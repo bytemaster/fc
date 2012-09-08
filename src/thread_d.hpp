@@ -359,6 +359,13 @@ namespace fc {
         return time_point::min();
     }
 
+    void unblock( fc::context* c ) {
+      if(  fc::thread::current().my != this ) {
+        async( [=](){ unblock(c); } );
+        return;
+      }
+      ready_push_front(c); 
+    }
 
         void yield_until( const time_point& tp, bool reschedule ) {
           check_fiber_exceptions();

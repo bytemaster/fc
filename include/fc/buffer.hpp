@@ -4,16 +4,16 @@ namespace fc {
 
   struct const_buffer {
     const_buffer( const char* const c = 0, size_t l = 0 )
-    :data(c),len(l){}
+    :data(c),size(l){}
     const char* const data;
-    size_t            len;
+    size_t            size;
   };
 
   struct mutable_buffer {
     mutable_buffer( char* c = 0, size_t l = 0 )
-    :data(c),len(l){}
+    :data(c),size(l){}
     char*     data;
-    size_t    len;
+    size_t    size;
   };
 
 }

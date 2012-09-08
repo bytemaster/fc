@@ -62,6 +62,10 @@ set( sources
   src/hex.cpp
   src/sha1.cpp
   src/value_cast.cpp
+  src/filesystem.cpp
+  src/ip.cpp
+  src/bigint.cpp
+  src/mutex.cpp
 )
 setup_library( fc SOURCES ${sources} )
 

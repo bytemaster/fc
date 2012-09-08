@@ -44,10 +44,12 @@ namespace fc {
         return ds;
       }
       friend sha1 operator << ( const sha1& h1, uint32_t i );
-      friend sha1 operator ^ ( const sha1& h1, const sha1 h2 );
-      friend bool operator >= ( const sha1& h1, const sha1 h2 );
-      friend bool operator > ( const sha1& h1, const sha1 h2 ); 
-    private:
+      friend bool operator == ( const sha1& h1, const sha1& h2 );
+      friend bool operator != ( const sha1& h1, const sha1& h2 );
+      friend sha1 operator ^ ( const sha1& h1, const sha1& h2 );
+      friend bool operator >= ( const sha1& h1, const sha1& h2 );
+      friend bool operator > ( const sha1& h1, const sha1& h2 ); 
+
       uint32_t _hash[5]; 
   };
 

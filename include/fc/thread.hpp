@@ -95,6 +95,7 @@ namespace fc {
        *  @return true unless quit() has been called.
        */
       bool is_running()const;
+      bool is_current()const;
      
       priority current_priority()const;
       ~thread();
@@ -103,6 +104,7 @@ namespace fc {
       thread( class thread_d* );
       friend class promise_base;
       friend class thread_d;
+      friend class mutex;
       friend void yield();
       friend void usleep(const microseconds&);
       friend void sleep_until(const time_point&);

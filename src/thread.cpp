@@ -325,6 +325,9 @@ namespace fc {
 
 
     }
+    bool thread::is_current()const {
+      return this == &current();
+    }
 
 
 }

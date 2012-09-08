@@ -4,6 +4,7 @@
 #include <fc/error.hpp>
 #include <boost/context/all.hpp>
 #include <fc/exception.hpp>
+#include <vector>
 
 namespace fc {
   class thread;
@@ -110,13 +111,13 @@ namespace fc {
 
     void timeout_blocking_promises() {
       for( auto i = blocking_prom.begin(); i != blocking_prom.end(); ++i ) {
-        i->prom->set_exception( boost::copy_exception( future_wait_timeout() ) );
+        i->prom->set_exception( fc::copy_exception( future_wait_timeout() ) );
       }
     }
     template<typename Exception>
     void except_blocking_promises( const Exception& e ) {
       for( auto i = blocking_prom.begin(); i != blocking_prom.end(); ++i ) {
-        i->prom->set_exception( boost::copy_exception( e ) );
+        i->prom->set_exception( fc::copy_exception( e ) );
       }
     }
     void clear_blocking_promises() {

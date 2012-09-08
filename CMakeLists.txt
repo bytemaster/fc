@@ -14,7 +14,7 @@ SET( CMAKE_DEBUG_POSTFIX _debug )
 #SET( BUILD_SHARED_LIBS NO )
 
 SET(Boost_USE_STATIC_LIBS ON)
-FIND_PACKAGE(Boost 1.50 COMPONENTS thread date_time system filesystem program_options signals serialization chrono unit_test_framework context ) 
+FIND_PACKAGE(Boost 1.51 COMPONENTS thread date_time system filesystem program_options signals serialization chrono unit_test_framework context ) 
 
 
 
@@ -63,10 +63,8 @@ set( sources
 )
 setup_library( fc SOURCES ${sources} )
 
-add_executable( test_vec tests/vector_test.cpp )
-target_link_libraries( test_vec fc ${Boost_SYSTEM_LIBRARY} ${Boost_CHRONO_LIBRARY} ${Boost_THREAD_LIBRARY} ${Boost_CONTEXT_LIBRARY} )
-
+#add_executable( test_vec tests/vector_test.cpp )
+#target_link_libraries( test_vec fc ${Boost_SYSTEM_LIBRARY} ${Boost_CHRONO_LIBRARY} ${Boost_THREAD_LIBRARY} ${Boost_CONTEXT_LIBRARY} )
 
 add_executable( unit_tests tests/unit.cpp )
 target_link_libraries( unit_tests fc ${Boost_CHRONO_LIBRARY} ${Boost_THREAD_LIBRARY} ${Boost_CONTEXT_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} )
-

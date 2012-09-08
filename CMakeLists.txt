@@ -59,6 +59,8 @@ set( sources
   src/exception.cpp
   src/thread.cpp
   src/value.cpp
+  src/hex.cpp
+  src/sha1.cpp
   src/value_cast.cpp
 )
 setup_library( fc SOURCES ${sources} )
@@ -66,5 +68,5 @@ setup_library( fc SOURCES ${sources} )
 #add_executable( test_vec tests/vector_test.cpp )
 #target_link_libraries( test_vec fc ${Boost_SYSTEM_LIBRARY} ${Boost_CHRONO_LIBRARY} ${Boost_THREAD_LIBRARY} ${Boost_CONTEXT_LIBRARY} )
 
-add_executable( unit_tests tests/unit.cpp )
-target_link_libraries( unit_tests fc ${Boost_CHRONO_LIBRARY} ${Boost_THREAD_LIBRARY} ${Boost_CONTEXT_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} )
+#add_executable( unit_tests tests/unit.cpp )
+#target_link_libraries( unit_tests fc ${Boost_CHRONO_LIBRARY} ${Boost_THREAD_LIBRARY} ${Boost_CONTEXT_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} )

@@ -2,6 +2,7 @@
 #define _FC_TASK_HPP_
 #include <fc/future.hpp>
 #include <fc/priority.hpp>
+#include <fc/aligned.hpp>
 
 namespace fc {
   struct context;
@@ -56,29 +57,29 @@ namespace fc {
   class task : virtual public task_base, virtual public promise<R> {
     public:
       template<typename Functor>
-      task( Functor&& f ):task_base(&_functor[0]) {
+      task( Functor&& f ):task_base(&_functor) {
         static_assert( sizeof(f) <= sizeof(_functor), "sizeof(Functor) is larger than FunctorSize" );
-        new ((char*)&_functor[0]) Functor( fc::forward<Functor>(f) );
+        new ((char*)&_functor) Functor( fc::forward<Functor>(f) );
         _destroy_functor = &detail::functor_destructor<Functor>::destroy;
 
         _promise_impl = static_cast<promise<R>*>(this);
         _run_functor  = &detail::functor_run<Functor>::run;
       }
-      char _functor[FunctorSize];
+      aligned<FunctorSize> _functor;
   };
   template<uint64_t FunctorSize>
   class task<void,FunctorSize> : virtual public task_base, virtual public promise<void> {
     public:
       template<typename Functor>
-      task( Functor&& f ):task_base(&_functor[0]) {
+      task( Functor&& f ):task_base(&_functor) {
         static_assert( sizeof(f) <= sizeof(_functor), "sizeof(Functor) is larger than FunctorSize"  );
-        new ((char*)&_functor[0]) Functor( fc::forward<Functor>(f) );
+        new ((char*)&_functor) Functor( fc::forward<Functor>(f) );
         _destroy_functor = &detail::functor_destructor<Functor>::destroy;
 
         _promise_impl = static_cast<promise<void>*>(this);
         _run_functor  = &detail::void_functor_run<Functor>::run;
       }
-      char _functor[FunctorSize];
+      aligned<FunctorSize> _functor;
   };
 
 }

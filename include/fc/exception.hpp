@@ -48,7 +48,7 @@ namespace fc {
 
 } // namespace fc 
 
-#define FC_THROW( X ) throw (X) 
+#define FC_THROW( X, ... ) throw (X) 
 
 
 #endif // _FC_EXCEPTION_HPP_

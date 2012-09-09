@@ -7,11 +7,21 @@ namespace fc {
     static boost::mutex m; return m;
    }
 
+   thread*& current_thread() {
+      #ifdef _MSC_VER
+         static __declspec(thread) thread* t = NULL;
+      #else
+         static __thread thread* t = NULL;
+      #endif
+      return t;
+   }
+
    thread::thread( const char* name  ) {
       promise<void>::ptr p(new promise<void>());
       boost::thread* t = new boost::thread( [this,p]() {
           try {
             this->my = new thread_d(*this);
+            current_thread() = this;
             p->set_value();
             exec();
           } catch ( ... ) {
@@ -41,22 +51,8 @@ namespace fc {
    }
 
    thread& thread::current() {
-      // Apple does not support __thread by default, but some custom gcc builds
-      // for Mac OS X support it.  Backup use boost::thread_specific_ptr
-      #if defined(__APPLE__) && (__GNUC__ <= 4 && __GNUC_MINOR__ < 4)
-          #warning using boost::thread_specific_ptr instead of __thread, use gcc 4.5 or newer for better performance.
-          static boost::thread_specific_ptr<thread>  t;
-          if( !t.get() ) t.reset( new thread((thread_d*)0) );
-              return *t.get();
-      #else
-          #ifdef _MSC_VER
-             static __declspec(thread) thread* t = NULL;
-          #else
-             static __thread thread* t = NULL;
-          #endif
-             if( !t ) t = new thread((thread_d*)0);
-             return *t;
-      #endif
+     if( !current_thread() ) current_thread() = new thread((thread_d*)0);
+     return *current_thread();
    }
    const string& thread::name()const { return my->name; }
    void          thread::set_name( const fc::string& n ) { my->name = n; }

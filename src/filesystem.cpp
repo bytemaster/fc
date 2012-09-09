@@ -41,10 +41,10 @@ namespace fc {
    }
 
    path::operator boost::filesystem::path& () {
-    return static_cast<boost::filesystem::path&>(*this);
+    return *_p;
    }
    path::operator const boost::filesystem::path& ()const {
-    return static_cast<const boost::filesystem::path&>(*this);
+    return *_p;
    }
 
    fc::string path::string()const {

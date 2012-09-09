@@ -52,11 +52,11 @@ namespace fc {
 
       shared_ptr& operator=(const shared_ptr& p ) {
         shared_ptr tmp(p);
-        fc::swap(tmp,*this);
+        fc::swap(tmp._ptr,_ptr);
         return *this;
       }
       shared_ptr& operator=(shared_ptr&& p ) {
-        fc::swap(*this,p); 
+        fc::swap(_ptr,p._ptr); 
         return *this;
       }
       T& operator*  ()const  { return *_ptr; }

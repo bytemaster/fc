@@ -23,6 +23,7 @@ namespace fc {
      SHA_CTX ctx;
   };
 
+  sha1::encoder::~encoder() {}
   sha1::encoder::encoder() {
     reset();
   }
@@ -71,6 +72,9 @@ namespace fc {
   }
   bool operator > ( const fc::sha1& h1, const fc::sha1& h2 ) {
     return memcmp( h1._hash, h2._hash, sizeof(h1._hash) ) > 0;
+  }
+  bool operator < ( const fc::sha1& h1, const fc::sha1& h2 ) {
+    return memcmp( h1._hash, h2._hash, sizeof(h1._hash) ) < 0;
   }
   bool operator != ( const fc::sha1& h1, const fc::sha1& h2 ) {
     return memcmp( h1._hash, h2._hash, sizeof(h1._hash) ) != 0;

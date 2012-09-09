@@ -37,6 +37,7 @@ namespace fc {
 
       void      reserve( uint64_t );
       uint64_t  size()const;
+      uint64_t  find( char c, uint64_t pos = 0 )const;
 
       void    resize( uint64_t s );
       void    clear();

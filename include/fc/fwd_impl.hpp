@@ -55,23 +55,28 @@ namespace fc {
     bool fwd<T,S,A>::operator !()const { return !(**this); }
 
 
+    template<uint64_t RequiredSize, uint64_t ProvidedSize>
+    void check_size() { static_assert( (ProvidedSize >= RequiredSize), "Failed to reserve enough space in fc::fwd<T,S>" ); }
+
     template<typename T,unsigned int S,typename A>
     template<typename U>
     fwd<T,S,A>::fwd( U&& u ) {
-      static_assert( sizeof(_store) >= sizeof(*this), "Failed to reserve enough space" );
+      check_size<sizeof(T),sizeof(_store)>();
       new (this) T( fc::forward<U>(u) );
     }
     template<typename T,unsigned int S,typename A>
     fwd<T,S,A>::fwd() {
-      static_assert( sizeof(_store) >= sizeof(*this), "Failed to reserve enough space" );
+      check_size<sizeof(T),sizeof(_store)>();
       new (this) T();
     }
     template<typename T,unsigned int S,typename A>
     fwd<T,S,A>::fwd( const fwd<T,S,A>& f ){
+      check_size<sizeof(T),sizeof(_store)>();
       new (this) T( *f );
     }
     template<typename T,unsigned int S,typename A>
     fwd<T,S,A>::fwd( fwd<T,S,A>&& f ){
+      check_size<sizeof(T),sizeof(_store)>();
       new (this) T( fc::move(*f) );
     }
 

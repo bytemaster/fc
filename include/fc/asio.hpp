@@ -5,17 +5,18 @@
 #ifndef _FC_ASIO_HPP_
 #define _FC_ASIO_HPP_
 #include <boost/asio.hpp>
+#include <boost/bind.hpp>
 #include <fc/future.hpp>
 #include <boost/iostreams/stream.hpp>
 #include <boost/iostreams/combine.hpp>
 
 namespace fc { 
 /**
- *  @brief defines fc::cmt wrappers for boost::asio functions.
+ *  @brief defines fc wrappers for boost::asio functions.
  */
 namespace asio {
     /**
-     *  @brief internal implementation types/methods for fc::cmt::asio
+     *  @brief internal implementation types/methods for fc::asio
      */
     namespace detail {
         using namespace fc;
@@ -48,7 +49,7 @@ namespace asio {
         #endif 
     }
     /**
-     * @return the default boost::asio::io_service for use with fc::cmt::asio
+     * @return the default boost::asio::io_service for use with fc::asio
      * 
      * This IO service is automatically running in its own thread to service asynchronous
      * requests without blocking any other threads.
@@ -74,7 +75,7 @@ namespace asio {
                   BOOST_THROW_EXCEPTION( boost::system::system_error(ec) );
         } 
         
-        promise<size_t>::ptr p(new promise<size_t>("fc::cmt::asio::read"));
+        promise<size_t>::ptr p(new promise<size_t>("fc::asio::read"));
         boost::asio::async_read( s, buf, boost::bind( detail::read_write_handler, p, _1, _2 ) );
         return p->wait();
     }
@@ -105,7 +106,7 @@ namespace asio {
                   BOOST_THROW_EXCEPTION( boost::system::system_error(ec) );
         }
         
-        promise<size_t>::ptr p(new promise<size_t>("fc::cmt::asio::read_some"));
+        promise<size_t>::ptr p(new promise<size_t>("fc::asio::read_some"));
         s.async_read_some( buf, boost::bind( detail::read_write_handler, p, _1, _2 ) );
         return p->wait();
     }
@@ -125,7 +126,7 @@ namespace asio {
                 BOOST_THROW_EXCEPTION( boost::system::system_error(ec) );
             }
         }
-        promise<size_t>::ptr p(new promise<size_t>("fc::cmt::asio::write"));
+        promise<size_t>::ptr p(new promise<size_t>("fc::asio::write"));
         boost::asio::async_write(s, buf, boost::bind( detail::read_write_handler, p, _1, _2 ) );
         return p->wait();
     }
@@ -147,7 +148,7 @@ namespace asio {
                 BOOST_THROW_EXCEPTION( boost::system::system_error(ec) );
             }
         }
-        promise<size_t>::ptr p(new promise<size_t>("fc::cmt::asio::write_some"));
+        promise<size_t>::ptr p(new promise<size_t>("fc::asio::write_some"));
         s.async_write_some( buf, boost::bind( detail::read_write_handler, p, _1, _2 ) );
         return p->wait();
     }
@@ -161,7 +162,7 @@ namespace asio {
         sink( AsyncWriteStream& p ):m_stream(p){}
     
         std::streamsize write( const char* s, std::streamsize n ) {
-          return fc::cmt::asio::write( m_stream, boost::asio::const_buffers_1(s,n) );
+          return fc::asio::write( m_stream, boost::asio::const_buffers_1(s,n) );
         }
         void close() { m_stream.close(); }
     
@@ -178,7 +179,7 @@ namespace asio {
         source( AsyncReadStream& p ):m_stream(p){}
     
         std::streamsize read( char* s, std::streamsize n ) {
-          return fc::cmt::asio::read_some( m_stream, boost::asio::buffer(s,n) );
+          return fc::asio::read_some( m_stream, boost::asio::buffer(s,n) );
         }
         void close() { m_stream.close(); }
     
@@ -194,11 +195,11 @@ namespace asio {
         io_device( AsyncStream& p ):m_stream(p){}
     
         std::streamsize write( const char* s, std::streamsize n ) {
-          return fc::cmt::asio::write( m_stream, boost::asio::const_buffers_1(s,static_cast<size_t>(n)) );
+          return fc::asio::write( m_stream, boost::asio::const_buffers_1(s,static_cast<size_t>(n)) );
         }
         std::streamsize read( char* s, std::streamsize n ) {
           try {
-            return fc::cmt::asio::read_some( m_stream, boost::asio::buffer(s,n) );
+            return fc::asio::read_some( m_stream, boost::asio::buffer(s,n) );
           } catch ( const boost::system::system_error& e ) {
             if( e.code() == boost::asio::error::eof )  
                 return -1;
@@ -225,8 +226,8 @@ namespace asio {
           */
         template<typename SocketType, typename AcceptorType>
         void accept( AcceptorType& acc, SocketType& sock ) {
-            promise<boost::system::error_code>::ptr p( new promise<boost::system::error_code>("fc::cmt::asio::tcp::accept") );
-            acc.async_accept( sock, boost::bind( fc::cmt::asio::detail::error_handler, p, _1 ) );
+            promise<boost::system::error_code>::ptr p( new promise<boost::system::error_code>("fc::asio::tcp::accept") );
+            acc.async_accept( sock, boost::bind( fc::asio::detail::error_handler, p, _1 ) );
             auto ec = p->wait();
             if( !ec ) sock.non_blocking(true);
             if( ec ) BOOST_THROW_EXCEPTION( boost::system::system_error(ec) );
@@ -238,16 +239,16 @@ namespace asio {
           */
         template<typename AsyncSocket, typename EndpointType>
         void connect( AsyncSocket& sock, const EndpointType& ep ) {
-            promise<boost::system::error_code>::ptr p(new promise<boost::system::error_code>("fc::cmt::asio::tcp::connect"));
-            sock.async_connect( ep, boost::bind( fc::cmt::asio::detail::error_handler, p, _1 ) );
+            promise<boost::system::error_code>::ptr p(new promise<boost::system::error_code>("fc::asio::tcp::connect"));
+            sock.async_connect( ep, boost::bind( fc::asio::detail::error_handler, p, _1 ) );
             auto ec = p->wait();
             if( !ec ) sock.non_blocking(true);
             if( ec ) BOOST_THROW_EXCEPTION( boost::system::system_error(ec) );
         }
       
-        typedef boost::iostreams::stream<fc::cmt::asio::sink<boost::asio::ip::tcp::socket> >      ostream;
-        typedef boost::iostreams::stream<fc::cmt::asio::source<boost::asio::ip::tcp::socket> >    istream;
-        typedef boost::iostreams::stream<fc::cmt::asio::io_device<boost::asio::ip::tcp::socket> > iostream;
+        typedef boost::iostreams::stream<fc::asio::sink<boost::asio::ip::tcp::socket> >      ostream;
+        typedef boost::iostreams::stream<fc::asio::source<boost::asio::ip::tcp::socket> >    istream;
+        typedef boost::iostreams::stream<fc::asio::io_device<boost::asio::ip::tcp::socket> > iostream;
 
     }
     namespace udp {

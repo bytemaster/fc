@@ -22,6 +22,7 @@ namespace fc {
       class encoder {
         public:
           encoder();
+          ~encoder();
 
           void write( const char* d, uint32_t dlen );
           void reset();
@@ -29,18 +30,18 @@ namespace fc {
 
         private:
           struct      impl;
-          fwd<impl,8> my;
+          fwd<impl,89> my;
       };
 
       template<typename T>
       inline friend T& operator<<( T& ds, const sha1& ep ) {
-        ds.write( (const char*)ep.hash, sizeof(ep.hash) );
+        ds.write( ep.data(), sizeof(ep) );
         return ds;
       }
 
       template<typename T>
       inline friend T& operator>>( T& ds, sha1& ep ) {
-        ds.read( (char*)ep.hash, sizeof(ep.hash) );
+        ds.read( ep.data(), sizeof(ep) );
         return ds;
       }
       friend sha1 operator << ( const sha1& h1, uint32_t i );
@@ -49,6 +50,7 @@ namespace fc {
       friend sha1 operator ^ ( const sha1& h1, const sha1& h2 );
       friend bool operator >= ( const sha1& h1, const sha1& h2 );
       friend bool operator > ( const sha1& h1, const sha1& h2 ); 
+      friend bool operator < ( const sha1& h1, const sha1& h2 ); 
 
       uint32_t _hash[5]; 
   };

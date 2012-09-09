@@ -17,6 +17,7 @@ namespace fc {
       ~path();
       path( const boost::filesystem::path& );
       path( const fc::string& p );
+      path( const char* );
       path( const path& p );
       path( path&& p );
       path& operator =( const path& );

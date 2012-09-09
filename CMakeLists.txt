@@ -66,6 +66,9 @@ set( sources
   src/ip.cpp
   src/bigint.cpp
   src/mutex.cpp
+  src/pke.cpp
+  src/base64.cpp
+  src/udp_socket.cpp
 )
 setup_library( fc SOURCES ${sources} )
 

@@ -12,7 +12,9 @@ namespace fc {
 
         address& operator=( const fc::string& s );
         operator fc::string()const;
+        operator uint32_t()const;
 
+        friend bool operator==( const address& a, const address& b );
       private:
         uint32_t _ip;
     };
@@ -29,6 +31,8 @@ namespace fc {
 
         uint16_t       port()const;
         const address& get_address()const;
+
+        friend bool operator==( const endpoint& a, const endpoint& b );
     
       private:
         uint16_t _port;
@@ -36,4 +40,5 @@ namespace fc {
     };
   }
 }
+bool operator==( const fc::ip::endpoint& a, const fc::ip::endpoint& b );
 #endif // _FC_ENDPOINT_HPP_

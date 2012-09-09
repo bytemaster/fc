@@ -12,6 +12,10 @@ namespace fc { namespace ip {
     _ip = boost::asio::ip::address_v4::from_string(s.c_str()).to_ulong();
   }
 
+  bool operator==( const address& a, const address& b ) {
+    return uint32_t(a) == uint32_t(b);
+  }
+
   address& address::operator=( const fc::string& s ) {
     _ip = boost::asio::ip::address_v4::from_string(s.c_str()).to_ulong();
     return *this;
@@ -20,6 +24,9 @@ namespace fc { namespace ip {
   address::operator fc::string()const {
     return boost::asio::ip::address_v4(_ip).to_string().c_str();
   }
+  address::operator uint32_t()const {
+    return _ip;
+  }
 
 
   endpoint::endpoint()
@@ -27,6 +34,9 @@ namespace fc { namespace ip {
   endpoint::endpoint(const address& a, uint16_t p)
   :_port(p),_ip(a){}
 
+  bool operator==( const endpoint& a, const endpoint& b ) {
+    return a._port == b._port  && a._ip == b._ip;
+  }
   uint16_t       endpoint::port()const    { return _port; }
   const address& endpoint::get_address()const { return _ip;   }
 

@@ -15,6 +15,7 @@ namespace fc {
         friend class time_point;
         int64_t      _count; 
   };
+  inline microseconds seconds( int64_t s ) { return microseconds( s * 1000000 ); }
 
   class time_point { 
     public:

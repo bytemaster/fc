@@ -56,6 +56,7 @@ namespace fc  {
 
   void       string::reserve(uint64_t r)    { reinterpret_cast<std::string*>(this)->reserve(r); }
   uint64_t   string::size()const            { return reinterpret_cast<const std::string*>(this)->size(); }
+  uint64_t   string::find(char c, uint64_t p)const { return reinterpret_cast<const std::string*>(this)->find(c,p); }
   void       string::clear()                { return reinterpret_cast<std::string*>(this)->clear(); }
   void       string::resize( uint64_t s )   { reinterpret_cast<std::string*>(this)->resize(s); }
                                             

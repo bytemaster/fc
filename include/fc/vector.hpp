@@ -49,7 +49,7 @@ namespace fc {
           vector_impl( vector_impl&& c):_data(c._data){c._data =nullptr; }
           vector_impl( const vector_impl& c):_data(nullptr) {
             if( c.size() ) {
-              _data  = data<T>::allocate( c.size() );
+              _data  = detail::data<T>::allocate( c.size() );
               memcpy(begin(),c.begin(),c.size() );
             }
           }
@@ -69,7 +69,9 @@ namespace fc {
           T&       back()       { return (&_data->first)[-1+_data->size]; }
           const T& back()const  { return (&_data->first)[-1+_data->size]; }
           T&       front()      { return (&_data->first)[0]; }
-          const T& front()const { return (&_data->first)[0]; }
+          const T& front()const { return (&_data->first)[0]; } 
+          const T* data()const  { return (&_data->first);    }
+          T*       data()       { return (&_data->first);    }
 
           iterator begin()            { return _data ? &front()   : 0;}
           const_iterator begin()const { return _data ? &front()   : 0;}
@@ -90,12 +92,12 @@ namespace fc {
           }
 
           void     reserve( uint64_t i ) {
-            _data = data<T>::reallocate( _data, i );
+            _data = detail::data<T>::reallocate( _data, i );
           }
 
           void     resize( uint64_t i ) {
             if( capacity() < i ) 
-               _data = data<T>::reallocate( _data, i );
+               _data = detail::data<T>::reallocate( _data, i );
             _data->size = i;
           }
 
@@ -154,7 +156,7 @@ namespace fc {
              return *this;
           }
       protected:
-          data<T>*  _data;
+          detail::data<T>*  _data;
     };
     
     template<typename T>
@@ -164,7 +166,7 @@ namespace fc {
           vector_impl( vector_impl&& c):_data(c._data){c._data =nullptr; }
           vector_impl( const vector_impl& c):_data(nullptr) {
             if( c.size() ) {
-              _data  = data<T>::allocate( c.size() );
+              _data  = detail::data<T>::allocate( c.size() );
               auto i = begin();
               auto ci = c.begin();
               auto ce = c.end();
@@ -194,6 +196,8 @@ namespace fc {
           const T& back()const  { return (&_data->first)[-1+_data->size]; }
           T&       front()      { return (&_data->first)[0]; }
           const T& front()const { return (&_data->first)[0]; }
+          const T* data()const  { return (&_data->first);    }
+          T*       data()       { return (&_data->first);    }
 
           iterator begin()            { return _data ? &front()   : 0;}
           const_iterator begin()const { return _data ? &front()   : 0;}
@@ -225,7 +229,7 @@ namespace fc {
             if( nullptr != this->_data && i <= this->_data->capacity ) 
                return;
             
-            auto _ndata = data<T>::allocate( i );
+            auto _ndata = detail::data<T>::allocate( i );
             auto nc = &_ndata->first;
             auto c = this->begin();
             auto e = this->end();
@@ -319,7 +323,7 @@ namespace fc {
              return *this;
           }
        private:
-          data<T>* _data;
+          detail::data<T>* _data;
     };
   }
 

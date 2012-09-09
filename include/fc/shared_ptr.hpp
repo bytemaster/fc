@@ -43,10 +43,11 @@ namespace fc {
         if( _ptr ) _ptr->release();
       }
       shared_ptr& reset( T* v = 0 )  {
-        if( v == _ptr ) return;
+        if( v == _ptr ) return *this;
         if( _ptr ) _ptr->release();
         _ptr = v;
         if( _ptr ) _ptr->retain();
+        return *this;
       }
 
       shared_ptr& operator=(const shared_ptr& p ) {

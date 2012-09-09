@@ -6,6 +6,9 @@ namespace fc {
   const char* thread_name() {
     return thread::current().name().c_str();
   }
+  void* thread_ptr() {
+    return &thread::current();
+  }
    boost::mutex& log_mutex() {
     static boost::mutex m; return m;
    }
@@ -275,11 +278,10 @@ namespace fc {
 
     void thread::notify( const promise_base::ptr& p ) {
       BOOST_ASSERT(p->ready());
-      if( &current() != this )  {
-        this->async( boost::bind( &thread::notify, this, p ) );
+      if( !is_current() ) {
+        this->async( [=](){ notify(p); } );
         return;
       }
-      //slog( "                                    notify task complete %1%", p.get() );
       //debug( "begin notify" );
       // TODO: store a list of blocked contexts with the promise 
       //  to accelerate the lookup.... unless it introduces contention...

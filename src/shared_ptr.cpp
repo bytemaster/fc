@@ -1,11 +1,15 @@
 #include <fc/shared_ptr.hpp>
 #include <boost/atomic.hpp>
 #include <boost/memory_order.hpp>
+#include <assert.h>
 
 namespace fc {
   retainable::retainable()
   :_ref_count(1) { }
 
+  retainable::~retainable() { 
+    assert( _ref_count == 0 );
+  }
   void retainable::retain() {
     ((boost::atomic<int32_t>*)&_ref_count)->fetch_add(1, boost::memory_order_relaxed );
   }

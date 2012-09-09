@@ -3,15 +3,18 @@
 #include <fc/future.hpp>
 #include <fc/priority.hpp>
 #include <fc/aligned.hpp>
+#include <fc/fwd.hpp>
 
 namespace fc {
   struct context;
+  class spin_lock;
 
   class task_base : virtual public promise_base {
     public:
-      ~task_base();
       void        run(); 
     protected:
+      ~task_base();
+
       uint64_t    _posted_num;
       priority    _prio;
       time_point  _when;
@@ -24,10 +27,10 @@ namespace fc {
       // thread/thread_private
       friend class thread;
       friend class thread_d;
-      char          _spinlock_store[sizeof(void*)];
+      fwd<spin_lock,8> _spinlock;
 
       // avoid rtti info for every possible functor...
-      promise_base* _promise_impl;
+      void*         _promise_impl;
       void*         _functor;
       void          (*_destroy_functor)(void*);
       void          (*_run_functor)(void*, void* );
@@ -66,6 +69,8 @@ namespace fc {
         _run_functor  = &detail::functor_run<Functor>::run;
       }
       aligned<FunctorSize> _functor;
+    private:
+      ~task(){}
   };
   template<uint64_t FunctorSize>
   class task<void,FunctorSize> : virtual public task_base, virtual public promise<void> {
@@ -80,6 +85,8 @@ namespace fc {
         _run_functor  = &detail::void_functor_run<Functor>::run;
       }
       aligned<FunctorSize> _functor;
+    private:
+      ~task(){}
   };
 
 }

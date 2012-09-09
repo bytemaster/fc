@@ -49,7 +49,7 @@ namespace fc {
   class promise_base : virtual  public retainable {
     public:
       typedef shared_ptr<promise_base> ptr;
-      promise_base(const char* desc="");
+      promise_base(const char* desc="?");
 
       const char* get_desc()const;
                    
@@ -68,6 +68,8 @@ namespace fc {
       void _set_value(const void* v);
 
       void _on_complete( detail::completion_handler* c );
+      ~promise_base();
+
     private:
       friend class  thread;
       friend struct context;
@@ -87,10 +89,9 @@ namespace fc {
   class promise : virtual public promise_base {
     public:
       typedef shared_ptr< promise<T> > ptr;
-      promise( const char* desc = "" ):promise_base(desc){}
+      promise( const char* desc = "?" ):promise_base(desc){}
       promise( const T& val ){ set_value(val); }
       promise( T&& val ){ set_value(fc::move(val) ); }
-      ~promise(){}
     
       const T& wait(const microseconds& timeout = microseconds::max() ){
         this->_wait( timeout );
@@ -117,13 +118,14 @@ namespace fc {
       }
     protected:
       optional<T> result;
+      ~promise(){}
   };
 
   template<>
-  class promise<void> : public promise_base {
+  class promise<void> : virtual public promise_base {
     public:
       typedef shared_ptr< promise<void> > ptr;
-      promise( const char* desc = "" ):promise_base(desc){}
+      promise( const char* desc = "?" ):promise_base(desc){}
       promise( const void_t& v ){ set_value(); }
     
       void wait(const microseconds& timeout = microseconds::max() ){
@@ -140,6 +142,8 @@ namespace fc {
       void on_complete( CompletionHandler&& c ) {
         _on_complete( new detail::completion_handler_impl<CompletionHandler,void>(fc::forward<CompletionHandler>(c)) );
       }
+    protected:
+      ~promise(){}
   };
   
   /**

@@ -279,7 +279,7 @@ namespace fc {
                     next->run();
                     current->cur_task = 0;
                     next->_set_active_context(0);
-                    delete next;
+                    next->release();
                     return true;
                 }
                 return false;

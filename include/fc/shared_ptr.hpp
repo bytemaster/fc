@@ -18,8 +18,7 @@ namespace fc {
       int32_t retain_count()const;
 
     protected:
-      virtual ~retainable(){};
-
+      virtual ~retainable();
     private:
       volatile int32_t _ref_count;
   };
@@ -28,20 +27,20 @@ namespace fc {
   class shared_ptr {
     public:
       shared_ptr( T* t, bool inc = false )
-      :_ptr(t) { if( inc ) t->retain(); }
+      :_ptr(t) { if( inc ) t->retain();  }
 
-      shared_ptr():_ptr(0){}
+      shared_ptr():_ptr(nullptr){}
+
       shared_ptr( const shared_ptr& p ) {
         _ptr = p._ptr;
         if( _ptr ) _ptr->retain();
       }
       shared_ptr( shared_ptr&& p ) {
         _ptr = p._ptr;
-        p._ptr = 0;
+        p._ptr = nullptr;
       }
-      ~shared_ptr() {
-        if( _ptr ) _ptr->release();
-      }
+      ~shared_ptr() { if( _ptr ) { _ptr->release(); } }
+
       shared_ptr& reset( T* v = 0 )  {
         if( v == _ptr ) return *this;
         if( _ptr ) _ptr->release();

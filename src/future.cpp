@@ -7,17 +7,17 @@
 
 #include <boost/assert.hpp>
 
+
 namespace fc {
 
   promise_base::promise_base( const char* desc )
-  : _ready(false),
+  :_ready(false),
    _blocked_thread(nullptr),
    _timeout(time_point::max()),
    _canceled(false),
    _desc(desc),
    _compl(nullptr)
-  {
-  }
+  { }
 
   const char* promise_base::get_desc()const{
     return _desc; 
@@ -63,21 +63,23 @@ namespace fc {
      _blocked_thread =&thread::current();
   }
   void promise_base::_notify(){
-    if( _blocked_thread ) 
+    if( _blocked_thread != nullptr ) 
       _blocked_thread->notify(ptr(this,true));
   }
+  promise_base::~promise_base() { }
   void promise_base::_set_timeout(){
     if( _ready ) 
       return;
     set_exception( fc::copy_exception( future_wait_timeout() ) );
   }
   void promise_base::_set_value(const void* s){
-    BOOST_ASSERT( !_ready );
+ //   slog( "%p == %d", &_ready, int(_ready));
+//    BOOST_ASSERT( !_ready );
     { synchronized(_spin_yield) 
       _ready = true;
     }
     _notify();
-    if( _compl ) {
+    if( nullptr != _compl ) {
       _compl->on_complete(s,_except);
     }
   }

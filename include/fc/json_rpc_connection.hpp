@@ -13,18 +13,24 @@ namespace fc {  namespace json {
       void handle_error( const fc::string& );
       int64_t             id;
       pending_result::ptr next;
+      protected:
+        ~pending_result(){}
     };
     template<typename T>
     struct pending_result_impl : virtual public promise<T>, virtual public pending_result {   
        virtual void handle_result( const fc::string& s ) {
           set_value( fc::json::from_string<T>(s) );
        }
+      protected:
+        ~pending_result_impl(){}
     };
     template<>
     struct pending_result_impl<void> : virtual public promise<void>, virtual public pending_result {   
        virtual void handle_result( const fc::string& ) {
           set_value();
        }
+      protected:
+        ~pending_result_impl(){}
     };
   }
 

@@ -273,7 +273,8 @@ namespace fc {
                     next->run();
                     current->cur_task = 0;
                     next->set_active_context(0);
-                    delete next;
+                    next->release();
+                    //delete next;
                     return true;
                 }
                 return false;

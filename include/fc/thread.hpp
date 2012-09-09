@@ -53,9 +53,11 @@ namespace fc {
       template<typename Functor>
       auto async( Functor&& f, const char* desc ="", priority prio = priority()) -> fc::future<decltype(f())> {
          typedef decltype(f()) Result;
-         fc::task<Result,sizeof(Functor)>* tsk = new fc::task<Result,sizeof(Functor)>( fc::forward<Functor>(f) );
+         fc::task<Result,sizeof(Functor)>* tsk = 
+              new fc::task<Result,sizeof(Functor)>( fc::forward<Functor>(f) );
+         fc::future<Result> r(fc::shared_ptr< fc::promise<Result> >(tsk,true) );
          async_task(tsk,prio,desc);
-         return fc::future<Result>(fc::shared_ptr< fc::promise<Result> >(tsk,true) );
+         return r;
       }
      
      
@@ -72,9 +74,11 @@ namespace fc {
       auto schedule( Functor&& f, const fc::time_point& when, 
                      const char* desc = "", priority prio = priority()) -> fc::future<decltype(f())> {
          typedef decltype(f()) Result;
-         fc::task<Result,sizeof(Functor)>* tsk = new fc::task<Result,sizeof(Functor)>( fc::forward<Functor>(f) );
+         fc::task<Result,sizeof(Functor)>* tsk = 
+              new fc::task<Result,sizeof(Functor)>( fc::forward<Functor>(f) );
+         fc::future<Result> r(fc::shared_ptr< fc::promise<Result> >(tsk,true) );
          async_task(tsk,prio,when,desc);
-         return fc::future<Result>(fc::shared_ptr< fc::promise<Result> >(tsk,true) );
+         return r;
       }
      
       /**

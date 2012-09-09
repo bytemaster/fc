@@ -74,7 +74,7 @@ namespace fc {
     }
   }
   void   udp_socket::close() {
-    my->_sock->cancel(); 
+    my->_sock.cancel(); 
     my->_sock.close();
   }
 

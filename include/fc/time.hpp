@@ -16,6 +16,7 @@ namespace fc {
         int64_t      _count; 
   };
   inline microseconds seconds( int64_t s ) { return microseconds( s * 1000000 ); }
+  inline microseconds milliseconds( int64_t s ) { return microseconds( s * 1000 ); }
 
   class time_point { 
     public:

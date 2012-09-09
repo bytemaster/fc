@@ -69,6 +69,7 @@ set( sources
   src/pke.cpp
   src/base64.cpp
   src/udp_socket.cpp
+  src/asio.cpp
 )
 setup_library( fc SOURCES ${sources} )
 

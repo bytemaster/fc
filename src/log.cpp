@@ -5,6 +5,8 @@
 #include <unistd.h>
 
 namespace fc {
+  const char* thread_name();
+
   const char* short_name( const char* file_name ) { 
     const char* end = file_name + strlen(file_name);
     --end;
@@ -24,9 +26,9 @@ namespace fc {
 
   void log( const char* color, const char* file_name, size_t line_num, const char* method_name, const char* format, ... ) {
     if(isatty(fileno(stderr)))
-      fprintf( stderr, "%s", color );
+      fprintf( stderr, "\r%s", color );
 
-    fprintf( stderr, "%s:%zd  %s ",  short_name(file_name), line_num, method_name );
+    fprintf( stderr, "%-15s %-15s %-5zd %s ",  thread_name(), short_name(file_name), line_num, method_name );
     va_list args;
     va_start(args,format);
     vfprintf( stderr, format, args );

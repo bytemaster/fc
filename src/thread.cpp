@@ -3,6 +3,9 @@
 #include "thread_d.hpp"
 
 namespace fc {
+  const char* thread_name() {
+    return thread::current().name().c_str();
+  }
    boost::mutex& log_mutex() {
     static boost::mutex m; return m;
    }
@@ -59,14 +62,15 @@ namespace fc {
    void          thread::debug( const fc::string& d ) { my->debug(d); }
 
    void thread::quit() {
-      wlog( "quit!" );
       if( &current() != this ) {
-          async( boost::bind( &thread::quit, this ) ).wait();
+          wlog( "async quit %s", my->name.c_str() );
+          async( [=](){quit();} ).wait();
           if( my->boost_thread ) {
             my->boost_thread->join();
           }
           return;
       }
+      wlog( "%s", my->name.c_str() );
 
       // break all promises, thread quit!
       fc::context* cur  = my->blocked;

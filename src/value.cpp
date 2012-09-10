@@ -285,8 +285,8 @@ namespace fc {
   bool value::is_boolean()const {
     return _obj_type == &reflector<bool>::instance();
   }
-  fwd<vector<string>,8> value::get_keys()const {
-    fwd<vector<string>,8> s;
+  fwd<vector<string>,24> value::get_keys()const {
+    fwd<vector<string>,24> s;
     return s;
   }
 

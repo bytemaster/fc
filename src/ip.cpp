@@ -50,7 +50,7 @@ namespace fc { namespace ip {
   }
 
   endpoint::operator string()const {
-    return string(_ip) + ':' + boost::lexical_cast<uint16_t>(_port);
+    return string(_ip) + ':' + fc::string(boost::lexical_cast<std::string>(_port).c_str());
   }
 
 } } 

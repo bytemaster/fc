@@ -113,7 +113,7 @@ namespace fc {
         return _obj_type == reflector<T>::instance();
       }
 
-      fwd<vector<string>,8> get_keys()const; 
+      fwd<vector<string>,24> get_keys()const; 
 
       iterator              find( const char* key );
       const_iterator        find( const char* key )const;

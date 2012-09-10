@@ -6,6 +6,16 @@
 #include <fc/utility.hpp>
 #include <fc/log.hpp>
 
+
+#if 0
+#include <vector>
+namespace fc {
+  template<typename T>
+  using vector = std::vector<T>;
+}
+
+#else
+
 namespace fc {
   namespace detail {
     template<typename T>
@@ -348,5 +358,6 @@ namespace fc {
   };
 
 };
+#endif 
 
 #endif // _FC_VECTOR_HPP_

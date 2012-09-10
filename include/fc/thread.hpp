@@ -1,13 +1,12 @@
 #ifndef _FC_THREAD_HPP_
 #define _FC_THREAD_HPP_
 #include <fc/task.hpp>
+#include <fc/vector_fwd.hpp>
 
 namespace fc {
   class string;
   class time_point;
   class microseconds;
-  
-  template<typename T> class vector; // forward declare
 
   class thread {
     public:

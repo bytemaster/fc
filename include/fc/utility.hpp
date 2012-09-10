@@ -3,6 +3,8 @@
 #include <stdint.h>
 #include <new>
 
+#define nullptr 0
+
 typedef decltype(sizeof(int)) size_t;
 namespace std {
   typedef decltype(sizeof(int)) size_t;

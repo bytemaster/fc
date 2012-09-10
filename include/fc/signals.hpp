@@ -5,8 +5,11 @@
 #include <fc/thread.hpp>
 
 namespace fc {
+#if !defined(BOOST_NO_TEMPLATE_ALIASES) 
    template<typename T>
    using signal = boost::signal<T>;
+#else
+#endif
 
    template<typename T>
    inline T wait( boost::signal<void(T)>& sig, const microseconds& timeout_us=microseconds::max() ) {

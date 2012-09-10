@@ -46,8 +46,8 @@ namespace fc  {
     ::detail::destroy( this );
   }
 
-  string::iterator string::begin()            { return &reinterpret_cast<std::string*>(this)->front(); }
-  string::iterator string::end()              { return &reinterpret_cast<std::string*>(this)->back() +1; }// my->str.size(); }
+  string::iterator string::begin()            { return &(*this)[0]; }
+  string::iterator string::end()              { return &(*this)[size()]; }
   string::const_iterator string::begin()const { return reinterpret_cast<const std::string*>(this)->c_str(); }
   string::const_iterator string::end()const   { return reinterpret_cast<const std::string*>(this)->c_str() + reinterpret_cast<const std::string*>(this)->size(); }
 

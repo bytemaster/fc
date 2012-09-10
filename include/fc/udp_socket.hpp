@@ -20,6 +20,9 @@ namespace fc {
       size_t send_to( const char* b, size_t l, const fc::ip::endpoint& to ); 
       void   close();
 
+      void   connect( const fc::ip::endpoint& e );
+      fc::ip::endpoint local_endpoint()const;
+
     private:
       class       impl;
       fwd<impl,32> my;

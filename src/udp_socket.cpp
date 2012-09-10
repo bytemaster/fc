@@ -78,4 +78,11 @@ namespace fc {
     my->_sock.close();
   }
 
+  fc::ip::endpoint udp_socket::local_endpoint()const {
+    return to_fc_ep( my->_sock.local_endpoint() );
+  }
+  void udp_socket::connect( const fc::ip::endpoint& e ) {
+     my->_sock.connect( to_asio_ep(e) );
+  }
+
 }

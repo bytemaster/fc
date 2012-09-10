@@ -29,6 +29,7 @@ namespace fc {
         /** returns "IP:PORT" */
         operator string()const;
 
+        void           set_port(uint16_t p ) { _port = p; }
         uint16_t       port()const;
         const address& get_address()const;
 
@@ -40,5 +41,4 @@ namespace fc {
     };
   }
 }
-bool operator==( const fc::ip::endpoint& a, const fc::ip::endpoint& b );
 #endif // _FC_ENDPOINT_HPP_

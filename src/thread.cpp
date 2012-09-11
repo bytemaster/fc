@@ -34,6 +34,8 @@ namespace fc {
             elog( "Caught unhandled exception" );
           }
           slog( "exiting %s", name );
+          delete this->my;
+          slog( "..." );
       } );
       p->wait();
       my->boost_thread = t;
@@ -71,9 +73,12 @@ namespace fc {
    void thread::quit() {
       if( &current() != this ) {
           wlog( "async quit %s", my->name.c_str() );
-          async( [=](){quit();} ).wait();
+          async( [=](){quit();} );//.wait();
           if( my->boost_thread ) {
+            auto n = name();
+            slog( "joining... %s", n.c_str() );
             my->boost_thread->join();
+            slog( "done joining... %s", n.c_str() );
           }
           return;
       }

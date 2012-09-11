@@ -321,6 +321,7 @@ namespace fc {
                   
                   if( done ) return;
                   if( timeout_time == time_point::max() ) {
+                    slog("wait");
                     task_ready.wait( lock );
                   } else if( timeout_time != time_point::min() ) {
                     slog("timed wait");

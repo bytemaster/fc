@@ -35,7 +35,7 @@ namespace fc {
     };
     std::istream& get_cin_stream() {
       static io::stream<cin_source> cin_stream;// =   cin_source(); 
-      cin_stream.open(NULL);
+      cin_stream.open(0);
       return cin_stream;
     }
 

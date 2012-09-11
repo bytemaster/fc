@@ -22,8 +22,7 @@ namespace fc {
 
    inline void wait( boost::signal<void()>& sig, const microseconds& timeout_us=microseconds::max() ) {
      promise<void>::ptr p(new promise<void>());
-     boost::signals::scoped_connection c = sig.connect( [=]() { slog( "set value!" );p->set_value(); } ); 
-     slog( "wait quit" );
+     boost::signals::scoped_connection c = sig.connect( [=]() { p->set_value(); } ); 
      p->wait( timeout_us ); 
    }
 } 

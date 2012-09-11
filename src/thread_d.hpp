@@ -321,10 +321,8 @@ namespace fc {
                   
                   if( done ) return;
                   if( timeout_time == time_point::max() ) {
-                    slog("wait");
                     task_ready.wait( lock );
                   } else if( timeout_time != time_point::min() ) {
-                    slog("timed wait");
                     task_ready.wait_until( lock, boost::chrono::system_clock::time_point() + 
                                                  boost::chrono::microseconds(timeout_time.time_since_epoch().count()) );
                   }

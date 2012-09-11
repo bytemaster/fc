@@ -31,11 +31,10 @@ namespace fc {
             p->set_value();
             exec();
           } catch ( ... ) {
-            elog( "Caught unhandled exception" );
+            elog( "Caught unhandled exception %1%", boost::current_exception_diagnostic_information() );
           }
-          slog( "exiting %s", name );
           delete this->my;
-          slog( "..." );
+          this->my = 0;
       } );
       p->wait();
       my->boost_thread = t;
@@ -72,7 +71,6 @@ namespace fc {
 
    void thread::quit() {
       if( &current() != this ) {
-          wlog( "async quit %s", my->name.c_str() );
           async( [=](){quit();} );//.wait();
           if( my->boost_thread ) {
             auto n = name();
@@ -218,12 +216,10 @@ namespace fc {
 
    void thread::poke() {
      boost::unique_lock<boost::mutex> lock(my->task_ready_mutex);
-               slog("notify one");
      my->task_ready.notify_one();
    }
 
    void thread::async_task( task_base* t, const priority& p, const time_point& tp, const char* desc ) {
-      slog( "%s", name().c_str() );
       task_base* stale_head = my->task_in_queue.load(boost::memory_order_relaxed);
       do { t->_next = stale_head;
       }while( !my->task_in_queue.compare_exchange_weak( stale_head, t, boost::memory_order_release ) );
@@ -233,7 +229,6 @@ namespace fc {
       // when *this thread is about to block on a wait condition.  
       if( this != &current() &&  !stale_head ) { 
           boost::unique_lock<boost::mutex> lock(my->task_ready_mutex);
-                    slog("notify one");
           my->task_ready.notify_one();
       }
    }

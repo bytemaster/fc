@@ -29,9 +29,9 @@
 
 namespace fc {
 
-inline const fc::string& base64_chars()
+inline const std::string& base64_chars()
 {
-    static const fc::string m_base64_chars = 
+    static const std::string m_base64_chars = 
                  "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
                  "abcdefghijklmnopqrstuvwxyz"
                  "0123456789+/";
@@ -42,15 +42,15 @@ static inline bool is_base64(unsigned char c) {
   return (isalnum(c) || (c == '+') || (c == '/'));
 }
 
-fc::string base64_encode(unsigned char const* bytes_to_encode, unsigned int in_len);
+std::string base64_encode(unsigned char const* bytes_to_encode, unsigned int in_len);
 
-fc::string base64_encode( const fc::string& enc ) {
+std::string base64_encode( const std::string& enc ) {
   char const* s = enc.c_str();
   return base64_encode( (unsigned char const*)s, enc.size() );
 }
-fc::string base64_encode(unsigned char const* bytes_to_encode, unsigned int in_len) {
+std::string base64_encode(unsigned char const* bytes_to_encode, unsigned int in_len) {
 
-  fc::string ret;
+  std::string ret;
   int i = 0;
   int j = 0;
   unsigned char char_array_3[3];
@@ -93,13 +93,13 @@ fc::string base64_encode(unsigned char const* bytes_to_encode, unsigned int in_l
 }
 
 
-fc::string base64_decode(fc::string const& encoded_string) {
+std::string base64_decode(std::string const& encoded_string) {
   int in_len = encoded_string.size();
   int i = 0;
   int j = 0;
   int in_ = 0;
   unsigned char char_array_4[4], char_array_3[3];
-  fc::string ret;
+  std::string ret;
 
   while (in_len-- && ( encoded_string[in_] != '=') && is_base64(encoded_string[in_])) {
     char_array_4[i++] = encoded_string[in_]; in_++;

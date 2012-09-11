@@ -68,8 +68,11 @@ set( sources
   src/mutex.cpp
   src/pke.cpp
   src/base64.cpp
+  src/blowfish.cpp
+  src/dh.cpp
   src/udp_socket.cpp
   src/asio.cpp
+  src/super_fast_hash.cpp
 )
 setup_library( fc SOURCES ${sources} )
 

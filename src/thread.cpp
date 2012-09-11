@@ -24,7 +24,7 @@ namespace fc {
 
    thread::thread( const char* name  ) {
       promise<void>::ptr p(new promise<void>());
-      boost::thread* t = new boost::thread( [this,p]() {
+      boost::thread* t = new boost::thread( [this,p,name]() {
           try {
             this->my = new thread_d(*this);
             current_thread() = this;
@@ -33,6 +33,7 @@ namespace fc {
           } catch ( ... ) {
             elog( "Caught unhandled exception" );
           }
+          slog( "exiting %s", name );
       } );
       p->wait();
       my->boost_thread = t;
@@ -53,7 +54,10 @@ namespace fc {
    }
 
    thread::~thread() {
-     delete my;
+     if( is_current() ) {
+      delete my;
+      my = 0;
+     }
    }
 
    thread& thread::current() {
@@ -207,7 +211,14 @@ namespace fc {
       async_task( t, p, time_point::max(), desc );
    }
 
+   void thread::poke() {
+     boost::unique_lock<boost::mutex> lock(my->task_ready_mutex);
+               slog("notify one");
+     my->task_ready.notify_one();
+   }
+
    void thread::async_task( task_base* t, const priority& p, const time_point& tp, const char* desc ) {
+      slog( "%s", name().c_str() );
       task_base* stale_head = my->task_in_queue.load(boost::memory_order_relaxed);
       do { t->_next = stale_head;
       }while( !my->task_in_queue.compare_exchange_weak( stale_head, t, boost::memory_order_release ) );
@@ -217,6 +228,7 @@ namespace fc {
       // when *this thread is about to block on a wait condition.  
       if( this != &current() &&  !stale_head ) { 
           boost::unique_lock<boost::mutex> lock(my->task_ready_mutex);
+                    slog("notify one");
           my->task_ready.notify_one();
       }
    }
@@ -282,7 +294,6 @@ namespace fc {
         this->async( [=](){ notify(p); } );
         return;
       }
-      //debug( "begin notify" );
       // TODO: store a list of blocked contexts with the promise 
       //  to accelerate the lookup.... unless it introduces contention...
       
@@ -293,9 +304,7 @@ namespace fc {
       fc::context* prev_blocked = 0;
       while( cur_blocked ) {
         // if the blocked context is waiting on this promise 
-       // slog( "try unblock ctx %1% from prom %2%", cur_blocked, p.get() );
         if( cur_blocked->try_unblock( p.get() )  ) {
-          //slog( "unblock!" );
           // remove it from the blocked list.
 
           // remove this context from the sleep queue...
@@ -323,9 +332,6 @@ namespace fc {
           cur_blocked   = cur_blocked->next_blocked;
         }
       }
-      //debug( "end notify" );
-
-
     }
     bool thread::is_current()const {
       return this == &current();

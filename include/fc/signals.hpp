@@ -4,6 +4,8 @@
 #include <fc/future.hpp>
 #include <fc/thread.hpp>
 
+#include <fc/log.hpp>
+
 namespace fc {
 #if !defined(BOOST_NO_TEMPLATE_ALIASES) 
    template<typename T>
@@ -20,7 +22,8 @@ namespace fc {
 
    inline void wait( boost::signal<void()>& sig, const microseconds& timeout_us=microseconds::max() ) {
      promise<void>::ptr p(new promise<void>());
-     boost::signals::scoped_connection c = sig.connect( [=]() { p->set_value(); } ); 
+     boost::signals::scoped_connection c = sig.connect( [=]() { slog( "set value!" );p->set_value(); } ); 
+     slog( "wait quit" );
      p->wait( timeout_us ); 
    }
 } 

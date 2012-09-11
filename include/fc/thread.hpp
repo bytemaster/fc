@@ -58,6 +58,7 @@ namespace fc {
          async_task(tsk,prio,desc);
          return r;
       }
+      void poke();
      
      
       /**

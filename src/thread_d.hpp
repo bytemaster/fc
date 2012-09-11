@@ -32,11 +32,14 @@ namespace fc {
               name = fc::string("th_") + char('a'+cnt); 
               cnt++;
             }
+            ~thread_d(){
+              slog( "...%p %s",this,name.c_str() );
+            }
            fc::thread&             self;
            boost::thread* boost_thread;
            bc::stack_allocator              stack_alloc;
-           boost::mutex                     task_ready_mutex;
            boost::condition_variable        task_ready;
+           boost::mutex                     task_ready_mutex;
 
            boost::atomic<task_base*>       task_in_queue;
            std::vector<task_base*>         task_pqueue;
@@ -316,9 +319,11 @@ namespace fc {
                   if( has_next_task() ) continue;
                   time_point timeout_time = check_for_timeouts();
                   
+                  if( done ) return;
                   if( timeout_time == time_point::max() ) {
                     task_ready.wait( lock );
                   } else if( timeout_time != time_point::min() ) {
+                    slog("timed wait");
                     task_ready.wait_until( lock, boost::chrono::system_clock::time_point() + 
                                                  boost::chrono::microseconds(timeout_time.time_since_epoch().count()) );
                   }

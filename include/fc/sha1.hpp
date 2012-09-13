@@ -19,6 +19,9 @@ namespace fc {
       static sha1 hash( const char* d, uint32_t dlen );
       static sha1 hash( const fc::string& );
 
+      template<typename T>
+      static sha1 hash( const T& t ) { sha1::encoder e; e << t; return e.result(); } 
+
       class encoder {
         public:
           encoder();

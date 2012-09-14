@@ -30,6 +30,9 @@ namespace fc {
     return *this;
    }
 
+   bool operator ==( const fc::path& l, const fc::path& r ) { return *l._p == *r._p; }
+   bool operator !=( const fc::path& l, const fc::path& r ) { return *l._p != *r._p; }
+
    path& path::operator /=( const fc::path& p ) {
       *_p /= *p._p;
       return *this;
@@ -50,8 +53,14 @@ namespace fc {
    fc::string path::string()const {
     return _p->string().c_str();
    }
+   fc::path path::filename()const {
+    return _p->filename();
+   }
 
 
   bool exists( const path& p ) { return boost::filesystem::exists(p); }
   void create_directories( const path& p ) { boost::filesystem::create_directories(p); }
+  bool is_directory( const path& p ) { return boost::filesystem::is_directory(p); }
+  bool is_regular( const path& p ) { return boost::filesystem::is_regular(p); }
+  uint64_t file_size( const path& p ) { return boost::filesystem::file_size(p); }
 }

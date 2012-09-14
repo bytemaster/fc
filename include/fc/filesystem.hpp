@@ -25,17 +25,23 @@ namespace fc {
 
       path& operator /=( const fc::path& );
       friend path operator /( const fc::path& p, const fc::path& );
+      friend bool operator ==( const fc::path& p, const fc::path& );
+      friend bool operator !=( const fc::path& p, const fc::path& );
 
       operator boost::filesystem::path& ();
       operator const boost::filesystem::path& ()const;
 
+      fc::path   filename()const;
       fc::string string()const;
     private:
       fwd<boost::filesystem::path,8> _p; 
   };
 
-  bool exists( const path& p );
-  void create_directories( const path& p );
+  bool     exists( const path& p );
+  bool     is_directory( const path& p );
+  bool     is_regular( const path& p );
+  void     create_directories( const path& p );
+  uint64_t file_size( const path& p );
 }
 
 #endif // _FC_FILESYSTEM_HPP_

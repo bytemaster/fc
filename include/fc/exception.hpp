@@ -3,6 +3,11 @@
 #include <fc/shared_ptr.hpp>
 #include <fc/string.hpp>
 
+// TODO: Remove boost exception dependency here!!
+// TODO: Remove boost format dependency here!!
+#include <boost/format.hpp>
+#include <boost/exception/all.hpp>
+
 // provided for easy integration with boost.
 namespace boost { class exception_ptr; }
 
@@ -46,9 +51,19 @@ namespace fc {
   }
   void          rethrow_exception( const exception_ptr& e );
 
-} // namespace fc 
 
-#define FC_THROW( X, ... ) throw (X) 
+  typedef boost::error_info<struct err_msg_,std::string> err_msg;
+  struct exception : public virtual boost::exception, public virtual std::exception {
+      const char* what()const throw()     { return "exception";                     }
+      virtual void       rethrow()const   { BOOST_THROW_EXCEPTION(*this);                  } 
+      const std::string& message()const   { return *boost::get_error_info<fc::err_msg>(*this); }
+  };
+} // namespace fc 
+#define FC_THROW(X,...) throw X
+#define FC_THROW_MSG( MSG, ... ) \
+  do { \
+    BOOST_THROW_EXCEPTION( fc::exception() << fc::err_msg( (boost::format( MSG ) __VA_ARGS__ ).str() ) );\
+  } while(0)
 
 
 #endif // _FC_EXCEPTION_HPP_

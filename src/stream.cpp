@@ -17,11 +17,6 @@ namespace fc {
         cin_source( const cin_source& s ):_cin_thread(s._cin_thread){}
 
         std::streamsize read( char* s, std::streamsize n ) {
-          //if( !_cin_thread ) _cin_thread = new fc::thread("cin");
-
-          //if( _cin_thread != &fc::thread::current()  ) {
-           // return _cin_thread->async( [=](){ return this->read( s, n ); } ).wait();
-         // }
           int r =  std::cin.readsome(s,n);
           if( std::cin && r <= 0 ) {
             std::cin.read( s, 1 );

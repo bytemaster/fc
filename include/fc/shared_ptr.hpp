@@ -41,11 +41,11 @@ namespace fc {
       }
       ~shared_ptr() { if( _ptr ) { _ptr->release(); } }
 
-      shared_ptr& reset( T* v = 0 )  {
+      shared_ptr& reset( T* v = 0, bool inc = false )  {
         if( v == _ptr ) return *this;
         if( _ptr ) _ptr->release();
         _ptr = v;
-        if( _ptr ) _ptr->retain();
+        if( _ptr && inc ) _ptr->retain();
         return *this;
       }
 

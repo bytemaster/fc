@@ -36,8 +36,8 @@ namespace fc {
         friend bool operator==( const endpoint& a, const endpoint& b );
     
       private:
-        uint16_t _port;
         address  _ip;
+        uint16_t _port;
     };
   }
 }

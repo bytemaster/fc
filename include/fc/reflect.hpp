@@ -169,6 +169,7 @@ namespace fc {
   template<typename T>
   class reflector : public detail::reflector_impl<T, reflector<T> >{
     public:
+      enum _is_defined { is_defined = 0 };
       virtual const char* name()const { return get_typename<T>::name(); }
       virtual void visit( void* s, const abstract_visitor& v )const {
          v.visit( *((T*)s) );

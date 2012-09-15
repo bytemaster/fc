@@ -1,5 +1,7 @@
 #include <fc/exception.hpp>
+#include <fc/error.hpp>
 #include <boost/exception/all.hpp>
+#include <boost/lexical_cast.hpp>
 
 namespace fc {
   #define bexcept  void* e = &my[0]; (*((boost::exception_ptr*)e))
@@ -66,4 +68,38 @@ namespace fc {
     const void* e = &my[0]; 
     return (*((boost::exception_ptr*)e));
   }
+
+
+  fc::string to_string( char v ) { return fc::string(&v,1); }
+  fc::string to_string( uint64_t v ) { return boost::lexical_cast<std::string>(v).c_str(); }
+  fc::string to_string( int64_t v ){ return boost::lexical_cast<std::string>(v).c_str(); }
+  fc::string to_string( double v ){ return boost::lexical_cast<std::string>(v).c_str(); }
+  fc::string to_string( float v ){ return boost::lexical_cast<std::string>(v).c_str(); }
+  fc::string to_string( int32_t v ){ return boost::lexical_cast<std::string>(v).c_str(); }
+  fc::string to_string( uint32_t v ){ return boost::lexical_cast<std::string>(v).c_str(); }
+  fc::string to_string( int16_t v ){ return boost::lexical_cast<std::string>(v).c_str(); }
+  fc::string to_string( uint16_t v ){ return boost::lexical_cast<std::string>(v).c_str(); }
+  fc::string to_string( size_t v ){ return boost::lexical_cast<std::string>(v).c_str(); }
+  fc::string to_string( long int v ){ return boost::lexical_cast<std::string>(v).c_str(); }
+
+  void throw_exception( const char* func, const char* file, int line, const char* msg ) {
+    ::boost::exception_detail::throw_exception_(fc::generic_exception(msg),func, file, line );
+  }
+  void throw_exception( const char* func, const char* file, int line, const char* msg, 
+                        const fc::string& a1 ) {
+    ::boost::exception_detail::throw_exception_(fc::generic_exception(msg),func, file, line );
+  }
+  void throw_exception( const char* func, const char* file, int line, const char* msg, 
+                        const fc::string& a1, const fc::string& a2 ) {
+    ::boost::exception_detail::throw_exception_(fc::generic_exception(msg),func, file, line );
+  }
+  void throw_exception( const char* func, const char* file, int line, const char* msg, 
+                        const fc::string& a1, const fc::string& a2, const fc::string& a3 ) {
+    ::boost::exception_detail::throw_exception_(fc::generic_exception(msg),func, file, line );
+  }
+  void throw_exception( const char* func, const char* file, int line, const char* msg, 
+                        const fc::string& a1, const fc::string& a2, const fc::string& a3, const fc::string& a4 ) {
+    ::boost::exception_detail::throw_exception_(fc::generic_exception(msg),func, file, line );
+  }
+
 }

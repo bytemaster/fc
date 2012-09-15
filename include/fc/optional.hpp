@@ -64,7 +64,7 @@ namespace fc {
 
     private:
       // force alignment... to 8 byte boundaries 
-      double _value[(sizeof(T)+sizeof(double)-1)/sizeof(double)];
+      double _value[8 * ((sizeof(T)+7)/8)];
       bool   _valid;
   };
 

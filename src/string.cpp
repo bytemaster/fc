@@ -15,6 +15,10 @@ namespace detail {
 
 namespace fc  {
 
+  string::string(const char* s, int l) {
+    static_assert( sizeof(*this) >= sizeof(std::string), "failed to reserve enough space" );
+    new (this) std::string(s,l);
+  }
   string::string() {
     static_assert( sizeof(*this) >= sizeof(std::string), "failed to reserve enough space" );
     new (this) std::string();

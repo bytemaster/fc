@@ -21,6 +21,7 @@ namespace fc {
 namespace fc{  \
   template<> class reflector<TYPE> : virtual public detail::reflector_impl<TYPE, reflector<TYPE> > { \
     public:\
+      enum _is_defined { is_defined = 1 }; \
       virtual const char* name()const; \
       virtual void visit( void* s, const abstract_visitor& v )const; \
       virtual void visit( const void* s, const abstract_const_visitor& v )const; \

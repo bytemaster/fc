@@ -52,7 +52,7 @@ namespace fc {
         data(){};
     };
 
-    template<typename T, bool IsClass=false>
+    template<typename T, typename IsClass=fc::false_type>
     struct vector_impl {
       public:
           vector_impl():_data(nullptr){}
@@ -170,7 +170,7 @@ namespace fc {
     };
     
     template<typename T>
-    class vector_impl<T,true>  {
+    class vector_impl<T,fc::true_type>  {
       public: 
           vector_impl():_data(nullptr){}
           vector_impl( vector_impl&& c):_data(c._data){c._data =nullptr; }
@@ -338,12 +338,12 @@ namespace fc {
   }
 
   template<typename T>
-  class vector : public detail::vector_impl<T, fc::is_class<T>::value> {
+  class vector : public detail::vector_impl<T, typename fc::is_class<T>::type> {
     public:
       vector(){}
-      vector( uint64_t s ):detail::vector_impl<T, fc::is_class<T>::value>(s){}
-      vector( const vector& v ):detail::vector_impl<T, fc::is_class<T>::value>(v){}
-      vector( vector&& v ):detail::vector_impl<T, fc::is_class<T>::value>(fc::move(v)){}
+      vector( uint64_t s ):detail::vector_impl<T, typename fc::is_class<T>::type>(s){}
+      vector( const vector& v ):detail::vector_impl<T, typename fc::is_class<T>::type>(v){}
+      vector( vector&& v ):detail::vector_impl<T, typename fc::is_class<T>::type>(fc::move(v)){}
 
       vector& operator=( vector&& v ) {
          *((base*)this) = fc::move(v);
@@ -354,7 +354,7 @@ namespace fc {
          return *this;
       }
     private:
-      typedef detail::vector_impl<T, fc::is_class<T>::value>  base;
+      typedef detail::vector_impl<T, typename fc::is_class<T>::type>  base;
   };
 
 };

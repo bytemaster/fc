@@ -2,11 +2,10 @@
 #define _FC_EXCEPTION_HPP_
 #include <fc/shared_ptr.hpp>
 #include <fc/string.hpp>
+#include <boost/current_function.hpp>
 
 // TODO: Remove boost exception dependency here!!
 // TODO: Remove boost format dependency here!!
-#include <boost/format.hpp>
-#include <boost/exception/all.hpp>
 
 // provided for easy integration with boost.
 namespace boost { class exception_ptr; }
@@ -51,18 +50,46 @@ namespace fc {
   }
   void          rethrow_exception( const exception_ptr& e );
 
+  void throw_exception( const char* func, const char* file, int line, const char* msg );
+  void throw_exception( const char* func, const char* file, int line, const char* msg, 
+                        const fc::string& a1 );
+  void throw_exception( const char* func, const char* file, int line, const char* msg, 
+                        const fc::string& a1, const fc::string& a2 );
+  void throw_exception( const char* func, const char* file, int line, const char* msg, 
+                        const fc::string& a1, const fc::string& a2, const fc::string& a3 );
+  void throw_exception( const char* func, const char* file, int line, const char* msg, 
+                        const fc::string& a1, const fc::string& a2, const fc::string& a3, const fc::string& a4 );
 
-  typedef boost::error_info<struct err_msg_,std::string> err_msg;
-  struct exception : public virtual boost::exception, public virtual std::exception {
-      const char* what()const throw()     { return "exception";                     }
-      virtual void       rethrow()const   { BOOST_THROW_EXCEPTION(*this);                  } 
-      const std::string& message()const   { return *boost::get_error_info<fc::err_msg>(*this); }
-  };
+  template<typename T>
+  fc::string to_string( T&& v ) { return fc::string(fc::forward<T>(v)); }
+  fc::string to_string( char v ); // { return fc::string(&v,1); }
+  fc::string to_string( uint64_t v );
+  fc::string to_string( int64_t v );
+  fc::string to_string( double v );
+  fc::string to_string( float v );
+  fc::string to_string( int32_t v );
+  fc::string to_string( uint32_t v );
+  fc::string to_string( int16_t v );
+  fc::string to_string( uint16_t v );
+  fc::string to_string( size_t v );
+  fc::string to_string( long int v );
+
+  template<typename T>
+  void throw_exception( const char* func, const char* file, int line, const char* msg, T&& a1 ) {
+    throw_exception( func, file, line, msg, to_string(fc::forward<T>(a1) ) );
+  }
+
+  template<typename T1, typename T2>
+  void throw_exception( const char* func, const char* file, int line, const char* msg, T1&& a1, T2&& a2 ) {
+    throw_exception( func, file, line, msg, to_string(fc::forward<T1>(a1) ), to_string( fc::forward<T2>(a2) ) );
+  }
+
+
 } // namespace fc 
-#define FC_THROW(X,...) throw X
-#define FC_THROW_MSG( MSG, ... ) \
+#define FC_THROW(X) throw X
+#define FC_THROW_MSG( ... ) \
   do { \
-    BOOST_THROW_EXCEPTION( fc::exception() << fc::err_msg( (boost::format( MSG ) __VA_ARGS__ ).str() ) );\
+    fc::throw_exception( BOOST_CURRENT_FUNCTION, __FILE__, __LINE__, __VA_ARGS__ ); \
   } while(0)
 
 

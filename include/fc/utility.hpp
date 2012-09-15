@@ -22,14 +22,16 @@ namespace fc {
   template<typename T, typename U>
   inline T&& forward( U&& u ) { return static_cast<T&&>(u); }
 
+  struct true_type  { enum _value { value = 1 }; };
+  struct false_type { enum _value { value = 0 }; };
+
   namespace detail {
-    template<typename T> char is_class_helper(void(T::*)());
-    template<typename T> double is_class_helper(...);
+    template<typename T> fc::true_type is_class_helper(void(T::*)());
+    template<typename T> fc::false_type is_class_helper(...);
   }
+
   template<typename T>
-  struct is_class {
-    enum { value = sizeof(char) == sizeof(detail::is_class_helper<T>(0)) }; 
-  };
+  struct is_class { typedef decltype(detail::is_class_helper<T>(0)) type; };
 
   template<typename T>
   void swap( T& a, T& b ) {

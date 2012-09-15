@@ -20,6 +20,7 @@ namespace fc {
       string( const string& c );
       string( string&& c );
       string( const char* c );
+      string( const char* c, int s );
       string( const_iterator b, const_iterator e );
       ~string();
 

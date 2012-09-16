@@ -31,7 +31,7 @@ namespace fc {
             p->set_value();
             exec();
           } catch ( ... ) {
-            elog( "Caught unhandled exception %1%", boost::current_exception_diagnostic_information() );
+            elog( "Caught unhandled exception %s", boost::current_exception_diagnostic_information().c_str() );
           }
           delete this->my;
           this->my = 0;

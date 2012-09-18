@@ -2,6 +2,9 @@
 #include <iostream>
 #include <boost/iostreams/stream.hpp>
 #include <fc/thread.hpp>
+#include <fstream>
+#include <sstream>
+#include <fc/fwd_impl.hpp>
 
 namespace fc {
   namespace detail {
@@ -176,7 +179,129 @@ namespace fc {
  
   #undef print_help
 
+  class ofstream::impl {
+    public:
+      impl(){}
+      impl( const fc::string& s, int m )
+      :ofs(s.c_str(), std::ios_base::binary ){}
+
+
+      std::ofstream ofs;
+  };
+
+  ofstream::ofstream(){}
+  ofstream::ofstream( const fc::string& s, int m )
+  :my(s,m){}
+  ofstream::~ofstream(){}
+  void ofstream::open( const fc::string& s, int m ) {
+    my->ofs.open(s.c_str(), std::ios_base::binary );
+  }
+  ofstream& ofstream::write( const char* b, size_t s ) {
+    my->ofs.write(b,s);
+    return *this;
+  }
+  void ofstream::put( char c ) { my->ofs.put(c); }
+
+
+  class ifstream::impl {
+    public:
+      impl(){}
+      impl( const fc::string& s, int m )
+      :ifs(s.c_str(), std::ios_base::binary ){}
+
+
+      std::ifstream ifs;
+  };
+
+
+
+  ifstream::ifstream() {
+  }
+  ifstream::~ifstream() {}
+  ifstream::ifstream( const fc::string& s, int m )
+  :my(s.c_str(), std::ios_base::binary){}
+
+  ifstream& ifstream::read( char* b, size_t s ) {
+    my->ifs.read(b,s);
+    return *this;
+  }
+  void ifstream::open( const fc::string& s, int m ) {
+    my->ifs.open(s.c_str(), std::ios_base::binary );
+  }
+
+  class stringstream::impl {
+    public:
+    impl( fc::string&s )
+    :ss( reinterpret_cast<std::string&>(s) )
+    {
+    }
+    std::stringstream ss;
+  };
+
+  stringstream::stringstream( fc::string& s )
+  :my(s) {
+  }
+  stringstream::~stringstream(){}
+
+  stringstream& operator>>( stringstream& s, int64_t&   v ){
+    s.my->ss >> v;
+    return s;
+  }
+  stringstream& operator>>( stringstream& s, uint64_t&   v ){
+    s.my->ss >> v;
+    return s;
+  }
+  stringstream& operator>>( stringstream& s, int32_t&    v ){
+    s.my->ss >> v;
+    return s;
+  }
+  stringstream& operator>>( stringstream& s, uint32_t&   v ){
+    s.my->ss >> v;
+    return s;
+  }
+  stringstream& operator>>( stringstream& s, int16_t&    v ){
+    s.my->ss >> v;
+    return s;
+  }
+  stringstream& operator>>( stringstream& s, uint16_t&   v ){
+    s.my->ss >> v;
+    return s;
+  }
+  stringstream& operator>>( stringstream& s, int8_t&     v ){
+    s.my->ss >> v;
+    return s;
+  }
+  stringstream& operator>>( stringstream& s, uint8_t&    v ){
+    s.my->ss >> v;
+    return s;
+  }
+  stringstream& operator>>( stringstream& s, float&      v ){
+    s.my->ss >> v;
+    return s;
+  }
+  stringstream& operator>>( stringstream& s, double&     v ){
+    s.my->ss >> v;
+    return s;
+  }
+  stringstream& operator>>( stringstream& s, bool&      v ){
+    s.my->ss >> v;
+    return s;
+  }
+  stringstream& operator>>( stringstream& s, char&      v ){
+    s.my->ss >> v;
+    return s;
+  }
+  stringstream& operator>>( stringstream& s, fc::string& v ){
+    s.my->ss >> reinterpret_cast<std::string&>(v);
+    return s;
+  }
+
+  bool getline( istream& in, fc::string& f ) {
+    return false;
+  }
+
   ostream cout( std::cout );
   ostream cerr( std::cerr );
   istream cin(  detail::get_cin_stream() );
 } //namespace fc
+

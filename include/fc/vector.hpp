@@ -106,9 +106,13 @@ namespace fc {
           }
 
           void     resize( uint64_t i ) {
-            if( capacity() < i ) 
-               _data = detail::data<T>::reallocate( _data, i );
-            _data->size = i;
+            if( capacity() < i ) {
+               if( _data )
+                   _data = detail::data<T>::reallocate( _data, i );
+               else
+                   _data = detail::data<T>::allocate( i );
+            }
+            if( _data ) _data->size = i;
           }
 
           template<typename U>

@@ -151,8 +151,7 @@ namespace fc {
   }
 
 
-  template<typename T>
-  struct get_typename {};
+  template<typename T> class get_typename{};
   template<> struct get_typename<int32_t>  { static const char* name()  { return "int32_t";  } };
   template<> struct get_typename<int64_t>  { static const char* name()  { return "int64_t";  } };
   template<> struct get_typename<int16_t>  { static const char* name()  { return "int16_t";  } };
@@ -164,6 +163,7 @@ namespace fc {
   template<> struct get_typename<double>   { static const char* name()  { return "double";   } };
   template<> struct get_typename<float>    { static const char* name()  { return "float";    } };
   template<> struct get_typename<bool>     { static const char* name()  { return "bool";     } };
+  template<> struct get_typename<char>     { static const char* name()  { return "char";     } };
   template<> struct get_typename<string>   { static const char* name()  { return "string";   } };
 
   template<typename T>
@@ -178,7 +178,7 @@ namespace fc {
          v.visit( *((const T*)s) );
       }
 
-      static reflector& instance() { static reflector inst; return inst; }
+      static reflector& instance() { static reflector<T> inst; return inst; }
   };
 
   template<typename T> reflector<T>& reflect( const T& ) { return reflector<T>::instance(); }

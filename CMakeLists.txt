@@ -73,6 +73,8 @@ set( sources
   src/udp_socket.cpp
   src/asio.cpp
   src/super_fast_hash.cpp
+  src/file_mapping.cpp
+  src/program_options.cpp
 )
 setup_library( fc SOURCES ${sources} )
 

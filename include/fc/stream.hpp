@@ -1,7 +1,7 @@
 #ifndef _FC_STREAM_HPP_
 #define _FC_STREAM_HPP_
 #include <fc/utility.hpp>
-#include <fc/log.hpp>
+#include <fc/fwd.hpp>
 
 namespace fc {
   class string;
@@ -156,7 +156,83 @@ namespace fc {
     private:
       ostream( const ostream& o );
       ostream& operator=(const ostream& o);
-      char  _store[54*sizeof(void*)];
+      void*  _store[54];
+  };
+
+  bool getline( fc::istream&, fc::string& );
+
+  class stringstream {
+    public:
+      stringstream();
+      stringstream( fc::string& s);
+      ~stringstream();
+
+      fc::string str();
+
+      friend stringstream& operator>>( stringstream&, int64_t&    );
+      friend stringstream& operator>>( stringstream&, uint64_t&   );
+      friend stringstream& operator>>( stringstream&, int32_t&    );
+      friend stringstream& operator>>( stringstream&, uint32_t&   );
+      friend stringstream& operator>>( stringstream&, int16_t&    );
+      friend stringstream& operator>>( stringstream&, uint16_t&   );
+      friend stringstream& operator>>( stringstream&, int8_t&     );
+      friend stringstream& operator>>( stringstream&, uint8_t&    );
+      friend stringstream& operator>>( stringstream&, float&      );
+      friend stringstream& operator>>( stringstream&, double&     );
+      friend stringstream& operator>>( stringstream&, bool&       );
+      friend stringstream& operator>>( stringstream&, char&       );
+      friend stringstream& operator>>( stringstream&, fc::string& );
+
+      friend stringstream& operator<<( stringstream&, const int64_t&    );
+      friend stringstream& operator<<( stringstream&, const uint64_t&   );
+      friend stringstream& operator<<( stringstream&, const int32_t&    );
+      friend stringstream& operator<<( stringstream&, const uint32_t&   );
+      friend stringstream& operator<<( stringstream&, const int16_t&    );
+      friend stringstream& operator<<( stringstream&, const uint16_t&   );
+      friend stringstream& operator<<( stringstream&, const int8_t&     );
+      friend stringstream& operator<<( stringstream&, const uint8_t&    );
+      friend stringstream& operator<<( stringstream&, const float&      );
+      friend stringstream& operator<<( stringstream&, const double&     );
+      friend stringstream& operator<<( stringstream&, const bool&       );
+      friend stringstream& operator<<( stringstream&, const char&       );
+      friend stringstream& operator<<( stringstream&, const fc::string& );
+    private:
+      class impl;
+      fwd<impl,368> my;
+  };
+
+  class ofstream {
+    public:
+      enum mode { out, binary };
+      ofstream();
+      ofstream( const fc::string& file, int m );
+      ~ofstream();
+
+      void open( const fc::string& file, int m );
+      ofstream& write( const char* buf, size_t len );
+      void   put( char c );
+      void   close();
+      void   flush();
+
+    private:
+      class impl;
+      fwd<impl,896> my;
+  };
+  class ifstream {
+    public:
+      enum mode { in, binary };
+      ifstream();
+      ifstream( const fc::string& file, int m );
+      ~ifstream();
+
+      void open( const fc::string& file, int m );
+      ifstream& read( char* buf, size_t len );
+      void   close();
+      void   flush();
+
+    private:
+      class impl;
+      fwd<impl,904> my;
   };
 
   extern ostream cout;

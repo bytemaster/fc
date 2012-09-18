@@ -2,6 +2,7 @@
 #define _FC_SHA1_HPP_
 #include <fc/fwd.hpp>
 #include <fc/string.hpp>
+#include <fc/reflect.hpp>
 
 namespace fc {
 
@@ -59,6 +60,7 @@ namespace fc {
   };
 
 }
+FC_REFLECTABLE( fc::sha1 )
 
 #endif // _FC_SHA1_HPP_
 

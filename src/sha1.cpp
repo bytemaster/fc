@@ -84,3 +84,13 @@ namespace fc {
   }
   
 } // namespace fc
+
+namespace fc {
+   const char* reflector<sha1>::name()const {  return "sha1"; }
+   void reflector<sha1>::visit( void* s, const abstract_visitor& v )const {
+   }
+   void reflector<sha1>::visit( const void* s, const abstract_const_visitor& v )const {
+      v.visit( fc::string( *((const sha1*)s)) ); 
+   }
+   reflector<sha1>& reflector<sha1>::instance() { static reflector<sha1> inst; return inst; }
+} // namespace fc 

@@ -35,8 +35,8 @@ namespace fc {
     if(isatty(fileno(stderr)))
       std::cerr<<"\r"<<color;
     
-    //fprintf( stderr, "%p %-15s %-15s %-5zd %-15s ",  
-    std::cerr<<         thread_ptr()<< thread_name()<< short_name(file_name)<< line_num<< method_name ;
+    fprintf( stderr, "%p %-15s %-15s %-5zd %-15s ", thread_ptr(), thread_name(), short_name(file_name), line_num, method_name );
+    //std::cerr<<thread_ptr()<< thread_name()<< short_name(file_name)<< line_num<< method_name ;
     va_list args;
     va_start(args,format);
     vfprintf( stderr, format, args );

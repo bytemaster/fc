@@ -34,6 +34,9 @@ namespace fc {
   struct is_class { typedef decltype(detail::is_class_helper<T>(0)) type; };
 
   template<typename T>
+  const T& min( const T& a, const T& b ) { return a < b ? a: b; }
+
+  template<typename T>
   void swap( T& a, T& b ) {
     T tmp = fc::move(a);
     a = fc::move(b);

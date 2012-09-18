@@ -2,6 +2,7 @@
 #include <fc/error.hpp>
 #include <boost/exception/all.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/format.hpp>
 
 namespace fc {
   #define bexcept  void* e = &my[0]; (*((boost::exception_ptr*)e))
@@ -85,13 +86,13 @@ namespace fc {
   void throw_exception( const char* func, const char* file, int line, const char* msg ) {
     ::boost::exception_detail::throw_exception_(fc::generic_exception(msg),func, file, line );
   }
-  void throw_exception( const char* func, const char* file, int line, const char* msg, 
+  void throw_exception_( const char* func, const char* file, int line, const char* msg, 
                         const fc::string& a1 ) {
-    ::boost::exception_detail::throw_exception_(fc::generic_exception(msg),func, file, line );
+    ::boost::exception_detail::throw_exception_(fc::generic_exception( (boost::format(msg) % a1.c_str() ).str().c_str()) ,func, file, line );
   }
-  void throw_exception( const char* func, const char* file, int line, const char* msg, 
+  void throw_exception_( const char* func, const char* file, int line, const char* msg, 
                         const fc::string& a1, const fc::string& a2 ) {
-    ::boost::exception_detail::throw_exception_(fc::generic_exception(msg),func, file, line );
+    ::boost::exception_detail::throw_exception_(fc::generic_exception( (boost::format(msg) % a1.c_str() %a2.c_str()).str().c_str()),func, file, line );
   }
   void throw_exception( const char* func, const char* file, int line, const char* msg, 
                         const fc::string& a1, const fc::string& a2, const fc::string& a3 ) {

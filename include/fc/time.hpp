@@ -10,6 +10,7 @@ namespace fc {
         friend microseconds operator + (const  microseconds& l, const microseconds& r ) { return microseconds(l._count+r._count); }
 
         bool operator==(const microseconds& c)const { return _count == c._count; }
+        microseconds& operator+=(const microseconds& c) { _count += c._count; return *this; }
         int64_t count()const { return _count; }
     private:
         friend class time_point;
@@ -30,6 +31,7 @@ namespace fc {
         bool   operator <=( const time_point& t )const                              { return elapsed._count <=t.elapsed._count; }
         bool   operator ==( const time_point& t )const                              { return elapsed._count ==t.elapsed._count; }
         bool   operator !=( const time_point& t )const                              { return elapsed._count !=t.elapsed._count; }
+        time_point&  operator += ( const microseconds& m )                          { elapsed+=m; return *this;               }
         friend time_point   operator + ( const time_point& t, const microseconds& m ) { return time_point(t.elapsed+m);         }
         friend microseconds operator - ( const time_point& t, const time_point& m ) { return microseconds(t.elapsed.count() - m.elapsed.count()); }
     private:

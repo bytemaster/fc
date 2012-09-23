@@ -4,9 +4,12 @@
 #include <fc/datastream.hpp>
 #include <fc/varint.hpp>
 #include <fc/optional.hpp>
+#include <fc/vector.hpp>
 //#include <fc/value.hpp>
 
-namespace fc { namespace raw {
+namespace fc { 
+    class value; 
+    namespace raw {
 
     template<typename Stream, typename T>
     void unpack( Stream& s, fc::optional<T>& v );

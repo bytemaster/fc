@@ -2,6 +2,7 @@
 #define _FC_DATASTREAM_HPP_
 #include <fc/utility.hpp>
 #include <fc/exception.hpp>
+#include <string.h>
 #include <stdint.h>
 
 namespace fc {

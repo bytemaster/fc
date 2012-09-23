@@ -8,6 +8,7 @@
 #ifndef _FC_STATIC_REFLECT_HPP_
 #define _FC_STATIC_REFLECT_HPP_
 
+#include <fc/utility.hpp>
 #include <boost/static_assert.hpp>
 #include <boost/preprocessor/seq/for_each_i.hpp>
 #include <boost/preprocessor/seq/for_each.hpp>

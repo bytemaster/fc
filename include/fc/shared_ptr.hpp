@@ -26,6 +26,12 @@ namespace fc {
   template<typename T>
   class shared_ptr {
     public:
+      template<typename Other>
+      shared_ptr( const shared_ptr<Other>& o )
+      :_ptr(o.get()) {
+        if(_ptr) _ptr->retain();
+      }
+      
       shared_ptr( T* t, bool inc = false )
       :_ptr(t) { if( inc ) t->retain();  }
 
@@ -70,6 +76,11 @@ namespace fc {
     private:
       T* _ptr;
   };
+
+  template<typename T, typename O>
+  fc::shared_ptr<T> dynamic_pointer_cast( const fc::shared_ptr<O>& t ) {
+    return fc::shared_ptr<T>( dynamic_cast<T*>(t.get()), true );
+  }
 }
 
 #endif

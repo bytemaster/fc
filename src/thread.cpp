@@ -211,7 +211,7 @@ namespace fc {
    }
 
    void thread::async_task( task_base* t, const priority& p, const char* desc ) {
-      async_task( t, p, time_point::max(), desc );
+      async_task( t, p, time_point::min(), desc );
    }
 
    void thread::poke() {
@@ -220,6 +220,9 @@ namespace fc {
    }
 
    void thread::async_task( task_base* t, const priority& p, const time_point& tp, const char* desc ) {
+      t->_when = tp;
+     // slog( "when %lld", t->_when.time_since_epoch().count() );
+     // slog( "delay %lld", (tp - fc::time_point::now()).count() );
       task_base* stale_head = my->task_in_queue.load(boost::memory_order_relaxed);
       do { t->_next = stale_head;
       }while( !my->task_in_queue.compare_exchange_weak( stale_head, t, boost::memory_order_release ) );

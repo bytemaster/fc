@@ -55,9 +55,9 @@ namespace fc {
                         const fc::string& a1 );
   void throw_exception_( const char* func, const char* file, int line, const char* msg, 
                         const fc::string& a1, const fc::string& a2 );
-  void throw_exception( const char* func, const char* file, int line, const char* msg, 
+  void throw_exception_( const char* func, const char* file, int line, const char* msg, 
                         const fc::string& a1, const fc::string& a2, const fc::string& a3 );
-  void throw_exception( const char* func, const char* file, int line, const char* msg, 
+  void throw_exception_( const char* func, const char* file, int line, const char* msg, 
                         const fc::string& a1, const fc::string& a2, const fc::string& a3, const fc::string& a4 );
 
   template<typename T>
@@ -82,6 +82,10 @@ namespace fc {
   template<typename T1, typename T2>
   void throw_exception( const char* func, const char* file, int line, const char* msg, T1&& a1, T2&& a2 ) {
     throw_exception_( func, file, line, msg, to_string(fc::forward<T1>(a1) ), to_string( fc::forward<T2>(a2) ) );
+  }
+  template<typename T1, typename T2, typename T3>
+  void throw_exception( const char* func, const char* file, int line, const char* msg, T1&& a1, T2&& a2, T3&& a3 ) {
+    throw_exception_( func, file, line, msg, to_string(fc::forward<T1>(a1) ), to_string( fc::forward<T2>(a2) ), to_string( fc::forward<T3>(a3) ) );
   }
 
 

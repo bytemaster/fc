@@ -94,11 +94,11 @@ namespace fc {
                         const fc::string& a1, const fc::string& a2 ) {
     ::boost::exception_detail::throw_exception_(fc::generic_exception( (boost::format(msg) % a1.c_str() %a2.c_str()).str().c_str()),func, file, line );
   }
-  void throw_exception( const char* func, const char* file, int line, const char* msg, 
+  void throw_exception_( const char* func, const char* file, int line, const char* msg, 
                         const fc::string& a1, const fc::string& a2, const fc::string& a3 ) {
     ::boost::exception_detail::throw_exception_(fc::generic_exception(msg),func, file, line );
   }
-  void throw_exception( const char* func, const char* file, int line, const char* msg, 
+  void throw_exception_( const char* func, const char* file, int line, const char* msg, 
                         const fc::string& a1, const fc::string& a2, const fc::string& a3, const fc::string& a4 ) {
     ::boost::exception_detail::throw_exception_(fc::generic_exception(msg),func, file, line );
   }

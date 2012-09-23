@@ -94,6 +94,9 @@ namespace fc  {
     return *this;
   }
 
+  bool operator < ( const string& a, const string& b ) {
+    return reinterpret_cast<const std::string&>(a) < reinterpret_cast<const std::string&>(b);
+  }
   string operator + ( const string& s, const string& c ) {
     return string(s) += c;
   }

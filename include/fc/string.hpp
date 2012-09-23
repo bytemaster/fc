@@ -49,6 +49,8 @@ namespace fc {
       bool    operator == ( const string& s )const;
       bool    operator != ( const string& s )const;
 
+      friend bool operator < ( const string& a, const string& b );
+
       string& operator+=( const string& s );
       string& operator+=( char c );
 

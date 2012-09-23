@@ -134,12 +134,14 @@ namespace fc {
                 return tmp;
            }
            void ready_push_front( const fc::context::ptr& c ) {
+           //     c->ready_time = time_point::now();
                 c->next = ready_head;
                 ready_head = c;
                 if( !ready_tail ) 
                     ready_tail = c;
            }
            void ready_push_back( const fc::context::ptr& c ) {
+            //    c->ready_time = time_point::now();
                 c->next = 0;
                 if( ready_tail ) { 
                     ready_tail->next = c;
@@ -155,7 +157,7 @@ namespace fc {
            };
            struct task_when_less {
                 bool operator()( task_base* a, task_base* b ) {
-                    return a->_when < b->_when;
+                    return a->_when > b->_when;
                 }
            };
 
@@ -358,7 +360,7 @@ namespace fc {
             if( c->blocking_prom.size() ) {
                 c->timeout_blocking_promises();
             }
-            else { ready_push_back( c ); }
+            else { ready_push_front( c ); }
         }
         return time_point::min();
     }

@@ -135,6 +135,7 @@ namespace fc {
     //promise_base*              prom; 
     std::vector<blocked_promise> blocking_prom;
     time_point                   resume_time;
+   // time_point                   ready_time; // time that this context was put on ready queue
     fc::context*                next_blocked;
     fc::context*                next;
     fc::thread*                 ctx_thread;

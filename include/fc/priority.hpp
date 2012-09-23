@@ -13,6 +13,8 @@ namespace fc {
     bool operator < ( const priority& p )const {
        return value < p.value;
     }
+    static priority max() { return priority(10000); }
+    static priority min() { return priority(-10000); }
     int value;
   };
 }

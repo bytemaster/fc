@@ -294,7 +294,7 @@ namespace fc {
     void thread::notify( const promise_base::ptr& p ) {
       BOOST_ASSERT(p->ready());
       if( !is_current() ) {
-        this->async( [=](){ notify(p); } );
+        this->async( [=](){ notify(p); }, "notify", priority::max() );
         return;
       }
       // TODO: store a list of blocked contexts with the promise 

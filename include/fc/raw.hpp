@@ -132,7 +132,7 @@ namespace fc {
 
         template<typename T, typename C, T(C::*p)>
         void operator()( const char* name )const {
-          slog( "packing %s", name );
+          //slog( "packing %s", name );
           raw::pack( s, c.*p );
         }
         private:            

@@ -83,13 +83,19 @@ namespace fc {
       wlog( "%s", my->name.c_str() );
 
       // break all promises, thread quit!
-      fc::context* cur  = my->blocked;
-      while( cur ) {
-          fc::context* n = cur->next;
-          // this will move the context into the ready list.
-          //cur->prom->set_exception( boost::copy_exception( error::thread_quit() ) );
-          cur->except_blocking_promises( thread_quit() );
-          cur = n;
+      while( my->blocked ) {
+        fc::context* cur  = my->blocked;
+        while( cur ) {
+            fc::context* n = cur->next;
+            // this will move the context into the ready list.
+            //cur->prom->set_exception( boost::copy_exception( error::thread_quit() ) );
+            cur->except_blocking_promises( thread_quit() );
+            cur = n;
+        }
+        if( my->blocked ) { 
+          wlog( "still blocking... whats up with that?");
+          debug( "on quit" ); 
+        }
       }
       BOOST_ASSERT( my->blocked == 0 );
       //my->blocked = 0;
@@ -102,7 +108,7 @@ namespace fc {
       my->sleep_pqueue.clear();
 
       // move all idle tasks to ready
-      cur = my->pt_head;
+      fc::context* cur = my->pt_head;
       while( cur ) {
         fc::context* n = cur->next;
         cur->next = 0;

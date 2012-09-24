@@ -102,7 +102,6 @@ namespace fc {
     }
     template<typename Stream> inline void unpack( Stream& s, fc::vector<char>& value ) { 
       unsigned_int size; unpack( s, size );
-      slog( "size %d", size.value );
       value.resize(size.value);
       if( value.size() )
         s.read( value.data(), value.size() );
@@ -254,7 +253,6 @@ namespace fc {
       datastream<size_t> ps; 
       raw::pack(ps,v );
       fc::vector<char> vec(ps.tellp());
-      slog( "vec.size %d", vec.size() );
       if( vec.size() ) {
         datastream<char*>  ds( vec.data(), vec.size() ); 
         raw::pack(ds,v);

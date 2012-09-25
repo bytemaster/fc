@@ -56,12 +56,15 @@ namespace fc {
     struct vector_impl {
       public:
           vector_impl():_data(nullptr){}
-          vector_impl( vector_impl&& c):_data(c._data){c._data =nullptr; }
+          vector_impl( vector_impl&& c):_data(c._data){c._data =nullptr; slog( "move size %d",size()); }
           vector_impl( const vector_impl& c):_data(nullptr) {
+            slog( "copy: c.size %d", c.size() );
             if( c.size() ) {
               _data  = detail::data<T>::allocate( c.size() );
+              _data->size = c.size();
               memcpy(begin(),c.begin(),c.size() );
             }
+            slog( "copy: this.size %d", size() );
           }
           vector_impl(uint64_t s):_data(nullptr){
             resize(s);

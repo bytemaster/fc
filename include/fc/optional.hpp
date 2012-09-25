@@ -41,15 +41,15 @@ namespace fc {
           new (&**this) T( fc::forward<U>(u) );
           _valid = true;
         } else {
-          **this = u;
+          **this = fc::forward<U>(u);
         }
         return *this;
       }
 
       optional& operator=( const optional& o ) {
-        if( _valid && o.valid ) { **this = *o; }
+        if( _valid && o._valid ) { **this = *o; }
         else if( !_valid && o._valid ) {
-          *this = **o;
+          *this = *o;
         } // else !_valid && !o._valid == same!
         return *this;
       }
@@ -59,8 +59,8 @@ namespace fc {
       T&       operator*()      { void* v = &_value[0]; return *static_cast<T*>(v); }
       const T& operator*()const { const void* v = &_value[0]; return *static_cast<const T*>(v); }
 
-      T&       operator->()      { void* v = &_value[0]; return *static_cast<T*>(v); }
-      const T& operator->()const { const void* v = &_value[0]; return *static_cast<const T*>(v); }
+      T*       operator->()      { void* v = &_value[0]; return static_cast<T*>(v); }
+      const T* operator->()const { const void* v = &_value[0]; return static_cast<const T*>(v); }
 
     private:
       // force alignment... to 8 byte boundaries 

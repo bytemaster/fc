@@ -37,7 +37,14 @@ namespace fc {
     
       private:
         address  _ip;
-        uint16_t _port;
+        /**
+         *  The compiler pads endpoint to a full 8 bytes, so while
+         *  a port number is limited in range to 16 bits, we specify
+         *  a full 32 bits so that memcmp can be used with sizeof(), 
+         *  otherwise 2 bytes will be 'random' and you do not know 
+         *  where they are stored.
+         */
+        uint32_t _port; 
     };
   }
 }

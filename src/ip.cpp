@@ -30,7 +30,7 @@ namespace fc { namespace ip {
 
 
   endpoint::endpoint()
-  :_port(0){}
+  :_port(0){  }
   endpoint::endpoint(const address& a, uint16_t p)
   :_port(p),_ip(a){}
 

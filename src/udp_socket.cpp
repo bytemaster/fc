@@ -9,6 +9,9 @@ namespace fc {
   class udp_socket::impl {
     public:
       impl():_sock( fc::asio::default_io_service() ){}
+      ~impl(){
+        _sock.cancel();
+      }
 
       boost::asio::ip::udp::socket _sock;
   };

@@ -226,6 +226,7 @@ namespace fc {
    }
 
    void thread::async_task( task_base* t, const priority& p, const time_point& tp, const char* desc ) {
+      assert(my);
       t->_when = tp;
      // slog( "when %lld", t->_when.time_since_epoch().count() );
      // slog( "delay %lld", (tp - fc::time_point::now()).count() );

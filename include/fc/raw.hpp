@@ -5,6 +5,8 @@
 #include <fc/varint.hpp>
 #include <fc/optional.hpp>
 #include <fc/vector.hpp>
+#include <fc/fwd.hpp>
+#include <fc/array.hpp>
 //#include <fc/value.hpp>
 
 namespace fc { 
@@ -38,6 +40,15 @@ namespace fc {
     template<typename Stream, typename T>
     inline void unpack( Stream& s, fc::vector<T>& v );
 
+
+    template<typename Stream, typename T, size_t N> 
+    inline void pack( Stream& s, const fc::array<T,N>& v) {
+      s.write((const char*)&v.data[0],N*sizeof(T));
+    }
+    template<typename Stream, typename T, size_t N> 
+    inline void unpack( Stream& s, fc::array<T,N>& v) {
+      s.read((char*)&v.data[0],N*sizeof(T));
+    }
     template<typename Stream> inline void pack( Stream& s, const signed_int& v ) {
       uint32_t val = (v.value<<1) ^ (v.value>>31);
       do {
@@ -131,7 +142,6 @@ namespace fc {
 
         template<typename T, typename C, T(C::*p)>
         void operator()( const char* name )const {
-          //slog( "packing %s", name );
           raw::pack( s, c.*p );
         }
         private:            

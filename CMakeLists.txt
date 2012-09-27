@@ -71,6 +71,7 @@ set( sources
   src/blowfish.cpp
   src/dh.cpp
   src/udp_socket.cpp
+  src/tcp_socket.cpp
   src/asio.cpp
   src/super_fast_hash.cpp
   src/file_mapping.cpp

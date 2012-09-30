@@ -29,6 +29,7 @@ namespace fc {
           ~encoder();
 
           void write( const char* d, uint32_t dlen );
+          void put( char c ) { write( &c, 1 ); }
           void reset();
           sha1 result();
 

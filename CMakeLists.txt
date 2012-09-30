@@ -68,6 +68,7 @@ set( sources
   src/mutex.cpp
   src/pke.cpp
   src/base64.cpp
+  src/base58.cpp
   src/blowfish.cpp
   src/dh.cpp
   src/udp_socket.cpp

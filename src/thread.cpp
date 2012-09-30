@@ -56,6 +56,7 @@ namespace fc {
 
    thread::~thread() {
      if( is_current() ) {
+      //slog( "my %p", my );
       delete my;
       my = 0;
      }
@@ -299,6 +300,7 @@ namespace fc {
     }
 
     void thread::notify( const promise_base::ptr& p ) {
+      //slog( "this %p  my %p", this, my );
       BOOST_ASSERT(p->ready());
       if( !is_current() ) {
         this->async( [=](){ notify(p); }, "notify", priority::max() );

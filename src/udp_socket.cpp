@@ -10,7 +10,7 @@ namespace fc {
     public:
       impl():_sock( fc::asio::default_io_service() ){}
       ~impl(){
-        _sock.cancel();
+      //  _sock.cancel();
       }
 
       boost::asio::ip::udp::socket _sock;
@@ -77,7 +77,7 @@ namespace fc {
     }
   }
   void   udp_socket::close() {
-    my->_sock.cancel(); 
+    //my->_sock.cancel(); 
     my->_sock.close();
   }
 

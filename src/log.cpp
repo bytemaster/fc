@@ -44,6 +44,7 @@ namespace fc {
     if (isatty(fileno(stderr)))
       fprintf( stderr, "%s", CONSOLE_DEFAULT );
     fprintf( stderr, "\n" );
+    fflush( stderr );
   }
 
   /** used to add extra fields to be printed (thread,fiber,time,etc) */

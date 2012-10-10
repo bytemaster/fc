@@ -16,6 +16,8 @@ namespace fc {
       size_t readsome( char* buffer, size_t max );
       size_t read( char* buffer, size_t s );
 
+      void flush();
+
     private:
       friend class tcp_server;
       class impl;
@@ -24,11 +26,11 @@ namespace fc {
 
   class tcp_server {
     public:
-      tcp_server();
+      tcp_server(uint16_t port=0);
       ~tcp_server();
 
       bool accept( tcp_socket& s );
-      void listen( uint16_t port );
+//      void listen( uint16_t port );
     
     private:
       class impl;

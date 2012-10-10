@@ -233,15 +233,80 @@ namespace fc {
     public:
     impl( fc::string&s )
     :ss( reinterpret_cast<std::string&>(s) )
-    {
-    }
+    { }
+    impl(){}
+    
     std::stringstream ss;
   };
 
   stringstream::stringstream( fc::string& s )
   :my(s) {
   }
+  stringstream::stringstream(){}
   stringstream::~stringstream(){}
+
+  stringstream& operator<<( stringstream& s, const int64_t&   v ){
+    s.my->ss << v;
+    return s;
+  }
+  stringstream& operator<<( stringstream& s, const uint64_t&   v ){
+    s.my->ss << v;
+    return s;
+  }
+  stringstream& operator<<( stringstream& s, const int32_t&    v ){
+    s.my->ss << v;
+    return s;
+  }
+  stringstream& operator<<( stringstream& s, const uint32_t&   v ){
+    s.my->ss << v;
+    return s;
+  }
+  stringstream& operator<<( stringstream& s, const int16_t&    v ){
+    s.my->ss << v;
+    return s;
+  }
+  stringstream& operator<<( stringstream& s, const uint16_t&   v ){
+    s.my->ss << v;
+    return s;
+  }
+  stringstream& operator<<( stringstream& s, const int8_t&     v ){
+    s.my->ss << v;
+    return s;
+  }
+  stringstream& operator<<( stringstream& s, const uint8_t&    v ){
+    s.my->ss << v;
+    return s;
+  }
+  stringstream& operator<<( stringstream& s, const float&      v ){
+    s.my->ss << v;
+    return s;
+  }
+  stringstream& operator<<( stringstream& s, const double&     v ){
+    s.my->ss << v;
+    return s;
+  }
+  stringstream& operator<<( stringstream& s, const bool&      v ){
+    s.my->ss << v;
+    return s;
+  }
+  stringstream& operator<<( stringstream& s, const char&      v ){
+    s.my->ss << v;
+    return s;
+  }
+  stringstream& operator<<( stringstream& s, const char* cs ) {
+    s.my->ss << cs;
+    return s;
+  }
+  stringstream& operator<<( stringstream& s, const fc::string& v ){
+    s.my->ss <<reinterpret_cast<const std::string&>(v); 
+    return s;
+  }
+
+  fc::string stringstream::str(){
+    //std::string st = my->ss.str();
+    return my->ss.str().c_str();//*reinterpret_cast<fc::string*>(&st);
+  }
+
 
   stringstream& operator>>( stringstream& s, int64_t&   v ){
     s.my->ss >> v;

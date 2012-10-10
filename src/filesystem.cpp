@@ -56,11 +56,20 @@ namespace fc {
    fc::path path::filename()const {
     return _p->filename();
    }
+   fc::path path::extension()const {
+    return _p->extension();
+   }
+   fc::path path::stem()const {
+    return _p->stem();
+   }
+   fc::path path::parent_path()const {
+    return _p->parent_path();
+   }
 
 
   bool exists( const path& p ) { return boost::filesystem::exists(p); }
   void create_directories( const path& p ) { boost::filesystem::create_directories(p); }
   bool is_directory( const path& p ) { return boost::filesystem::is_directory(p); }
-  bool is_regular( const path& p ) { return boost::filesystem::is_regular(p); }
+  bool is_regular_file( const path& p ) { return boost::filesystem::is_regular_file(p); }
   uint64_t file_size( const path& p ) { return boost::filesystem::file_size(p); }
 }

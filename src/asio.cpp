@@ -1,5 +1,6 @@
 #include <fc/asio.hpp>
 #include <fc/thread.hpp>
+#include <fc/log.hpp>
 #include <boost/thread.hpp>
 
 namespace fc {

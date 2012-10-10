@@ -88,6 +88,7 @@ namespace fc {
     throw_exception_( func, file, line, msg, to_string(fc::forward<T1>(a1) ), to_string( fc::forward<T2>(a2) ), to_string( fc::forward<T3>(a3) ) );
   }
 
+  fc::string except_str();
 
 } // namespace fc 
 #define FC_THROW(X) throw X

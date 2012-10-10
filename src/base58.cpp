@@ -21,6 +21,7 @@
 #include <algorithm>
 #include <string.h>
 
+#include <fc/log.hpp>
 #include <fc/string.hpp>
 #include <fc/exception.hpp>
 
@@ -534,6 +535,7 @@ inline std::string EncodeBase58(const unsigned char* pbegin, const unsigned char
 
     // Convert little endian std::string to big endian
     reverse(str.begin(), str.end());
+//    slog( "Encode '%s'", str.c_str() );
     return str;
 }
 
@@ -563,8 +565,10 @@ inline bool DecodeBase58(const char* psz, std::vector<unsigned char>& vchRet)
         {
             while (isspace(*p))
                 p++;
-            if (*p != '\0')
+            if (*p != '\0') {
+                slog( "%s  '%c'", pszBase58,*p );
                 return false;
+            }
             break;
         }
         bnChar.setulong(p1 - pszBase58);
@@ -609,6 +613,7 @@ fc::string to_base58( const char* d, uint32_t s ) {
  *  @return the number of bytes decoded
  */
 size_t from_base58( const fc::string& base58_str, char* out_data, size_t out_data_len ) {
+  //slog( "%s", base58_str.c_str() );
   std::vector<unsigned char> out;
   if( !DecodeBase58( base58_str.c_str(), out ) ) {
     FC_THROW_MSG( "Unable to decode base58 string '%s'", base58_str );

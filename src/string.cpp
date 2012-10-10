@@ -64,6 +64,10 @@ namespace fc  {
   void       string::clear()                { return reinterpret_cast<std::string*>(this)->clear(); }
   void       string::resize( uint64_t s )   { reinterpret_cast<std::string*>(this)->resize(s); }
                                             
+
+  fc::string string::substr( int32_t start, int32_t len ) {
+    return reinterpret_cast<const std::string&>(*this).substr(start,len).c_str();
+  }
   const char* string::c_str()const          { return reinterpret_cast<const std::string*>(this)->c_str(); }
 
   bool    string::operator == ( const char* s )const {

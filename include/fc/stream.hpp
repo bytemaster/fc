@@ -196,6 +196,7 @@ namespace fc {
       friend stringstream& operator<<( stringstream&, const bool&       );
       friend stringstream& operator<<( stringstream&, const char&       );
       friend stringstream& operator<<( stringstream&, const fc::string& );
+      friend stringstream& operator<<( stringstream&, const char* );
     private:
       class impl;
       fwd<impl,368> my;

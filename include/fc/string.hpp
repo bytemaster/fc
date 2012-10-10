@@ -2,6 +2,25 @@
 #define _FC_STRING_HPP_
 #include <stdint.h>
 
+
+/**
+ *  There is debate about whether doing this is 'standard conforming', but 
+ *  it works everywhere and enables the purpose of this library which is to 
+ *  accelerate compiles while maintaining compatability.
+ */
+namespace std {
+  template<class Char>
+  struct char_traits;
+
+  template<class T>
+  struct allocator;
+
+  template<class Char, class Traits, class Allocator>
+  struct basic_string;
+
+  typedef basic_string<char, char_traits<char>, allocator<char> > string;
+}
+
 namespace fc {
   /**
    *  Including <string> results in 4000 lines of code
@@ -17,12 +36,17 @@ namespace fc {
       typedef const char* const_iterator;
 
       string();
+      string( const std::string& s );
+      string( std::string&& s );
       string( const string& c );
       string( string&& c );
       string( const char* c );
       string( const char* c, int s );
       string( const_iterator b, const_iterator e );
       ~string();
+
+      operator std::string&();
+      operator const std::string&()const;
 
       iterator begin();
       iterator end();

@@ -44,7 +44,21 @@ namespace fc  {
     static_assert( sizeof(my) >= sizeof(std::string), "failed to reserve enough space" );
     new (this) std::string(b,e);
   }
+  string::string( const std::string& s ) {
+    static_assert( sizeof(my) >= sizeof(std::string), "failed to reserve enough space" );
+    new (this) std::string(s);
+  }
+  string::string( std::string&& s ) {
+    static_assert( sizeof(my) >= sizeof(std::string), "failed to reserve enough space" );
+    new (this) std::string(fc::move(s));
+  }
 
+  string::operator std::string&() {
+     return *reinterpret_cast<std::string*>(this);
+  }
+  string::operator const std::string&()const {
+     return *reinterpret_cast<const std::string*>(this);
+  }
 
   string::~string() {
     ::detail::destroy( this );

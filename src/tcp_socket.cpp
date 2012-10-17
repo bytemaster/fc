@@ -3,6 +3,7 @@
 #include <fc/fwd_impl.hpp>
 #include <fc/log.hpp>
 #include <fc/asio.hpp>
+#include <fc/ip.hpp>
 
 namespace fc {
 
@@ -10,7 +11,7 @@ namespace fc {
     public:
       impl():_sock( fc::asio::default_io_service() ){}
       ~impl(){
-        _sock.close();
+        if( _sock.is_open() ) _sock.close();
       }
 
       boost::asio::ip::tcp::socket _sock;
@@ -68,17 +69,22 @@ namespace fc {
     }
     return r;
   }
+  void tcp_socket::connect_to( const fc::ip::endpoint& e ) {
+    fc::asio::tcp::connect(my->_sock, fc::asio::tcp::endpoint( boost::asio::ip::address_v4(e.get_address()), e.port() ) ); 
+  }
 
   class tcp_server::impl {
     public:
       impl(uint16_t port):_accept( fc::asio::default_io_service(), boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), port) ){}
       ~impl(){
-        _accept.cancel();
+        _accept.close();
       }
 
       boost::asio::ip::tcp::acceptor _accept;
   };
-
+  void tcp_server::close() {
+    if( my->_accept.is_open() ) my->_accept.close();
+  }
   tcp_server::tcp_server(uint16_t port)
   :my(port) {
   }
@@ -87,16 +93,11 @@ namespace fc {
 
 
   bool tcp_server::accept( tcp_socket& s ) {
-    slog( "accept!" );
     fc::promise<boost::system::error_code>::ptr p( new promise<boost::system::error_code>("mace::cmt::asio::tcp::accept") );
-    slog( "." );
     my->_accept.async_accept( s.my->_sock, [=]( const boost::system::error_code& e ) {
-                  slog( "\aaccept!" );
                   p->set_value(e);
               } );
-    slog( "." );
     auto ec = p->wait();
-    slog( "." );
     if( !ec ) s.my->_sock.non_blocking(true);
     if( ec ) BOOST_THROW_EXCEPTION( boost::system::system_error(ec) );
     return true;

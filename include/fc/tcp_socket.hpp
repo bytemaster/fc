@@ -29,6 +29,7 @@ namespace fc {
       tcp_server(uint16_t port=0);
       ~tcp_server();
 
+      void close();
       bool accept( tcp_socket& s );
 //      void listen( uint16_t port );
     

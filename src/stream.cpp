@@ -5,6 +5,7 @@
 #include <fstream>
 #include <sstream>
 #include <fc/fwd_impl.hpp>
+#include <fc/log.hpp>
 
 namespace fc {
   namespace detail {
@@ -21,6 +22,7 @@ namespace fc {
 
         std::streamsize read( char* s, std::streamsize n ) {
           int r =  std::cin.readsome(s,n);
+          slog( "%d", r );
           if( std::cin && r <= 0 ) {
             std::cin.read( s, 1 );
             if( std::cin.eof() ) return -1;
@@ -362,6 +364,16 @@ namespace fc {
   }
 
   bool getline( istream& in, fc::string& f ) {
+    std::stringstream ss;
+    char c;
+    while( in.readsome( &c, sizeof(c) ) > 0  ) {
+      slog( "%c", c );
+      if( c != '\n' ) ss << c;
+      else {
+        f = ss.str();
+        return true;
+      }
+    }
     return false;
   }
 

@@ -1,6 +1,7 @@
 #ifndef _FC_TIME_HPP_
 #define _FC_TIME_HPP_
 #include <stdint.h>
+#include <fc/string.hpp>
 
 namespace fc {
   class microseconds { 
@@ -26,6 +27,8 @@ namespace fc {
         static time_point now();
         static time_point max() { return time_point( microseconds::max() ); }
         static time_point min() { return time_point();                      }
+        operator fc::string()const;
+
         const microseconds& time_since_epoch()const { return elapsed; }
         bool   operator > ( const time_point& t )const                              { return elapsed._count > t.elapsed._count; }
         bool   operator < ( const time_point& t )const                              { return elapsed._count < t.elapsed._count; }

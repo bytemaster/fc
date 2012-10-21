@@ -10,6 +10,7 @@ namespace fc {
       virtual ~istream(){};
 
       virtual size_t readsome( char* buf, size_t len ) = 0;
+      virtual istream& read( char* buf, size_t len ) = 0;
 
       template<typename T>
       friend istream& operator>>( istream& i, T& v ){ return i.read(v); }
@@ -36,22 +37,25 @@ namespace fc {
     public:
       virtual ~ostream(){};
 
-      virtual size_t write( const char* buf, size_t len ) = 0;
+      virtual ostream& write( const char* buf, size_t len ) = 0;
       virtual void   close() = 0;
       virtual void   flush() = 0;
 
       template<typename T>
-      friend ostream& operator<<( ostream& o, const T& v ){ return o.write(fc::lexical_cast<fc::string>(v)); }
+      friend ostream& operator<<( ostream& o, const T& v )         { return o.write(fc::lexical_cast<fc::string>(v)); }
+      friend ostream& operator<<( ostream& o, char* v )            { return o.write(v); }
+      friend ostream& operator<<( ostream& o, const char* v )      { return o.write(v); }
+      friend ostream& operator<<( ostream& o, const fc::string& v ){ return o.write(v); }
 
     protected:
       virtual ostream& write( const fc::string& ) = 0;
   };
   class iostream : public virtual ostream, public virtual istream {};
 
-  bool getline( fc::istream&, fc::string&, char delim = '\n' );
+  fc::istream& getline( fc::istream&, fc::string&, char delim = '\n' );
 
   struct cout_t : virtual public ostream { 
-      virtual size_t write( const char* buf, size_t len );
+      virtual ostream& write( const char* buf, size_t len );
       virtual void   close();
       virtual void   flush();
 
@@ -59,7 +63,7 @@ namespace fc {
   };
 
   struct cerr_t : virtual public ostream { 
-      virtual size_t write( const char* buf, size_t len );
+      virtual ostream& write( const char* buf, size_t len );
       virtual void   close();
       virtual void   flush();
 
@@ -68,6 +72,7 @@ namespace fc {
 
   struct cin_t : virtual public istream { 
       virtual size_t readsome( char* buf, size_t len );
+      virtual istream& read( char* buf, size_t len );
       virtual bool eof()const;
 
       virtual istream& read( int64_t&    );
@@ -90,4 +95,3 @@ namespace fc {
   extern cerr_t cerr;
   extern cin_t  cin;
 }
-

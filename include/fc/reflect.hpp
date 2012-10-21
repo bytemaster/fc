@@ -1,198 +1,198 @@
+
+/**
+ * @file fc/reflect.hpp
+ *
+ * @brief Defines types and macros used to provide reflection.
+ *
+ */
 #ifndef _FC_REFLECT_HPP_
 #define _FC_REFLECT_HPP_
+
+#include <fc/utility.hpp>
+#include <boost/static_assert.hpp>
+//#include <boost/preprocessor/seq/for_each_i.hpp>
+#include <boost/preprocessor/seq/for_each.hpp>
+#include <boost/preprocessor/seq/enum.hpp>
+#include <boost/preprocessor/seq/seq.hpp>
+#include <boost/preprocessor/stringize.hpp>
+//#include <boost/preprocessor/tuple/elem.hpp>
+//#include <boost/preprocessor/facilities/empty.hpp>
 #include <stdint.h>
-#include <fc/abstract_types.hpp>
-#include <fc/fwd.hpp>
-#include <fc/reflect_fwd.hpp>
+
+
+//#include <mace/void.hpp>
+//#include <mace/reflect/typeinfo.hpp>
 
 namespace fc { 
 
-  class string;
+/**
+ *  @brief defines visit functions for T
+ *  Unless this is specialized, visit() will not be defined for T.
+ *
+ *  @tparam T - the type that will be visited.
+ *
+ *  The @ref FC_REFLECT(TYPE,MEMBERS) or FC_STATIC_REFLECT_DERIVED(TYPE,BASES,MEMBERS) macro is used to specialize this
+ *  class for your type.
+ */
+template<typename T>
+struct reflector{
+    typedef T type;
+    typedef fc::false_type is_defined;
+    typedef fc::false_type is_enum; 
 
-  class abstract_visitor;
-  class abstract_const_visitor;
-  class abstract_reflector;
+    /**
+     *  @tparam Visitor a function object of the form:
+     *    
+     *    @code
+     *     struct functor {  
+     *        template<typename MemberPtr, MemberPtr m>
+     *        void operator()( const char* name )const;
+     *     };
+     *    @endcode
+     *
+     *  If T is an enum then the functor has the following form:
+     *    @code
+     *     struct functor {  
+     *        template<int Value>
+     *        void operator()( const char* name )const;
+     *     };
+     *    @endcode
+     *  
+     *  @param v a functor that will be called for each member on T
+     *
+     *  @note - this method is not defined for non-reflected types.
+     */
+    #ifdef DOXYGEN
+    template<typename Visitor>
+    static inline void visit( const Visitor& v ); 
+    #endif // DOXYGEN
+};
 
-  // provides reference semantics
-  class ref {
-    public:
-      template<typename T>
-      ref( T& v );
-      
-      ref( const ref& v )
-      :_obj(v._obj),_reflector(v._reflector){}
-
-      ref( void* o, abstract_reflector& r )
-      :_obj(o),_reflector(r){}
-      
-      void* _obj;
-      abstract_reflector& _reflector;
-
-    private: 
-      ref& operator=(const ref& o);
-  };
-
-  class cref {
-    public:
-      template<typename T>
-      cref( const T& v );
-      
-      cref( const cref& v )
-      :_obj(v._obj),_reflector(v._reflector){}
-      
-      cref( const ref& v )
-      :_obj(v._obj),_reflector(v._reflector){}
-
-      cref( const void* o, abstract_reflector& r )
-      :_obj(o),_reflector(r){}
-      
-      const void* _obj;
-      abstract_reflector& _reflector;
-
-    private: 
-      cref& operator=(const cref& o);
-  };
-
-
-  class abstract_reflector : virtual public abstract_value_type {
-    public:
-     virtual ~abstract_reflector(){}
-     virtual const char* name()const = 0;
-     virtual void        visit( void* s,       const abstract_visitor& v )const = 0; 
-     virtual void        visit( const void* s, const abstract_const_visitor& v )const = 0; 
-     virtual ref         get_member(void*, uint64_t) = 0;
-     virtual cref        get_member(const void*, uint64_t) = 0;
-     virtual ref         get_member(void*, const char*) = 0;
-     virtual cref        get_member(const void*, const char*) = 0;
-     virtual size_t      member_count(const void*) = 0;
-
-  };
-  
-  class abstract_visitor {
-    public:
-      virtual ~abstract_visitor(){}
-      virtual void visit()const=0;
-      virtual void visit( char& c )const=0;
-      virtual void visit( uint8_t& c )const=0;
-      virtual void visit( uint16_t& c )const=0;
-      virtual void visit( uint32_t& c )const=0;
-      virtual void visit( uint64_t& c )const=0;
-      virtual void visit( int8_t& c )const=0;
-      virtual void visit( int16_t& c )const=0;
-      virtual void visit( int32_t& c )const=0;
-      virtual void visit( int64_t& c )const=0;
-      virtual void visit( double& c )const=0;
-      virtual void visit( float& c )const=0;
-      virtual void visit( bool& c )const=0;
-      virtual void visit( fc::string& c )const=0;
-      virtual void visit( const char* member, int idx, int size, const ref& v)const=0;
-      virtual void visit( int idx, int size, const ref& v)const=0;
-      virtual void array_size( int size )const=0;
-      virtual void object_size( int size )const=0;
-  };
-
-  class abstract_const_visitor {
-    public:
-      virtual ~abstract_const_visitor(){}
-      virtual void visit()const=0;
-      virtual void visit( const char& c )const=0;
-      virtual void visit( const uint8_t& c )const=0;
-      virtual void visit( const uint16_t& c )const=0;
-      virtual void visit( const uint32_t& c )const=0;
-      virtual void visit( const uint64_t& c )const=0;
-      virtual void visit( const int8_t& c )const=0;
-      virtual void visit( const int16_t& c )const=0;
-      virtual void visit( const int32_t& c )const=0;
-      virtual void visit( const int64_t& c )const=0;
-      virtual void visit( const double& c )const=0;
-      virtual void visit( const float& c )const=0;
-      virtual void visit( const bool& c )const=0;
-      virtual void visit( const fc::string& c )const=0;
-      virtual void visit( const char* member, int idx, int size, const cref& v)const=0;
-      virtual void visit( int idx, int size, const cref& v)const=0;
-      virtual void array_size( int size )const=0;
-      virtual void object_size( int size )const=0;
-  };
-
-  namespace detail {
-      template<typename T, typename Derived>
-      class reflector_impl : virtual public value_type<T>, virtual public abstract_reflector {
-         virtual ref         get_member(void*, uint64_t) {
-          int x = 0;
-          return x;
-         }
-         virtual cref        get_member(const void*, uint64_t) {
-          int x = 0;
-          return x;
-         }
-         // throw if field is not found
-         virtual ref         get_member(void*, const char*) {
-          int x = 0;
-          return x;
-            // init static hash map the first time it is called...
-            // lookup field in hash map, return ref
-            //return ref();
-         }
-         // throw if field is not found
-         virtual cref        get_member(const void*, const char*) {
-          int x = 0;
-          return x;
-            // init static hash map the first time it is called...
-            // lookup field in hash map, return ref
-            //return cref();
-         }
-         // throw if field is not found
-         virtual size_t      member_count(const void*) {
-            // init static hash map the first time it is called...
-            // lookup field in hash map, return ref
-            return 0;
-         }
-      };
-  }
+ } // namespace fc
 
 
-  template<typename T> class get_typename{};
-  template<> struct get_typename<int32_t>  { static const char* name()  { return "int32_t";  } };
-  template<> struct get_typename<int64_t>  { static const char* name()  { return "int64_t";  } };
-  template<> struct get_typename<int16_t>  { static const char* name()  { return "int16_t";  } };
-  template<> struct get_typename<int8_t>   { static const char* name()  { return "int8_t";   } };
-  template<> struct get_typename<uint32_t> { static const char* name()  { return "uint32_t"; } };
-  template<> struct get_typename<uint64_t> { static const char* name()  { return "uint64_t"; } };
-  template<> struct get_typename<uint16_t> { static const char* name()  { return "uint16_t"; } };
-  template<> struct get_typename<uint8_t>  { static const char* name()  { return "uint8_t";  } };
-  template<> struct get_typename<double>   { static const char* name()  { return "double";   } };
-  template<> struct get_typename<float>    { static const char* name()  { return "float";    } };
-  template<> struct get_typename<bool>     { static const char* name()  { return "bool";     } };
-  template<> struct get_typename<char>     { static const char* name()  { return "char";     } };
-  template<> struct get_typename<string>   { static const char* name()  { return "string";   } };
+#ifndef DOXYGEN
 
-  template<typename T>
-  class reflector : public detail::reflector_impl<T, reflector<T> >{
-    public:
-      enum _is_defined { is_defined = 0 };
-      virtual const char* name()const { return get_typename<T>::name(); }
-      virtual void visit( void* s, const abstract_visitor& v )const {
-         v.visit( *((T*)s) );
-      }
-      virtual void visit( const void* s, const abstract_const_visitor& v )const {
-         v.visit( *((const T*)s) );
-      }
-
-      static reflector& instance() { static reflector<T> inst; return inst; }
-  };
-
-  template<typename T> reflector<T>& reflect( const T& ) { return reflector<T>::instance(); }
-
-  template<typename T>
-  ref::ref( T& v ) :_obj(&v),_reflector(reflector<T>::instance()){}
-
-  template<typename T>
-  cref::cref( const T& v ) :_obj(&v),_reflector(reflector<T>::instance()){}
-
-  template<typename T,unsigned int S>
-  class reflector<fwd<T,S>>;
-
-} // namespace fc
+#define FC_REFLECT_VISIT_BASE(r, visitor, base) \
+  fc::reflector<base>::visit( visitor );
 
 
-#endif // _REFLECT_HPP_
+#ifndef WIN32
+  #define TEMPLATE template
+#else
+  #define TEMPLATE
+#endif
+//#include <boost/typeof/typeof.hpp>
+#define FC_REFLECT_VISIT_MEMBER( r, visitor, elem ) \
+  visitor.TEMPLATE operator()<decltype(((type*)0)->elem), type, &type::elem>( BOOST_PP_STRINGIZE(elem) );
+
+
+#define FC_REFLECT_BASE_MEMBER_COUNT( r, OP, elem ) \
+  OP fc::reflector<elem>::member_count
+
+#define FC_REFLECT_DERIVED_IMPL_INLINE( TYPE, INHERITS, MEMBERS ) \
+template<typename Visitor>\
+static inline void visit( const Visitor& v ) { \
+    BOOST_PP_SEQ_FOR_EACH( FC_REFLECT_VISIT_BASE, v, INHERITS ) \
+    BOOST_PP_SEQ_FOR_EACH( FC_REFLECT_VISIT_MEMBER, v, MEMBERS ) \
+} 
+
+#define FC_REFLECT_DERIVED_IMPL_EXT( TYPE, INHERITS, MEMBERS ) \
+template<typename Visitor>\
+void fc::reflector<TYPE>::visit( const Visitor& v ) { \
+    BOOST_PP_SEQ_FOR_EACH( FC_REFLECT_VISIT_BASE, v, INHERITS ) \
+    BOOST_PP_SEQ_FOR_EACH( FC_REFLECT_VISIT_MEMBER, v, MEMBERS ) \
+} 
+
+#endif // DOXYGEN
+
+
+#define FC_REFLECT_VISIT_ENUM( r, visitor, elem ) \
+  visitor.TEMPLATE operator()<elem>(BOOST_PP_STRINGIZE(elem));
+#define FC_REFLECT_ENUM_TO_STRING( r, visitor, elem ) \
+  case elem: return BOOST_PP_STRINGIZE(elem);
+
+#define FC_REFLECT_ENUM_FROM_STRING( r, visitor, elem ) \
+  if( strcmp( s, BOOST_PP_STRINGIZE(elem)  ) == 0 ) return elem;
+
+#define FC_REFLECT_ENUM( ENUM, FIELDS ) \
+namespace fc { \
+template<> struct reflector<ENUM> { \
+    typedef fc::true_type is_defined; \
+    typedef fc::true_type is_enum; \
+    template<typename Visitor> \
+    static inline void visit( const Visitor& v ) { \
+        BOOST_PP_SEQ_FOR_EACH( FC_REFLECT_VISIT_ENUM, v, FIELDS ) \
+    }\
+    static const char* to_string(int64_t i) { \
+      switch( ENUM(i) ) { \
+        BOOST_PP_SEQ_FOR_EACH( FC_REFLECT_ENUM_TO_STRING, v, FIELDS ) \
+        default: \
+        FC_REFLECT_THROW( fc::reflect::unknown_field(), "%1% not in enum '%2%'", %i %BOOST_PP_STRINGIZE(ENUM) ); \
+      }\
+    } \
+    static ENUM from_string( const char* s ) { \
+        BOOST_PP_SEQ_FOR_EACH( FC_REFLECT_ENUM_FROM_STRING, v, FIELDS ) \
+        FC_REFLECT_THROW( fc::reflect::unknown_field(), "%1% in enum %2%", %s %BOOST_PP_STRINGIZE(ENUM) ); \
+    } \
+};  \
+} }
+
+
+
+/**
+ *  @def FC_REFLECT_DERIVED(TYPE,INHERITS,MEMBERS)
+ *
+ *  @brief Specializes fc::reflector for TYPE where 
+ *         type inherits other reflected classes
+ *
+ *  @param INHERITS - a sequence of base class names (basea)(baseb)(basec)
+ *  @param MEMBERS - a sequence of member names.  (field1)(field2)(field3)
+ */
+#define FC_REFLECT_DERIVED( TYPE, INHERITS, MEMBERS ) \
+namespace fc {  \
+template<> struct reflector<TYPE> {\
+    typedef TYPE type; \
+    typedef fc::true_type  is_defined; \
+    typedef fc::false_type is_enum; \
+    enum  member_count_enum {  \
+      local_member_count = BOOST_PP_SEQ_SIZE(MEMBERS), \
+      total_member_count = local_member_count BOOST_PP_SEQ_FOR_EACH( FC_REFLECT_BASE_MEMBER_COUNT, +, INHERITS )\
+    }; \
+    FC_REFLECT_DERIVED_IMPL_INLINE( TYPE, INHERITS, MEMBERS ) \
+}; } 
+
+
+/**
+ *  @def FC_REFLECT(TYPE,MEMBERS)
+ *  @brief Specializes fc::reflector for TYPE
+ *
+ *  @param MEMBERS - a sequence of member names.  (field1)(field2)(field3)
+ *
+ *  @see FC_REFLECT_DERIVED
+ */
+#define FC_REFLECT( TYPE, MEMBERS ) \
+    FC_REFLECT_DERIVED( TYPE, BOOST_PP_SEQ_NIL, MEMBERS )
+
+#define FC_REFLECT_FWD( TYPE ) \
+namespace fc { \
+template<> struct reflector<TYPE> {\
+    typedef TYPE type; \
+    typedef fc::true_type is_defined; \
+    enum  member_count_enum {  \
+      local_member_count = BOOST_PP_SEQ_SIZE(MEMBERS), \
+      total_member_count = local_member_count BOOST_PP_SEQ_FOR_EACH( FC_REFLECT_BASE_MEMBER_COUNT, +, INHERITS )\
+    }; \
+    template<typename Visitor> static void visit( const Visitor& v ); \
+}; }
+
+
+#define FC_REFLECT_DERIVED_IMPL( TYPE, MEMBERS ) \
+    FC_REFLECT_IMPL_DERIVED_EXT( TYPE, BOOST_PP_SEQ_NIL, MEMBERS )
+
+#define FC_REFLECT_IMPL( TYPE, MEMBERS ) \
+    FC_REFLECT_DERIVED_IMPL_EXT( TYPE, BOOST_PP_SEQ_NIL, MEMBERS )
+
+
+
+#endif

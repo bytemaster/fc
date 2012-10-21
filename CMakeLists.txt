@@ -45,7 +45,8 @@ include_directories( ${Boost_INCLUDE_DIR} )
 include_directories( include )
 
 set( sources 
-  src/json_rpc_connection.cpp
+  src/value.cpp
+  src/lexical_cast.cpp
   src/spin_lock.cpp 
   src/spin_yield_lock.cpp 
   src/task.cpp 
@@ -55,13 +56,12 @@ set( sources
   src/json.cpp 
   src/log.cpp 
   src/time.cpp 
-  src/stream.cpp
+  src/iostream.cpp
+  src/sstream.cpp
   src/exception.cpp
   src/thread.cpp
-  src/value.cpp
   src/hex.cpp
   src/sha1.cpp
-  src/value_cast.cpp
   src/filesystem.cpp
   src/ip.cpp
   src/bigint.cpp
@@ -76,7 +76,7 @@ set( sources
   src/asio.cpp
   src/super_fast_hash.cpp
   src/file_mapping.cpp
-  src/program_options.cpp
+#  src/program_options.cpp
 )
 setup_library( fc SOURCES ${sources} )
 

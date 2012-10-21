@@ -1,5 +1,5 @@
-#include <fc/sha1.hpp>
 #include <fc/hex.hpp>
+#include <fc/sha1.hpp>
 #include <fc/fwd_impl.hpp>
 #include <openssl/sha.h>
 #include <string.h>
@@ -8,7 +8,7 @@ namespace fc {
   
   sha1::sha1() { memset( _hash, 0, sizeof(_hash) ); }
   sha1::sha1( const fc::string& hex_str ) {
-    from_hex( hex_str, (char*)_hash, sizeof(_hash) );  
+    fc::from_hex( hex_str, (char*)_hash, sizeof(_hash) );  
   }
 
   fc::string sha1::str()const {
@@ -85,12 +85,3 @@ namespace fc {
   
 } // namespace fc
 
-namespace fc {
-   const char* reflector<sha1>::name()const {  return "sha1"; }
-   void reflector<sha1>::visit( void* s, const abstract_visitor& v )const {
-   }
-   void reflector<sha1>::visit( const void* s, const abstract_const_visitor& v )const {
-      v.visit( fc::string( *((const sha1*)s)) ); 
-   }
-   reflector<sha1>& reflector<sha1>::instance() { static reflector<sha1> inst; return inst; }
-} // namespace fc 

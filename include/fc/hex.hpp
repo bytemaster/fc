@@ -1,5 +1,4 @@
-#ifndef _FC_HEX_HPP_
-#define _FC_HEX_HPP_
+#pragma once
 #include <fc/string.hpp>
 #include <fc/utility.hpp>
 
@@ -11,6 +10,4 @@ namespace fc {
      *  @return the number of bytes decoded
      */
     size_t from_hex( const fc::string& hex_str, char* out_data, size_t out_data_len );
-
 } 
-#endif // _FC_HEX_HPP_

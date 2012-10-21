@@ -1,6 +1,6 @@
 #ifndef _TORNET_RPC_RAW_HPP_
 #define _TORNET_RPC_RAW_HPP_
-#include <fc/static_reflect.hpp>
+#include <fc/reflect.hpp>
 #include <fc/datastream.hpp>
 #include <fc/varint.hpp>
 #include <fc/optional.hpp>
@@ -161,22 +161,6 @@ namespace fc {
         private:            
           Class&  c;
           Stream& s;
-      };
-
-      template<typename Stream>
-      struct pack_sequence {
-         pack_sequence( Stream& _s ):s(_s){}
-         template<typename T>
-         void operator() ( const T& v )const { raw::pack(s,v); }
-         Stream&    s;
-      };
-
-      template<typename Stream>
-      struct unpack_sequence {
-         unpack_sequence( Stream& _s ):s(_s){}
-         template<typename T>
-         void operator() ( T& v )const { raw::unpack(s,v); }
-         Stream&  s;
       };
 
       template<typename IsClass=fc::true_type>

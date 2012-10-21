@@ -55,6 +55,8 @@ namespace fc {
     template<typename T, typename IsClass=fc::false_type>
     struct vector_impl {
       public:
+          typedef T*       iterator;
+          typedef const T* const_iterator;
           vector_impl():_data(nullptr){}
           vector_impl( vector_impl&& c):_data(c._data){c._data =nullptr; }
           vector_impl( const vector_impl& c):_data(nullptr) {
@@ -66,14 +68,16 @@ namespace fc {
             }
             //slog( "copy: this.size %d", size() );
           }
+          vector_impl(const_iterator b, const_iterator e ):_data(nullptr) {
+            resize(e-b);
+            if( size() ) memcpy( data(), b, size() );
+          }
           vector_impl(uint64_t s):_data(nullptr){
             resize(s);
           }
           ~vector_impl() {
             clear();
           }
-          typedef T*       iterator;
-          typedef const T* const_iterator;
 
 
           uint64_t size()const     { return _data ? _data->size : 0;     }
@@ -180,6 +184,8 @@ namespace fc {
     template<typename T>
     class vector_impl<T,fc::true_type>  {
       public: 
+          typedef T*       iterator;
+          typedef const T* const_iterator;
           vector_impl():_data(nullptr){}
           vector_impl( vector_impl&& c):_data(c._data){c._data =nullptr; }
           vector_impl( const vector_impl& c):_data(nullptr) {
@@ -196,6 +202,13 @@ namespace fc {
               }
             }
           }
+          vector_impl(const_iterator b, const_iterator e ):_data(nullptr) {
+            resize(e-b);
+            for( auto i = begin(); i != end(); ++i ) {
+              *i = *b;
+              ++b;
+            }
+          }
 
           vector_impl(uint64_t s):_data(nullptr){
             resize(s);
@@ -203,8 +216,6 @@ namespace fc {
           ~vector_impl() {
             clear();
           }
-          typedef T*       iterator;
-          typedef const T* const_iterator;
 
 
           uint64_t size()const     { return _data ? _data->size : 0;     }
@@ -352,6 +363,8 @@ namespace fc {
       vector( uint64_t s ):detail::vector_impl<T, typename fc::is_class<T>::type>(s){}
       vector( const vector& v ):detail::vector_impl<T, typename fc::is_class<T>::type>(v){}
       vector( vector&& v ):detail::vector_impl<T, typename fc::is_class<T>::type>(fc::move(v)){}
+
+      vector( const T* b, const T* e ):detail::vector_impl<T, typename fc::is_class<T>::type>(b,e){}
 
       vector& operator=( vector&& v ) {
          *((base*)this) = fc::move(v);

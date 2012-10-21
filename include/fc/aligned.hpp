@@ -8,6 +8,8 @@ namespace fc {
       T    _align;
       char _data[S];
     } _store;
+    operator char*()            { return _store._data; }
+    operator const char*()const { return _store._data; }
   };
 
 }

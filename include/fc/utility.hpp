@@ -31,7 +31,7 @@ namespace fc {
   }
 
   template<typename T>
-  struct is_class { typedef decltype(detail::is_class_helper<T>(0)) type; };
+  struct is_class { typedef decltype(detail::is_class_helper<T>(0)) type; enum value_enum { value = type::value }; };
 
   template<typename T>
   const T& min( const T& a, const T& b ) { return a < b ? a: b; }

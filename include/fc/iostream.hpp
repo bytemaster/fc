@@ -52,7 +52,6 @@ namespace fc {
   };
   class iostream : public virtual ostream, public virtual istream {};
 
-  fc::istream& getline( fc::istream&, fc::string&, char delim = '\n' );
 
   struct cout_t : virtual public ostream { 
       virtual ostream& write( const char* buf, size_t len );
@@ -89,6 +88,8 @@ namespace fc {
       virtual istream& read( char&       );
       virtual istream& read( fc::string& );
   };
+  fc::istream& getline( fc::istream&, fc::string&, char delim = '\n' );
+  fc::cin_t&   getline( fc::cin_t&, fc::string&, char delim = '\n' );
 
 
   extern cout_t cout;

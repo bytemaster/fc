@@ -8,23 +8,36 @@
 namespace fc {
   fc::thread& cin_thread() { static fc::thread i("cin"); return i; }
 
-  fc::istream& getline( fc::istream& i, fc::string& s, char delim  ) {
+  fc::cin_t& getline( fc::cin_t& i, fc::string& s, char delim  ) {
+    if( !cin_thread().is_current() ) {
+      cin_thread().async([&](){ getline(i,s,delim); } ).wait();
+      return i;
+    }
     fc::stringstream ss; 
     char c;
-    if( i.readsome( &c, 1 ) != 1 ) {
-      cin_thread().async([&](){ i.read(&c,1); } ).wait();
-    }
+    i.read( &c, 1 );
     while( !i.eof() ) {
       if( c == delim ) { s = ss.str();  return i; }
       ss.write(&c,1);
-
-      if( i.readsome( &c, 1 ) != 1 ) {
-        cin_thread().async([&](){ i.read(&c,1); } ).wait();
-      }
+      i.read( &c, 1 );
     }
     s = ss.str();
     return i;
   }
+
+  fc::istream& getline( fc::istream& i, fc::string& s, char delim  ) {
+    fc::stringstream ss; 
+    char c;
+    i.read( &c, 1 );
+    while( !i.eof() ) {
+      if( c == delim ) { s = ss.str();  return i; }
+      ss.write(&c,1);
+      i.read( &c, 1 );
+    }
+    s = ss.str();
+    return i;
+  }
+
 
   ostream& cout_t::write( const char* buf, size_t len ) { std::cout.write(buf,len); return *this; }
   void   cout_t::close() {}
@@ -42,24 +55,28 @@ namespace fc {
     return std::cin.readsome(buf,len);
   }
   istream& cin_t::read( char* buf, size_t len ) {
+    if( !cin_thread().is_current() ) { 
+      cin_thread().async( [=](){ this->read(buf,len); } ).wait();
+      return *this;
+    }
     std::cin.read(buf,len);
     return *this;
   }
   bool cin_t::eof()const { return std::cin.eof(); }
 
-  istream& cin_t::read( int64_t&     v) { std::cin >> v; return *this; }
-  istream& cin_t::read( uint64_t&    v) { std::cin >> v; return *this; }
-  istream& cin_t::read( int32_t&     v) { std::cin >> v; return *this; }
-  istream& cin_t::read( uint32_t&    v) { std::cin >> v; return *this; }
-  istream& cin_t::read( int16_t&     v) { std::cin >> v; return *this; }
-  istream& cin_t::read( uint16_t&    v) { std::cin >> v; return *this; }
-  istream& cin_t::read( int8_t&      v) { std::cin >> v; return *this; }
-  istream& cin_t::read( uint8_t&     v) { std::cin >> v; return *this; }
-  istream& cin_t::read( float&       v) { std::cin >> v; return *this; }
-  istream& cin_t::read( double&      v) { std::cin >> v; return *this; }
-  istream& cin_t::read( bool&        v) { std::cin >> v; return *this; }
-  istream& cin_t::read( char&        v) { std::cin >> v; return *this; }
-  istream& cin_t::read( fc::string&  v) { std::cin >> *reinterpret_cast<std::string*>(&v); return *this; }
+  istream& cin_t::read( int64_t&     v) { slog("");             std::cin >> v; return *this; }
+  istream& cin_t::read( uint64_t&    v) { slog("");             std::cin >> v; return *this; }
+  istream& cin_t::read( int32_t&     v) { slog("");             std::cin >> v; return *this; }
+  istream& cin_t::read( uint32_t&    v) { slog("");             std::cin >> v; return *this; }
+  istream& cin_t::read( int16_t&     v) { slog("");             std::cin >> v; return *this; }
+  istream& cin_t::read( uint16_t&    v) { slog("");             std::cin >> v; return *this; }
+  istream& cin_t::read( int8_t&      v) { slog("");             std::cin >> v; return *this; }
+  istream& cin_t::read( uint8_t&     v) { slog("");             std::cin >> v; return *this; }
+  istream& cin_t::read( float&       v) { slog("");             std::cin >> v; return *this; }
+  istream& cin_t::read( double&      v) { slog("");             std::cin >> v; return *this; }
+  istream& cin_t::read( bool&        v) { slog("");             std::cin >> v; return *this; }
+  istream& cin_t::read( char&        v) { slog("");             std::cin >> v; return *this; }
+  istream& cin_t::read( fc::string&  v) { slog("");             std::cin >> *reinterpret_cast<std::string*>(&v); return *this; }
 
 
   cout_t cout;

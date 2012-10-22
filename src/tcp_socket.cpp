@@ -16,6 +16,9 @@ namespace fc {
 
       boost::asio::ip::tcp::socket _sock;
   };
+  bool tcp_socket::is_open()const {
+    return my->_sock.is_open();
+  }
 
   tcp_socket::tcp_socket(){}
 
@@ -26,14 +29,12 @@ namespace fc {
     boost::system::error_code ec;
     size_t w = my->_sock.write_some( boost::asio::buffer( buf, len ), ec );
 
-    slog( "wrote %d ", w );
     if( w < len ) {
       buf += w;
       len -= w;
     } 
 
     if( ec == boost::asio::error::would_block ) {
-      wlog( "world block" );
       promise<size_t>::ptr p(new promise<size_t>("tcp_socket::write"));
       boost::asio::async_write( my->_sock, boost::asio::buffer(buf, len),
                 [=]( const boost::system::error_code& ec, size_t bt ) {

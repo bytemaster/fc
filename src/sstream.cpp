@@ -1,5 +1,6 @@
 #include <fc/sstream.hpp>
 #include <fc/fwd_impl.hpp>
+#include <fc/log.hpp>
 #include <sstream>
 
 namespace fc {
@@ -32,14 +33,16 @@ namespace fc {
     return *this;
   }
   size_t   stringstream::readsome( char* buf, size_t len ) {
+    slog("");
     return my->ss.readsome(buf,len);
   }
   istream&   stringstream::read( char* buf, size_t len ) {
+    slog("");
     my->ss.read(buf,len);
     return *this;
   }
-  void     stringstream::close(){};
-  void     stringstream::flush(){};
+  void     stringstream::close(){ my->ss.flush(); };
+  void     stringstream::flush(){ my->ss.flush(); };
 
   istream& stringstream::read( int64_t&     v ) { my->ss >> v; return *this; }
   istream& stringstream::read( uint64_t&    v ) { my->ss >> v; return *this; }
@@ -56,7 +59,7 @@ namespace fc {
   istream& stringstream::read( fc::string&  v ) { my->ss >> *reinterpret_cast<std::string*>(&v); return *this; }
 
   ostream& stringstream::write( const fc::string& s) {
-    my->ss << s.c_str();
+    my->ss.write( s.c_str(), s.size() );
     return *this;
   }
 

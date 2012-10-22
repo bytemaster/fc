@@ -16,6 +16,8 @@ namespace fc {
       size_t readsome( char* buffer, size_t max );
       size_t read( char* buffer, size_t s );
 
+      bool   is_open()const;
+
       void flush();
 
     private:

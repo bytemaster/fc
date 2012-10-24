@@ -1,5 +1,4 @@
-#ifndef _FC_SHARED_PTR_HPP_
-#define _FC_SHARED_PTR_HPP_
+#pragma once
 #include <fc/utility.hpp>
 
 namespace fc {
@@ -83,4 +82,3 @@ namespace fc {
   }
 }
 
-#endif

@@ -45,6 +45,7 @@ include_directories( ${Boost_INCLUDE_DIR} )
 include_directories( include )
 
 set( sources 
+  src/http_connection.cpp
   src/value.cpp
   src/lexical_cast.cpp
   src/spin_lock.cpp 

@@ -17,6 +17,7 @@ namespace fc {
   struct reply {
      enum status_code {
          OK                  = 200,
+         RecordCreated       = 201,
          NotFound            = 404,
          Found               = 302,
          InternalServerError = 500

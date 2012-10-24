@@ -32,10 +32,10 @@ namespace fc {
       complete(false),
       cur_task(0)
     {
-      my_context.fc_stack.base = alloc.allocate( bc::minimum_stacksize() );
-   //   slog( "new stack %1% bytes at %2%", bc::minimum_stacksize(), my_context.fc_stack.base );
+      my_context.fc_stack.base = alloc.allocate( bc::default_stacksize() );
+   //   slog( "new stack %1% bytes at %2%", bc::default_stacksize(), my_context.fc_stack.base );
       my_context.fc_stack.limit = 
-        static_cast<char*>( my_context.fc_stack.base) - bc::minimum_stacksize();
+        static_cast<char*>( my_context.fc_stack.base) - bc::default_stacksize();
       make_fcontext( &my_context, sf );
     }
 
@@ -52,7 +52,7 @@ namespace fc {
 
     ~context() {
       if(stack_alloc) {
-        stack_alloc->deallocate( my_context.fc_stack.base, bc::minimum_stacksize() );
+        stack_alloc->deallocate( my_context.fc_stack.base, bc::default_stacksize() );
   //      slog("deallocate stack" );
       }
     }

@@ -1,7 +1,7 @@
 #include <fc/exception.hpp>
 #include <fc/error.hpp>
 #include <boost/exception/all.hpp>
-#include <boost/lexical_cast.hpp>
+#include <fc/lexical_cast.hpp>
 #include <boost/format.hpp>
 
 namespace fc {
@@ -72,16 +72,16 @@ namespace fc {
 
 
   fc::string to_string( char v ) { return fc::string(&v,1); }
-  fc::string to_string( uint64_t v ) { return boost::lexical_cast<std::string>(v).c_str(); }
-  fc::string to_string( int64_t v ){ return boost::lexical_cast<std::string>(v).c_str(); }
-  fc::string to_string( double v ){ return boost::lexical_cast<std::string>(v).c_str(); }
-  fc::string to_string( float v ){ return boost::lexical_cast<std::string>(v).c_str(); }
-  fc::string to_string( int32_t v ){ return boost::lexical_cast<std::string>(v).c_str(); }
-  fc::string to_string( uint32_t v ){ return boost::lexical_cast<std::string>(v).c_str(); }
-  fc::string to_string( int16_t v ){ return boost::lexical_cast<std::string>(v).c_str(); }
-  fc::string to_string( uint16_t v ){ return boost::lexical_cast<std::string>(v).c_str(); }
-  fc::string to_string( size_t v ){ return boost::lexical_cast<std::string>(v).c_str(); }
-  fc::string to_string( long int v ){ return boost::lexical_cast<std::string>(v).c_str(); }
+  fc::string to_string( uint64_t v ) { return fc::lexical_cast<fc::string>(v).c_str(); }
+  fc::string to_string( int64_t v ){ return fc::lexical_cast<fc::string>(v).c_str(); }
+  fc::string to_string( double v ){ return fc::lexical_cast<fc::string>(v).c_str(); }
+  fc::string to_string( float v ){ return fc::lexical_cast<fc::string>(v).c_str(); }
+  fc::string to_string( int32_t v ){ return fc::lexical_cast<fc::string>(v).c_str(); }
+  fc::string to_string( uint32_t v ){ return fc::lexical_cast<fc::string>(v).c_str(); }
+  fc::string to_string( int16_t v ){ return fc::lexical_cast<fc::string>(v).c_str(); }
+  fc::string to_string( uint16_t v ){ return fc::lexical_cast<fc::string>(v).c_str(); }
+//  fc::string to_string( size_t v ){ return fc::lexical_cast<fc::string>(v).c_str(); }
+  //fc::string to_string( long int v ){ return fc::lexical_cast<std::string>(v).c_str(); }
 
   void throw_exception( const char* func, const char* file, int line, const char* msg ) {
     ::boost::exception_detail::throw_exception_(fc::generic_exception(msg),func, file, line );

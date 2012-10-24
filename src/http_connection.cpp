@@ -1,6 +1,7 @@
 #include <fc/http/connection.hpp>
 #include <fc/tcp_socket.hpp>
 #include <fc/sstream.hpp>
+#include <fc/iostream.hpp>
 
 
 FC_START_SHARED_IMPL(fc::http::connection)
@@ -68,16 +69,21 @@ void       connection::connect_to( const fc::ip::endpoint& ep ) {
 http::reply connection::request( const fc::string& method, 
                                 const fc::string& url, 
                                 const fc::string& body ) {
+	
+  
   fc::stringstream req;
   req << method <<" "<<url<<" HTTP/1.1\r\n";
+  req << "Host: localhost\r\n";
   if( body.size() ) req << "Content-Length: "<< body.size() << "\r\n";
-  req << "\r\n";
-
+  req << "\r\n"; 
   fc::string head = req.str();
+
   my->sock.write( head.c_str(), head.size() );
 
-  if( body.size() ) 
+  if( body.size() )  {
       my->sock.write( body.c_str(), body.size() );
+  }
+  fc::cerr.flush();
 
   return my->parse_reply();
 }

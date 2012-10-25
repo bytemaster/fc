@@ -1,50 +1,35 @@
-#ifndef _FC_FUNCTION_HPP_
-#define _FC_FUNCTION_HPP_
+#pragma once
 #include <fc/utility.hpp>
 #include <fc/shared_ptr.hpp>
-/*
-#include <functional>
-#include <boost/config.hpp>
 
 namespace fc {
-  // place holder for more compile-effecient functor
-#if !defined(BOOST_NO_TEMPLATE_ALIASES) 
-  template<typename T>
-  using function = std::function<T>;
-#else
-#endif
-*/
-
-
-//template<typename Signature>
-//class function { };
-
-namespace fc {
-
 template<typename R,typename ... Args>
-class function_impl {
+class function {
   public:
+    function(){}
+
     template<typename Functor>
-    function_impl( Functor&& f )
+    function( Functor&& f )
     :func( new impl<Functor>( fc::forward<Functor>(f) ) ){};
 
-    function_impl( const function_impl& c ):func(c.func){}
-    function_impl( function_impl&& c ) { fc::swap( func, c.func); }
-    ~function_impl(){}
+    function( const function& c ):func(c.func){}
+    function( function&& c ) { fc::swap( func, c.func); }
+    ~function(){}
 
     template<typename Functor>
-    function_impl& operator=( Functor&& f ) { 
+    function& operator=( Functor&& f ) { 
       func.reset( new impl<Functor>( fc::forward<Functor>(f) ) ); 
       return *this; 
     }
 
-    function_impl& operator=( const function_impl& c ) { func = c.func; return *this; }
-    function_impl& operator=( function_impl&& c )      { fc::swap(func,c.func); return *this; }
+    function& operator=( const function& c ) { func = c.func; return *this; }
+    function& operator=( function&& c )      { fc::swap(func,c.func); return *this; }
     
     template<typename... Args2>
     R operator()( Args2... args2) { return func->call(fc::forward<Args2>(args2)...); }
 
-  private:
+  protected:
+
     struct impl_base : public fc::retainable {
       virtual ~impl_base(){}
       virtual R call(Args...) = 0;
@@ -59,6 +44,8 @@ class function_impl {
 
       Functor func;
     };
+    function( const fc::shared_ptr<impl_base>& f ):func(f){}
+    function( fc::shared_ptr<impl_base>&& f ):func(fc::move(f)){}
 
     fc::shared_ptr<impl_base> func;
 };
@@ -71,44 +58,50 @@ class function_impl {
  *
  *  TODO: Small functions are allocated on the stack, large functors are
  *  allocated on the heap.
+ *
+ *  Simply including boost/function adds an additional 0.6 seconds to every 
+ *  object file compared to using fc/function.
+ *
+ *  Including <functional> on the other hand adds a mere 0.05 
+ *  seconds to every object file compared to fc/function.
  */
-template<typename Signature = void()>
-class function : public function_impl<void> {
-  public:
-    template<typename U>
-    function( U&& u ):function_impl<void>( fc::forward<U>(u) ){}
-    using function_impl::operator=;
-};
-
 template<typename R>
-class function<R()> : public function_impl<R> {
+class function<R()> : public function<R> {
   public:
+    function(){}
     template<typename U>
-    function( U&& u ):function_impl<R>( fc::forward<U>(u) ){}
-    using function_impl<R>::operator=;
+    function( U&& u ) { *this = fc::forward<U>(u); }
+    using function<R>::operator=;
 };
 
 template<typename R,typename A1>
-class function<R(A1)> : public function_impl<R,A1> {
+class function<R(A1)> : public function<R,A1> {
   public:
+    function(){}
     template<typename U>
-    function( U&& u ):function_impl<R,A1>( fc::forward<U>(u) ){}
-    using function_impl<R,A1>::operator=;
+    function( U&& u ) { *this = fc::forward<U>(u); }
+    //using function<R,A1>::operator=;
 };
 
 template<typename R,typename A1,typename A2>
-class function<R(A1,A2)> : public function_impl<R,A1,A2> {
+class function<R(A1,A2)> : public function<R,A1,A2> {
   public:
+    function(){}
     template<typename U>
-    function( U&& u ):function_impl<R,A1,A2>( fc::forward<U>(u) ){}
-    using function_impl<R,A1,A2>::operator=;
+    function( U&& u ):function<R,A1,A2>( fc::forward<U>(u) ){}
+    function( const function& c ):function<R,A1,A2>(c.func){}
+    using function<R,A1,A2>::operator=;
 };
 
-
-
-
-
+template<typename R,typename A1,typename A2, typename A3>
+class function<R(A1,A2,A3)> : public function<R,A1,A2,A3> {
+  public:
+    function(){}
+    template<typename U>
+    function( U&& u ):function<R,A1,A2,A3>( fc::forward<U>(u) ){}
+    function( const function& c ):function<R,A1,A2,A3>(c.func){}
+    using function<R,A1,A2,A3>::operator=;
+};
 
 }
 
-#endif // _FC_FUNCTION_HPP_

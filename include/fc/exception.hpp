@@ -71,8 +71,8 @@ namespace fc {
   fc::string to_string( uint32_t v );
   fc::string to_string( int16_t v );
   fc::string to_string( uint16_t v );
-  fc::string to_string( size_t v );
-  fc::string to_string( long int v );
+//  fc::string to_string( size_t v );
+//  fc::string to_string( long int v );
 
   template<typename T>
   void throw_exception( const char* func, const char* file, int line, const char* msg, T&& a1 ) {

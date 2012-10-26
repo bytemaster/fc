@@ -28,7 +28,7 @@ namespace fc {
     fc::string to_string( int16_t d  );
     fc::string to_string( int8_t d  );
     fc::string to_string( char d  );
-    fc::string to_string( const char* d  );
+    inline fc::string to_string( const char* d  ) { return d; }
     inline fc::string to_string( fc::string s ) { return s; }
 
     template<typename R> 

@@ -77,7 +77,6 @@ namespace fc {
       return o;
   }
 
-  fc::cin_t&   getline( fc::cin_t&, fc::string&, char delim = '\n' );
   template<typename T>
   cin_t& operator>>( cin_t& o, T& v ) {
       fc::string str;

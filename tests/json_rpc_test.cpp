@@ -1,5 +1,4 @@
 #include <fc/json_rpc_client.hpp>
-#include <iostream>
 
 struct test {
   int add(int x){ return x+1; }

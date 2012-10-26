@@ -79,6 +79,7 @@ namespace fc {
 namespace fc { namespace detail { \
   template<typename Transform> \
   struct vtable<test,Transform> : public fc::retainable { \
+     vtable(){} \
     BOOST_PP_SEQ_FOR_EACH( FC_STUB_VTABLE_DEFINE_MEMBER, CLASS, METHODS ) \
       template<typename T, typename Visitor> \
       void visit( Visitor&& v ) { \

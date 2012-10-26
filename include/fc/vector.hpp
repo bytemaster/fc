@@ -182,7 +182,7 @@ namespace fc {
     };
     
     template<typename T>
-    class vector_impl<T,fc::true_type>  {
+    struct vector_impl<T,fc::true_type>  {
       public: 
           typedef T*       iterator;
           typedef const T* const_iterator;

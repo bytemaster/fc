@@ -1,5 +1,12 @@
 #pragma once
 #include <fc/utility.hpp>
+#include <boost/preprocessor/repeat.hpp>
+#include <boost/preprocessor/repeat_from_to.hpp>
+#include <boost/preprocessor/repetition/enum_binary_params.hpp>
+#include <boost/preprocessor/repetition/enum_params.hpp>
+#include <boost/preprocessor/repetition/enum.hpp>
+#include <boost/preprocessor/facilities/empty.hpp>
+#include <boost/preprocessor/repetition/enum_params_with_a_default.hpp>
 
 namespace fc {
 
@@ -21,7 +28,6 @@ namespace fc {
    *    void operator()( const MemberType& m );
    *  };
    *  @endcode
-   */
   template<typename A=void, typename B=void,typename C=void, typename D=void>
   struct tuple { 
     tuple(){}
@@ -45,14 +51,55 @@ namespace fc {
     C c; 
     D d; 
   }; 
+   */
 
-  template<>
-  struct tuple<> {
-    enum size_enum { size = 0 };
-    template<typename V> 
-    void visit( V&& v)const{};
-  };
+        #define RREF_PARAMS(z,n,data) BOOST_PP_CAT(AA,n)&& BOOST_PP_CAT(a,n)
+        #define ILIST_PARAMS(z,n,data) BOOST_PP_CAT(a,n)( fc::forward<BOOST_PP_CAT(AA,n)>( BOOST_PP_CAT(a,n) ) )
+        #define ILIST_PARAMS_COPY(z,n,data) BOOST_PP_CAT(a,n)( t.BOOST_PP_CAT(a,n)  )
+        #define VISIT_PARAMS(z,n,data) v(BOOST_PP_CAT(a,n));
+        #define FORWARD_PARAMS(z,n,data) fc::forward<BOOST_PP_CAT(AA,n)>(BOOST_PP_CAT(a,n))
+        #define MEM_PARAMS(z,n,data) BOOST_PP_CAT(A,n) BOOST_PP_CAT(a,n);
+        #define TUPLE(z,n,unused) \
+        template<BOOST_PP_ENUM_PARAMS( n, typename A)> \
+        struct tuple<BOOST_PP_ENUM_PARAMS(n,A)> { \
+            enum size_enum { size = n }; \
+            template<BOOST_PP_ENUM_PARAMS( n, typename AA)> \
+            tuple( BOOST_PP_ENUM(n, RREF_PARAMS, unused ) )BOOST_PP_IF(n,:,BOOST_PP_EMPTY())BOOST_PP_ENUM( n, ILIST_PARAMS,unused){} \
+            tuple( const tuple& t )BOOST_PP_IF(n,:,BOOST_PP_EMPTY())BOOST_PP_ENUM( n, ILIST_PARAMS_COPY,unused){} \
+            tuple( tuple&& t )BOOST_PP_IF(n,:,BOOST_PP_EMPTY())BOOST_PP_ENUM( n, ILIST_PARAMS_COPY,unused){} \
+            tuple(){}\
+            template<typename V>\
+            void visit( V&& v ) { BOOST_PP_REPEAT(n,VISIT_PARAMS,a) }\
+            template<typename V>\
+            void visit( V&& v )const { BOOST_PP_REPEAT(n,VISIT_PARAMS,a) }\
+            BOOST_PP_REPEAT(n,MEM_PARAMS,a) \
+        };  \
+        template<BOOST_PP_ENUM_PARAMS( n, typename AA)> \
+        tuple<BOOST_PP_ENUM_PARAMS(n,AA)> make_tuple( BOOST_PP_ENUM( n, RREF_PARAMS, unused) ) { \
+          return tuple<BOOST_PP_ENUM_PARAMS(n,AA)>( BOOST_PP_ENUM( n, FORWARD_PARAMS,unused ) );  \
+        } 
+        template<BOOST_PP_ENUM_PARAMS_WITH_A_DEFAULT(9, typename A, void)> struct tuple{};
+        BOOST_PP_REPEAT_FROM_TO( 1, 8, TUPLE, unused )
 
+
+        #undef FORWARD_PARAMS
+        #undef RREF_PARAMS
+        #undef ILIST_PARAMS
+        #undef ILIST_PARAMS_COPY
+        #undef VISIT_PARAMS
+        #undef MEM_PARAMS
+        #undef TUPLE
+
+        template<>
+        struct tuple<> {
+          enum size_enum { size = 0 };
+          template<typename V> 
+          void visit( V&& v)const{};
+        };
+
+        inline tuple<> make_tuple(){ return tuple<>(); }
+
+  /*
   template<typename A>
   struct tuple<A,void> { 
     enum size_enum { size = 1 };
@@ -127,4 +174,5 @@ namespace fc {
   tuple<A,B,C> make_tuple(A&& a, B&& b, C&& c, D&& d){ 
     return tuple<A,B,C,D>( fc::forward<A>(a), fc::forward<B>(b), fc::forward<C>(c), fc::forward<D>(d) ); 
   }
+  */
 }

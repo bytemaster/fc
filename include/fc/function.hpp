@@ -26,7 +26,7 @@ class function {
     function& operator=( function&& c )      { fc::swap(func,c.func); return *this; }
     
     template<typename... Args2>
-    R operator()( Args2... args2) { return func->call(fc::forward<Args2>(args2)...); }
+    R operator()( Args2... args2)const { return func->call(fc::forward<Args2>(args2)...); }
 
   protected:
 
@@ -78,9 +78,14 @@ template<typename R,typename A1>
 class function<R(A1)> : public function<R,A1> {
   public:
     function(){}
-    template<typename U>
-    function( U&& u ) { *this = fc::forward<U>(u); }
-    //using function<R,A1>::operator=;
+//    template<typename U>
+//    function( U&& u ) { static_assert( sizeof(U) < 0, "tesT"); *this = fc::forward<U>(u); }
+    function( const function<R,A1>& u ):function<R,A1>(u){}
+    function( function<R,A1>&& u ):function<R,A1>(u){}
+    function( const function& u ):function<R,A1>(u.func){}
+    function( function&& u ):function<R,A1>(fc::move(u.func)){}
+
+    using function<R,A1>::operator=;
 };
 
 template<typename R,typename A1,typename A2>

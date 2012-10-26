@@ -117,7 +117,7 @@ namespace fc {
     fc::context* n  = 0;
     fc::context* cc = fc::thread::current().my->current;
     {
-      boost::unique_lock<fc::spin_yield_lock> lock(m_blist_lock);
+      fc::unique_lock<fc::spin_yield_lock> lock(m_blist_lock);
       if( !m_blist ) { 
         m_blist = cc;
         return;
@@ -151,7 +151,7 @@ namespace fc {
 
   void mutex::unlock() {
     fc::context* next = 0;
-    { boost::unique_lock<fc::spin_yield_lock> lock(m_blist_lock);
+    { fc::unique_lock<fc::spin_yield_lock> lock(m_blist_lock);
       get_tail(m_blist, next);
       if( next ) {
         next->next_blocked = 0;

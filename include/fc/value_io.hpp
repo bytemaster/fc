@@ -4,6 +4,7 @@
 #include <fc/optional.hpp>
 #include <fc/value.hpp>
 #include <fc/value_cast.hpp>
+#include <fc/tuple.hpp>
 
 namespace fc {
   struct void_t{};
@@ -14,12 +15,18 @@ namespace fc {
   template<typename T> 
   void unpack( const fc::value& jsv, T& v ); 
 
+  template<typename A, typename B, typename C, typename D>
+  void pack( fc::value& v, const tuple<A,B,C,D>& t );
+  template<typename A, typename B, typename C, typename D>
+  void unpack( const fc::value& val, tuple<A,B,C,D>& t ); 
+
   template<typename T> 
   void pack( fc::value& jsv, const fc::optional<T>& v );
 
   template<typename T> 
   void unpack( const fc::value& jsv, fc::optional<T>& v );
 
+  inline void pack( fc::value& jsv, const char& v )         { jsv = fc::string(&v,1); }
   inline void pack( fc::value& jsv, const fc::value& v )    { jsv = v; }
   inline void pack( fc::value& jsv, fc::value& v )          { jsv = v; }
   inline void pack( fc::value& jsv, fc::value&& v )         { jsv = fc::move(v); }
@@ -189,18 +196,22 @@ namespace fc {
 
   } // namesapce detail
 
-  inline void unpack( const fc::value& jsv, bool& v )         { v = value_cast<bool>(jsv);       }
-  inline void unpack( const fc::value& jsv, float& v )        { v = value_cast<float>(jsv);      }
-  inline void unpack( const fc::value& jsv, double& v )       { v = value_cast<double>(jsv);     }
-  inline void unpack( const fc::value& jsv, uint8_t& v )      { v = value_cast<uint8_t>(jsv);    }
-  inline void unpack( const fc::value& jsv, uint16_t& v )     { v = value_cast<uint16_t>(jsv);   }
-  inline void unpack( const fc::value& jsv, uint32_t& v )     { v = value_cast<uint32_t>(jsv);   }
-  inline void unpack( const fc::value& jsv, uint64_t& v )     { v = value_cast<uint64_t>(jsv);   }
-  inline void unpack( const fc::value& jsv, int8_t& v )       { v = value_cast<int8_t>(jsv);     }
-  inline void unpack( const fc::value& jsv, int16_t& v )      { v = value_cast<int16_t>(jsv);    }
-  inline void unpack( const fc::value& jsv, int32_t& v )      { v = value_cast<int32_t>(jsv);    }
-  inline void unpack( const fc::value& jsv, int64_t& v )      { v = value_cast<int64_t>(jsv);    }
-  inline void unpack( const fc::value& jsv, fc::string& v )   { v = value_cast<fc::string>(jsv); }
+  inline void unpack( const fc::value& jsv, char& v )         { 
+    auto s = value_cast<fc::string>(jsv); 
+    if( s.size() ) v = s[0];
+  }
+  inline void unpack( const fc::value& jsv, bool& v )         { v = value_cast<bool>(jsv);          }
+  inline void unpack( const fc::value& jsv, float& v )        { v = value_cast<float>(jsv);         }
+  inline void unpack( const fc::value& jsv, double& v )       { v = value_cast<double>(jsv);        }
+  inline void unpack( const fc::value& jsv, uint8_t& v )      { v = value_cast<uint8_t>(jsv);       }
+  inline void unpack( const fc::value& jsv, uint16_t& v )     { v = value_cast<uint16_t>(jsv);      }
+  inline void unpack( const fc::value& jsv, uint32_t& v )     { v = value_cast<uint32_t>(jsv);      }
+  inline void unpack( const fc::value& jsv, uint64_t& v )     { v = value_cast<uint64_t>(jsv);      }
+  inline void unpack( const fc::value& jsv, int8_t& v )       { v = value_cast<int8_t>(jsv);        }
+  inline void unpack( const fc::value& jsv, int16_t& v )      { v = value_cast<int16_t>(jsv);       }
+  inline void unpack( const fc::value& jsv, int32_t& v )      { v = value_cast<int32_t>(jsv);       }
+  inline void unpack( const fc::value& jsv, int64_t& v )      { v = value_cast<int64_t>(jsv);       }
+  inline void unpack( const fc::value& jsv, fc::string& v )   { v = value_cast<fc::string>(jsv);    }
 
   template<typename T> 
   void pack( fc::value& jsv, const fc::optional<T>& v ) {
@@ -229,6 +240,37 @@ namespace fc {
           ++itr;
           ++i;
       }
+  }
+  struct tuple_to_value_visitor {
+    tuple_to_value_visitor( value& v ):_val(v),_count(0) { }
+    template<typename T>
+    void operator()( T&& t ) {
+      _val[_count] = value(fc::forward<T>(t) );
+      ++_count;
+    }
+    value& _val;
+    int    _count;
+  };
+  struct tuple_from_value_visitor {
+    tuple_from_value_visitor( const value& v ):_val(v),_count(0) { }
+    template<typename T>
+    void operator()( T&& t ) {
+      if( _count < _val.size() ) unpack( _val[_count], t );
+      ++_count;
+    }
+    const value& _val;
+    int    _count;
+  };
+
+  template<typename A, typename B, typename C, typename D>
+  inline void pack( fc::value& val, const tuple<A,B,C,D>& t ) {
+    val = fc::value::array( tuple<A,B,C,D>::size );
+    t.visit( tuple_to_value_visitor(val) );
+  }
+  template<typename A, typename B, typename C, typename D>
+  inline void unpack( const fc::value& val, tuple<A,B,C,D>& t ) {
+    val = fc::value::array( tuple<A,B,C,D>::size );
+    t.visit( tuple_from_value_visitor(val) );
   }
 
   template<typename T>

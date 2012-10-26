@@ -193,4 +193,5 @@ namespace fc {
       new (holder) detail::value_holder(); 
       fc::pack( *this, std::forward<T>(v) );
     }
+
 }

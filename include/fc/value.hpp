@@ -5,6 +5,9 @@
 #include <fc/aligned.hpp>
 
 namespace fc {
+    template<typename A, typename B, typename C, typename D>
+    struct tuple;
+
     /**
      *  @brief a dynamic container that can hold
      *  integers, reals, strings, booleans, arrays, and
@@ -27,6 +30,7 @@ namespace fc {
           fc::vector<key_val>  fields;
         };
         struct array {
+          array( size_t s = 0 ):fields(s){}
           //fc::string           type;
           fc::vector<value>    fields;
         };

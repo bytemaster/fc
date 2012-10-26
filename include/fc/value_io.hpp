@@ -7,6 +7,9 @@
 #include <fc/tuple.hpp>
 
 namespace fc {
+  template<typename T>
+  T value_cast( const value& v );
+
   struct void_t{};
 
   template<typename T>
@@ -160,7 +163,7 @@ namespace fc {
       template<typename T>
       static inline void unpack( const fc::value& jsv, T& v ) { 
          if( strcmp( jsv.type(), "string" ) == 0 ) {
-            v = fc::reflector<T>::from_string( value_cast<fc::string>(jsv).c_str() );
+            v = fc::reflector<T>::from_string( fc::value_cast<fc::string>(jsv).c_str() );
          } else {
             // throw if invalid int, by attempting to convert to string
             fc::reflector<T>::to_string( v = value_cast<int64_t>(jsv) );
@@ -269,7 +272,6 @@ namespace fc {
   }
   template<typename A, typename B, typename C, typename D>
   inline void unpack( const fc::value& val, tuple<A,B,C,D>& t ) {
-    val = fc::value::array( tuple<A,B,C,D>::size );
     t.visit( tuple_from_value_visitor(val) );
   }
 

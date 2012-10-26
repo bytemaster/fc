@@ -9,7 +9,7 @@
 
 namespace fc {
   class abstract_thread;
-  class void_t;
+  struct void_t;
   class priority;
   class exception_ptr;
   class thread;

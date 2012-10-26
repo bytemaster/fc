@@ -298,7 +298,7 @@ namespace fc {
             this->reserve( this->size()+1 );
             loc = this->begin() + pos;
             if( this->size() != 0 ) {
-                new (this->end()) T( fc::move(this->back()) );
+                new ((void*)this->end()) T( fc::move(this->back()) );
                 auto cur = this->back();
                 ++this->_data->size;
                 while( cur != loc ) {

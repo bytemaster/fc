@@ -191,7 +191,7 @@ namespace fc {
     template<typename T>
     value::value( T&& v ) {
       new (holder) detail::value_holder(); 
-      fc::pack( *this, std::forward<T>(v) );
+      fc::pack( *this, fc::forward<T>(v) );
     }
 
 }

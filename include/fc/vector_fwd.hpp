@@ -5,8 +5,8 @@
 #else
 namespace fc {
   template<typename T> class vector;
-  template<typename T> class reflector;
-  template<typename T> class reflector< fc::vector<T> >;
+  template<typename T> struct reflector;
+  template<typename T> struct reflector< fc::vector<T> >;
 };
 #endif
 

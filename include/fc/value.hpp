@@ -3,10 +3,10 @@
 #include <fc/string.hpp>
 #include <fc/vector.hpp>
 #include <fc/aligned.hpp>
+#include <boost/preprocessor/repetition/enum_params.hpp>
 
 namespace fc {
-    template<typename A, typename B, typename C, typename D>
-    struct tuple;
+    template<BOOST_PP_ENUM_PARAMS(9, typename A)> struct tuple;
 
     /**
      *  @brief a dynamic container that can hold

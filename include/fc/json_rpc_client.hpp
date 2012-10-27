@@ -1,23 +1,27 @@
 #pragma once
 #include <fc/actor.hpp>
 #include <fc/json_rpc_connection.hpp>
+#include <boost/preprocessor/repeat.hpp>
+#include <boost/preprocessor/repetition/enum_binary_params.hpp>
+#include <boost/preprocessor/repetition/enum_params.hpp>
+#include <boost/preprocessor/facilities/empty.hpp>
 
 
 namespace fc { namespace json {
 
   namespace detail {
     struct rpc_member {
-        // TODO: expand for all method arity and constness....
-        template<typename R, typename C, typename A1, typename P>
-        static fc::function<fc::future<R>,A1> functor( P, 
-                                                        R (C::*mem_func)(A1),
-                                                        const rpc_connection& c = rpc_connection(), 
-                                                        const char* name = nullptr 
-                                                        ) {
-          return [=](A1 a1)->fc::future<R>{ return c.invoke<R>( name, make_tuple(a1) ); };
-        }
+        #define RPC_MEMBER_FUNCTOR(z,n,IS_CONST) \
+        template<typename R, typename C, typename P BOOST_PP_COMMA_IF(n) BOOST_PP_ENUM_PARAMS( n, typename A)> \
+        static fc::function<fc::future<R> BOOST_PP_COMMA_IF(n)  BOOST_PP_ENUM_PARAMS(n,A)  >  \
+            functor( P, R (C::*mem_func)(BOOST_PP_ENUM_PARAMS(n,A)) IS_CONST,  \
+                      const rpc_connection& c = rpc_connection(), const char* name = nullptr ) { \
+            return [=](BOOST_PP_ENUM_BINARY_PARAMS(n,A,a))->fc::future<R>{ return c.invoke<R>( name, make_tuple(BOOST_PP_ENUM_PARAMS(n,a)) ); }; \
+        } 
+        BOOST_PP_REPEAT( 8, RPC_MEMBER_FUNCTOR, const )
+        BOOST_PP_REPEAT( 8, RPC_MEMBER_FUNCTOR, BOOST_PP_EMPTY() )
+        #undef RPC_MEMBER_FUNCTOR
     };
-
 
     struct vtable_visitor {
         vtable_visitor( rpc_connection& c ):_con(c){}
@@ -28,7 +32,6 @@ namespace fc { namespace json {
         }
         rpc_connection& _con;
     };
-
   };
 
 

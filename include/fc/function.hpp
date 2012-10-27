@@ -78,8 +78,6 @@ template<typename R,typename A1>
 class function<R(A1)> : public function<R,A1> {
   public:
     function(){}
-//    template<typename U>
-//    function( U&& u ) { static_assert( sizeof(U) < 0, "tesT"); *this = fc::forward<U>(u); }
     function( const function<R,A1>& u ):function<R,A1>(u){}
     function( function<R,A1>&& u ):function<R,A1>(u){}
     function( const function& u ):function<R,A1>(u.func){}

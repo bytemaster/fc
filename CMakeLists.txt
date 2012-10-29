@@ -41,12 +41,14 @@ option( UNITY_BUILD OFF )
 
 include_directories( vendor/boost/process/include )
 include_directories( ${Boost_INCLUDE_DIR} )
+include_directories( ${OPENSSL_INCLUDE_DIR} )
 include_directories( include )
 
 set( sources 
   src/process.cpp
   src/http_connection.cpp
   src/json_rpc_connection.cpp
+  src/json_rpc_stream_connection.cpp
   src/value.cpp
   src/lexical_cast.cpp
   src/spin_lock.cpp 
@@ -82,7 +84,7 @@ set( sources
 )
 setup_library( fc SOURCES ${sources} )
 
-setup_executable( json_rpc_test SOURCES tests/json_rpc_test.cpp LIBRARIES fc ${Boost_THREAD_LIBRARY} ${Boost_CONTEXT_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${Boost_CHRONO_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} )
+setup_executable( json_rpc_test SOURCES tests/json_rpc_test.cpp LIBRARIES fc ${pthread_library} ${rt_library} ${Boost_THREAD_LIBRARY} ${Boost_CONTEXT_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${Boost_CHRONO_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${rt_library} )
 
 #add_executable( test_vec tests/vector_test.cpp )
 #target_link_libraries( test_vec fc ${Boost_SYSTEM_LIBRARY} ${Boost_CHRONO_LIBRARY} ${Boost_THREAD_LIBRARY} ${Boost_CONTEXT_LIBRARY} )

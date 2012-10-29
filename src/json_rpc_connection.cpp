@@ -23,8 +23,8 @@ namespace fc { namespace json {
     public:
       impl():_next_req_id(0){ }
       ~impl(){ cancel_pending_requests();  }
-      int64_t                                                    _next_req_id;
-      std::unordered_map<std::string,detail::server_method::ptr> _methods;
+      int64_t                                                _next_req_id;
+      std::unordered_map<std::string,rpc_server_method::ptr> _methods;
 
       detail::pending_result::ptr _pr_head;
       detail::pending_result::ptr _pr_tail;

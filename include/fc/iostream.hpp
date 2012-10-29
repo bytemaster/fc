@@ -76,12 +76,4 @@ namespace fc {
       v = fc::lexical_cast<T>(str); 
       return o;
   }
-
-  template<typename T>
-  cin_t& operator>>( cin_t& o, T& v ) {
-      fc::string str;
-      getline( o, str, ' ' );
-      v = fc::lexical_cast<T>(str); 
-      return o;
-  }
 }

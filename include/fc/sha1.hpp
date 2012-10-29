@@ -34,7 +34,7 @@ namespace fc {
 
         private:
           struct      impl;
-          fwd<impl,89> my;
+          fwd<impl,96> my;
       };
 
       template<typename T>

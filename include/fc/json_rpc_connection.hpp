@@ -2,8 +2,16 @@
 #include <fc/json.hpp>
 #include <fc/future.hpp>
 #include <fc/function.hpp>
+#include <fc/ptr.hpp>
 
 namespace fc {  namespace json {
+  class rpc_connection;
+
+  struct rpc_server_method : public fc::retainable {
+    typedef fc::shared_ptr<rpc_server_method> ptr;
+    virtual value call( const value& v ) = 0;
+  };
+
   namespace detail {
     struct pending_result : virtual public promise_base {
       typedef shared_ptr<pending_result> ptr;
@@ -31,20 +39,28 @@ namespace fc {  namespace json {
         ~pending_result_impl(){}
     };
 
-    struct server_method : public fc::retainable {
-       typedef fc::shared_ptr<server_method> ptr;
-       virtual value call( const value& param ) = 0;
-    };
+
     template<typename R, typename Args>
-    struct server_method_impl : public server_method {
-       server_method_impl( const fc::function<R,Args>& a ):func(a){};
-       virtual value call( const value& param ) {
-          return value( func( value_cast<Args>(param) ) );
-       }
-       fc::function<R,Args> func;
+    struct rpc_server_method_impl : public rpc_server_method {
+      rpc_server_method_impl( const fc::function<R,Args>& f ):func(f){} 
+      virtual value call( const value& v ) {
+        return value( func( fc::value_cast<Args>( v ) ) ); 
+      }
+      fc::function<R,Args> func;
     };
 
-  } // namespace detail 
+    template<typename InterfaceType>
+    struct add_method_visitor {
+      public:
+        add_method_visitor( const fc::ptr<InterfaceType>& p, fc::json::rpc_connection& c ):_ptr(p){}
+
+        template<typename R, typename Args, typename Type>
+        void operator()( const char* name, fc::function<R,Args>& meth, Type );
+
+        const fc::ptr<InterfaceType>& _ptr;
+        fc::json::rpc_connection&     _con;
+    };
+  }
 
   /**
    *  This is the base JSON RPC connection that handles the protocol
@@ -75,22 +91,40 @@ namespace fc {  namespace json {
 
       template<typename R, typename Args >
       void add_method( const fc::string& name, const fc::function<R,Args>& a ) {
-         this->add_method( name, detail::server_method::ptr(new detail::server_method_impl<R,Args>(a) ) );
+         this->add_method( name, rpc_server_method::ptr(new detail::rpc_server_method_impl<R,Args>(a) ) );
       }
+
+      template<typename InterfaceType>
+      void add_interface( const fc::ptr<InterfaceType>& it ) {
+        it->template visit<InterfaceType>( detail::add_method_visitor<InterfaceType>( it, *this ) );
+      }
+
+      void add_method( const fc::string& name, const fc::json::rpc_server_method::ptr& func );
 
     protected:
       void         handle_message( const value& m );
-      virtual void send_invoke( uint64_t id, const fc::string& m, value&& param );
-      virtual void send_error( uint64_t id, int64_t code, const fc::string& msg );
-      virtual void send_result( uint64_t id, value&& r );
+      virtual void send_invoke( uint64_t id, const fc::string& m, value&& param ) = 0;
+      virtual void send_error( uint64_t id, int64_t code, const fc::string& msg ) = 0;
+      virtual void send_result( uint64_t id, value&& r ) = 0;
+
 
     private:
       void invoke( detail::pending_result::ptr&& p, const fc::string& m, value&& param );
-      void add_method( const fc::string& name, detail::server_method::ptr&& m );
+      void add_method( const fc::string& name, rpc_server_method::ptr&& m );
 
       class impl;
       fc::shared_ptr<class impl> my;
   };
+
+  namespace detail {
+
+    template<typename InterfaceType>
+    template<typename R, typename Args, typename Type>
+    void add_method_visitor<InterfaceType>::operator()( const char* name, fc::function<R,Args>& meth, Type ) {
+        _con.add_method( name, rpc_server_method::ptr( new rpc_server_method_impl<R,Args>(meth) ) );
+    }
+
+  } // namespace detail
 
 } } // fc::json
 

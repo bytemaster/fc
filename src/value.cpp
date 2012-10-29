@@ -270,6 +270,10 @@ value& value::operator=( const value& v ){
   gh(v.holder)->copy_helper(holder);
   return *this;
 }
+bool value::is_null()const {
+    return strcmp(gh(holder)->type(), "null") == 0;
+}
+
 
 value::object::const_iterator value::find( const char* key )const {
   if( strcmp(gh(holder)->type(), "object") == 0) {

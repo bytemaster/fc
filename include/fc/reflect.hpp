@@ -9,19 +9,11 @@
 #define _FC_REFLECT_HPP_
 
 #include <fc/utility.hpp>
-#include <boost/static_assert.hpp>
-//#include <boost/preprocessor/seq/for_each_i.hpp>
-#include <boost/preprocessor/seq/for_each.hpp>
 #include <boost/preprocessor/seq/enum.hpp>
 #include <boost/preprocessor/seq/seq.hpp>
 #include <boost/preprocessor/stringize.hpp>
-//#include <boost/preprocessor/tuple/elem.hpp>
-//#include <boost/preprocessor/facilities/empty.hpp>
 #include <stdint.h>
 
-
-//#include <mace/void.hpp>
-//#include <mace/reflect/typeinfo.hpp>
 
 namespace fc { 
 

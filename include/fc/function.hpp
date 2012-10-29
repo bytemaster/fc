@@ -28,6 +28,8 @@ class function {
     template<typename... Args2>
     R operator()( Args2... args2)const { return func->call(fc::forward<Args2>(args2)...); }
 
+    bool operator!()const { return !func; }
+
   protected:
 
     struct impl_base : public fc::retainable {

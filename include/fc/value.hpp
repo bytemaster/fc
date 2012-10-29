@@ -86,6 +86,7 @@ namespace fc {
         value& operator=( value&& v );
         value& operator=( const value& v );
 
+
         /**
          *  Include fc/value_cast.hpp for implementation
          */
@@ -137,6 +138,8 @@ namespace fc {
 
         aligned<24> holder;
     };
+    bool operator == ( const value& v, std::nullptr_t );
+    bool operator != ( const value& v, std::nullptr_t );
 
     struct value::key_val {
        key_val(){};

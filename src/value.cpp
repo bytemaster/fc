@@ -250,6 +250,12 @@ value::value( value::object& a ){
   static_assert( sizeof(holder) >= sizeof( detail::value_holder_impl<value::object> ), "size check" );
   new (holder) detail::value_holder_impl<value::object>(a);
 }
+bool operator == ( const value& v, std::nullptr_t ) {
+  return v.is_null();
+}
+bool operator != ( const value& v, std::nullptr_t ) {
+  return v.is_null();
+}
 
 value& value::operator=( value&& v ){
   decltype(holder) tmp;

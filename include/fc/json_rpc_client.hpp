@@ -15,8 +15,9 @@ namespace fc { namespace json {
         template<typename R, typename C, typename P BOOST_PP_COMMA_IF(n) BOOST_PP_ENUM_PARAMS( n, typename A)> \
         static fc::function<fc::future<R> BOOST_PP_COMMA_IF(n)  BOOST_PP_ENUM_PARAMS(n,A)  >  \
             functor( P, R (C::*mem_func)(BOOST_PP_ENUM_PARAMS(n,A)) IS_CONST,  \
-                      const rpc_connection& c = rpc_connection(), const char* name = nullptr ) { \
-            return [=](BOOST_PP_ENUM_BINARY_PARAMS(n,A,a))->fc::future<R>{ return c.invoke<R>( name, make_tuple(BOOST_PP_ENUM_PARAMS(n,a)) ); }; \
+                      const rpc_connection::ptr& c = rpc_connection::ptr(), const char* name = nullptr ) { \
+            return [=](BOOST_PP_ENUM_BINARY_PARAMS(n,A,a))->fc::future<R>{ \
+                return c->invoke<R>( name, make_tuple(BOOST_PP_ENUM_PARAMS(n,a)) ); }; \
         } 
         BOOST_PP_REPEAT( 8, RPC_MEMBER_FUNCTOR, const )
         BOOST_PP_REPEAT( 8, RPC_MEMBER_FUNCTOR, BOOST_PP_EMPTY() )
@@ -24,13 +25,13 @@ namespace fc { namespace json {
     };
 
     struct vtable_visitor {
-        vtable_visitor( rpc_connection& c ):_con(c){}
+        vtable_visitor( rpc_connection::ptr& c ):_con(c){}
     
         template<typename Function, typename MemberPtr>
         void operator()( const char* name, Function& memb, MemberPtr m )const {
           memb = rpc_member::functor( nullptr, m, _con, name );
         }
-        rpc_connection& _con;
+        rpc_connection::ptr& _con;
     };
   };
 
@@ -39,12 +40,12 @@ namespace fc { namespace json {
   class rpc_client : public ptr<InterfaceType,fc::json::detail::rpc_member> {
     public:
       rpc_client(){}
-      rpc_client( const rpc_connection& c ):_con(c){
+      rpc_client( const rpc_connection::ptr& c ):_con(c){
         init();
       }
       rpc_client( const rpc_client& c ):_con(c._con){}
 
-      void set_connection( const rpc_connection& c ) {
+      void set_connection( const rpc_connection::ptr& c ) {
         _con = c;
         init();
       }
@@ -55,7 +56,7 @@ namespace fc { namespace json {
           this->_vtable.reset(new fc::detail::vtable<InterfaceType,fc::json::detail::rpc_member>() );
           this->_vtable->template visit<InterfaceType>( fc::json::detail::vtable_visitor(_con) );
       }
-      rpc_connection  _con; 
+      rpc_connection::ptr  _con; 
   };
 
 } } // fc::json

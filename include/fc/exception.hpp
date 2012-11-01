@@ -87,6 +87,10 @@ namespace fc {
   void throw_exception( const char* func, const char* file, int line, const char* msg, T1&& a1, T2&& a2, T3&& a3 ) {
     throw_exception_( func, file, line, msg, to_string(fc::forward<T1>(a1) ), to_string( fc::forward<T2>(a2) ), to_string( fc::forward<T3>(a3) ) );
   }
+  template<typename T1, typename T2, typename T3, typename T4>
+  void throw_exception( const char* func, const char* file, int line, const char* msg, T1&& a1, T2&& a2, T3&& a3, T4&& a4 ) {
+    throw_exception_( func, file, line, msg, to_string(fc::forward<T1>(a1) ), to_string( fc::forward<T2>(a2) ), to_string( fc::forward<T3>(a3) ), to_string( fc::forward<T4>(a4) ) );
+  }
 
   fc::string except_str();
 

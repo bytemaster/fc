@@ -45,6 +45,7 @@ include_directories( ${OPENSSL_INCLUDE_DIR} )
 include_directories( include )
 
 set( sources 
+  src/ssh.cpp
   src/process.cpp
   src/http_connection.cpp
   src/json_rpc_connection.cpp
@@ -82,6 +83,9 @@ set( sources
   src/file_mapping.cpp
 #  src/program_options.cpp
 )
+
+add_subdirectory(vendor/libssh2-1.4.2)
+
 setup_library( fc SOURCES ${sources} )
 
 setup_executable( json_rpc_test SOURCES tests/json_rpc_test.cpp LIBRARIES fc ${pthread_library} ${rt_library} ${Boost_THREAD_LIBRARY} ${Boost_CONTEXT_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${Boost_CHRONO_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${rt_library} )

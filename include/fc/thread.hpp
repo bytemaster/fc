@@ -1,7 +1,7 @@
 #ifndef _FC_THREAD_HPP_
 #define _FC_THREAD_HPP_
 #include <fc/task.hpp>
-#include <fc/vector_fwd.hpp>
+#include <fc/vector.hpp>
 
 namespace fc {
   class string;
@@ -104,6 +104,13 @@ namespace fc {
       priority current_priority()const;
       ~thread();
 
+       template<typename T1, typename T2>
+       int wait_any( const fc::future<T1>& f1, const fc::future<T2>& f2) {
+          fc::vector<fc::promise_base::ptr> proms(2);
+          proms[0] = fc::static_pointer_cast<fc::promise_base>(f1.m_prom);
+          proms[1] = fc::static_pointer_cast<fc::promise_base>(f2.m_prom);
+          return wait_any_until(fc::move(proms), fc::time_point::max() );
+       }
     private:
       thread( class thread_d* );
       friend class promise_base;
@@ -126,6 +133,7 @@ namespace fc {
       void async_task( task_base* t, const priority& p, const char* desc );
       void async_task( task_base* t, const priority& p, const time_point& tp, const char* desc );
       class thread_d* my;
+
   };
 
   /** 
@@ -153,6 +161,10 @@ namespace fc {
     *
     * @return 0 if f1 is ready, 1 if f2 is ready or throw on error.
     */
+   template<typename T1, typename T2>
+   int wait_any( const fc::future<T1>& f1, const fc::future<T2>& f2) {
+      return fc::thread::current().wait_any(f1,f2);
+   }
    int wait_any( fc::vector<promise_base::ptr>&& v, const microseconds& timeout_us = microseconds::max() );
    int wait_any_until( fc::vector<promise_base::ptr>&& v, const time_point& tp );
 

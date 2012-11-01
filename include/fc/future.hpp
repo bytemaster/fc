@@ -204,6 +204,7 @@ namespace fc {
         m_prom->on_complete( fc::forward<CompletionHandler>(c) );
       }
     private:
+      friend class thread;
       shared_ptr<promise<T>> m_prom;
   };
 
@@ -244,6 +245,7 @@ namespace fc {
       }
 
     private:
+      friend class thread;
       shared_ptr<promise<void>> m_prom;
   };
 } 

@@ -80,5 +80,9 @@ namespace fc {
   fc::shared_ptr<T> dynamic_pointer_cast( const fc::shared_ptr<O>& t ) {
     return fc::shared_ptr<T>( dynamic_cast<T*>(t.get()), true );
   }
+  template<typename T, typename O>
+  fc::shared_ptr<T> static_pointer_cast( const fc::shared_ptr<O>& t ) {
+    return fc::shared_ptr<T>( static_cast<T*>(t.get()), true );
+  }
 }
 

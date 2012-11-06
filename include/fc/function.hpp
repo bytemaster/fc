@@ -25,8 +25,7 @@ class function {
     function& operator=( const function& c ) { func = c.func; return *this; }
     function& operator=( function&& c )      { fc::swap(func,c.func); return *this; }
     
-    template<typename... Args2>
-    R operator()( Args2... args2)const { return func->call(fc::forward<Args2>(args2)...); }
+    R operator()( Args... args)const { return func->call(args...); }
 
     bool operator!()const { return !func; }
 
@@ -34,7 +33,7 @@ class function {
 
     struct impl_base : public fc::retainable {
       virtual ~impl_base(){}
-      virtual R call(Args...) = 0;
+      virtual R call(Args...)const = 0;
     };
 
     template<typename Functor>
@@ -42,7 +41,7 @@ class function {
       template<typename U>
       impl( U&& u ):func( fc::forward<U>(u) ){}
 
-      virtual R call(Args... args) { return func(args...); }
+      virtual R call(Args... args)const { return func(args...); }
 
       Functor func;
     };

@@ -8,13 +8,13 @@ namespace fc {
     struct identity_member { 
         // TODO: enumerate all method patterns
         template<typename R, typename C, typename P>
-        static fc::function<R()> functor( P&& p, R (C::*mem_func)() ) {
+        static fc::function<R> functor( P&& p, R (C::*mem_func)() ) {
           return [=](){ return (p->*mem_func)(); };
         }
         
         template<typename R, typename C, typename A1, typename P>
-        static fc::function<R(A1)> functor( P&& p, R (C::*mem_func)(A1) ) {
-          return [=](A1 a1){ return (p->*mem_func)(a1); };
+        static fc::function<R,A1> functor( P&& p, R (C::*mem_func)(A1) ) {
+          return fc::function<R,A1>([=](A1 a1){ return (p->*mem_func)(a1); });
         }
     };
 
@@ -44,24 +44,24 @@ namespace fc {
       template<typename InterfaceType>
       ptr( InterfaceType* p )
       :_vtable( new vtable_type() ) {
-          _vtable->template visit<InterfaceType>( detail::vtable_visitor<InterfaceType*>(p) );
+          _vtable->template visit_other<InterfaceType>( detail::vtable_visitor<InterfaceType*>(p) );
       }
 
       template<typename InterfaceType>
       ptr( const fc::shared_ptr<InterfaceType>& p )
       :_vtable( new vtable_type() ),_self(p){ 
-          _vtable->template visit<InterfaceType>( detail::vtable_visitor<InterfaceType*>(p.get()) );
+          _vtable->template visit_other<InterfaceType>( detail::vtable_visitor<InterfaceType*>(p.get()) );
       }
 
-      vtable_type& operator*()            { return *_vtable; }
-      const vtable_type& operator*()const { return *_vtable; }
+      //vtable_type& operator*()            { return *_vtable; }
+      vtable_type& operator*()const { return *_vtable; }
 
-      vtable_type* operator->()            { return _vtable.get(); }
-      const vtable_type* operator->()const { return _vtable.get(); }
+      //vtable_type* operator->()            { return _vtable.get(); }
+      vtable_type* operator->()const { return _vtable.get(); }
 
     protected:
-      fc::shared_ptr< vtable_type > _vtable;
-      fc::shared_ptr< fc::retainable >              _self;
+      fc::shared_ptr< vtable_type >    _vtable;
+      fc::shared_ptr< fc::retainable > _self;
   };
 
 
@@ -72,8 +72,10 @@ namespace fc {
 
 #define FC_STUB_VTABLE_DEFINE_MEMBER( r, data, elem ) \
       decltype(Transform::functor( (data*)nullptr, &data::elem)) elem; 
+#define FC_STUB_VTABLE_DEFINE_VISIT_OTHER( r, data, elem ) \
+        v( BOOST_PP_STRINGIZE(elem), elem, &T::elem ); 
 #define FC_STUB_VTABLE_DEFINE_VISIT( r, data, elem ) \
-        v( BOOST_PP_STRINGIZE(elem), elem, &T::elem ); \
+        v( BOOST_PP_STRINGIZE(elem), elem ); 
 
 #define FC_STUB( CLASS, METHODS ) \
 namespace fc { namespace detail { \
@@ -82,7 +84,11 @@ namespace fc { namespace detail { \
      vtable(){} \
     BOOST_PP_SEQ_FOR_EACH( FC_STUB_VTABLE_DEFINE_MEMBER, CLASS, METHODS ) \
       template<typename T, typename Visitor> \
-      void visit( Visitor&& v ) { \
+      void visit_other( Visitor&& v ){ \
+        BOOST_PP_SEQ_FOR_EACH( FC_STUB_VTABLE_DEFINE_VISIT_OTHER, CLASS, METHODS ) \
+      } \
+      template<typename Visitor> \
+      void visit( Visitor&& v ){ \
         BOOST_PP_SEQ_FOR_EACH( FC_STUB_VTABLE_DEFINE_VISIT, CLASS, METHODS ) \
       } \
   }; \

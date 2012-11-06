@@ -41,6 +41,9 @@ namespace fc { namespace json {
   };
 
 
+  void rpc_connection::add_method( const fc::string& name, fc::shared_ptr<fc::json::rpc_server_method>&& p ) {
+    my->_methods[name] = fc::move(p);
+  }
   void rpc_connection::handle_message( const value& v ) {
      auto id_itr = v.find( "id" );
      auto m_itr  = v.find( "method" );
@@ -143,7 +146,7 @@ namespace fc { namespace json {
       my->_pr_tail = p;
       my->_pr_head = my->_pr_tail;
     }
-    send_invoke( ++my->_next_req_id, m, fc::move(param) );
+    send_invoke( my->_next_req_id++, m, fc::move(param) );
   }
 
 

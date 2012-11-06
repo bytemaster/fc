@@ -9,8 +9,9 @@ namespace fc {
 
   class tcp_socket::impl {
     public:
-      impl():_sock( fc::asio::default_io_service() ){}
+      impl():_sock( fc::asio::default_io_service() ){ slog( "sock %p", this); }
       ~impl(){
+        slog( "~sock %p", this );
         if( _sock.is_open() ) _sock.close();
       }
 
@@ -22,10 +23,18 @@ namespace fc {
 
   tcp_socket::tcp_socket(){}
 
-  tcp_socket::~tcp_socket(){}
+  tcp_socket::~tcp_socket(){ slog( "%p", &my); }
 
+  void tcp_socket::flush() {}
+  void tcp_socket::close() {
+    my->_sock.close();
+  }
 
-  void   tcp_socket::write( const char* buf, size_t len ) {
+  bool tcp_socket::eof()const {
+    return !my->_sock.is_open();
+  }
+
+  fc::ostream&   tcp_socket::write( const char* buf, size_t len ) {
     boost::system::error_code ec;
     size_t w = my->_sock.write_some( boost::asio::buffer( buf, len ), ec );
 
@@ -46,6 +55,7 @@ namespace fc {
       wlog( "throw" );
       throw boost::system::system_error(ec);
     }
+    return *this;
   }
   size_t tcp_socket::readsome( char* buf, size_t len ) {
     boost::system::error_code ec;
@@ -63,12 +73,12 @@ namespace fc {
     }
     return w;
   }
-  size_t tcp_socket::read( char* buffer, size_t s ) {
+  fc::istream& tcp_socket::read( char* buffer, size_t s ) {
     size_t r = readsome( buffer, s );
     while( r < s ) {
       r += readsome( buffer + r, s - r );
     }
-    return r;
+    return *this;
   }
   void tcp_socket::connect_to( const fc::ip::endpoint& e ) {
     fc::asio::tcp::connect(my->_sock, fc::asio::tcp::endpoint( boost::asio::ip::address_v4(e.get_address()), e.port() ) ); 
@@ -84,12 +94,14 @@ namespace fc {
       boost::asio::ip::tcp::acceptor _accept;
   };
   void tcp_server::close() {
-    if( my->_accept.is_open() ) my->_accept.close();
+    if( my && my->_accept.is_open() ) my->_accept.close();
+    delete my; my = nullptr;
   }
-  tcp_server::tcp_server(uint16_t port)
-  :my(port) {
+  tcp_server::tcp_server()
+  :my(nullptr) {
   }
   tcp_server::~tcp_server() {
+    delete my;
   }
 
 
@@ -103,16 +115,11 @@ namespace fc {
     if( ec ) BOOST_THROW_EXCEPTION( boost::system::system_error(ec) );
     return true;
   }
- #if 0 
   void tcp_server::listen( uint16_t port ) {
-  /*
-    slog( "listen %d!", port );
-    my->_accept.bind( 
-    slog( "listen %d!", port );
-    my->_accept.listen(port);
-    slog( "listen %d!", port );
-    */
+    if( my ) delete my;
+    my = new impl(port);
   }
-  #endif
+
+
 
 } // namespace fc 

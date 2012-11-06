@@ -10,7 +10,7 @@ FC_START_SHARED_IMPL(fc::http::connection)
    int read_until( char* buffer, char* end, char c = '\n' ) {
       char* p = buffer;
      // try {
-          while( p < end && sock.read(p,1) ) {
+          while( p < end && !sock.read(p,1).eof() ) {
             if( *p == c ) {
               *p = '\0';
               return (p - buffer)-1;

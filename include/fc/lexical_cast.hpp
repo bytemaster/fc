@@ -72,6 +72,9 @@ namespace fc {
     struct lexical_cast<bool, R> { static bool cast( const R& v ) { return v; } };
 
     template<> 
+    struct lexical_cast<char, fc::string> { static bool cast( const fc::string& v ) { return v[0]; } };// TODO: check string len
+
+    template<> 
     struct lexical_cast<bool, fc::string> { static bool cast( const fc::string& v ) { return v == "true"; } };
 
     template<> 

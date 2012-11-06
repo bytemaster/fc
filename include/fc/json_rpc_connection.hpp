@@ -52,10 +52,10 @@ namespace fc {  namespace json {
     template<typename InterfaceType>
     struct add_method_visitor {
       public:
-        add_method_visitor( const fc::ptr<InterfaceType>& p, fc::json::rpc_connection& c ):_ptr(p){}
+        add_method_visitor( const fc::ptr<InterfaceType>& p, fc::json::rpc_connection& c ):_ptr(p),_con(c){}
 
-        template<typename R, typename Args, typename Type>
-        void operator()( const char* name, fc::function<R,Args>& meth, Type );
+        template<typename R, typename Args>
+        void operator()( const char* name, fc::function<R,Args>& meth);
 
         const fc::ptr<InterfaceType>& _ptr;
         fc::json::rpc_connection&     _con;
@@ -111,6 +111,8 @@ namespace fc {  namespace json {
     private:
       void invoke( detail::pending_result::ptr&& p, const fc::string& m, value&& param );
       void add_method( const fc::string& name, rpc_server_method::ptr&& m );
+      template<typename InterfaceType>
+      friend struct detail::add_method_visitor;
 
       class impl;
       fc::shared_ptr<class impl> my;
@@ -119,8 +121,8 @@ namespace fc {  namespace json {
   namespace detail {
 
     template<typename InterfaceType>
-    template<typename R, typename Args, typename Type>
-    void add_method_visitor<InterfaceType>::operator()( const char* name, fc::function<R,Args>& meth, Type ) {
+    template<typename R, typename Args>
+    void add_method_visitor<InterfaceType>::operator()( const char* name, fc::function<R,Args>& meth) {
         _con.add_method( name, rpc_server_method::ptr( new rpc_server_method_impl<R,Args>(meth) ) );
     }
 

@@ -140,6 +140,7 @@ namespace fc { namespace json {
 
   void rpc_connection::invoke( detail::pending_result::ptr&& p, 
                                const fc::string& m, value&& param ) {
+    p->id = my->_next_req_id;
     if( my->_pr_tail ) {
       my->_pr_tail->next = p;
       my->_pr_tail = my->_pr_tail->next;

@@ -6,15 +6,9 @@ namespace fc {
   
   namespace detail {
     struct identity_member { 
-        // TODO: enumerate all method patterns
-        template<typename R, typename C, typename P>
-        static fc::function<R> functor( P&& p, R (C::*mem_func)() ) {
-          return [=](){ return (p->*mem_func)(); };
-        }
-        
-        template<typename R, typename C, typename A1, typename P>
-        static fc::function<R,A1> functor( P&& p, R (C::*mem_func)(A1) ) {
-          return fc::function<R,A1>([=](A1 a1){ return (p->*mem_func)(a1); });
+        template<typename R, typename C, typename P, typename... Args>
+        static fc::function<R,Args...> functor( P&& p, R (C::*mem_func)(Args...) ) {
+          return fc::function<R,Args...>([=](Args... args){ return (p->*mem_func)(args...); });
         }
     };
 

@@ -25,7 +25,6 @@ namespace fc {  namespace json {
     template<typename T>
     struct pending_result_impl : virtual public promise<T>, virtual public pending_result {   
        virtual void handle_result( const fc::value& s ) {
-             slog( "cast %s", typeid(T).name() );
           this->set_value( value_cast<T>(s) );
        }
       protected:

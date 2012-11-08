@@ -10,7 +10,7 @@ struct test {
   int sub(int x){ return x-1; }
   int sub1(int x){ return 3; }
   int sub2(float x){ return 3; }
-  int sub3(double x){ return 3; }
+  int sub3(double x, int y){ return x-y; }
   int sub4(uint16_t x){ return 3; }
   int sub5(char x){ return 3; }
   int sub6(uint64_t x){ return 3; }
@@ -37,6 +37,7 @@ int main( int argc, char** argv ) {
 
       fc::json::rpc_client<test> rpcc( con );
       slog( "5+1=%d", rpcc->add(5).wait() );
+      slog( "sub3 4-5=%d", rpcc->sub3(4,5).wait() );
   }
   slog( "exit serv" );
   /*

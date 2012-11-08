@@ -49,6 +49,9 @@ namespace fc {
    path::operator const boost::filesystem::path& ()const {
     return *_p;
    }
+   fc::string path::generic_string()const {
+    return _p->generic_string();
+   }
 
    fc::string path::string()const {
     return _p->string().c_str();

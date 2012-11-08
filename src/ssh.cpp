@@ -426,13 +426,13 @@ namespace fc { namespace ssh {
     time_t now;
     memset( &now, 0, sizeof(now) );
     // TODO: preserve creation / modification date
-    chan = libssh2_scp_send64( my->session, remote_path.string().c_str(), 0700, fsize, now, now );
+    chan = libssh2_scp_send64( my->session, remote_path.generic_string().c_str(), 0700, fsize, now, now );
     while( chan == 0 ) {
       char* msg;
       int ec = libssh2_session_last_error( my->session, &msg, 0, 0 );
       if( ec == LIBSSH2_ERROR_EAGAIN ) {
         my->wait_on_socket();
-        chan = libssh2_scp_send64( my->session, local_path.string().c_str(), 0700, fsize, now, now );
+        chan = libssh2_scp_send64( my->session, local_path.generic_string().c_str(), 0700, fsize, now, now );
       } else {
           FC_THROW_MSG( "scp %s to %s failed %s - %s",local_path.string(), remote_path.string(), ec, msg );
       }
@@ -486,10 +486,10 @@ namespace fc { namespace ssh {
       return; // nothing to do
     }
 
-    int rc = libssh2_sftp_unlink(my->sftp, remote_path.string().c_str() );
+    int rc = libssh2_sftp_unlink(my->sftp, remote_path.generic_string().c_str() );
     while( rc == LIBSSH2_ERROR_EAGAIN ) {
       my->wait_on_socket();
-      rc = libssh2_sftp_unlink(my->sftp, remote_path.string().c_str() );
+      rc = libssh2_sftp_unlink(my->sftp, remote_path.generic_string().c_str() );
     }
     if( 0 != rc ) {
        rc = libssh2_sftp_last_error(my->sftp);
@@ -500,10 +500,10 @@ namespace fc { namespace ssh {
   file_attrib client::stat( const fc::path& remote_path ){
      my->init_sftp();
      LIBSSH2_SFTP_ATTRIBUTES att;
-     int ec = libssh2_sftp_stat( my->sftp, remote_path.string().c_str(), &att );
+     int ec = libssh2_sftp_stat( my->sftp, remote_path.generic_string().c_str(), &att );
      while( ec == LIBSSH2_ERROR_EAGAIN ) {
         my->wait_on_socket();
-        ec = libssh2_sftp_stat( my->sftp, remote_path.string().c_str(), &att );
+        ec = libssh2_sftp_stat( my->sftp, remote_path.generic_string().c_str(), &att );
      }
      if( ec ) {
         return file_attrib();

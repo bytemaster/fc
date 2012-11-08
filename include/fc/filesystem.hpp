@@ -37,6 +37,7 @@ namespace fc {
       fc::path   filename()const;
       fc::path   parent_path()const;
       fc::string string()const;
+      fc::string generic_string()const;
     private:
       fwd<boost::filesystem::path,8> _p; 
   };

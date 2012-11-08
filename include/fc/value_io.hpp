@@ -132,7 +132,7 @@ namespace fc {
          }
          else {
             if( !is_optional< typename fc::remove_reference<decltype(c.*p)>::type >::type::value ) {
-                wlog( "unable to find name: '%1%'",name);
+                wlog( "unable to find name: '%s'",name);
             }
          }
       }

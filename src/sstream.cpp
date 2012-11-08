@@ -33,11 +33,9 @@ namespace fc {
     return *this;
   }
   size_t   stringstream::readsome( char* buf, size_t len ) {
-    slog("");
     return my->ss.readsome(buf,len);
   }
   istream&   stringstream::read( char* buf, size_t len ) {
-    slog("");
     my->ss.read(buf,len);
     return *this;
   }

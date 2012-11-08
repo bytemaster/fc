@@ -64,6 +64,7 @@ namespace fc { namespace json {
 
           value nul;
           const value& params = (p_itr != end) ? p_itr->val : nul;
+          slog( "params '%s'", to_string( params ).c_str() );
 
           if( id_itr != end ) { // capture reply
             try {

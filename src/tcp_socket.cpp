@@ -9,9 +9,8 @@ namespace fc {
 
   class tcp_socket::impl {
     public:
-      impl():_sock( fc::asio::default_io_service() ){ slog( "sock %p", this); }
+      impl():_sock( fc::asio::default_io_service() ){ }
       ~impl(){
-        slog( "~sock %p", this );
         if( _sock.is_open() ) _sock.close();
       }
 

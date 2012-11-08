@@ -4,16 +4,18 @@
 #include <boost/preprocessor/repeat.hpp>
 #include <boost/preprocessor/repetition/enum_binary_params.hpp>
 #include <boost/preprocessor/repetition/enum_params.hpp>
+#include <boost/preprocessor/repetition/enum_trailing_params.hpp>
 #include <boost/preprocessor/facilities/empty.hpp>
 
 
 namespace fc { namespace json {
+        //static std::function<fc::future<R>( BOOST_PP_ENUM_PARAMS(n,A) ) >  
 
   namespace detail {
     struct rpc_member {
         #define RPC_MEMBER_FUNCTOR(z,n,IS_CONST) \
-        template<typename R, typename C, typename P BOOST_PP_COMMA_IF(n) BOOST_PP_ENUM_PARAMS( n, typename A)> \
-        static fc::function<fc::future<R> BOOST_PP_COMMA_IF(n)  BOOST_PP_ENUM_PARAMS(n,A)  >  \
+        template<typename R, typename C, typename P BOOST_PP_ENUM_TRAILING_PARAMS( n, typename A)> \
+        static fc::function<fc::future<R> BOOST_PP_ENUM_TRAILING_PARAMS(n,A) > \
             functor( P, R (C::*mem_func)(BOOST_PP_ENUM_PARAMS(n,A)) IS_CONST,  \
                       const rpc_connection::ptr& c = rpc_connection::ptr(), const char* name = nullptr ) { \
             return [=](BOOST_PP_ENUM_BINARY_PARAMS(n,A,a))->fc::future<R>{ \

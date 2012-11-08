@@ -587,7 +587,7 @@ char* read_key_val( value::object& obj, bool sc, char* in, char* end, fc::json::
     if( sc ) { // if we expect a ,
       if( *name != ',' ) { // but didn't get one
         if( *name != '}' )
-            wlog( "expected ',' or '}' but got %1%", name ); // warn and accept name
+            wlog( "expected ',' or '}' but got '%s'", name ); // warn and accept name
       } else { // we got the exepcted , read the expected name 
         name = fc::json::read_value( name_end, end, name_end );
       }
@@ -757,15 +757,15 @@ fc::value to_value( char* start, char* end, error_collector& ec ) {
     }
     case 'n': {
       temp_set move_end(ve,'\0');
-      if( strcmp(s,"null" ) ) return value();
+      if( strcmp(s,"null" ) == 0) return value();
     }
     case 't': {
       temp_set move_end(ve,'\0');
-      if( strcmp(s,"true" ) ) return true;
+      if( strcmp(s,"true" ) == 0) return true;
     }
     case 'f': {
       temp_set move_end(ve,'\0');
-      if( strcmp(s,"false" ) ) return false;
+      if( strcmp(s,"false" ) == 0) return false;
     }
 
     default:

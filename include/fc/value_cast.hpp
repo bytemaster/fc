@@ -5,6 +5,9 @@
 #include <fc/lexical_cast.hpp>
 #include <fc/numeric_cast.hpp>
 #include <fc/value_io.hpp>
+#include <fc/tuple.hpp>
+
+#include <typeinfo>
 
 namespace fc {
 
@@ -26,9 +29,9 @@ namespace fc {
          virtual void operator()( const double& v      ){ m_out = fc::numeric_cast<T>(v); }
          virtual void operator()( const bool& v        ){ m_out = fc::numeric_cast<T>(v); }
          virtual void operator()( const fc::string& v ) { m_out = fc::lexical_cast<T>(v); }
-         virtual void operator()( const value::object&  )      { FC_THROW_MSG("bad cast");             }
-         virtual void operator()( const value::array&  )       { FC_THROW_MSG("bad cast");             }
-         virtual void operator()( )                     { FC_THROW_MSG("bad cast");             }
+         virtual void operator()( const value::object&  )      { FC_THROW_MSG("bad cast"); }
+         virtual void operator()( const value::array&  )       { FC_THROW_MSG("bad cast"); }
+         virtual void operator()( )                     { FC_THROW_MSG("bad cast");        }
          private:
          T& m_out;
        };
@@ -48,10 +51,10 @@ namespace fc {
          virtual void operator()( const float& v       ){ m_out = fc::lexical_cast<fc::string>(v); }
          virtual void operator()( const double& v      ){ m_out = fc::lexical_cast<fc::string>(v); }
          virtual void operator()( const bool& v        ){ m_out = fc::lexical_cast<fc::string>(v); }
-         virtual void operator()( const fc::string& v ){ m_out = v;                                   }
-         virtual void operator()( const value::object&  )      { FC_THROW_MSG("bad cast");                       }
-         virtual void operator()( const value::array&  )       { FC_THROW_MSG("bad cast");                       }
-         virtual void operator()( )                     { FC_THROW_MSG("bad cast");                       }
+         virtual void operator()( const fc::string& v ){ m_out = v;                                }
+         virtual void operator()( const value::object&  )      { FC_THROW_MSG("bad cast"); }
+         virtual void operator()( const value::array&  )       { FC_THROW_MSG("bad cast"); }
+         virtual void operator()( )                     { FC_THROW_MSG("bad cast");        }
      
          private:
          fc::string& m_out;
@@ -122,14 +125,45 @@ namespace fc {
          virtual void operator()( const value::array&  )       { FC_THROW_MSG("bad cast");}
          virtual void operator()( )                     { }
        };
+        template<typename IsTuple=fc::false_type>
+        struct cast_if_tuple {
+          template<typename T>
+          static T cast(  const value& v ) {
+             slog( "cast non tuple %s", typeid(T).name() );
+             T out;
+             v.visit(cast_visitor<T>(out));
+             return out;
+          }
+        };
+        template<>
+        struct cast_if_tuple<fc::true_type> {
+          struct member_visitor {
+             member_visitor( const value& v )
+             :_val(v),idx(0){}
+             template<typename Member>
+             void operator()( Member& m ) {
+               m = value_cast<Member>(_val[idx]);
+               ++idx;
+             }
+             const value& _val;
+             int    idx;
+          };
+
+          template<typename T>
+          static T cast(  const value& v ) {
+             T out;
+             out.visit( member_visitor(v) );
+             slog( "cast tuple" );
+            // v.visit(cast_visitor<T>(out));
+             return out;
+          }
+        };
 
         template<typename IsReflected=fc::false_type>
         struct cast_if_reflected {
           template<typename T>
           static T cast(  const value& v ) {
-             T out;
-             v.visit(cast_visitor<T>(out));
-             return out;
+            return cast_if_tuple<typename is_tuple<T>::type>::template cast<T>(v);
           }
         };
 

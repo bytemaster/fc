@@ -25,6 +25,7 @@ namespace fc {  namespace json {
     template<typename T>
     struct pending_result_impl : virtual public promise<T>, virtual public pending_result {   
        virtual void handle_result( const fc::value& s ) {
+             slog( "cast %s", typeid(T).name() );
           this->set_value( value_cast<T>(s) );
        }
       protected:
@@ -40,13 +41,16 @@ namespace fc {  namespace json {
     };
 
 
-    template<typename R, typename Args>
+    template<typename R, typename... Args>
     struct rpc_server_method_impl : public rpc_server_method {
-      rpc_server_method_impl( const fc::function<R,Args>& f ):func(f){} 
+      //static_assert( fc::is_tuple<Args>::type::value, "params should be a tuple" );
+      rpc_server_method_impl( const fc::function<R,Args...>& f ):func(f){} 
       virtual value call( const value& v ) {
-        return value( func( fc::value_cast<Args>( v ) ) ); 
+       //      slog( "cast %s", typeid(Args).name() );
+        return value(  call_fused( func, fc::value_cast<fc::tuple<Args...> >( v ) ) ); 
+        //return value(  func( fc::value_cast<Args>( v ))  ); 
       }
-      fc::function<R,Args> func;
+      fc::function<R,Args...> func;
     };
 
     template<typename InterfaceType>
@@ -54,8 +58,8 @@ namespace fc {  namespace json {
       public:
         add_method_visitor( const fc::ptr<InterfaceType>& p, fc::json::rpc_connection& c ):_ptr(p),_con(c){}
 
-        template<typename R, typename Args>
-        void operator()( const char* name, fc::function<R,Args>& meth);
+        template<typename R, typename... Args>
+        void operator()( const char* name, fc::function<R,Args...>& meth);
 
         const fc::ptr<InterfaceType>& _ptr;
         fc::json::rpc_connection&     _con;
@@ -91,6 +95,7 @@ namespace fc {  namespace json {
 
       template<typename R, typename Args >
       void add_method( const fc::string& name, const fc::function<R,Args>& a ) {
+         static_assert( is_tuple<Args>::type::value, "is tuple" );
          this->add_method( name, rpc_server_method::ptr(new detail::rpc_server_method_impl<R,Args>(a) ) );
       }
 
@@ -121,9 +126,10 @@ namespace fc {  namespace json {
   namespace detail {
 
     template<typename InterfaceType>
-    template<typename R, typename Args>
-    void add_method_visitor<InterfaceType>::operator()( const char* name, fc::function<R,Args>& meth) {
-        _con.add_method( name, rpc_server_method::ptr( new rpc_server_method_impl<R,Args>(meth) ) );
+    template<typename R, typename... Args>
+    void add_method_visitor<InterfaceType>::operator()( const char* name, fc::function<R,Args...>& meth)    {
+        _con.add_method( name, rpc_server_method::ptr( 
+                              new rpc_server_method_impl<R,Args...>(meth) ) );
     }
 
   } // namespace detail

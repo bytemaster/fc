@@ -14,7 +14,7 @@ int main( int argc, char** argv ) {
 //   fc::string pw;
 //   std::cin>>pw;
    fc::ssh::client c;
-   c.connect( "dlarimer", "yyRK@$p9", "localhost" );
+   c.connect( "dlarimer", "", "localhost" );
    fc::ssh::process proc = c.exec( "/bin/ls" );
    while( !proc.out_stream().eof() ) {
       fc::string line;

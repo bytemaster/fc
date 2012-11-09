@@ -91,6 +91,7 @@ add_subdirectory(vendor/libssh2-1.4.2)
 setup_library( fc SOURCES ${sources} )
 
 setup_executable( json_rpc_test SOURCES tests/json_rpc_test.cpp LIBRARIES fc ${pthread_library} ${rt_library} ${Boost_THREAD_LIBRARY} ${Boost_CONTEXT_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${Boost_CHRONO_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${rt_library} )
+setup_executable( ssh_test SOURCES tests/ssh.cpp LIBRARIES fc ${pthread_library} ${rt_library} ${Boost_THREAD_LIBRARY} ${Boost_CONTEXT_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${Boost_CHRONO_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${rt_library} ssh2 ${OPENSSL_LIBRARY} ${OPENSSL_CRYPTO_LIBRARY} z)
 
 #add_executable( test_vec tests/vector_test.cpp )
 #target_link_libraries( test_vec fc ${Boost_SYSTEM_LIBRARY} ${Boost_CHRONO_LIBRARY} ${Boost_THREAD_LIBRARY} ${Boost_CONTEXT_LIBRARY} )

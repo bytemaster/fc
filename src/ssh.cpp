@@ -1,4 +1,5 @@
 #include <fc/ssh/client.hpp>
+#include <fc/ssh/process.hpp>
 #include <fc/exception.hpp>
 #include <fc/iostream.hpp>
 #include <fc/log.hpp>
@@ -19,13 +20,31 @@ namespace fc { namespace ssh {
   namespace detail {
     static int ssh_init = libssh2_init(0);
 
+    class process_istream : public fc::istream {
+       public:
+          virtual size_t readsome( char* buf, size_t len ) { return 0; }
+          virtual istream& read( char* buf, size_t len )  { return *this; }
+
+          virtual bool eof()const { return true; }
+    };
+
+    class process_ostream : public fc::ostream {
+      public:
+          virtual ostream& write( const char* buf, size_t len ) { return *this; }
+          virtual void   close(){}
+          virtual void   flush(){}
+    };
+
     class process_impl : public fc::retainable {
       public:
         process_impl( const client& c ):sshc(c){}
 
+        process_istream std_err;
+        process_istream std_out;
+        process_ostream std_in;
+
         client  sshc;
     };
-
 
 
     class client_impl : public fc::retainable {
@@ -514,10 +533,121 @@ namespace fc { namespace ssh {
      return ft;
   }
 
-  void client::mkdir( const fc::path& remote_dir, int mode ) {
+  void client::mkdir( const fc::path& rdir, int mode ) {
+    auto s = stat(rdir);
+    if( s.is_directory() ) return;
+    else if( s.exists() ) {
+      FC_THROW_MSG( "Non directory exists at path %s", rdir.generic_string().c_str() );
+    }
+
+    int rc = libssh2_sftp_mkdir(my->sftp, rdir.generic_string().c_str(), mode );
+    while( rc == LIBSSH2_ERROR_EAGAIN ) {
+      my->wait_on_socket();
+      rc = libssh2_sftp_mkdir(my->sftp, rdir.generic_string().c_str(), mode );
+    }
+    if( 0 != rc ) {
+       rc = libssh2_sftp_last_error(my->sftp);
+       FC_THROW_MSG( "mkdir error %s", rc );
+    }
   }
 
   void client::close() {
+    if( my->session ) {
+       if( my->sftp ) {
+         int ec = libssh2_sftp_shutdown(my->sftp);
+         try {
+             while( ec == LIBSSH2_ERROR_EAGAIN ) {
+                my->wait_on_socket();
+                ec = libssh2_sftp_shutdown(my->sftp);
+             } 
+         }catch(...){
+          elog( "... caught error closing sftp session???" );
+         }
+         my->sftp = 0;
+       }
+       try {
+         int ec = libssh2_session_disconnect(my->session, "exit cleanly" );
+         while( ec == LIBSSH2_ERROR_EAGAIN ) {
+            my->wait_on_socket();
+            ec = libssh2_session_disconnect(my->session, "exit cleanly" );
+         }
+         ec = libssh2_session_free(my->session);
+         while( ec == LIBSSH2_ERROR_EAGAIN ) {
+            my->wait_on_socket();
+            ec = libssh2_session_free(my->session );
+         }
+         my->session = 0;
+       } catch ( ... ){
+          elog( "... caught error freeing session???" );
+          my->session = 0;
+       }
+       try {
+         if( my->sock ) {
+           slog( "closing socket" );
+           my->sock->close();
+         }
+       } catch ( ... ){
+          elog( "... caught error closing socket???" );
+       }
+       my->sock.reset(0);
+       try {
+        if( my->read_prom ) my->read_prom->wait();
+       } catch ( ... ){
+        wlog( "caught error waiting on read prom" );
+       }
+       try {
+        if( my->write_prom ) my->write_prom->wait();
+       } catch ( ... ){
+        wlog( "caught error waiting on write prom" );
+       }
+    }
   }
- 
+
+  file_attrib::file_attrib()
+  :size(0),uid(0),gid(0),permissions(0),atime(0),mtime(0)
+  { }
+
+  bool file_attrib::is_directory() {
+    return  LIBSSH2_SFTP_S_ISDIR(permissions);
+  }
+  bool file_attrib::is_file() {
+    return LIBSSH2_SFTP_S_ISREG(permissions);
+  }
+  bool file_attrib::exists() {
+    return 0 != permissions;
+  }
+  
+
+
+
+  process::~process()
+  {}
+
+  /**
+   *  Blocks until the result code of the process has been returned.
+   */
+  int process::result() {
+    return 0;
+  }
+  /**
+   *  @brief returns a stream that writes to the procss' stdin
+   */
+  fc::ostream& process::in_stream() {
+    return my->std_in;
+  }
+  /**
+   *  @brief returns a stream that reads from the process' stdout
+   */
+  fc::istream& process::out_stream() {
+    return my->std_out;
+  }
+  /**
+   *  @brief returns a stream that reads from the process' stderr
+   */
+  fc::istream& process::err_stream() {
+    return my->std_err;
+  }
+  process::process( client& c, const fc::string& cmd, const fc::string& pty_type)
+  {
+  }
 } }

@@ -16,7 +16,7 @@ namespace fc {
       fc::thread::current().debug("~mutex");
       while( c )  {
         elog( "still blocking on context %p (%s)", m_blist, (m_blist->cur_task ? m_blist->cur_task->get_desc() : "no current task") ); 
-        c = c->next_blocked;
+        c = c->next_blocked_mutex;
       }
     }
     BOOST_ASSERT( !m_blist && "Attempt to free mutex while others are blocking on lock." );
@@ -30,9 +30,9 @@ namespace fc {
     next = 0;
     fc::context* n = h;
     if( !n ) return n;
-    while( n->next_blocked ) { 
+    while( n->next_blocked_mutex ) { 
       next = n;
-      n=n->next_blocked;
+      n=n->next_blocked_mutex;
     }
     return n;
   }
@@ -42,20 +42,20 @@ namespace fc {
     while( c ) {
       if( c == target ) {
         if( p ) { 
-          p->next_blocked = c->next_blocked; 
+          p->next_blocked_mutex = c->next_blocked_mutex; 
           return head; 
         }
-        return c->next_blocked;
+        return c->next_blocked_mutex;
       }
       p = c;
-      c = c->next_blocked;
+      c = c->next_blocked_mutex;
     }
     return head;
   }
   static void cleanup( fc::mutex& m, fc::spin_yield_lock& syl, fc::context*& bl, fc::context* cc ) {
     {  
       fc::unique_lock<fc::spin_yield_lock> lock(syl);
-      if( cc->next_blocked ) {
+      if( cc->next_blocked_mutex ) {
         bl = remove(bl, cc ); 
         return;
       }
@@ -101,12 +101,12 @@ namespace fc {
       if ( get_tail( m_blist, n ) == cc ) 
         return true;
 
-      cc->next_blocked = m_blist;
+      cc->next_blocked_mutex = m_blist;
       m_blist = cc;
     } // end lock scope
     try {
         fc::thread::current().my->yield_until( abs_time, false );
-        return( 0 == cc->next_blocked );
+        return( 0 == cc->next_blocked_mutex );
     } catch (...) {
       cleanup( *this, m_blist_lock, m_blist, cc);
       throw;
@@ -127,13 +127,13 @@ namespace fc {
       if ( get_tail( m_blist, n ) == cc ) {
         return;
       }
-      cc->next_blocked = m_blist;
+      cc->next_blocked_mutex = m_blist;
       m_blist = cc;
 
       int cnt = 0;
       auto i = m_blist;
       while( i ) {
-        i = i->next_blocked;
+        i = i->next_blocked_mutex;
         ++cnt;
       }
       wlog( "wait queue len %1%", cnt );
@@ -141,7 +141,7 @@ namespace fc {
 
     try {
       fc::thread::current().yield(false);
-      BOOST_ASSERT( cc->next_blocked == 0 );
+      BOOST_ASSERT( cc->next_blocked_mutex == 0 );
     } catch ( ... ) {
       wlog( "lock with throw %p %s",this, fc::current_exception().diagnostic_information().c_str() );
       cleanup( *this, m_blist_lock, m_blist, cc);
@@ -154,7 +154,7 @@ namespace fc {
     { fc::unique_lock<fc::spin_yield_lock> lock(m_blist_lock);
       get_tail(m_blist, next);
       if( next ) {
-        next->next_blocked = 0;
+        next->next_blocked_mutex = 0;
         next->ctx_thread->my->unblock( next );
       } else {
         m_blist   = 0;

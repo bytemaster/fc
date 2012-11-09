@@ -26,6 +26,7 @@ namespace fc {
     : caller_context(0),
       stack_alloc(&alloc),
       next_blocked(0), 
+      next_blocked_mutex(0), 
       next(0), 
       ctx_thread(t),
       canceled(false),
@@ -43,6 +44,7 @@ namespace fc {
     :caller_context(0),
      stack_alloc(0),
      next_blocked(0), 
+     next_blocked_mutex(0), 
      next(0), 
      ctx_thread(t),
      canceled(false),
@@ -137,6 +139,7 @@ namespace fc {
     time_point                   resume_time;
    // time_point                   ready_time; // time that this context was put on ready queue
     fc::context*                next_blocked;
+    fc::context*                next_blocked_mutex;
     fc::context*                next;
     fc::thread*                 ctx_thread;
     bool                         canceled;

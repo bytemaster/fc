@@ -8,6 +8,7 @@ namespace fc {
   namespace ssh {
   namespace detail {
     struct client_impl;
+    struct process_impl;
   };
 
   enum sftp_file_type {
@@ -109,7 +110,7 @@ namespace fc {
 
     private:
       friend class process;
-      friend class process_impl;
+      friend class detail::process_impl;
       fc::shared_ptr<detail::client_impl>  my;
   };
 

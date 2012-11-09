@@ -22,9 +22,12 @@ namespace fc {
    *
    *  Process can only be created by mace::ssh::client.
    */
-  class process : public fc::retainable {
+  class process { //: public fc::retainable {
     public:
-      typedef fc::shared_ptr<process> ptr;
+      //typedef fc::shared_ptr<process> ptr;
+
+      process( const process& p );
+      process( process&& p );
 
       ~process();
 
@@ -47,6 +50,7 @@ namespace fc {
     private:
       friend class client;
       process( client& c, const fc::string& cmd, const fc::string& pty_type = fc::string() );
+      process();
 
       fc::shared_ptr<detail::process_impl> my;
   };

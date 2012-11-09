@@ -8,7 +8,7 @@ namespace fc {
     struct actor_member { 
         // TODO: expand for all method arity and constness....
         template<typename R, typename C, typename A1, typename P>
-        static fc::function<fc::future<R>(A1)> functor( P&& p, R (C::*mem_func)(A1), fc::thread* t = nullptr) {
+        static std::function<fc::future<R>(A1)> functor( P&& p, R (C::*mem_func)(A1), fc::thread* t = nullptr) {
           return [=](A1 a1){ return t->async( [=](){ return (p->*mem_func)(a1); } ); };
         }
     };

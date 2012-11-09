@@ -40,16 +40,13 @@ namespace fc {  namespace json {
     };
 
 
-    template<typename R, typename... Args>
+    template<typename R, typename ArgsTuple, typename Signature>
     struct rpc_server_method_impl : public rpc_server_method {
-      //static_assert( fc::is_tuple<Args>::type::value, "params should be a tuple" );
-      rpc_server_method_impl( const fc::function<R,Args...>& f ):func(f){} 
+      rpc_server_method_impl( const std::function<Signature>& f ):func(f){} 
       virtual value call( const value& v ) {
-       //      slog( "cast %s", typeid(Args).name() );
-        return value(  call_fused( func, fc::value_cast<fc::tuple<Args...> >( v ) ) ); 
-        //return value(  func( fc::value_cast<Args>( v ))  ); 
+        return value(  call_fused(func, fc::value_cast<ArgsTuple>( v ) ) ); 
       }
-      fc::function<R,Args...> func;
+      std::function<Signature> func;
     };
 
     template<typename InterfaceType>
@@ -57,8 +54,12 @@ namespace fc {  namespace json {
       public:
         add_method_visitor( const fc::ptr<InterfaceType>& p, fc::json::rpc_connection& c ):_ptr(p),_con(c){}
 
-        template<typename R, typename... Args>
-        void operator()( const char* name, fc::function<R,Args...>& meth);
+        template<typename R>
+        void operator()( const char* name, std::function<R()>& meth);
+        template<typename R, typename A1>
+        void operator()( const char* name, std::function<R(A1)>& meth);
+        template<typename R, typename A1, typename A2>
+        void operator()( const char* name, std::function<R(A1,A2)>& meth);
 
         const fc::ptr<InterfaceType>& _ptr;
         fc::json::rpc_connection&     _con;
@@ -92,12 +93,6 @@ namespace fc {  namespace json {
         return rtn;
       }
 
-      template<typename R, typename Args >
-      void add_method( const fc::string& name, const fc::function<R,Args>& a ) {
-         static_assert( is_tuple<Args>::type::value, "is tuple" );
-         this->add_method( name, rpc_server_method::ptr(new detail::rpc_server_method_impl<R,Args>(a) ) );
-      }
-
       template<typename InterfaceType>
       void add_interface( const fc::ptr<InterfaceType>& it ) {
         it->template visit<InterfaceType>( detail::add_method_visitor<InterfaceType>( it, *this ) );
@@ -125,10 +120,19 @@ namespace fc {  namespace json {
   namespace detail {
 
     template<typename InterfaceType>
-    template<typename R, typename... Args>
-    void add_method_visitor<InterfaceType>::operator()( const char* name, fc::function<R,Args...>& meth)    {
-        _con.add_method( name, rpc_server_method::ptr( 
-                              new rpc_server_method_impl<R,Args...>(meth) ) );
+    template<typename R, typename A1>
+    void add_method_visitor<InterfaceType>::operator()( const char* name, std::function<R(A1)>& meth)    {
+        _con.add_method( name, rpc_server_method::ptr( new rpc_server_method_impl<R,tuple<A1>,R(A1) >(meth) ) );
+    }
+    template<typename InterfaceType>
+    template<typename R, typename A1, typename A2>
+    void add_method_visitor<InterfaceType>::operator()( const char* name, std::function<R(A1,A2)>& meth)    {
+        _con.add_method( name, rpc_server_method::ptr( new rpc_server_method_impl<R,tuple<A1,A2>,R(A1,A2) >(meth) ) );
+    }
+    template<typename InterfaceType>
+    template<typename R>
+    void add_method_visitor<InterfaceType>::operator()( const char* name, std::function<R()>& meth)    {
+        _con.add_method( name, rpc_server_method::ptr( new rpc_server_method_impl<R,tuple<>,R() >(meth) ) );
     }
 
   } // namespace detail

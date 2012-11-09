@@ -1,7 +1,7 @@
+#if 0
 #pragma once
 #include <fc/utility.hpp>
 #include <fc/shared_ptr.hpp>
-
 namespace fc {
 template<typename R,typename ... Args>
 class function {
@@ -108,4 +108,5 @@ class function<R(A1,A2,A3)> : public function<R,A1,A2,A3> {
 };
 
 }
+#endif
 

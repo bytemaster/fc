@@ -9,21 +9,36 @@
 
 
 namespace fc { namespace json {
-        //static std::function<fc::future<R>( BOOST_PP_ENUM_PARAMS(n,A) ) >  
 
   namespace detail {
     struct rpc_member {
-        #define RPC_MEMBER_FUNCTOR(z,n,IS_CONST) \
-        template<typename R, typename C, typename P BOOST_PP_ENUM_TRAILING_PARAMS( n, typename A)> \
-        static fc::function<fc::future<R> BOOST_PP_ENUM_TRAILING_PARAMS(n,A) > \
-            functor( P, R (C::*mem_func)(BOOST_PP_ENUM_PARAMS(n,A)) IS_CONST,  \
-                      const rpc_connection::ptr& c = rpc_connection::ptr(), const char* name = nullptr ) { \
-            return [=](BOOST_PP_ENUM_BINARY_PARAMS(n,A,a))->fc::future<R>{ \
-                return c->invoke<R>( name, make_tuple(BOOST_PP_ENUM_PARAMS(n,a)) ); }; \
-        } 
-        BOOST_PP_REPEAT( 8, RPC_MEMBER_FUNCTOR, const )
-        BOOST_PP_REPEAT( 8, RPC_MEMBER_FUNCTOR, BOOST_PP_EMPTY() )
-        #undef RPC_MEMBER_FUNCTOR
+       #if BOOST_NO_VARIADIC_TEMPLATES
+         #define RPC_MEMBER_FUNCTOR(z,n,IS_CONST) \
+         template<typename R, typename C, typename P BOOST_PP_ENUM_TRAILING_PARAMS( n, typename A)> \
+         static std::function<fc::future<R>( BOOST_PP_ENUM_PARAMS(n,A) ) > \
+             functor( P, R (C::*mem_func)(BOOST_PP_ENUM_PARAMS(n,A)) IS_CONST,  \
+                       const rpc_connection::ptr& c = rpc_connection::ptr(), const char* name = nullptr ) { \
+             return [=](BOOST_PP_ENUM_BINARY_PARAMS(n,A,a))->fc::future<R>{ \
+                 return c->invoke<R>( name, make_tuple(BOOST_PP_ENUM_PARAMS(n,a)) ); }; \
+         } 
+         BOOST_PP_REPEAT( 8, RPC_MEMBER_FUNCTOR, const )
+         BOOST_PP_REPEAT( 8, RPC_MEMBER_FUNCTOR, BOOST_PP_EMPTY() )
+         #undef RPC_MEMBER_FUNCTOR
+
+       #else
+         template<typename R, typename C, typename P, typename... Args>
+         static std::function<fc::future<R>(Args...)> functor( P&& p, R (C::*mem_func)(Args...), 
+                       const rpc_connection::ptr& c = rpc_connection::ptr(), const char* name = nullptr ) { 
+            return [=](Args... args)->fc::future<R>{ 
+                return c->invoke<R>( name, make_tuple(args...) ); }; 
+         }
+         template<typename R, typename C, typename P, typename... Args>
+         static std::function<fc::future<R>(Args...)> functor( P&& p, R (C::*mem_func)(Args...)const,
+                       const rpc_connection::ptr& c = rpc_connection::ptr(), const char* name = nullptr ) { 
+            return [=](Args... args)->fc::future<R>{ 
+                return c->invoke<R>( name, make_tuple(args...) ); }; 
+         }
+       #endif
     };
 
     struct vtable_visitor {

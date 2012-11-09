@@ -10,7 +10,7 @@ namespace fc { namespace json {
       fc::istream&           in;
       fc::ostream&           out;
       rpc_stream_connection& self;
-      fc::function<void>     on_close;
+      std::function<void()>  on_close;
 
       impl( fc::istream& i, fc::ostream& o, rpc_stream_connection& s )
       :in(i),out(o),self(s){
@@ -73,7 +73,7 @@ namespace fc { namespace json {
   /**
    *  When the connection is closed, call the given method
    */
-  void rpc_stream_connection::on_close( const fc::function<void>& oc ) {
+  void rpc_stream_connection::on_close( const std::function<void()>& oc ) {
     my->on_close = oc;
   }
 

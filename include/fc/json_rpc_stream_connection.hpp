@@ -24,7 +24,7 @@ namespace fc {
       /**
        *  When the connection is closed, call the given method
        */
-      void on_close( const fc::function<void>& );
+      void on_close( const std::function<void()>& );
 
     protected:
       ~rpc_stream_connection();

@@ -1,15 +1,37 @@
 #pragma once 
-#include <fc/function.hpp>
+//#include <fc/function.hpp>
 #include <fc/future.hpp>
+#include <functional>
+#include <boost/preprocessor/repeat.hpp>
+#include <boost/preprocessor/repetition/enum_binary_params.hpp>
+#include <boost/preprocessor/repetition/enum_params.hpp>
+#include <boost/preprocessor/repetition/enum_trailing_params.hpp>
+#include <boost/preprocessor/facilities/empty.hpp>
 
 namespace fc {
   
   namespace detail {
     struct identity_member { 
-        template<typename R, typename C, typename P, typename... Args>
-        static fc::function<R,Args...> functor( P&& p, R (C::*mem_func)(Args...) ) {
-          return fc::function<R,Args...>([=](Args... args){ return (p->*mem_func)(args...); });
-        }
+       #if  BOOST_NO_VARIADIC_TEMPLATES
+         #define RPC_MEMBER_FUNCTOR(z,n,IS_CONST) \
+         template<typename R, typename C, typename P BOOST_PP_ENUM_TRAILING_PARAMS( n, typename A)> \
+         static std::function<R( BOOST_PP_ENUM_PARAMS(n,A) ) > \
+             functor( P p, R (C::*mem_func)(BOOST_PP_ENUM_PARAMS(n,A)) IS_CONST ){  \
+           return [=](BOOST_PP_ENUM_BINARY_PARAMS(n,A,a)){ return (p->*mem_func)(BOOST_PP_ENUM_PARAMS(n,a)); }; \
+         } 
+         BOOST_PP_REPEAT( 8, RPC_MEMBER_FUNCTOR, const )
+         BOOST_PP_REPEAT( 8, RPC_MEMBER_FUNCTOR, BOOST_PP_EMPTY() )
+         #undef RPC_MEMBER_FUNCTOR
+       #else
+         template<typename R, typename C, typename P, typename... Args>
+         static std::function<R(Args...)> functor( P&& p, R (C::*mem_func)(Args...) ) {
+           return std::function<R(Args...)>([=](Args... args){ return (p->*mem_func)(args...); });
+         }
+         template<typename R, typename C, typename P, typename... Args>
+         static std::function<R(Args...)> functor( P&& p, R (C::*mem_func)(Args...)const ) {
+           return std::function<R(Args...)>([=](Args... args){ return (p->*mem_func)(args...); });
+         }
+       #endif
     };
 
     template< typename Interface, typename Transform = detail::identity_member >

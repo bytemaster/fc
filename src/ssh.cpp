@@ -437,7 +437,7 @@ namespace fc { namespace ssh {
   }
 
   void client::scp_send( const fc::path& local_path, const fc::path& remote_path, 
-                        fc::function<bool,size_t,size_t> progress ) {
+                        std::function<bool(size_t,size_t)> progress ) {
     /**
      *  Tests have shown that if one scp is 'blocked' by a need to read (presumably to 
      *  ack recv for the trx window), and then a second transfer begins that the first

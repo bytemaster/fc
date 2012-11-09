@@ -7,9 +7,9 @@ namespace fc {
   namespace json {
     class rpc_tcp_server::impl {
       public:
-        fc::function<void,rpc_connection&> on_con; 
-        fc::tcp_server                     tcp_serv;
-        fc::vector<rpc_tcp_connection::ptr> cons;
+        std::function<void(rpc_connection&)> on_con; 
+        fc::tcp_server                       tcp_serv;
+        fc::vector<rpc_tcp_connection::ptr>  cons;
     };
     rpc_tcp_server::rpc_tcp_server()
     :my( new impl() ){}
@@ -17,7 +17,7 @@ namespace fc {
       delete my;
     }
 
-    void rpc_tcp_server::on_new_connection( const fc::function<void,rpc_connection&>& c ) {
+    void rpc_tcp_server::on_new_connection( const std::function<void(rpc_connection&)>& c ) {
       my->on_con = c;
     }
 

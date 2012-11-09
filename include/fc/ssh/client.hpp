@@ -1,6 +1,6 @@
 #pragma once
 #include <fc/ssh/process.hpp>
-#include <fc/function.hpp>
+#include <functional>
 #include <fc/filesystem.hpp>
 
 namespace fc { 
@@ -86,7 +86,7 @@ namespace fc {
        *         transfer, the callback should return true.  To cancel the callback should return false.
        */
       void scp_send( const fc::path& local_path, const fc::path& remote_path, 
-                              fc::function<bool,size_t,size_t> progress = [](size_t,size_t){return true;} );
+                              std::function<bool(size_t,size_t)> progress = [](size_t,size_t){return true;} );
 
 
       /**

@@ -30,7 +30,7 @@ namespace fc {
             });
           }
 
-          void on_new_connection( const fc::function<void,rpc_connection&>& c );
+          void on_new_connection( const std::function<void(rpc_connection&)>& c );
 
           void listen( uint16_t port );
         

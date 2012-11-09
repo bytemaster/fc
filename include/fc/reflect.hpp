@@ -11,10 +11,12 @@
 #include <fc/utility.hpp>
 #include <boost/preprocessor/seq/for_each.hpp>
 #include <boost/preprocessor/seq/enum.hpp>
+#include <boost/preprocessor/seq/size.hpp>
 #include <boost/preprocessor/seq/seq.hpp>
 #include <boost/preprocessor/stringize.hpp>
 #include <stdint.h>
 
+#include <fc/exception.hpp>
 
 namespace fc { 
 
@@ -121,15 +123,15 @@ template<> struct reflector<ENUM> { \
       switch( ENUM(i) ) { \
         BOOST_PP_SEQ_FOR_EACH( FC_REFLECT_ENUM_TO_STRING, v, FIELDS ) \
         default: \
-        FC_REFLECT_THROW( fc::reflect::unknown_field(), "%1% not in enum '%2%'", %i %BOOST_PP_STRINGIZE(ENUM) ); \
+        FC_THROW_MSG(  "Unknown field %s not in enum '%s'", i, BOOST_PP_STRINGIZE(ENUM) ); \
       }\
     } \
     static ENUM from_string( const char* s ) { \
         BOOST_PP_SEQ_FOR_EACH( FC_REFLECT_ENUM_FROM_STRING, v, FIELDS ) \
-        FC_REFLECT_THROW( fc::reflect::unknown_field(), "%1% in enum %2%", %s %BOOST_PP_STRINGIZE(ENUM) ); \
+        FC_THROW_MSG(  "Unknown field %s not in enum '%s'", s, BOOST_PP_STRINGIZE(ENUM) ); \
     } \
 };  \
-} }
+} 
 
 
 

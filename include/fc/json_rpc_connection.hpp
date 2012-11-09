@@ -50,14 +50,14 @@ namespace fc {  namespace json {
 
     #define FC_JSON_NAMED_PARAMS( T ) \
     namespace fc { namespace json {namespace detail { \
-    template<typename T> \
+    template<> \
     struct named_param< fc::tuple<T> > { \
       typedef fc::true_type type; \
       static tuple<T> cast( const value& v ) { return make_tuple(fc::value_cast<T>(v)); } \
       template<typename X> \
       static value to_value( X&& x ) { return value( x.a0 ); }\
     }; \
-    template<typename T> \
+    template<> \
     struct named_param< fc::tuple<T&> > { \
       typedef fc::true_type type; \
       static tuple<T> cast( const value& v ) { return make_tuple(fc::value_cast<T>(v)); } \

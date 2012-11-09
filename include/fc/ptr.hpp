@@ -96,7 +96,7 @@ namespace fc {
 #define FC_STUB( CLASS, METHODS ) \
 namespace fc { namespace detail { \
   template<typename Transform> \
-  struct vtable<test,Transform> : public fc::retainable { \
+  struct vtable<CLASS,Transform> : public fc::retainable { \
      vtable(){} \
     BOOST_PP_SEQ_FOR_EACH( FC_STUB_VTABLE_DEFINE_MEMBER, CLASS, METHODS ) \
       template<typename T, typename Visitor> \

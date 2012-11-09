@@ -2,7 +2,7 @@
 #include <fc/exception.hpp>
 #include <fc/log.hpp>
 #include <fc/iostream.hpp>
-#include <iostream>
+//#include <iostream>
 
 int main( int argc, char** argv ) {
   try {
@@ -11,10 +11,10 @@ int main( int argc, char** argv ) {
   //    return -1;
   //  }
    fc::cout<<"password: ";
-   std::string pw;
-   std::cin>>pw;
+//   fc::string pw;
+//   std::cin>>pw;
    fc::ssh::client c;
-   c.connect( "dlarimer", pw, "localhost" );
+   c.connect( "dlarimer", "yyRK@$p9", "localhost" );
    fc::ssh::process proc = c.exec( "/bin/ls" );
    while( !proc.out_stream().eof() ) {
       fc::string line;

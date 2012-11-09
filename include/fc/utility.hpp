@@ -13,8 +13,13 @@ namespace std {
 namespace fc {
   template<typename T> struct remove_reference           { typedef T type;       };
   template<typename T> struct remove_reference<T&>       { typedef T type;       };
-  template<typename T> struct remove_reference<const T&> { typedef const T type; };
   template<typename T> struct remove_reference<T&&>      { typedef T type;       };
+
+  template<typename T> struct deduce           { typedef T type; };
+  template<typename T> struct deduce<T&>       { typedef T type; };
+  template<typename T> struct deduce<const T&> { typedef T type; };
+  template<typename T> struct deduce<T&&>      { typedef T type; };
+  template<typename T> struct deduce<const T&&>{ typedef T type; };
 
   template<typename T>
   typename fc::remove_reference<T>::type&& move( T&& t ) { return static_cast<typename fc::remove_reference<T>::type&&>(t); }

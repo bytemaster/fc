@@ -39,12 +39,38 @@ namespace fc {  namespace json {
         ~pending_result_impl(){}
     };
 
+    template<typename T>
+    struct named_param {
+      typedef fc::false_type type;
+      static T cast( const value& v ) { return fc::value_cast<T>(v); }
+
+      template<typename X>
+      static value to_value( X&& x ) { return value(fc::forward<X>(x)); }
+    };
+
+    #define FC_JSON_NAMED_PARAMS( T ) \
+    namespace fc { namespace json {namespace detail { \
+    template<typename T> \
+    struct named_param< fc::tuple<T> > { \
+      typedef fc::true_type type; \
+      static tuple<T> cast( const value& v ) { return make_tuple(fc::value_cast<T>(v)); } \
+      template<typename X> \
+      static value to_value( X&& x ) { return value( x.a0 ); }\
+    }; \
+    template<typename T> \
+    struct named_param< fc::tuple<T&> > { \
+      typedef fc::true_type type; \
+      static tuple<T> cast( const value& v ) { return make_tuple(fc::value_cast<T>(v)); } \
+      template<typename X> \
+      static value to_value( X&& x ) { return value( x.a0 ); }\
+    }; \
+    } } }
 
     template<typename R, typename ArgsTuple, typename Signature>
     struct rpc_server_method_impl : public rpc_server_method {
       rpc_server_method_impl( const std::function<Signature>& f ):func(f){} 
       virtual value call( const value& v ) {
-        return value(  call_fused(func, fc::value_cast<ArgsTuple>( v ) ) ); 
+        return value(  call_fused(func, named_param<ArgsTuple>::cast(v) ) ); 
       }
       std::function<Signature> func;
     };
@@ -89,7 +115,8 @@ namespace fc {  namespace json {
       future<R> invoke( const fc::string& method, Args&& a = nullptr  ){
         auto r = new detail::pending_result_impl<R>();
         typename promise<R>::ptr rtn( r, true );
-        invoke( detail::pending_result::ptr(r), method, value(fc::forward<Args>(a)) );
+        invoke( detail::pending_result::ptr(r), method, 
+            value(detail::named_param<typename fc::deduce<Args>::type>::to_value(a)) );
         return rtn;
       }
 

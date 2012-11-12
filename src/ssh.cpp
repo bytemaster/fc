@@ -643,6 +643,9 @@ namespace fc { namespace ssh {
 
   process::~process()
   {}
+  bool process::valid()const {
+      return !!my;
+  }
 
   /**
    *  Blocks until the result code of the process has been returned.

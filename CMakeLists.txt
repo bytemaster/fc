@@ -54,6 +54,7 @@ set( sources
   src/json_rpc_stream_connection.cpp
   src/json_rpc_tcp_connection.cpp
   src/json_rpc_tcp_server.cpp
+  src/json_rpc_error_object.cpp
   src/value.cpp
   src/lexical_cast.cpp
   src/spin_lock.cpp 
@@ -88,7 +89,7 @@ set( sources
 #  src/program_options.cpp
 )
 
-add_subdirectory(vendor/libssh2-1.4.2)
+#add_subdirectory(vendor/libssh2-1.4.2)
 
 setup_library( fc SOURCES ${sources} )
 

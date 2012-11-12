@@ -28,8 +28,10 @@ namespace fc {
 
       process( const process& p );
       process( process&& p );
-
+      process();
       ~process();
+
+      bool valid()const;
 
       /**
        *  Blocks until the result code of the process has been returned.
@@ -50,7 +52,6 @@ namespace fc {
     private:
       friend class client;
       process( client& c, const fc::string& cmd, const fc::string& pty_type = fc::string() );
-      process();
 
       fc::shared_ptr<detail::process_impl> my;
   };

@@ -57,20 +57,13 @@ namespace fc {  namespace json {
       template<typename X> \
       static value to_value( X&& x ) { return value( x.a0 ); }\
     }; \
-    template<> \
-    struct named_param< fc::tuple<T&> > { \
-      typedef fc::true_type type; \
-      static tuple<T> cast( const value& v ) { return make_tuple(fc::value_cast<T>(v)); } \
-      template<typename X> \
-      static value to_value( X&& x ) { return value( x.a0 ); }\
-    }; \
     } } }
 
     template<typename R, typename ArgsTuple, typename Signature>
     struct rpc_server_method_impl : public rpc_server_method {
       rpc_server_method_impl( const std::function<Signature>& f ):func(f){} 
       virtual value call( const value& v ) {
-        return value(  call_fused(func, named_param<ArgsTuple>::cast(v) ) ); 
+        return value(  fc::call_fused(func, named_param<typename deduce<ArgsTuple>::type>::cast(v) ) ); 
       }
       std::function<Signature> func;
     };

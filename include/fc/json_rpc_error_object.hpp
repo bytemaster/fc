@@ -1,4 +1,7 @@
 #pragma once 
+#include <fc/string.hpp>
+#include <fc/optional.hpp>
+#include <fc/value.hpp>
 
 namespace fc { namespace json {
 

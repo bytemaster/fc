@@ -1,5 +1,5 @@
 #pragma once 
-#include <fc/fwd.hpp>
+#include <fc/shared_ptr.hpp>
 #include <fc/iostream.hpp>
 
 namespace fc {
@@ -19,7 +19,7 @@ namespace fc {
 
     private:
       class impl;
-      fwd<impl,896> my;
+      fc::shared_ptr<impl> my;
   };
 
   class ifstream : virtual public istream {
@@ -32,13 +32,10 @@ namespace fc {
       void open( const fc::path& file, int m );
       ifstream& read( char* buf, size_t len );
       void   close();
-      void   flush();
-
       bool    eof()const;
-
     private:
       class impl;
-      fwd<impl,904> my;
+      fc::shared_ptr<impl> my;
   };
   
 } // namespace fc 

@@ -77,4 +77,5 @@ namespace fc {
   uint64_t file_size( const path& p ) { return boost::filesystem::file_size(p); }
   void copy( const path& f, const path& t ) { boost::filesystem::copy( f, t ); }
   bool remove( const path& f ) { return boost::filesystem::remove( f ); }
+  fc::path canonical( const fc::path& p ) { return boost::filesystem::canonical(p); }
 }

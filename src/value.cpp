@@ -185,7 +185,7 @@ value::value( char* c ) {
    new (holder) detail::value_holder_impl<fc::string>( c );
 }
 value::~value() {
-  gh(holder)->~value_holder_impl<void>();
+  gh(holder)->~value_holder();
 }
 value::value( int8_t v){
   static_assert( sizeof(holder) >= sizeof( detail::value_holder_impl<int8_t> ), "size check" );
@@ -363,6 +363,15 @@ const char* value::type()const { return gh(holder)->type(); }
 void  value::visit( value::const_visitor&& v )const {
    auto h = ((detail::value_holder*)&holder[0]);
    h->visit( fc::move(v) );
+}
+/*  sets the subkey key with v and return *this */
+value&  value::set( const char* key,       fc::value v ) {
+    (*this)[key] = fc::move(v);
+    return *this;
+}
+value&  value::set( const fc::string& key, fc::value v ) {
+    (*this)[key.c_str()] = fc::move(v);
+    return *this;
 }
 
 } // namepace fc

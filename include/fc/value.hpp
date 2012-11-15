@@ -127,6 +127,14 @@ namespace fc {
         bool         is_null()const;
 
         void         visit( const_visitor&& v )const;
+
+        /*  sets the subkey key with v and return *this */
+        value&       set( const char* key,       fc::value v );
+        value&       set( const fc::string& key, fc::value v );
+
+        template<typename S, typename T>
+        value&       set( S&& key, T&& v ) { return set( fc::forward<S>(key), fc::value( fc::forward<T>(v) ) ); }
+
       private:
         /** throws exceptions on errors 
          *

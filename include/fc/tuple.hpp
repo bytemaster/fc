@@ -60,6 +60,10 @@ namespace fc {
           template<typename V> 
           void visit( V&& v)const{};
         };
+        template<typename Functor, typename Tuple> 
+        auto call_fused( Functor f, Tuple&& t )  -> decltype( f( ) ) {
+          return f();
+        } 
 
         inline tuple<> make_tuple(){ return tuple<>(); }
 
@@ -73,6 +77,7 @@ namespace fc {
         #define ILIST_PARAMS_COPY(z,n,data) BOOST_PP_CAT(a,n)( t.BOOST_PP_CAT(a,n)  )
         #define VISIT_PARAMS(z,n,data) v(BOOST_PP_CAT(a,n));
         #define LIST_MEMBERS_ON(z,n,data) data.BOOST_PP_CAT(a,n)
+        #define DEDUCE_MEMBERS(z,n,data) typename fc::deduce<BOOST_PP_CAT(AA,n)>::type
         #define FORWARD_PARAMS(z,n,data) fc::forward<BOOST_PP_CAT(AA,n)>(BOOST_PP_CAT(a,n))
         #define MEM_PARAMS(z,n,data) BOOST_PP_CAT(A,n) BOOST_PP_CAT(a,n);
         #define TUPLE(z,n,unused) \
@@ -102,12 +107,17 @@ namespace fc {
         template<BOOST_PP_ENUM_PARAMS( n, typename AA)> \
         struct is_tuple<fc::tuple<BOOST_PP_ENUM_PARAMS(n,AA)> > { \
           typedef fc::true_type type; \
-        };
+        }; \
+        template<BOOST_PP_ENUM_PARAMS( n, typename AA)> \
+        struct deduce<fc::tuple<BOOST_PP_ENUM_PARAMS(n,AA)> > { \
+          typedef fc::tuple<BOOST_PP_ENUM( n, DEDUCE_MEMBERS,unused)>  type; \
+        }; 
 
         BOOST_PP_REPEAT_FROM_TO( 1, 8, TUPLE, unused )
 
 
         #undef FORWARD_PARAMS
+        #undef DEDUCE_MEMBERS
         #undef RREF_PARAMS
         #undef LIST_MEMBERS_ON
         #undef ILIST_PARAMS

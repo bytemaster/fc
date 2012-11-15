@@ -6,6 +6,7 @@
 #include <fc/numeric_cast.hpp>
 #include <fc/value_io.hpp>
 #include <fc/tuple.hpp>
+#include <fc/vector.hpp>
 
 #include <typeinfo>
 
@@ -107,6 +108,40 @@ namespace fc {
          private:
          value::object& m_out;
        };
+
+       template<typename T>
+       struct cast_visitor<fc::vector<T>> : value::const_visitor {
+         cast_visitor( fc::vector<T>& out )
+         :m_out(out){}
+         virtual void operator()( const int8_t& v      )    { FC_THROW_MSG("bad cast");}
+         virtual void operator()( const int16_t& v     )    { FC_THROW_MSG("bad cast");}
+         virtual void operator()( const int32_t& v     )    { FC_THROW_MSG("bad cast");}
+         virtual void operator()( const int64_t& v     )    { FC_THROW_MSG("bad cast");}
+         virtual void operator()( const uint8_t& v     )    { FC_THROW_MSG("bad cast");}
+         virtual void operator()( const uint16_t& v    )    { FC_THROW_MSG("bad cast");}
+         virtual void operator()( const uint32_t& v    )    { FC_THROW_MSG("bad cast");}
+         virtual void operator()( const uint64_t& v    )    { FC_THROW_MSG("bad cast");}
+         virtual void operator()( const float& v       )    { FC_THROW_MSG("bad cast");}
+         virtual void operator()( const double& v      )    { FC_THROW_MSG("bad cast");}
+         virtual void operator()( const bool& v        )    { FC_THROW_MSG("bad cast");}
+         virtual void operator()( const fc::string& v )     { FC_THROW_MSG("bad cast");}
+         virtual void operator()( const value::object& a )  { FC_THROW_MSG("bad cast");} 
+         virtual void operator()( const value::array& a )  {
+            m_out.resize(0);
+            m_out.reserve( a.fields.size() );
+            for( auto i = a.fields.begin(); i != a.fields.end(); ++i ) {
+              m_out.push_back( value_cast<T>( *i ) );
+            }
+         }
+
+         virtual void operator()( )                     { FC_THROW_MSG("bad cast");}
+     
+         private:
+         fc::vector<T>& m_out;
+       };
+
+
+
        template<>
        struct cast_visitor<void> : value::value::const_visitor {
          virtual void operator()( const int8_t& v      )       { FC_THROW_MSG("bad cast");}
@@ -130,8 +165,8 @@ namespace fc {
           template<typename T>
           static T cast(  const value& v ) {
              slog( "cast non tuple %s", typeid(T).name() );
-             T out;
-             v.visit(cast_visitor<T>(out));
+             typename fc::deduce<T>::type out;
+             v.visit(cast_visitor<decltype(out)>(out));
              return out;
           }
         };
@@ -149,12 +184,10 @@ namespace fc {
              int    idx;
           };
 
-          template<typename T>
-          static T cast(  const value& v ) {
-             T out;
+          template<typename Tuple>
+          static Tuple cast(  const value& v ) {
+             typename fc::deduce<Tuple>::type out;
              out.visit( member_visitor(v) );
-             slog( "cast tuple" );
-            // v.visit(cast_visitor<T>(out));
              return out;
           }
         };
@@ -219,7 +252,7 @@ namespace fc {
      */
     template<typename T>
     T value_cast( const value& v ) {
-      return detail::cast_if_reflected<typename fc::reflector<T>::is_defined>::template cast<T>(v);
+      return detail::cast_if_reflected<typename fc::reflector<typename fc::deduce<T>::type>::is_defined>::template cast< typename fc::deduce<T>::type >(v);
     }
 
     template<typename T>

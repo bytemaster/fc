@@ -641,6 +641,8 @@ namespace fc { namespace ssh {
 
 
 
+  process::process()
+  {}
   process::~process()
   {}
   bool process::valid()const {
@@ -656,19 +658,19 @@ namespace fc { namespace ssh {
   /**
    *  @brief returns a stream that writes to the procss' stdin
    */
-  fc::ostream& process::in_stream() {
+  fc::ostream& process::in_stream()const {
     return my->std_in;
   }
   /**
    *  @brief returns a stream that reads from the process' stdout
    */
-  fc::istream& process::out_stream() {
+  fc::istream& process::out_stream()const {
     return my->std_out;
   }
   /**
    *  @brief returns a stream that reads from the process' stderr
    */
-  fc::istream& process::err_stream() {
+  fc::istream& process::err_stream()const {
     return my->std_err;
   }
 

@@ -108,6 +108,28 @@ namespace fc {
          private:
          value::object& m_out;
        };
+       template<>
+       struct cast_visitor<fc::value> : value::const_visitor {
+         cast_visitor( value& out )
+         :m_out(out){}
+         virtual void operator()( const int8_t& v      )    { m_out = v; }
+         virtual void operator()( const int16_t& v     )    { m_out = v; }
+         virtual void operator()( const int32_t& v     )    { m_out = v; }
+         virtual void operator()( const int64_t& v     )    { m_out = v; }
+         virtual void operator()( const uint8_t& v     )    { m_out = v; }
+         virtual void operator()( const uint16_t& v    )    { m_out = v; }
+         virtual void operator()( const uint32_t& v    )    { m_out = v; }
+         virtual void operator()( const uint64_t& v    )    { m_out = v; }
+         virtual void operator()( const float& v       )    { m_out = v; }
+         virtual void operator()( const double& v      )    { m_out = v; }
+         virtual void operator()( const bool& v        )    { m_out = v; }
+         virtual void operator()( const fc::string& v )     { m_out = v; }
+         virtual void operator()( const value::object& a )  { m_out = a; }
+         virtual void operator()( const value::array& a )   { m_out = a; }
+         virtual void operator()( )                     { m_out = value(); }
+     
+         value& m_out;
+       };
 
        template<typename T>
        struct cast_visitor<fc::vector<T>> : value::const_visitor {

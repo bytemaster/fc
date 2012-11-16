@@ -29,6 +29,7 @@ namespace fc {
     protected:
       ~rpc_stream_connection();
       virtual void send_invoke( uint64_t id, const fc::string& m, value&& param );
+      virtual void send_notice(  const fc::string& m, value&& param );
       virtual void send_error( uint64_t id, int64_t code, const fc::string& msg );
       virtual void send_result( uint64_t id, value&& r );
 

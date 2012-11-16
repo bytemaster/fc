@@ -1,26 +1,21 @@
 #pragma once
 #include <fc/json_rpc_client.hpp>
+#include <fc/json_rpc_stream_connection.hpp>
 #include <fc/ssh/process.hpp>
 
 namespace fc { namespace json {
 
   template<typename InterfaceType>
-  class rpc_ssh_process_client : public ptr<InterfaceType,fc::json::detail::rpc_member> {
+  class rpc_ssh_process_client : public rpc_client<InterfaceType> {
     public:
       rpc_ssh_process_client(){}
       bool valid()const { return proc.valid(); }
 
       rpc_ssh_process_client( const fc::ssh::process& proc ) 
-      {
-         con.reset( new fc::json::rpc_stream_connection( proc.out_stream(), proc.in_stream() ) );
-         this->_vtable.reset(new fc::detail::vtable<InterfaceType,fc::json::detail::rpc_member>() );
-         this->_vtable->template visit<InterfaceType>( fc::json::detail::vtable_visitor(_con) );
-      }
+      :rpc_client<InterfaceType>(rpc_connection::ptr(new fc::json::rpc_stream_connection( proc.out_stream(), proc.in_stream() ) ) ){}
 
       rpc_ssh_process_client& operator = ( const fc::ssh::process& proc )  {
-         con.reset( new fc::json::rpc_stream_connection( proc.out_stream(), proc.in_stream() ) );
-         this->_vtable.reset(new fc::detail::vtable<InterfaceType,fc::json::detail::rpc_member>() );
-         this->_vtable->template visit<InterfaceType>( fc::json::detail::vtable_visitor(_con) );
+         this->set_connection( rpc_connection::ptr(new fc::json::rpc_stream_connection( proc.out_stream(), proc.in_stream() ) ) );
          return *this;
       }
 

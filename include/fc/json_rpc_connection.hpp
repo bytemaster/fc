@@ -79,6 +79,8 @@ namespace fc {  namespace json {
         void operator()( const char* name, std::function<R(A1)>& meth);
         template<typename R, typename A1, typename A2>
         void operator()( const char* name, std::function<R(A1,A2)>& meth);
+        template<typename R, typename A1, typename A2, typename A3>
+        void operator()( const char* name, std::function<R(A1,A2,A3)>& meth);
 
         const fc::ptr<InterfaceType>& _ptr;
         fc::json::rpc_connection&     _con;
@@ -110,7 +112,12 @@ namespace fc {  namespace json {
         typename promise<R>::ptr rtn( r, true );
         invoke( detail::pending_result::ptr(r), method, 
             value(detail::named_param<typename fc::deduce<Args>::type>::to_value(a)) );
-        return rtn;
+      }
+
+      template<typename Args >
+      void notice( const fc::string& method, Args&& a = nullptr  ){
+        send_notice( method, 
+            value(detail::named_param<typename fc::deduce<Args>::type>::to_value(a)) );
       }
 
       template<typename InterfaceType>
@@ -122,6 +129,7 @@ namespace fc {  namespace json {
 
     protected:
       void         handle_message( const value& m );
+      virtual void send_notice(  const fc::string& m, value&& param ) = 0;
       virtual void send_invoke( uint64_t id, const fc::string& m, value&& param ) = 0;
       virtual void send_error( uint64_t id, int64_t code, const fc::string& msg ) = 0;
       virtual void send_result( uint64_t id, value&& r ) = 0;
@@ -148,6 +156,11 @@ namespace fc {  namespace json {
     template<typename R, typename A1, typename A2>
     void add_method_visitor<InterfaceType>::operator()( const char* name, std::function<R(A1,A2)>& meth)    {
         _con.add_method( name, rpc_server_method::ptr( new rpc_server_method_impl<R,tuple<A1,A2>,R(A1,A2) >(meth) ) );
+    }
+    template<typename InterfaceType>
+    template<typename R, typename A1, typename A2, typename A3>
+    void add_method_visitor<InterfaceType>::operator()( const char* name, std::function<R(A1,A2,A3)>& meth)    {
+        _con.add_method( name, rpc_server_method::ptr( new rpc_server_method_impl<R,tuple<A1,A2,A3>,R(A1,A2,A3) >(meth) ) );
     }
     template<typename InterfaceType>
     template<typename R>

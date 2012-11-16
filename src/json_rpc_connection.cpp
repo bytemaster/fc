@@ -51,11 +51,12 @@ namespace fc { namespace json {
 
      if( m_itr != end ) {
         fc::string mname = value_cast<fc::string>(m_itr->val);
-        auto id = value_cast<uint64_t>(id_itr->val);
+
         auto smeth = my->_methods.find( mname );
         if( smeth == my->_methods.end() ) {
           if( id_itr != end )  {
             // TODO: send invalid method reply
+            auto id = value_cast<uint64_t>(id_itr->val);
             send_error( id, -1, "Unknown method '"+mname+"'");
           }
           // nothing to do, unknown method
@@ -67,6 +68,7 @@ namespace fc { namespace json {
           slog( "params '%s'", to_string( params ).c_str() );
 
           if( id_itr != end ) { // capture reply
+            auto id = value_cast<uint64_t>(id_itr->val);
             try {
                send_result( id, smeth->second->call(params) );
             } catch ( ... ) {

@@ -40,15 +40,15 @@ namespace fc {
       /**
        *  @brief returns a stream that writes to the procss' stdin
        */
-      fc::ostream& in_stream();
+      fc::ostream& in_stream()const;
       /**
        *  @brief returns a stream that reads from the process' stdout
        */
-      fc::istream& out_stream();
+      fc::istream& out_stream()const;
       /**
        *  @brief returns a stream that reads from the process' stderr
        */
-      fc::istream& err_stream();
+      fc::istream& err_stream()const;
     private:
       friend class client;
       process( client& c, const fc::string& cmd, const fc::string& pty_type = fc::string() );

@@ -74,6 +74,7 @@ http::reply connection::request( const fc::string& method,
   fc::stringstream req;
   req << method <<" "<<url<<" HTTP/1.1\r\n";
   req << "Host: localhost\r\n";
+  req << "Content-Type: application/json\r\n";
   if( body.size() ) req << "Content-Length: "<< body.size() << "\r\n";
   req << "\r\n"; 
   fc::string head = req.str();

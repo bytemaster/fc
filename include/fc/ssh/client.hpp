@@ -7,8 +7,8 @@ namespace fc {
   class path;
   namespace ssh {
   namespace detail {
-    struct client_impl;
-    struct process_impl;
+    class client_impl;
+    class process_impl;
   };
 
   enum sftp_file_type {

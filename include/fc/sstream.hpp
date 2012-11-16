@@ -8,6 +8,7 @@ namespace fc {
     public:
       stringstream();
       stringstream( fc::string& s);
+      stringstream( const fc::string& s);
       ~stringstream();
 
       fc::string str();

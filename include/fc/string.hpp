@@ -1,6 +1,6 @@
 #ifndef _FC_STRING_HPP_
 #define _FC_STRING_HPP_
-#include <stdint.h>
+#include <fc/utility.hpp>
 
 
 /**
@@ -34,6 +34,7 @@ namespace fc {
     public:
       typedef char*       iterator;
       typedef const char* const_iterator;
+      static const size_t npos = -1;
 
       string();
       string( const std::string& s );

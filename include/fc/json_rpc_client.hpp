@@ -54,25 +54,20 @@ namespace fc { namespace json {
 
 
   template<typename InterfaceType>
-  class rpc_client : public ptr<InterfaceType,fc::json::detail::rpc_member> {
+  class rpc_client : public actor<InterfaceType> { //ptr<InterfaceType,fc::json::detail::rpc_member> {
     public:
       rpc_client(){}
-      rpc_client( const rpc_connection::ptr& c ):_con(c){
-        init();
-      }
-      rpc_client( const rpc_client& c ):_con(c._con){}
+      rpc_client( const rpc_connection::ptr& c ){ set_connection(c); }
+      //rpc_client( const rpc_client& c ):_con(c._con){}
 
       void set_connection( const rpc_connection::ptr& c ) {
         _con = c;
-        init();
+        this->_vtable.reset(new fc::detail::vtable<InterfaceType,fc::detail::actor_member>() );
+        this->_vtable->template visit_other<InterfaceType>( fc::json::detail::vtable_visitor(_con) );
       }
       const rpc_connection& connection()const { return _con; }
 
     private:
-      void init() {
-          this->_vtable.reset(new fc::detail::vtable<InterfaceType,fc::json::detail::rpc_member>() );
-          this->_vtable->template visit_other<InterfaceType>( fc::json::detail::vtable_visitor(_con) );
-      }
       rpc_connection::ptr  _con; 
   };
 

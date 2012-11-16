@@ -53,8 +53,16 @@ namespace fc {
         } // else !_valid && !o._valid == same!
         return *this;
       }
+      optional& operator=( optional&& o ) {
+        if( _valid && o._valid ) { **this = fc::move(*o); }
+        else if( !_valid && o._valid ) {
+          *this = fc::move(*o);
+        } 
+        return *this;
+      }
 
       bool operator!()const { return !_valid; }
+      operator bool()const  { return _valid;  }
 
       T&       operator*()      { void* v = &_value[0]; return *static_cast<T*>(v); }
       const T& operator*()const { const void* v = &_value[0]; return *static_cast<const T*>(v); }

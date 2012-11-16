@@ -9,12 +9,18 @@ namespace fc {
     impl( fc::string&s )
     :ss( s )
     { }
+    impl( const fc::string&s )
+    :ss( s )
+    { }
     impl(){}
     
     std::stringstream ss;
   };
 
   stringstream::stringstream( fc::string& s )
+  :my(s) {
+  }
+  stringstream::stringstream( const fc::string& s )
   :my(s) {
   }
   stringstream::stringstream(){}

@@ -4,6 +4,7 @@
 #include <fc/reflect.hpp>
 
 namespace fc {
+  class path;
 
   class sha1 {
     public:
@@ -18,6 +19,7 @@ namespace fc {
 
       static sha1 hash( const char* d, uint32_t dlen );
       static sha1 hash( const fc::string& );
+      static sha1 hash( const fc::path& );
 
       template<typename T>
       static sha1 hash( const T& t ) { sha1::encoder e; e << t; return e.result(); } 

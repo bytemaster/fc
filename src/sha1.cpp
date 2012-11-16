@@ -3,6 +3,8 @@
 #include <fc/fwd_impl.hpp>
 #include <openssl/sha.h>
 #include <string.h>
+#include <fc/filesystem.hpp>
+#include <fc/interprocess/file_mapping.hpp>
 
 namespace fc {
   
@@ -35,6 +37,14 @@ namespace fc {
   }
   sha1 sha1::hash( const fc::string& s ) {
     return hash( s.c_str(), s.size() );
+  }
+  sha1 sha1::hash( const fc::path& s ) {
+    file_mapping fmap( s.string().c_str(), read_only );
+    size_t       fsize = file_size(s);
+    mapped_region mr( fmap, fc::read_only, 0, fsize );
+
+    const char* pos = reinterpret_cast<const char*>(mr.get_address());
+    return hash( pos, fsize );
   }
 
   void sha1::encoder::write( const char* d, uint32_t dlen ) {

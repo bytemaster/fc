@@ -67,6 +67,7 @@ set( sources
   src/log.cpp 
   src/time.cpp 
   src/iostream.cpp
+  src/fstream.cpp
   src/sstream.cpp
   src/exception.cpp
   src/thread.cpp

@@ -48,6 +48,7 @@ namespace fc {
       struct value_holder_impl<void> : value_holder {
         value_holder_impl(){};
        // typedef void_t T;
+      /*
         virtual const char* type()const             { return "void"; }
         virtual void visit( value::const_visitor&& v )const{ v(); }
         virtual void visit( value_visitor&& v )           { v(); }
@@ -56,6 +57,7 @@ namespace fc {
       
         virtual value_holder* move_helper( char* c ){ return new(c) value_holder_impl(); }
         virtual value_holder* copy_helper( char* c )const{ return new(c) value_holder_impl();}
+        */
       };
       
       
@@ -121,7 +123,10 @@ namespace fc {
       };
 
       value_holder::~value_holder(){}
-      const char* value_holder::type()const                  { return "null"; }
+      const char* value_holder::type()const  { return "void"; }
+      value_holder* value_holder::move_helper( char* c )      { return new(c) value_holder(); }
+      value_holder* value_holder::copy_helper( char* c )const { return new(c) value_holder(); }
+
       void value_holder::visit( value::const_visitor&& v )const     { v();           }
       void value_holder::visit( value_visitor&& v )                { v();           }
 
@@ -133,8 +138,8 @@ namespace fc {
       const value& value_holder::at( size_t )const           { FC_THROW_MSG("value type '%s' not an array", type()); return *((const value*)0); }
       void value_holder::push_back( value&& v )              { FC_THROW_MSG("value type '%s' not an array", type());  }
 
-      value_holder* value_holder::move_helper( char* c )     { return new(c) value_holder(); }
-      value_holder* value_holder::copy_helper( char* c )const{ return new(c) value_holder(); }
+     // value_holder* value_holder::move_helper( char* c )  = 0;
+     // value_holder* value_holder::copy_helper( char* c )const = 0;
 
       void value_holder_impl<value::array>::resize( size_t s )               { val.fields.resize(s);  }
       void value_holder_impl<value::array>::reserve( size_t s )              { val.fields.reserve(s); }
@@ -168,7 +173,7 @@ static const detail::value_holder* gh( const aligned<24>& h ) {
 }
   
 value::value() {
-  new (holder) detail::value_holder(); 
+  new (holder) detail::value_holder_impl<void>(); 
 }
 value::value( value&& m ) {
   gh(m.holder)->move_helper(holder._store._data);
@@ -271,7 +276,7 @@ value& value::operator=( const value& v ){
   return *this;
 }
 bool value::is_null()const {
-    return strcmp(gh(holder)->type(), "null") == 0;
+    return strcmp(gh(holder)->type(), "void") == 0;
 }
 
 
@@ -314,7 +319,7 @@ value&       value::operator[]( const char* key ) {
     }
     o->val.fields.push_back( key_val(key) );
     return o->val.fields.back().val;
-  } else if (strcmp(gh(holder)->type(), "null" ) == 0 ) {
+  } else if (strcmp(gh(holder)->type(), "void" ) == 0 ) {
     new (holder) detail::value_holder_impl<value::object>(value::object());
     return (*this)[key];
   }
@@ -358,6 +363,15 @@ const char* value::type()const { return gh(holder)->type(); }
 void  value::visit( value::const_visitor&& v )const {
    auto h = ((detail::value_holder*)&holder[0]);
    h->visit( fc::move(v) );
+}
+/*  sets the subkey key with v and return *this */
+value&  value::set( const char* key,       fc::value v ) {
+    (*this)[key] = fc::move(v);
+    return *this;
+}
+value&  value::set( const fc::string& key, fc::value v ) {
+    (*this)[key.c_str()] = fc::move(v);
+    return *this;
 }
 
 } // namepace fc

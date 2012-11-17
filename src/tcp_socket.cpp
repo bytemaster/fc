@@ -51,7 +51,7 @@ namespace fc {
                 });
       p->wait();
     } else if( ec ) {
-      wlog( "throw" );
+      elog( "throw... write data failed %s", boost::system::system_error(ec).what() );
       throw boost::system::system_error(ec);
     }
     return *this;

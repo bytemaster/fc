@@ -603,7 +603,7 @@ char* read_key_val( value::object& obj, bool sc, char* in, char* end, fc::json::
   // now we should have a name.
   if( name_end >= end -1 ) {
     temp_set ntemp(name_end,'\0');
-    elog( "early end after reading name %1%", name );
+    elog( "early end after reading name '%s'", name );
     return name_end;
   }
   if( *name != '"' ) {

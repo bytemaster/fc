@@ -102,7 +102,8 @@ namespace fc {
                         const fc::string& a1, const fc::string& a2, const fc::string& a3, const fc::string& a4 ) {
     ::boost::exception_detail::throw_exception_(fc::generic_exception(msg),func, file, line );
   }
-  fc::string except_str() { return fc::current_exception().diagnostic_information(); }
+  fc::string except_str() { return boost::current_exception_diagnostic_information(); }//boost::current_exception_diagonstic_information(); } 
+  //fc::current_exception().diagnostic_information(); }
 
 }
 

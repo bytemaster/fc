@@ -67,6 +67,15 @@ namespace fc {  namespace json {
       }
       std::function<Signature> func;
     };
+    template<typename ArgsTuple, typename Signature>
+    struct rpc_server_method_impl<void,ArgsTuple,Signature> : public rpc_server_method {
+      rpc_server_method_impl( const std::function<Signature>& f ):func(f){} 
+      virtual value call( const value& v ) {
+        fc::call_fused(func, named_param<typename deduce<ArgsTuple>::type>::cast(v) ); 
+        return value();
+      }
+      std::function<Signature> func;
+    };
 
     template<typename InterfaceType>
     struct add_method_visitor {

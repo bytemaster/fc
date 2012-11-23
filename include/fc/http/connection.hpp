@@ -22,6 +22,7 @@ namespace fc {
          Found               = 302,
          InternalServerError = 500
      };
+     reply( status_code c = OK):status(c){}
      int                     status;
      fc::vector<header>      headers;
      fc::vector<char>        body;

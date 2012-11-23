@@ -186,7 +186,6 @@ namespace fc {
         struct cast_if_tuple {
           template<typename T>
           static T cast(  const value& v ) {
-             slog( "cast non tuple %s", typeid(T).name() );
              typename fc::deduce<T>::type out;
              v.visit(cast_visitor<decltype(out)>(out));
              return out;

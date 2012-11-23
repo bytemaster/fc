@@ -1,4 +1,5 @@
 #include <boost/chrono/system_clocks.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
 #include <fc/time.hpp>
 #include <sstream>
 
@@ -11,8 +12,6 @@ namespace fc {
       bch::system_clock::time_point tp; 
       tp += bch::microseconds( elapsed._count);
       time_t tt = bch::system_clock::to_time_t(tp);
-      std::stringstream ss;
-      ss<<tt;
-      return ss.str();
+      return boost::posix_time::to_iso_string( boost::posix_time::from_time_t(tt) );
   }
 }

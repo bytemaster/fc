@@ -112,6 +112,7 @@ namespace fc {  namespace json {
         typename promise<R>::ptr rtn( r, true );
         invoke( detail::pending_result::ptr(r), method, 
             value(detail::named_param<typename fc::deduce<Args>::type>::to_value(a)) );
+        return rtn;
       }
 
       template<typename Args >

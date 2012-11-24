@@ -31,6 +31,7 @@ namespace fc {
       }
 
       struct impl_base : public fc::retainable  {
+          virtual ~impl_base(){}
           virtual void write( const char* buf, size_t len ) = 0;
           virtual void close() = 0;
           virtual void flush() = 0;
@@ -85,9 +86,10 @@ namespace fc {
 
     protected:
       struct impl_base : public fc::retainable  {
-          virtual void read( char* buf, size_t len ) = 0;
-          virtual size_t readsome( char* buf, size_t len ) = 0;
-          virtual bool eof()const;
+          virtual ~impl_base(){}
+          virtual void read( char* buf, size_t len )=0;
+          virtual size_t readsome( char* buf, size_t len )=0;
+          virtual bool eof()const=0;
       };
 
       template<typename T>

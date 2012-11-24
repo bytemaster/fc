@@ -167,18 +167,20 @@ namespace fc {
       future( const shared_ptr<promise<T>>& p ):m_prom(p){}
       future( shared_ptr<promise<T>>&& p ):m_prom(fc::move(p)){}
       future(){}
+
+      operator const T&()const { return wait(); }
       
       /// @pre valid()
       /// @post ready()
       /// @throws timeout
-      const T& wait( const microseconds& timeout = microseconds::max() ){
+      const T& wait( const microseconds& timeout = microseconds::max() )const {
         return m_prom->wait(timeout);
       }
 
       /// @pre valid()
       /// @post ready()
       /// @throws timeout
-      const T& wait_until( const time_point& tp ) {
+      const T& wait_until( const time_point& tp )const {
         return m_prom->wait_until(tp);
       }
 

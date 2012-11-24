@@ -133,7 +133,7 @@ fc::future<int> process::exec( const fc::path& exe, fc::vector<fc::string>&& arg
   promise<int>::ptr p(new promise<int>("process"));
   my->stat.async_wait(  my->child->get_id(), [=]( const boost::system::error_code& ec, int exit_code )
     {
-      slog( "process::result %1%", exit_code );
+      slog( "process::result %d", exit_code );
       if( !ec ) {
           #ifdef BOOST_POSIX_API
           try {

@@ -90,8 +90,9 @@ namespace fc {
           const T* data()const  { return (&_data->first);    }
           T*       data()       { return (&_data->first);    }
 
-          iterator begin()            { return _data ? &front()   : 0;}
+          iterator       begin()            { return _data ? &front()   : 0;}
           const_iterator begin()const { return _data ? &front()   : 0;}
+          iterator       end()        { return _data ? (&back())+1: 0;}
           const_iterator end()const   { return _data ? (&back())+1: 0;}
 
           T&       operator[]( uint64_t i )      { return (&_data->first)[i]; }

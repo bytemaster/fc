@@ -1,6 +1,7 @@
 #pragma once
 #include <fc/iostream.hpp>
 #include <fc/shared_ptr.hpp>
+#include <fc/log.hpp>
 
 namespace fc {
   /**
@@ -19,6 +20,7 @@ namespace fc {
         return *this;
       }
       virtual void   close() {
+      // TODO: move to cpp
         my->close();
       }
       virtual void   flush() {
@@ -100,7 +102,7 @@ namespace fc {
           virtual void read( char* buf, size_t len ) {
             st.read(buf,len);
           }
-          virtual bool eof()const { return st.eof(); }
+          virtual bool eof()const { return st.eof() || !st.good(); }
           T& st;
       };
       

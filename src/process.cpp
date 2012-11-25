@@ -43,7 +43,7 @@ namespace fc {
         try {
             return static_cast<std::streamsize>(fc::asio::read_some( *m_pi, boost::asio::buffer( s, static_cast<size_t>(n) ) ));
         } catch ( const boost::system::system_error& e ) {
-          if( e.code() == boost::asio::error::eof )  
+          if( e.code() == boost::asio::error::eof ) 
               return -1;
           throw;
         }
@@ -62,6 +62,17 @@ FC_START_SHARED_IMPL( fc::process )
    _ins(std_in),
    _outs(std_out),
    _errs(std_err){}
+
+  ~impl() {
+    try {
+      if( inp ) {
+        inp->close();
+      }
+      child->terminate();
+    }catch(...) {
+      wlog( "caught exception cleaning up process" );
+    }
+  }
 
   std::shared_ptr<bp::child> child;
   std::shared_ptr<bp::pipe>  outp;
@@ -133,7 +144,7 @@ fc::future<int> process::exec( const fc::path& exe, fc::vector<fc::string>&& arg
   promise<int>::ptr p(new promise<int>("process"));
   my->stat.async_wait(  my->child->get_id(), [=]( const boost::system::error_code& ec, int exit_code )
     {
-      slog( "process::result %d", exit_code );
+      //slog( "process::result %d", exit_code );
       if( !ec ) {
           #ifdef BOOST_POSIX_API
           try {
@@ -159,7 +170,7 @@ fc::future<int> process::exec( const fc::path& exe, fc::vector<fc::string>&& arg
  *  Forcefully kills the process.
  */
 void process::kill() {
-    my->child->terminate();
+  my->child->terminate();
 }
 
 /**

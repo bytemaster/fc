@@ -6,7 +6,7 @@
 
 namespace fc {
   
-  class udp_socket::impl {
+  class udp_socket::impl : public fc::retainable {
     public:
       impl():_sock( fc::asio::default_io_service() ){}
       ~impl(){
@@ -23,8 +23,11 @@ namespace fc {
     return fc::ip::endpoint( e.address().to_v4().to_ulong(), e.port() );
   }
 
-  udp_socket::udp_socket() {
+  udp_socket::udp_socket()
+  :my( new impl() ) {
   }
+  udp_socket::udp_socket( const udp_socket& s )
+  :my(s.my){}
   udp_socket::~udp_socket() {
   }
 

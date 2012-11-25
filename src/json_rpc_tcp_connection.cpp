@@ -7,7 +7,7 @@ namespace fc {
     class rpc_tcp_connection::impl : public fc::retainable {
       public:
           tcp_socket sock;
-          ~impl(){ slog( "%p", this );}
+          ~impl(){ }
     };
     
     rpc_tcp_connection::rpc_tcp_connection()
@@ -22,15 +22,12 @@ namespace fc {
 
     void rpc_tcp_connection::connect_to( const fc::ip::endpoint& ep ) {
       my->sock.connect_to(ep);
-      wlog( "Connected %p", my.get() );
       open( my->sock, my->sock );
     }
     void rpc_tcp_connection::start() {
-      slog( "open... %p", my.get() );
       open( my->sock, my->sock );
     }
     void rpc_tcp_connection::close() {
-      slog( "close %p", my.get() );
       rpc_stream_connection::close();
       //my->sock.close();
     }

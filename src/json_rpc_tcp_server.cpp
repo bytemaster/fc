@@ -22,8 +22,10 @@ namespace fc {
     }
 
     void rpc_tcp_server::listen( uint16_t port ) {
+      
       my->tcp_serv.listen(port);
       fc::async([this](){
+        try {
           rpc_tcp_connection::ptr con(new rpc_tcp_connection() );
           while( my->tcp_serv.accept( con->get_socket() ) ) {
             slog( "new connection!" );
@@ -32,6 +34,9 @@ namespace fc {
             my->cons.push_back(con);
             con.reset(new rpc_tcp_connection() );
           }
+        } catch ( ... ) {
+          wlog( "tcp listen failed..." );
+        }
       });
     }
 

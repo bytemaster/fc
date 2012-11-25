@@ -14,7 +14,6 @@ namespace fc { namespace json {
 
       impl( fc::istream& i, fc::ostream& o, rpc_stream_connection& s )
       :in(i),out(o),self(s){
-        slog( "%p", this );
         _read_loop_complete = fc::async( [=](){ read_loop(); } ); 
       }
       
@@ -28,20 +27,19 @@ namespace fc { namespace json {
 
       fc::future<void> _read_loop_complete;
       void read_loop() {
-        slog( "%p", this );
         fc::string line;
         fc::getline( in, line );
         while( !in.eof() ) {
             try {
                 fc::value v= fc::json::from_string( line );
-                slog( "%s", fc::json::to_string(v).c_str() );
+                //slog( "%s", fc::json::to_string(v).c_str() );
                 self.handle_message(v);
             } catch (...) {
               wlog( "%s", fc::except_str().c_str() );
+              return;
             }
             fc::getline( in, line );
         }
-        slog( "close read loop" );
         self.cancel_pending_requests();
         if( !!on_close ) on_close();
       }
@@ -50,7 +48,7 @@ namespace fc { namespace json {
   rpc_stream_connection::rpc_stream_connection( fc::istream& i, fc::ostream& o )
   :my( new impl(i,o,*this) ){
   }
-  rpc_stream_connection::rpc_stream_connection(){ slog( "default" ); }
+  rpc_stream_connection::rpc_stream_connection(){  }
   rpc_stream_connection::rpc_stream_connection(const rpc_stream_connection& c):my(c.my){}
   rpc_stream_connection::~rpc_stream_connection(){ 
    // slog( "%p", my.get() ); 
@@ -60,7 +58,6 @@ namespace fc { namespace json {
   // of this rpc_stream_connection
   void rpc_stream_connection::open( fc::istream& i, fc::ostream& o) {
     my.reset( new impl(i,o,*this) );
-    slog( "open... %p", my.get() );
   }
 
   // cancels all pending requests, closes the ostream

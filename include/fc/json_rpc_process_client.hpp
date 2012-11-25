@@ -23,7 +23,6 @@ namespace fc { namespace json {
       }
       fc::future<int> exec( const fc::path& exe, fc::vector<fc::string>&& args, 
                             const fc::path& wd, int opt = fc::process::open_all  ) {
-         slog( "cd %s; %s", wd.generic_string().c_str(), exe.generic_string().c_str() );
          auto r = _proc.exec( canonical(exe), fc::move(args), wd, opt ); 
          _con.reset( new fc::json::rpc_stream_connection( _proc.out_stream(), _proc.in_stream() ) );
          this->_vtable.reset(new fc::detail::vtable<InterfaceType,fc::json::detail::rpc_member>() );
@@ -32,7 +31,7 @@ namespace fc { namespace json {
          return r;
       }
 
-      void kill() { _con->close(); _proc.kill(); }
+      void kill() {  _con->close();  _proc.kill(); }
 
       /**
        *  @brief returns a stream that reads from the process' stderr

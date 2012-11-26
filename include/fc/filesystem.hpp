@@ -66,6 +66,9 @@ namespace fc {
   uint64_t file_size( const path& p );
   bool     remove( const path& p );
   void     copy( const path& from, const path& to );
+
+  path     unique_path();
+  path     temp_directory_path();
 }
 
 #endif // _FC_FILESYSTEM_HPP_

@@ -41,6 +41,7 @@ namespace fc { namespace json {
       template<typename T>
       void on_close( T&& f) { _con->on_close( fc::forward<T>(f) ); }
 
+      const fc::json::rpc_stream_connection::ptr& connection()const { return _con; }
     private:
       fc::process                    _proc;
       fc::json::rpc_stream_connection::ptr _con;

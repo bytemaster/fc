@@ -48,6 +48,9 @@ namespace fc {
    void ifstream::open( const fc::path& file, int m ) {
       my->ifs.open( file.string().c_str(), std::ios::binary );
    }
+   size_t ifstream::readsome( char* buf, size_t len ) {
+      return my->ifs.readsome( buf, len );
+   }
    ifstream& ifstream::read( char* buf, size_t len ) {
         my->ifs.read(buf,len);
         return *this;

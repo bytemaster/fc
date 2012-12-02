@@ -30,6 +30,7 @@ namespace fc {
       ~ifstream();
 
       void open( const fc::path& file, int m );
+      size_t readsome( char* buf, size_t len );
       ifstream& read( char* buf, size_t len );
       void   close();
       bool    eof()const;

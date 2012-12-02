@@ -55,7 +55,7 @@ namespace fc {
       friend bool operator==( const directory_iterator&, const directory_iterator& );
       friend bool operator!=( const directory_iterator&, const directory_iterator& );
     private:
-      fwd<boost::filesystem::directory_iterator,8> _p; 
+      fwd<boost::filesystem::directory_iterator,16> _p; 
   };
 
   bool     exists( const path& p );

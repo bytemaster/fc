@@ -67,6 +67,8 @@ namespace fc {
   fc::string to_string( int64_t v );
   fc::string to_string( double v );
   fc::string to_string( float v );
+  fc::string to_string( int8_t v );
+  fc::string to_string( uint8_t v );
   fc::string to_string( int32_t v );
   fc::string to_string( uint32_t v );
   fc::string to_string( int16_t v );

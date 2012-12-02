@@ -69,6 +69,22 @@ namespace fc {
     return _p->parent_path();
    }
 
+      directory_iterator::directory_iterator( const fc::path& p )
+      :_p(p){}
+
+      directory_iterator::directory_iterator(){}
+      directory_iterator::~directory_iterator(){}
+
+      fc::path            directory_iterator::operator*()const { return boost::filesystem::path(*(*_p)); }
+      directory_iterator& directory_iterator::operator++(int)  { (*_p)++; return *this; }
+      directory_iterator& directory_iterator::operator++()     { (*_p)++; return *this; }
+
+      bool operator==( const directory_iterator& r, const directory_iterator& l) {
+        return *r._p == *l._p;
+      }
+      bool operator!=( const directory_iterator& r, const directory_iterator& l) {
+        return *r._p != *l._p;
+      }
 
   bool exists( const path& p ) { return boost::filesystem::exists(p); }
   void create_directories( const path& p ) { boost::filesystem::create_directories(p); }

@@ -55,7 +55,7 @@ namespace fc {
         uint8_t b = uint8_t(val) & 0x7f;
         val >>= 7;
         b |= ((val > 0) << 7);
-        s.put(b);
+        s.write((char*)&b,1);//.put(b);
       } while( val );
     }
 
@@ -65,7 +65,7 @@ namespace fc {
         uint8_t b = uint8_t(val) & 0x7f;
         val >>= 7;
         b |= ((val > 0) << 7);
-        s.put(b);
+        s.write((char*)&b,1);//.put(b);
       }while( val );
     }
 
@@ -198,11 +198,11 @@ namespace fc {
       struct if_reflected<fc::true_type> {
         template<typename Stream, typename T>
         static inline void pack( Stream& s, const T& v ) { 
-          fc::static_reflector<T>::visit( pack_object_visitor<Stream,T>( v, s ) );
+          fc::reflector<T>::visit( pack_object_visitor<Stream,T>( v, s ) );
         }
         template<typename Stream, typename T>
         static inline void unpack( Stream& s, T& v ) { 
-          fc::static_reflector<T>::visit( unpack_object_visitor<Stream,T>( v, s ) );
+          fc::reflector<T>::visit( unpack_object_visitor<Stream,T>( v, s ) );
         }
       };
 
@@ -234,11 +234,11 @@ namespace fc {
 
     template<typename Stream, typename T> 
     inline void pack( Stream& s, const T& v ) {
-      fc::raw::detail::if_reflected< typename fc::static_reflector<T>::is_defined >::pack(s,v);
+      fc::raw::detail::if_reflected< typename fc::reflector<T>::is_defined >::pack(s,v);
     }
     template<typename Stream, typename T> 
     inline void unpack( Stream& s, T& v ) {
-      fc::raw::detail::if_reflected< typename fc::static_reflector<T>::is_defined >::unpack(s,v);
+      fc::raw::detail::if_reflected< typename fc::reflector<T>::is_defined >::unpack(s,v);
     }
 
 

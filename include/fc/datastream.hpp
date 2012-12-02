@@ -40,7 +40,8 @@ struct datastream {
           m_pos += s;
           return true;
         }
-        FC_THROW_MSG( "Attempt to read %s bytes beyond end of buffer of size %s", -((m_end-m_pos) - s),(m_end-m_start) );
+        FC_THROW_MSG( "Attempt to read %s bytes beyond end of buffer of size %s", 
+                        int64_t(-((m_end-m_pos) - s)), int64_t(m_end-m_start) );
         return false;
       }
       
@@ -50,7 +51,7 @@ struct datastream {
           m_pos += s;
           return true;
         }
-        FC_THROW_MSG( "Attempt to write %s bytes beyond end of buffer of size %s", -((m_end-m_pos) - s),(m_end-m_start) );
+        FC_THROW_MSG( "Attempt to write %s bytes beyond end of buffer of size %s", int64_t(-((m_end-m_pos) - s)),int64_t(m_end-m_start) );
         return false;
       }
       
@@ -60,7 +61,7 @@ struct datastream {
           ++m_pos; 
           return true;
         }
-        FC_THROW_MSG( "Attempt to write %s byte beyond end of buffer of size %s", -((m_end-m_pos) - 1), (m_end-m_start) );
+        FC_THROW_MSG( "Attempt to write %s byte beyond end of buffer of size %s", int64_t(-((m_end-m_pos) - 1)), int64_t(m_end-m_start) );
         return  false;
       }
       
@@ -71,7 +72,7 @@ struct datastream {
           ++m_pos; 
           return true;
         }
-        FC_THROW_MSG( "Attempt to read %s byte beyond end of buffer of size %s", -((m_end-m_pos) - 1), (m_end-m_start) );
+        FC_THROW_MSG( "Attempt to read %s byte beyond end of buffer of size %s", int64_t(-((m_end-m_pos) - 1)), int64_t(m_end-m_start) );
         ++m_pos; 
         return  false;
       }

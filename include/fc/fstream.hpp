@@ -25,15 +25,19 @@ namespace fc {
   class ifstream : virtual public istream {
     public:
       enum mode { in, binary };
+      enum seekdir { beg, cur, end };
+
       ifstream();
       ifstream( const fc::path& file, int m );
       ~ifstream();
 
-      void open( const fc::path& file, int m );
-      size_t readsome( char* buf, size_t len );
+      void      open( const fc::path& file, int m );
+      size_t    readsome( char* buf, size_t len );
       ifstream& read( char* buf, size_t len );
-      void   close();
-      bool    eof()const;
+      ifstream& seekg( size_t p, seekdir d = beg );
+      void      get( char& c ) { read( &c, 1 ); }
+      void      close();
+      bool      eof()const;
     private:
       class impl;
       fc::shared_ptr<impl> my;

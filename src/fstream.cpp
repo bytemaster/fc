@@ -55,6 +55,13 @@ namespace fc {
         my->ifs.read(buf,len);
         return *this;
    }
+   ifstream& ifstream::seekg( size_t p, seekdir d ) {
+      switch( d ) {
+        case beg: my->ifs.seekg( p, std::ios_base::beg ); return *this;
+        case cur: my->ifs.seekg( p, std::ios_base::cur ); return *this;
+        case end: my->ifs.seekg( p, std::ios_base::end ); return *this;
+      }
+   }
    void   ifstream::close() { return my->ifs.close(); }
 
    bool   ifstream::eof()const { return my->ifs.eof(); }

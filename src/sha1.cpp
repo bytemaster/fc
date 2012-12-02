@@ -5,6 +5,8 @@
 #include <string.h>
 #include <fc/filesystem.hpp>
 #include <fc/interprocess/file_mapping.hpp>
+#include <fc/value.hpp>
+#include <fc/value_cast.hpp>
 
 namespace fc {
   
@@ -91,6 +93,13 @@ namespace fc {
   }
   bool operator == ( const fc::sha1& h1, const fc::sha1& h2 ) {
     return memcmp( h1._hash, h2._hash, sizeof(h1._hash) ) == 0;
+  }
+
+  void pack( fc::value& v, const fc::sha1& s ) {
+      v = fc::string(s);
+  }
+  void unpack( const fc::value& v, fc::sha1& s ) {
+      s = sha1(fc::value_cast<fc::string>(v));
   }
   
 } // namespace fc

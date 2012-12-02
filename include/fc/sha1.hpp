@@ -61,6 +61,9 @@ namespace fc {
       uint32_t _hash[5]; 
   };
 
+  class value;
+  void pack( fc::value& , const fc::sha1&  );
+  void unpack( const fc::value& , fc::sha1&  );
 }
 
 

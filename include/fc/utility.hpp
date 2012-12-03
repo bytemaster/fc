@@ -41,11 +41,12 @@ namespace fc {
   template<typename T>
   const T& min( const T& a, const T& b ) { return a < b ? a: b; }
 
+}
+  // outside of namespace fc becuase of VC++ conflict with std::swap
   template<typename T>
-  void swap( T& a, T& b ) {
+  void fc_swap( T& a, T& b ) {
     T tmp = fc::move(a);
     a = fc::move(b);
     b = fc::move(tmp);
   }
-}
 #endif // _FC_UTILITY_HPP_

@@ -2,6 +2,7 @@
 //#include <fc/function.hpp>
 #include <fc/future.hpp>
 #include <functional>
+#include <boost/config.hpp>
 #include <boost/preprocessor/repeat.hpp>
 #include <boost/preprocessor/repetition/enum_binary_params.hpp>
 #include <boost/preprocessor/repetition/enum_params.hpp>
@@ -12,7 +13,7 @@ namespace fc {
   
   namespace detail {
     struct identity_member { 
-       #if  BOOST_NO_VARIADIC_TEMPLATES
+       #ifdef BOOST_NO_VARIADIC_TEMPLATES
          #define RPC_MEMBER_FUNCTOR(z,n,IS_CONST) \
          template<typename R, typename C, typename P BOOST_PP_ENUM_TRAILING_PARAMS( n, typename A)> \
          static std::function<R( BOOST_PP_ENUM_PARAMS(n,A) ) > \

@@ -22,7 +22,7 @@ namespace fc {
       ~file_mapping();
     private:
       friend class mapped_region;
-      fc::fwd<boost::interprocess::file_mapping,16> my;
+      fc::fwd<boost::interprocess::file_mapping,0x24> my;
   };
   class mapped_region {
     public:

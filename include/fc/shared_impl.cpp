@@ -20,7 +20,7 @@ shared_impl<T>::shared_impl( shared_impl<T>&& u ):_impl(fc::move(u._impl)){}
 
 template<typename T>
 shared_impl<T>& shared_impl<T>::operator=( shared_impl<T>&& u ) {
-  fc::swap(_impl,u._impl);
+  fc_swap(_impl,u._impl);
   return *this;
 }
 template<typename T>
@@ -46,7 +46,7 @@ TYPE::TYPE( A1&& a1, A2&& a2 ) \
 :my( new typename fc::shared_impl<TYPE>::impl( fc::forward<A1>(a1), fc::forward<A2>(a2) ) ){}\
 template<typename A1,typename A2, typename A3> \
 TYPE::TYPE( A1&& a1, A2&& a2, A3&& a3 ) \
-:my( new typename fc::shared_impl<TYPE>::impl( fc::forward<A1>(a1), fc::forward<A2>(a2), fc::forward<A3>(a3) ) ){}\
+:my( new fc::shared_impl<TYPE>::impl( fc::forward<A1>(a1), fc::forward<A2>(a2), fc::forward<A3>(a3) ) ){}\
 TYPE::TYPE( shared_impl<TYPE>::impl* m ) \
 :my(m){}\
 TYPE::TYPE( TYPE* c )\
@@ -56,7 +56,7 @@ TYPE::TYPE( TYPE&& c )\
 TYPE::TYPE( const TYPE& c )\
 :my(c.my){}\
 TYPE::TYPE() \
-:my( new typename fc::shared_impl<TYPE>::impl( ) ){}\
+:my( new fc::shared_impl<TYPE>::impl( ) ){}\
 TYPE::~TYPE(){}\
 bool TYPE::operator !()const { return !my; }\
 TYPE& TYPE::operator = ( const TYPE& c ) {\
@@ -64,11 +64,11 @@ TYPE& TYPE::operator = ( const TYPE& c ) {\
   return *this;\
 }\
 TYPE& TYPE::operator = ( TYPE&& c ) {\
-  fc::swap( my._impl, c.my._impl );\
+  fc_swap( my._impl, c.my._impl );\
   return *this;\
 }\
 TYPE& TYPE::operator = ( TYPE* c ) {\
-  fc::swap( my._impl, c->my._impl );\
+  fc_swap( my._impl, c->my._impl );\
   delete c;\
   return *this;\
 } \

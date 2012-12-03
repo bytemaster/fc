@@ -28,13 +28,35 @@ namespace fc {
          virtual void operator()( const uint64_t& v    ){ m_out = fc::numeric_cast<T>(v); }
          virtual void operator()( const float& v       ){ m_out = fc::numeric_cast<T>(v); }
          virtual void operator()( const double& v      ){ m_out = fc::numeric_cast<T>(v); }
-         virtual void operator()( const bool& v        ){ m_out = fc::numeric_cast<T>(v); }
+         virtual void operator()( const bool& v        ){ m_out = v; }
          virtual void operator()( const fc::string& v ) { m_out = fc::lexical_cast<T>(v); }
          virtual void operator()( const value::object&  )      { FC_THROW_MSG("bad cast"); }
          virtual void operator()( const value::array&  )       { FC_THROW_MSG("bad cast"); }
          virtual void operator()( )                     { FC_THROW_MSG("bad cast");        }
          private:
          T& m_out;
+       };
+       template<>
+       struct cast_visitor<bool> : value::const_visitor {
+         cast_visitor( bool& out )
+         :m_out(out){}
+         virtual void operator()( const int8_t& v      ){ m_out = v != 0; }
+         virtual void operator()( const int16_t& v     ){ m_out = v != 0; }
+         virtual void operator()( const int32_t& v     ){ m_out = v != 0; }
+         virtual void operator()( const int64_t& v     ){ m_out = v != 0; }
+         virtual void operator()( const uint8_t& v     ){ m_out = v != 0; }
+         virtual void operator()( const uint16_t& v    ){ m_out = v != 0; }
+         virtual void operator()( const uint32_t& v    ){ m_out = v != 0; }
+         virtual void operator()( const uint64_t& v    ){ m_out = v != 0; }
+         virtual void operator()( const float& v       ){ m_out = v != 0; }
+         virtual void operator()( const double& v      ){ m_out = v != 0; }
+         virtual void operator()( const bool& v        ){ m_out = v; }
+         virtual void operator()( const fc::string& v ) { m_out = !(v != "true"); }
+         virtual void operator()( const value::object&  )      { FC_THROW_MSG("bad cast"); }
+         virtual void operator()( const value::array&  )       { FC_THROW_MSG("bad cast"); }
+         virtual void operator()( )                     { FC_THROW_MSG("bad cast");        }
+         private:
+         bool& m_out;
        };
      
        template<>
@@ -51,7 +73,7 @@ namespace fc {
          virtual void operator()( const uint64_t& v    ){ m_out = fc::lexical_cast<fc::string>(v); }
          virtual void operator()( const float& v       ){ m_out = fc::lexical_cast<fc::string>(v); }
          virtual void operator()( const double& v      ){ m_out = fc::lexical_cast<fc::string>(v); }
-         virtual void operator()( const bool& v        ){ m_out = fc::lexical_cast<fc::string>(v); }
+         virtual void operator()( const bool& v        ){ m_out = v != 0 ? "true" : "false";       }
          virtual void operator()( const fc::string& v ){ m_out = v;                                }
          virtual void operator()( const value::object&  )      { FC_THROW_MSG("bad cast"); }
          virtual void operator()( const value::array&  )       { FC_THROW_MSG("bad cast"); }
@@ -165,7 +187,7 @@ namespace fc {
 
 
        template<>
-       struct cast_visitor<void> : value::value::const_visitor {
+       struct cast_visitor<void> : value::const_visitor {
          virtual void operator()( const int8_t& v      )       { FC_THROW_MSG("bad cast");}
          virtual void operator()( const int16_t& v     )       { FC_THROW_MSG("bad cast");}
          virtual void operator()( const int32_t& v     )       { FC_THROW_MSG("bad cast");}

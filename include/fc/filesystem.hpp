@@ -39,7 +39,7 @@ namespace fc {
       fc::string string()const;
       fc::string generic_string()const;
     private:
-      fwd<boost::filesystem::path,8> _p; 
+      fwd<boost::filesystem::path,32> _p; 
   };
 
   class directory_iterator {

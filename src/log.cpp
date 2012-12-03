@@ -4,7 +4,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
+#ifndef WIN32
 #include <unistd.h>
+#endif
 
 #include <iostream>
 
@@ -32,8 +34,10 @@ namespace fc {
   void log( const char* color, const char* file_name, size_t line_num, 
             const char* method_name, const char* format, ... ) {
     fc::unique_lock<boost::mutex> lock(log_mutex());
+    #ifndef WIN32
     if(isatty(fileno(stderr)))
       std::cerr<<"\r"<<color;
+    #endif
     
     fprintf( stderr, "%-15s %-15s %-5zd %-15s ", thread_name(), short_name(file_name), line_num, method_name );
     //std::cerr<<thread_ptr()<< thread_name()<< short_name(file_name)<< line_num<< method_name ;
@@ -41,8 +45,10 @@ namespace fc {
     va_start(args,format);
     vfprintf( stderr, format, args );
     va_end(args);
+    #ifndef WIN32
     if (isatty(fileno(stderr)))
       fprintf( stderr, "%s", CONSOLE_DEFAULT );
+    #endif
     fprintf( stderr, "\n" );
     fflush( stderr );
   }

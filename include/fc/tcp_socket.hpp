@@ -32,7 +32,7 @@ namespace fc {
     private:
       friend class tcp_server;
       class impl;
-      fc::fwd<impl,32> my;
+      fc::fwd<impl,0x44> my;
   };
 
   class tcp_server {

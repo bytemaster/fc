@@ -50,7 +50,7 @@ namespace fc {
    }
 
    thread& thread::operator=(thread&& t ) {
-      fc::swap(t.my,my);
+      fc_swap(t.my,my);
       return *this;
    }
 

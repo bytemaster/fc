@@ -11,11 +11,11 @@ namespace fc {
     inline double to_double( double d ) { return d; }
 
     int64_t to_int64( const fc::string& s );
-    inline  int64_t to_int64( double d ) { return d; }
+    inline  int64_t to_int64( double d ) { return static_cast<int64_t>(d); }
     inline  int64_t to_int64( int64_t d ) { return d; }
 
     uint64_t        to_uint64( const fc::string& s );
-    inline uint64_t to_uint64( double d ) { return d; }
+    inline uint64_t to_uint64( double d ) { return static_cast<uint64_t>(d); }
     inline uint64_t to_uint64( uint64_t d ) { return d; }
 
     fc::string to_string( double d   );
@@ -47,32 +47,33 @@ namespace fc {
     };
 
     template<typename R> 
-    struct lexical_cast<int64_t, R> { static uint64_t cast( const R& v ) { return to_int64( v ); } };
+    struct lexical_cast<int64_t, R> { static int64_t cast( const R& v ) { return static_cast<int64_t>(to_int64( v )); } };
 
     template<typename R> 
-    struct lexical_cast<int32_t, R> { static uint32_t cast( const R& v ) { return to_int64( v ); } };
+    struct lexical_cast<int32_t, R> { static int32_t cast( const R& v ) { return static_cast<int32_t>(to_int64( v )); } };
 
     template<typename R> 
-    struct lexical_cast<int16_t, R> { static uint16_t cast( const R& v ) { return to_int64( v ); } };
+    struct lexical_cast<int16_t, R> { static int16_t cast( const R& v ) { return static_cast<int16_t>(to_int64( v )); } };
 
     template<typename R> 
-    struct lexical_cast<int8_t, R> { static uint8_t cast( const R& v ) { return to_int64( v ); } };
+    struct lexical_cast<int8_t, R> { static int8_t cast( const R& v ) { return static_cast<int8_t>(to_int64( v )); } };
 
 
     template<typename R> 
-    struct lexical_cast<uint32_t, R> { static uint32_t cast( const R& v ) { return to_uint64( v ); } };
+    struct lexical_cast<uint32_t, R> { static uint32_t cast( const R& v ) { return static_cast<uint32_t>(to_uint64( v )); } };
 
     template<typename R> 
-    struct lexical_cast<uint16_t, R> { static uint16_t cast( const R& v ) { return to_uint64( v ); } };
+    struct lexical_cast<uint16_t, R> { static uint16_t cast( const R& v ) { return static_cast<uint16_t>(to_uint64( v )); } };
 
     template<typename R> 
-    struct lexical_cast<uint8_t, R> { static uint8_t cast( const R& v ) { return to_uint64( v ); } };
+    struct lexical_cast<uint8_t, R> { static uint8_t cast( const R& v ) { return static_cast<uint8_t>(to_uint64( v )); } };
 
     template<typename R> 
-    struct lexical_cast<bool, R> { static bool cast( const R& v ) { return v; } };
+    struct lexical_cast<bool, R> { static bool cast( const R& v ) { return v != 0; } };
 
     template<> 
-    struct lexical_cast<char, fc::string> { static bool cast( const fc::string& v ) { return v[0]; } };// TODO: check string len
+    struct lexical_cast<char, fc::string> { static char cast( const fc::string& v ) 
+    { return v[0]; } };// TODO: check string len
 
     template<> 
     struct lexical_cast<bool, fc::string> { static bool cast( const fc::string& v ) { return v == "true"; } };
@@ -81,7 +82,7 @@ namespace fc {
     struct lexical_cast<fc::string,bool> { static fc::string cast( const bool& v ) { return v ? "true" : "false";} };
 
     template<typename R> 
-    struct lexical_cast<float, R> { static float cast( const R& v ) { return to_double( v ); } };
+    struct lexical_cast<float, R> { static float cast( const R& v ) { return static_cast<float>(to_double( v )); } };
   }
 
 

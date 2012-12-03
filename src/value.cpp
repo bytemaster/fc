@@ -6,7 +6,8 @@
 namespace fc {
 
   namespace detail {
-      struct value_visitor {
+      class value_visitor {
+      	public:
         virtual void operator()( int8_t& v      ){};
         virtual void operator()( int16_t& v     ){};
         virtual void operator()( int32_t& v     ){};
@@ -24,6 +25,8 @@ namespace fc {
         virtual void operator()( ){};
       };
       
+      void value_holder::visit( value::const_visitor&& v )const {v(); }
+      void value_holder::visit( value_visitor&& v ) 	     {v(); }
       
       // fundamental values...
       template<typename T>
@@ -47,11 +50,11 @@ namespace fc {
       template<>
       struct value_holder_impl<void> : value_holder {
         value_holder_impl(){};
+        virtual void visit( value::const_visitor&& v )const{ v(); }
+        virtual void visit( value_visitor&& v )           { v(); }
        // typedef void_t T;
       /*
         virtual const char* type()const             { return "void"; }
-        virtual void visit( value::const_visitor&& v )const{ v(); }
-        virtual void visit( value_visitor&& v )           { v(); }
         virtual void clear()                        {  }
         virtual size_t size()const                  { return 0; }
       
@@ -127,8 +130,6 @@ namespace fc {
       value_holder* value_holder::move_helper( char* c )      { return new(c) value_holder(); }
       value_holder* value_holder::copy_helper( char* c )const { return new(c) value_holder(); }
 
-      void value_holder::visit( value::const_visitor&& v )const     { v();           }
-      void value_holder::visit( value_visitor&& v )                { v();           }
 
       void value_holder::clear()                             {}
       size_t value_holder::size()const                       { return 0; }

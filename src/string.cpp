@@ -1,13 +1,8 @@
 #include <fc/string.hpp>
 #include <fc/utility.hpp>
+#include <fc/fwd_impl.hpp>
 
 #include <string>
-namespace detail {
-  void destroy( void* t ) {
-    using namespace std;
-    reinterpret_cast<std::string*>(t)->~string();
-  }
-}
 
 /**
  *  Implemented with std::string for now.
@@ -15,112 +10,48 @@ namespace detail {
 
 namespace fc  {
 
-  string::string(const char* s, int l) {
-    static_assert( sizeof(*this) >= sizeof(std::string), "failed to reserve enough space" );
-    new (this) std::string(s,l);
-  }
-  string::string() {
-    static_assert( sizeof(*this) >= sizeof(std::string), "failed to reserve enough space" );
-    new (this) std::string();
-  }
-
-  string::string( const string& c ) {
-    static_assert( sizeof(my) >= sizeof(std::string), "failed to reserve enough space" );
-    new (this) std::string(reinterpret_cast<const std::string&>(c));
-  }
- 
-
-  string::string( string&& m )  {
-    static_assert( sizeof(my) >= sizeof(std::string), "failed to reserve enough space" );
-    new (this) std::string(reinterpret_cast<std::string&&>(m));
-  }
-  
-  string::string( const char* c ){
-    static_assert( sizeof(my) >= sizeof(std::string), "failed to reserve enough space" );
-    new (this) std::string(c);
-  }
-
-  string::string( const_iterator b, const_iterator e ) {
-    static_assert( sizeof(my) >= sizeof(std::string), "failed to reserve enough space" );
-    new (this) std::string(b,e);
-  }
-  string::string( const std::string& s ) {
-    static_assert( sizeof(my) >= sizeof(std::string), "failed to reserve enough space" );
-    new (this) std::string(s);
-  }
-  string::string( std::string&& s ) {
-    static_assert( sizeof(my) >= sizeof(std::string), "failed to reserve enough space" );
-    new (this) std::string(fc::move(s));
-  }
-
-  string::operator std::string&() {
-     return *reinterpret_cast<std::string*>(this);
-  }
-  string::operator const std::string&()const {
-     return *reinterpret_cast<const std::string*>(this);
-  }
-
-  string::~string() {
-    ::detail::destroy( this );
-  }
+  string::string(const char* s, int l) :my(s,l){ }
+  string::string(){}
+  string::string( const string& c ):my(c.my) { }
+  string::string( string&& m ):my(fc::move(m.my)) {}
+  string::string( const char* c ):my(c){}
+  string::string( const_iterator b, const_iterator e ):my(b,e){}
+  string::string( const std::string& s ):my(s) {}
+  string::string( std::string&& s ):my(fc::move(s)) {}
+  string::~string() { }
+  string::operator std::string&() { return *my; }
+  string::operator const std::string&()const { return *my; }
 
   string::iterator string::begin()            { return &(*this)[0]; }
   string::iterator string::end()              { return &(*this)[size()]; }
-  string::const_iterator string::begin()const { return reinterpret_cast<const std::string*>(this)->c_str(); }
-  string::const_iterator string::end()const   { return reinterpret_cast<const std::string*>(this)->c_str() + reinterpret_cast<const std::string*>(this)->size(); }
+  string::const_iterator string::begin()const { return my->c_str(); }
+  string::const_iterator string::end()const   { return my->c_str() + my->size(); }
 
-  char&       string::operator[](uint64_t idx)      { return reinterpret_cast<std::string*>(this)->at(idx); }
-  const char& string::operator[](uint64_t idx)const { return reinterpret_cast<const std::string*>(this)->at(idx); }
+  char&       string::operator[](uint64_t idx)      { return (*my)[idx]; }
+  const char& string::operator[](uint64_t idx)const { return (*my)[idx]; }
 
-  void       string::reserve(uint64_t r)    { reinterpret_cast<std::string*>(this)->reserve(r); }
-  uint64_t   string::size()const            { return reinterpret_cast<const std::string*>(this)->size(); }
-  uint64_t   string::find(char c, uint64_t p)const { return reinterpret_cast<const std::string*>(this)->find(c,p); }
-  void       string::clear()                { return reinterpret_cast<std::string*>(this)->clear(); }
-  void       string::resize( uint64_t s )   { reinterpret_cast<std::string*>(this)->resize(s); }
+  void       string::reserve(uint64_t r)           { my->reserve(r); }
+  uint64_t   string::size()const                   { return my->size(); }
+  uint64_t   string::find(char c, uint64_t p)const { return my->find(c,p); }
+  void       string::clear()                       { my->clear(); }
+  void       string::resize( uint64_t s )          { my->resize(s); }
                                             
+  fc::string string::substr( int32_t start, int32_t len ) { return my->substr(start,len); }
+  const char* string::c_str()const                        { return my->c_str(); }
 
-  fc::string string::substr( int32_t start, int32_t len ) {
-    return reinterpret_cast<const std::string&>(*this).substr(start,len).c_str();
-  }
-  const char* string::c_str()const          { return reinterpret_cast<const std::string*>(this)->c_str(); }
+  bool    string::operator == ( const char* s )const   { return *my == s; }
+  bool    string::operator == ( const string& s )const { return *my == *s.my; }
+  bool    string::operator != ( const string& s )const { return *my != *s.my; }
 
-  bool    string::operator == ( const char* s )const {
-    return reinterpret_cast<const std::string&>(*this) == s;
-  }
-  bool    string::operator == ( const string& s )const {
-    return reinterpret_cast<const std::string&>(*this) == reinterpret_cast<const std::string&>(s);
-  }
-  bool    string::operator != ( const string& s )const {
-    return reinterpret_cast<const std::string&>(*this) != reinterpret_cast<const std::string&>(s);
-  }
+  string& string::operator =( const string& c )          { *my = *c.my; return *this; }
+  string& string::operator =( string&& c )               { *my = fc::move( *c.my ); return *this; }
 
-  string& string::operator =( const string& c ) {
-    reinterpret_cast<std::string&>(*this) = reinterpret_cast<const std::string&>(c);
-    return *this;
-  }
-  string& string::operator =( string&& c ) {
-    reinterpret_cast<std::string&>(*this) = fc::move( reinterpret_cast<std::string&>(c) );
-    return *this;
-  }
+  string& string::operator+=( const string& s )          { *my += *s.my; return *this; }
+  string& string::operator+=( char c )                   { *my += c; return *this; }
 
-  string& string::operator+=( const string& s ) {
-    reinterpret_cast<std::string&>(*this) += reinterpret_cast<const std::string&>(s);
-    return *this;
-  }
-  string& string::operator+=( char c ) {
-    reinterpret_cast<std::string&>(*this) += c;
-    return *this;
-  }
-
-  bool operator < ( const string& a, const string& b ) {
-    return reinterpret_cast<const std::string&>(a) < reinterpret_cast<const std::string&>(b);
-  }
-  string operator + ( const string& s, const string& c ) {
-    return string(s) += c;
-  }
-  string operator + ( const string& s, char c ) {
-    return string(s) += c;
-  }
+  bool operator < ( const string& a, const string& b )   { return *a.my < *b.my; } 
+  string operator + ( const string& s, const string& c ) { return string(s) += c; }
+  string operator + ( const string& s, char c ) 	 { return string(s) += c; }
 
 } // namespace fc
 

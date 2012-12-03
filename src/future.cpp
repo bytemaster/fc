@@ -31,12 +31,12 @@ namespace fc {
   }
   bool promise_base::error()const {
     { synchronized(_spin_yield) 
-      return _except;
+      return _exceptp;
     }
   }
 
   void promise_base::set_exception( const fc::exception_ptr& e ){
-    _except = e;
+    _exceptp = e;
     _set_value(nullptr);
   }
 
@@ -47,14 +47,14 @@ namespace fc {
   void promise_base::_wait_until( const time_point& timeout_us ){
     { synchronized(_spin_yield) 
       if( _ready ) {
-        if( _except ) fc::rethrow_exception( _except );
+        if( _exceptp ) fc::rethrow_exception( _exceptp );
         return;
       }
       _enqueue_thread();
     }
     thread::current().wait_until( ptr(this,true), timeout_us );
     if( _ready ) {
-       if( _except ) fc::rethrow_exception( _except );
+       if( _exceptp ) fc::rethrow_exception( _exceptp );
        return; 
     }
     FC_THROW( future_wait_timeout() );
@@ -80,7 +80,7 @@ namespace fc {
     }
     _notify();
     if( nullptr != _compl ) {
-      _compl->on_complete(s,_except);
+      _compl->on_complete(s,_exceptp);
     }
   }
   void promise_base::_on_complete( detail::completion_handler* c ) {

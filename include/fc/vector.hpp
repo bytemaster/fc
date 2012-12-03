@@ -1,20 +1,10 @@
-#ifndef _FC_VECTOR_HPP_
-#define _FC_VECTOR_HPP_
+#pragma once
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <fc/utility.hpp>
 #include <fc/log.hpp>
 
-
-#if 0
-#include <vector>
-namespace fc {
-  template<typename T>
-  using vector = std::vector<T>;
-}
-
-#else
 
 namespace fc {
   namespace detail {
@@ -27,8 +17,8 @@ namespace fc {
       static data* allocate( uint64_t cap ) {
         data* d = nullptr;
         if( cap ){
-          d = (data*)malloc(sizeof(data) + sizeof(T)*(cap-1));
-          d->capacity = cap;
+          d = (data*)malloc(sizeof(data) + sizeof(T)*(static_cast<size_t>(cap)-1));
+          d->capacity = static_cast<size_t>(cap);
         } else {
           d = (data*)malloc(sizeof(data));
           d->capacity = 1;
@@ -38,8 +28,8 @@ namespace fc {
       }
       static data* reallocate( data* d, uint64_t cap ) {
         if( cap ){
-          d = (data*)realloc(d,sizeof(data) + sizeof(T)*(cap-1));
-          d->capacity = cap;
+          d = (data*)realloc(d,sizeof(data) + sizeof(T)*(static_cast<size_t>(cap)-1));
+          d->capacity = static_cast<size_t>(cap);
         } else {
           d = (data*)realloc(d,sizeof(data));
           d->capacity = 1;
@@ -64,13 +54,13 @@ namespace fc {
             if( c.size() ) {
               _data  = detail::data<T>::allocate( c.size() );
               _data->size = c.size();
-              memcpy(begin(),c.begin(),c.size() );
+              memcpy(begin(),c.begin(), static_cast<size_t>(c.size()) );
             }
             //slog( "copy: this.size %d", size() );
           }
           vector_impl(const_iterator b, const_iterator e ):_data(nullptr) {
             resize(e-b);
-            if( size() ) memcpy( data(), b, size() );
+            if( size() ) memcpy( data(), b, static_cast<size_t>(size()) );
           }
           vector_impl(uint64_t s):_data(nullptr){
             resize(s);
@@ -170,12 +160,12 @@ namespace fc {
           }
 
           vector_impl& operator=( vector_impl&& v ) {
-             fc::swap(_data,v._data);
+             fc_swap(_data,v._data);
              return *this;
           }
           vector_impl& operator=( const vector_impl& v ) {
              vector_impl tmp(v);
-             fc::swap(tmp._data,_data);
+             fc_swap(tmp._data,_data);
              return *this;
           }
       protected:
@@ -270,7 +260,7 @@ namespace fc {
               ++c;
               ++nc;
             }
-            fc::swap( _ndata, this->_data );
+            fc_swap( _ndata, this->_data );
             if( _ndata ) free(_ndata);
           }
 
@@ -344,12 +334,12 @@ namespace fc {
             return last;
           }
           vector_impl& operator=( vector_impl&& v ) {
-             fc::swap(_data,v._data);
+             fc_swap(_data,v._data);
              return *this;
           }
           vector_impl& operator=( const vector_impl& v ) {
              vector_impl tmp(v);
-             fc::swap(tmp._data,_data);
+             fc_swap(tmp._data,_data);
              return *this;
           }
        private:
@@ -380,6 +370,4 @@ namespace fc {
   };
 
 };
-#endif 
 
-#endif // _FC_VECTOR_HPP_

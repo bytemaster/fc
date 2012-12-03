@@ -79,7 +79,7 @@ namespace fc {
       mutable spin_yield_lock     _spin_yield;
       thread*                     _blocked_thread;
       time_point                  _timeout;
-      fc::exception_ptr           _except;
+      fc::exception_ptr           _exceptp;
       bool                        _canceled;
       const char*                 _desc;
       detail::completion_handler* _compl;

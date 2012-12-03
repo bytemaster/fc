@@ -122,7 +122,7 @@ namespace fc { namespace json {
   rpc_connection::rpc_connection( const rpc_connection& c )
   :my(c.my){ }
   rpc_connection::rpc_connection( rpc_connection&& c ) {
-    fc::swap(my,c.my);
+    fc_swap(my,c.my);
   }
   rpc_connection::~rpc_connection() {
   }
@@ -132,7 +132,7 @@ namespace fc { namespace json {
     return *this;
   }
   rpc_connection& rpc_connection::operator=(rpc_connection&& m) {
-    fc::swap(m.my,my);
+    fc_swap(m.my,my);
     return *this;
   }
 

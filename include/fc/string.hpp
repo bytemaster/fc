@@ -1,6 +1,6 @@
-#ifndef _FC_STRING_HPP_
-#define _FC_STRING_HPP_
+#pragma once
 #include <fc/utility.hpp>
+#include <fc/fwd.hpp>
 
 
 /**
@@ -13,10 +13,10 @@ namespace std {
   struct char_traits;
 
   template<class T>
-  struct allocator;
+  class allocator;
 
   template<class Char, class Traits, class Allocator>
-  struct basic_string;
+  class basic_string;
 
   typedef basic_string<char, char_traits<char>, allocator<char> > string;
 }
@@ -85,9 +85,8 @@ namespace fc {
       fc::string substr( int32_t start, int32_t len = 0x7fffffff );
     
     private:
-       void* my;
+       fc::fwd<std::string,32> my;
   };
 
 } // namespace FC
 
-#endif // _FC_STRING_HPP_

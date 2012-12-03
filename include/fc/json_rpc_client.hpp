@@ -12,7 +12,7 @@ namespace fc { namespace json {
 
   namespace detail {
     struct rpc_member {
-       #if BOOST_NO_VARIADIC_TEMPLATES
+       #ifdef BOOST_NO_VARIADIC_TEMPLATES
          #define RPC_MEMBER_FUNCTOR(z,n,IS_CONST) \
          template<typename R, typename C, typename P BOOST_PP_ENUM_TRAILING_PARAMS( n, typename A)> \
          static std::function<fc::future<R>( BOOST_PP_ENUM_PARAMS(n,A) ) > \

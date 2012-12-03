@@ -6,6 +6,7 @@
 #include <fc/interprocess/file_mapping.hpp>
 #include <map>
 
+
 namespace fc { namespace json {
   /**
    *  Placeholder for unparsed json data.
@@ -38,6 +39,11 @@ namespace fc { namespace json {
       }
       fc::vector<char> json_data;
   };
+
+} }
+
+typedef std::map<fc::string,fc::json::string> jmap;
+
 
   namespace errors {
     enum error_type {
@@ -107,9 +113,9 @@ namespace fc { namespace json {
       }
 
       enum error_defaults {
-         default_report  = json::errors::all,
-         default_recover = json::errors::all,
-         default_throw   = json::errors::none,
+         default_report  = errors::all,
+         default_recover = errors::all,
+         default_throw   = errors::none,
          default_ignore  = ~(default_report|default_recover|default_throw)
       };
 
@@ -181,7 +187,7 @@ namespace fc { namespace json {
 
 
 
-
+namespace fc { namespace json {
   fc::string escape_string( const fc::string& s ) {
     // calculate escape string size.
     uint32_t ecount = 0;
@@ -246,9 +252,9 @@ namespace fc { namespace json {
           case '"' :  out += '"'; break;
           case 'x' : { 
             ++i; if( i == out.end() ) return out;
-            char c = from_hex(*i);           
+            char c = fc::from_hex(*i);           
             ++i; if( i == out.end() ) { out += c;  return out; }
-            c = c<<4 | from_hex(*i);           
+            c = c<<4 | fc::from_hex(*i);           
             out += c;
             break;
           }
@@ -290,9 +296,9 @@ namespace fc { namespace json {
           case '"' : *out = '"'; ++out; break;
           case 'x' : { 
             ++i; if( *i == '\0' ){ *out = '\0'; return s; }
-            char c = from_hex(*i);           
+            char c = fc::from_hex(*i);           
             ++i; if( *i == '\0' ){ *out = c; ++out; *out = '\0'; return s; }
-            c = c<<4 | from_hex(*i);           
+            c = c<<4 | fc::from_hex(*i);           
             *out = c;
             ++out;
             break;
@@ -308,6 +314,7 @@ namespace fc { namespace json {
     *out = '\0';
     return s;
   }
+  } }// fc::json
 
 /**
  *   Ignores leading white space.
@@ -435,12 +442,12 @@ struct temp_set {
  * A,B,C
  * Warn on extra ',' or missing ','
  */
-void  read_values( value::array& a, char* in, char* end, fc::json::error_collector& ec ) {
+void  read_values( fc::value::array& a, char* in, char* end, error_collector& ec ) {
   char* ve = 0;
-  char* v = fc::json::read_value( in, end, ve );
+  char* v = read_value( in, end, ve );
   while( *v == ',' ) {
     wlog( "unexpected ','");
-    v = fc::json::read_value( ve, end, ve );
+    v = read_value( ve, end, ve );
   }
   if( v == ve ) return; // no values
 
@@ -451,7 +458,7 @@ void  read_values( value::array& a, char* in, char* end, fc::json::error_collect
   do { // expect comma + value | ''
 
     // expect comma or ''
-    c = fc::json::read_value( ve, end, ce );
+    c = read_value( ve, end, ce );
 
     // '' means we are done, no errors
     if( c == ce ) return;
@@ -465,12 +472,12 @@ void  read_values( value::array& a, char* in, char* end, fc::json::error_collect
     }
     
     // expect value
-    v = fc::json::read_value( ce, end, ve );
+    v = read_value( ce, end, ve );
     while ( *v == ',' ) { // but got comma
       // expect value
       wlog( "extra comma at c->ce" );
       c = v; ce = ve;
-      v = fc::json::read_value( ve, end, ve );
+      v = read_value( ve, end, ve );
     }
     if( v == ve ) {
       wlog( "trailing comma at c->ce" );
@@ -485,22 +492,22 @@ void  read_values( value::array& a, char* in, char* end, fc::json::error_collect
 /**
  *  Reads one level deep, does not recruse into sub objects.
  */
-char* read_key_val( std::map<fc::string,json::string>& obj, bool sc, char* in, char* end, fc::json::error_collector& ec ) {
+char* read_key_val( std::map<fc::string,fc::json::string>& obj, bool sc, char* in, char* end, error_collector& ec ) {
   char* name_end = 0;
   char* name = in;
   do {
     // read first char
-    name = fc::json::read_value( name, end, name_end );
+    name = read_value( name, end, name_end );
     if( sc ) { // if we expect a ,
       if( *name != ',' ) { // but didn't get one
         wlog( "expected ',' but got %1%", name ); // warn and accept name
       } else { // we got the exepcted , read the expected name 
-        name = fc::json::read_value( name_end, end, name_end );
+        name = read_value( name_end, end, name_end );
       }
     } else { // don't start with ','
       while( *name == ',' ) { //  while we don't have a name, keep looking
         wlog( "unexpected ',' " );
-        name = fc::json::read_value( name_end, end, name_end );
+        name = read_value( name_end, end, name_end );
       }
     }
   } while( *name == ',' );
@@ -517,11 +524,11 @@ char* read_key_val( std::map<fc::string,json::string>& obj, bool sc, char* in, c
     wlog( "unquoted name '%1%'", name );
   } else {
     temp_set ntemp(name_end,'\0');
-    name = inplace_unescape_string(name);
+    name = fc::json::inplace_unescape_string(name);
   }
 
   char* col_end = 0;
-  char* col = fc::json::read_value( name_end, end, col_end );
+  char* col = read_value( name_end, end, col_end );
 
   char* val_end = 0;
   char* val = 0;
@@ -555,7 +562,7 @@ char* read_key_val( std::map<fc::string,json::string>& obj, bool sc, char* in, c
       elog( "early end after reading name '%1%' and col '%2%'", name, col );
       return name_end;
     }
-    val = fc::json::read_value( col_end, end, val_end );
+    val = read_value( col_end, end, val_end );
     if( val == end ) {
       wlog( "no value specified" );
     }
@@ -576,12 +583,12 @@ char* read_key_val( std::map<fc::string,json::string>& obj, bool sc, char* in, c
  *  Reads an optional ',' followed by key : value, returning the next input position
  *  @param sc - start with ','
  */
-char* read_key_val( value::object& obj, bool sc, char* in, char* end, fc::json::error_collector& ec ) {
+char* read_key_val( fc::value::object& obj, bool sc, char* in, char* end, error_collector& ec ) {
   char* name_end = 0;
   char* name = in;
   do {
     // read first char
-    name = fc::json::read_value( name, end, name_end );
+    name = read_value( name, end, name_end );
     if( name == name_end )
       return name;
     if( sc ) { // if we expect a ,
@@ -589,12 +596,12 @@ char* read_key_val( value::object& obj, bool sc, char* in, char* end, fc::json::
         if( *name != '}' )
             wlog( "expected ',' or '}' but got '%s'", name ); // warn and accept name
       } else { // we got the exepcted , read the expected name 
-        name = fc::json::read_value( name_end, end, name_end );
+        name = read_value( name_end, end, name_end );
       }
     } else { // don't start with ','
       while( *name == ',' ) { //  while we don't have a name, keep looking
         wlog( "unexpected ',' " );
-        name = fc::json::read_value( name_end, end, name_end );
+        name = read_value( name_end, end, name_end );
       }
     }
   } while( *name == ',' );
@@ -611,11 +618,11 @@ char* read_key_val( value::object& obj, bool sc, char* in, char* end, fc::json::
     wlog( "unquoted name '%1%'", name );
   } else {
     temp_set ntemp(name_end,'\0');
-    name = inplace_unescape_string(name);
+    name = fc::json::inplace_unescape_string(name);
   }
 
   char* col_end = 0;
-  char* col = fc::json::read_value( name_end, end, col_end );
+  char* col = read_value( name_end, end, col_end );
 
   char* val_end = 0;
   char* val = 0;
@@ -649,7 +656,7 @@ char* read_key_val( value::object& obj, bool sc, char* in, char* end, fc::json::
       elog( "early end after reading name '%1%' and col '%2%'", name, col );
       return name_end;
     }
-    val = fc::json::read_value( col_end, end, val_end );
+    val = read_value( col_end, end, val_end );
     if( val == end ) {
       wlog( "no value specified" );
     }
@@ -657,13 +664,13 @@ char* read_key_val( value::object& obj, bool sc, char* in, char* end, fc::json::
   temp_set ntemp(name_end,'\0');
   temp_set vtemp(val_end,'\0');
   //slog( "name: '%1%'", fc::string(name,name_end) );
-  obj.fields.push_back( value::key_val( name, to_value( val, val_end, ec ) ) );
+  obj.fields.push_back( fc::value::key_val( name, to_value( val, val_end, ec ) ) );
   return val_end;
 }
 
 // first_key =::  '' | "name" : VALUE  *list_key
 // list_key       '' | ',' "name" : VALUE
-void read_key_vals( value::object& obj, char* in, char* end, fc::json::error_collector& ec ) {
+void read_key_vals( fc::value::object& obj, char* in, char* end, error_collector& ec ) {
   bool ex_c = false;
   char* kv_end = in;
   do {
@@ -674,8 +681,8 @@ void read_key_vals( value::object& obj, char* in, char* end, fc::json::error_col
 }
 // first_key =::  '' | "name" : VALUE  *list_key
 // list_key       '' | ',' "name" : VALUE
-std::map<fc::string,json::string> read_key_vals( char* in, char* end, fc::json::error_collector& ec ) {
-  std::map<fc::string,json::string> m;
+std::map<fc::string,fc::json::string> read_key_vals( char* in, char* end, error_collector& ec ) {
+  std::map<fc::string,fc::json::string> m;
   bool ex_c = false;
   char* kv_end = in;
   do {
@@ -692,7 +699,7 @@ std::map<fc::string,json::string> read_key_vals( char* in, char* end, fc::json::
  *  @brief adaptor for to_value( char*, char*, error_collector& )
  */
 fc::value to_value( fc::vector<char>&& v, error_collector& ec  ) {
-  if( v.size() == 0 ) return value();
+  if( v.size() == 0 ) return fc::value();
   return to_value( &v.front(), &v.front() + v.size(), ec );
 }
 
@@ -703,21 +710,21 @@ fc::value to_value( fc::vector<char>&& v, error_collector& ec  ) {
  *      any errors that occur while parsing the string.
  */
 fc::value to_value( char* start, char* end, error_collector& ec ) {
-  if( start == end ) return value();
+  if( start == end ) return fc::value();
 
   char* ve = 0;
   char* s = read_value( start, end, ve );
   //slog( "'%1%'", fc::string(start,ve) );
   switch( s[0] ) {
     case '[': {
-      value::array a;
+      fc::value::array a;
       read_values( a, s+1, ve -1, ec );
       return a;
     }
     case '{': {
-      value::object o;
+      fc::value::object o;
       read_key_vals( o, s+1, ve -1, ec );
-      value v = fc::move(o);
+      fc::value v = fc::move(o);
       return v;
     }
     case '0':
@@ -753,11 +760,11 @@ fc::value to_value( char* start, char* end, error_collector& ec ) {
     }
     case '\"': {
       temp_set move_end(ve,'\0');
-      return inplace_unescape_string( s );  
+      return fc::json::inplace_unescape_string( s );  
     }
     case 'n': {
       temp_set move_end(ve,'\0');
-      if( strcmp(s,"null" ) == 0) return value();
+      if( strcmp(s,"null" ) == 0) return fc::value();
     }
     case 't': {
       temp_set move_end(ve,'\0');
@@ -770,9 +777,10 @@ fc::value to_value( char* start, char* end, error_collector& ec ) {
 
     default:
       wlog( "return unable to parse... return as string '%s'", fc::string(s,ve).c_str() );
-      return value( fc::string( s, ve) );
+      return fc::value( fc::string( s, ve) );
   }
 }
+namespace fc { namespace json {
 
 fc::string pretty_print( fc::vector<char>&& v, uint8_t indent ) {
   int level = 0;
@@ -871,8 +879,8 @@ fc::string pretty_print( fc::vector<char>&& v, uint8_t indent ) {
     virtual void operator()( const float& v       ){ os << v; }
     virtual void operator()( const double& v      ){ os << v; }
     virtual void operator()( const bool& v        ){ os << (v ? "true" : "false"); }
-    virtual void operator()( const fc::string& v ){ os << '"' << escape_string(v) <<'"'; }
-    virtual void operator()( const value::object& o ){
+    virtual void operator()( const fc::string& v ){ os << '"' << fc::json::escape_string(v) <<'"'; }
+    virtual void operator()( const fc::value::object& o ){
       os << '{';
         for( uint32_t i = 0; i < o.fields.size(); ++i ) {
           if( i ) os <<',';
@@ -918,7 +926,7 @@ fc::string pretty_print( fc::vector<char>&& v, uint8_t indent ) {
 
     // memory map the file
     file_mapping fmap( local_path.string().c_str(), read_only );
-    size_t       fsize = file_size(local_path);
+    size_t       fsize = static_cast<size_t>(file_size(local_path));
 
 
     mapped_region mr( fmap, fc::read_only, 0, fsize );
@@ -929,8 +937,8 @@ fc::string pretty_print( fc::vector<char>&& v, uint8_t indent ) {
     // TODO: implement a const version of to_value 
     fc::vector<char> tmp(pos,end);
 
-    json::error_collector ec;
-    return fc::json::to_value(tmp.data(), tmp.data()+fsize,ec);
+    error_collector ec;
+    return to_value(tmp.data(), tmp.data()+fsize,ec);
   }
 
   value from_string( const fc::string& s ) {
@@ -945,5 +953,4 @@ fc::string pretty_print( fc::vector<char>&& v, uint8_t indent ) {
     return from_string( fc::vector<char>(s,e) );
   }
 
-
-}} // fc::json
+} }

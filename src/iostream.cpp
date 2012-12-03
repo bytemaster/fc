@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string.h>
 #include <fc/log.hpp>
+#include <string>
 
 namespace fc {
   ostream& operator<<( ostream& o, const char* v ) {
@@ -86,7 +87,7 @@ namespace fc {
   void   cerr_t::close() {};
   void   cerr_t::flush() { std::cerr.flush(); }
 
-  ostream& cerr_t::write( const fc::string& s ) { std::cerr<< *reinterpret_cast<const std::string*>(&s); return *this; }
+  ostream& cerr_t::write( const fc::string& s ) { std::cerr<< static_cast<std::string>(s); return *this; }
 
   size_t cin_t::readsome( char* buf, size_t len ) {
     cin_buffer& b = get_cin_buffer();

@@ -103,7 +103,7 @@ namespace fc {
    */
   template<typename T>
   struct shared_impl {
-    struct impl;
+    class impl;
     impl& operator*  ()const;
     impl* operator-> ()const;
 
@@ -119,7 +119,7 @@ namespace fc {
 
     ~shared_impl();
 
-    fc::shared_ptr<shared_impl::impl> _impl;
+    fc::shared_ptr<typename shared_impl<T>::impl> _impl;
   };
 
 }

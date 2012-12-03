@@ -1,5 +1,4 @@
-#ifndef FC_FWD_HPP_
-#define FC_FWD_HPP_
+#pragma once
 #include <fc/aligned.hpp>
 
 namespace fc {
@@ -44,4 +43,3 @@ class fwd {
 
 } // namespace fc
 
-#endif

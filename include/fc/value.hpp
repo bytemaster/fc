@@ -96,7 +96,7 @@ namespace fc {
         template<typename T>
         value& operator=( T&& v ) {
           value tmp(fc::forward<T>(v) );
-          fc::swap(*this,tmp);
+          fc_swap(*this,tmp);
           return *this;
         }
 

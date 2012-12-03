@@ -69,7 +69,7 @@ namespace fc {
 
 
       bigint& bigint::operator = ( bigint&& a ) {
-        fc::swap( a.n, n );
+        fc_swap( a.n, n );
         return *this;
       }
       bigint& bigint::operator = ( const bigint& a ) {

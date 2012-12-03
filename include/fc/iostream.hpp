@@ -59,14 +59,14 @@ namespace fc {
   template<typename T>
   ostream& operator<<( ostream& o, const T& v ) {
       auto str = fc::lexical_cast<fc::string>(v); 
-      o.write( str.c_str(), str.size() );
+      o.write( str.c_str(), static_cast<size_t>(str.size()) );
       return o;
   }
   ostream& operator<<( ostream& o, const char* v );
 
   template<typename T>
   ostream& operator<<( ostream& o, const fc::string& str ) {
-      o.write( str.c_str(), str.size() );
+      o.write( str.c_str(), static_cast<size_t>(str.size()) );
       return o;
   }
   template<typename T>

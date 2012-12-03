@@ -2,6 +2,7 @@
 #include <fc/json_rpc_client.hpp>
 #include <fc/json_rpc_tcp_server.hpp>
 #include <fc/json_rpc_tcp_connection.hpp>
+#include <fc/reflect.hpp>
 #include <fc/ip.hpp>
 #include <fc/iostream.hpp>
 

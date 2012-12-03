@@ -54,6 +54,7 @@ namespace fc {
 } // namespace fc
 
 FC_START_SHARED_IMPL( fc::process )
+  public:
   impl()
   :stat( fc::asio::default_io_service() ),
     std_out(process_source(outp)),

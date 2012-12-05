@@ -132,7 +132,7 @@ namespace fc {  namespace json {
 
       template<typename InterfaceType>
       void add_interface( const fc::ptr<InterfaceType>& it ) {
-        it->template visit( detail::add_method_visitor<InterfaceType>( it, *this ) );
+        it->TEMPLATE visit( detail::add_method_visitor<InterfaceType>( it, *this ) );
       }
 
       void add_method( const fc::string& name, const fc::json::rpc_server_method::ptr& func );

@@ -276,6 +276,12 @@ value& value::operator=( const value& v ){
   gh(v.holder)->copy_helper(holder);
   return *this;
 }
+value& value::operator=( value& v ){
+  if( this == &v ) return *this;
+  gh(holder)->~value_holder();
+  gh(v.holder)->copy_helper(holder);
+  return *this;
+}
 bool value::is_null()const {
     return strcmp(gh(holder)->type(), "void") == 0;
 }

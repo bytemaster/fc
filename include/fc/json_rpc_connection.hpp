@@ -1,4 +1,5 @@
 #pragma once
+#include <fc/json_rpc_error_object.hpp>
 #include <fc/json.hpp>
 #include <fc/future.hpp>
 #include <fc/function.hpp>
@@ -6,6 +7,7 @@
 
 namespace fc {  namespace json {
   class rpc_connection;
+  class error_object;
 
   struct rpc_server_method : public fc::retainable {
     typedef fc::shared_ptr<rpc_server_method> ptr;
@@ -141,7 +143,7 @@ namespace fc {  namespace json {
       void         handle_message( const value& m );
       virtual void send_notice(  const fc::string& m, value&& param ) = 0;
       virtual void send_invoke( uint64_t id, const fc::string& m, value&& param ) = 0;
-      virtual void send_error( uint64_t id, int64_t code, const fc::string& msg ) = 0;
+      virtual void send_error( uint64_t id, const error_object& e ) = 0;
       virtual void send_result( uint64_t id, value&& r ) = 0;
 
 

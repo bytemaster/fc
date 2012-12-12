@@ -177,11 +177,12 @@ namespace fc {
       template<typename T>
       static inline void pack(fc::value& s, const T& v ) { 
         v.did_not_implement_reflect_macro();
+        wlog( "warning, ignoring unknown type" );
       }
       template<typename T>
       static inline void unpack( const fc::value& s, T& v ) { 
         v.did_not_implement_reflect_macro();
-        //wlog( "warning, ignoring unknown type" );
+        wlog( "warning, ignoring unknown type" );
       }
     };
 

@@ -7,8 +7,9 @@
 #include <fc/value_io.hpp>
 #include <fc/tuple.hpp>
 #include <fc/vector.hpp>
+#include <fc/typename.hpp>
 
-#include <typeinfo>
+//#include <typeinfo>
 
 namespace fc {
 

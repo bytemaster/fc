@@ -1,4 +1,5 @@
 #include <fc/json_rpc_stream_connection.hpp>
+#include <fc/json_rpc_error_object.hpp>
 #include <fc/iostream.hpp>
 #include <fc/sstream.hpp>
 #include <fc/thread.hpp>
@@ -86,9 +87,9 @@ namespace fc { namespace json {
     fc::string o = ss.str();
     my->out.write( o.c_str(), o.size() );
   }
-  void rpc_stream_connection::send_error( uint64_t id, int64_t code, const fc::string& msg ) {
+  void rpc_stream_connection::send_error( uint64_t id, const json::error_object& eo ) {
     fc::stringstream ss;
-    ss<<"{\"id\":"<<id<<",\"error\":{\"code\":"<<code<<",\"message\":"<<fc::json::to_string(fc::value(msg))<<"}}\n";
+    ss<<"{\"id\":"<<id<<",\"error\":"<<fc::json::to_string(eo)<<"}\n";
     fc::string o = ss.str();
     my->out.write( o.c_str(), o.size() );
   }

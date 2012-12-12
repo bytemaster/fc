@@ -47,10 +47,9 @@ namespace fc {
       http::reply  request( const fc::string& method, const fc::string& url, const fc::string& body );
 
       // used for servers
-      fc::tcp_socket& get_socket();
+      fc::tcp_socket& get_socket()const;
 
-      http::request    read_request();
-      void             send_reply( const http::reply& );
+      http::request    read_request()const;
 
       FC_REFERENCE_TYPE(connection)
   };

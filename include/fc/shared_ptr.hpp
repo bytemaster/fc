@@ -40,6 +40,10 @@ namespace fc {
         _ptr = p._ptr;
         if( _ptr ) _ptr->retain();
       }
+      shared_ptr( shared_ptr& p ) {
+        _ptr = p._ptr;
+        if( _ptr ) _ptr->retain();
+      }
       shared_ptr( shared_ptr&& p ) {
         _ptr = p._ptr;
         p._ptr = nullptr;

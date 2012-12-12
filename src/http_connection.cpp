@@ -114,16 +114,13 @@ http::reply connection::request( const fc::string& method,
 }
 
 // used for servers
-fc::tcp_socket& connection::get_socket() {
+fc::tcp_socket& connection::get_socket()const {
   return my->sock;
 }
 
-http::request    connection::read_request() {
+http::request    connection::read_request()const {
   http::request r;
   return r;
-}
-void            connection::send_reply( const http::reply& ) {
-  
 }
 
 } } // fc::http

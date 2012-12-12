@@ -2,6 +2,7 @@
 #include <fc/log.hpp>
 #include <fc/thread.hpp>
 #include <fc/error.hpp>
+#include <fc/error_report.hpp>
 #include <fc/json_rpc_error_object.hpp>
 #include <unordered_map>
 #include <string>
@@ -72,6 +73,12 @@ namespace fc { namespace json {
             auto id = value_cast<uint64_t>(id_itr->val);
             try {
                send_result( id, smeth->second->call(params) );
+            } catch ( fc::error_report& eo ) {
+               if( eo.stack.size() ) {
+                  send_error( id, error_object( eo.current().desc, fc::value(eo) ) );
+               } else {
+                  send_error( id, error_object( "error report", fc::value(eo) ) );
+               }
             } catch ( const fc::json::error_object& eo ) {
                send_error( id, eo );
             } catch ( ... ) {

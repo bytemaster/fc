@@ -1,9 +1,9 @@
 #include <fc/error_report.hpp>
-
+#include <fc/filesystem.hpp>
 namespace fc {
 
 error_frame::error_frame( const fc::string& f, uint64_t l, const fc::string& m, const fc::string& d, fc::value met )
-:desc(d),file(f),line(l),method(m),meta(fc::move(met)){}
+:desc(d),file(fc::path(f).filename().generic_string()),line(l),method(m),meta(fc::move(met)){}
 
 error_report::error_report()
 {

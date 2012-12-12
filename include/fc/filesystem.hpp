@@ -62,6 +62,7 @@ namespace fc {
   bool     is_directory( const path& p );
   bool     is_regular_file( const path& p );
   void     create_directories( const path& p );
+  path     absolute( const path& p );
   path     canonical( const path& p );
   uint64_t file_size( const path& p );
   bool     remove( const path& p );

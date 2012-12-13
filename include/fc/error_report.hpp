@@ -3,6 +3,7 @@
 #include <fc/string.hpp>
 #include <fc/value.hpp>
 #include <fc/optional.hpp>
+#include <fc/exception.hpp>
 
 namespace fc {
 
@@ -49,7 +50,10 @@ namespace fc {
          fc::string    to_string()const;
          fc::string    to_detail_string()const;
          error_context stack;    ///< Human readable stack of what we were atempting to do.
+
+         fc::exception_ptr copy_exception();
    };
+
 
 } // namespace fc
 
@@ -57,7 +61,6 @@ namespace fc {
 FC_REFLECT( fc::error_frame,  (desc)(file)(line)(method)(time)(meta) )
 FC_REFLECT( fc::error_report, (stack) )
 
-#include <fc/exception.hpp>
 #define FC_REPORT( X, ... )         fc::error_report X( __FILE__, __LINE__, __func__, __VA_ARGS__ )
 #define FC_THROW_REPORT( ... )      FC_THROW( fc::error_report( __FILE__, __LINE__, __func__, __VA_ARGS__ ))
 #define FC_REPORT_CURRENT(ER, ... ) (ER).pop_frame().push_frame( __FILE__, __LINE__, __func__, __VA_ARGS__ )

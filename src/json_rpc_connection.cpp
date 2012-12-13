@@ -106,13 +106,11 @@ namespace fc { namespace json {
                   } else {
                     auto e_itr = v.find( "error" );
                     if( e_itr != end ) {
-                      cur->set_exception( 
-                        fc::copy_exception( 
-                          fc::generic_exception( 
-                            value_cast<fc::string>(
-                              e_itr->val["message"] ) ) ) );
+                      cur->set_exception( fc::value_cast<error_report>(e_itr->val["data"]).copy_exception() );
+                    } else {
+                       elog( "no result nor error field" );
                     }
-                  }
+                  } 
               } catch( ... ) {
                 cur->set_exception( fc::current_exception() );
               }

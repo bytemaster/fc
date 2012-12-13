@@ -3,6 +3,7 @@
 #include <fc/sstream.hpp>
 #include <fc/value.hpp>
 #include <fc/json.hpp>
+#include <boost/exception_ptr.hpp>
 namespace fc {
 
 error_frame::error_frame( const fc::string& f, uint64_t l, const fc::string& m, const fc::string& d, fc::value met )
@@ -136,6 +137,9 @@ fc::string error_report::to_detail_string()const {
     ss << stack[i].to_detail_string() << "\n";
   }
   return ss.str();
+}
+fc::exception_ptr error_report::copy_exception() {
+   return boost::copy_exception(*this);
 }
 
 } // namespace fc

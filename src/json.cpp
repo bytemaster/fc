@@ -919,12 +919,11 @@ fc::string pretty_print( fc::vector<char>&& v, uint8_t indent ) {
 
   value from_file( const fc::path& local_path ) {
     if( !exists(local_path) ) {
-       slog("...");
-      FC_THROW_REPORT( "Source file '${filename}' does not exist", value().set("filename",local_path.string()) );
+      FC_THROW_REPORT( "Source file ${filename} does not exist", value().set("filename",local_path.string()) );
     }
     if( is_directory( local_path ) ) {
-       wlog("...");
-      FC_THROW_MSG( "Source path '%s' is a directory, expected a file.", local_path.string() );
+      FC_THROW_REPORT( "Source path ${path} is a directory; a file was expected", 
+                       value().set("path",local_path.string()) );
     }
 
     // memory map the file

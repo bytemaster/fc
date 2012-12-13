@@ -82,7 +82,7 @@ namespace fc {
       friend string operator + ( const string&, const string&  );
       friend string operator + ( const string&, char c );
 
-      fc::string substr( int32_t start, int32_t len = 0x7fffffff );
+      fc::string substr( int32_t start, int32_t len = 0x7fffffff )const;
     
     private:
        fc::fwd<std::string,32> my;

@@ -19,6 +19,9 @@ namespace fc {
          error_frame& operator=(const error_frame& );
          error_frame& operator=(error_frame&& );
 
+         fc::string    to_string()const;
+         fc::string    to_detail_string()const;
+
          fc::string                  desc;
          fc::string                  file;
          int64_t                     line;
@@ -43,6 +46,8 @@ namespace fc {
          error_report& push_frame( const fc::string& file, uint64_t line, const fc::string& method, const fc::string& desc, fc::value meta = fc::value() );
          error_report& append( const error_report& e );
 
+         fc::string    to_string()const;
+         fc::string    to_detail_string()const;
          error_context stack;    ///< Human readable stack of what we were atempting to do.
    };
 

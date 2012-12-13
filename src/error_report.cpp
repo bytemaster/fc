@@ -1,5 +1,8 @@
 #include <fc/error_report.hpp>
 #include <fc/filesystem.hpp>
+#include <fc/sstream.hpp>
+#include <fc/value.hpp>
+#include <fc/json.hpp>
 namespace fc {
 
 error_frame::error_frame( const fc::string& f, uint64_t l, const fc::string& m, const fc::string& d, fc::value met )
@@ -68,6 +71,71 @@ fc::error_report&         error_report::append( const error_report& e )
       stack.push_back( e.stack[i] );
    }
    return *this;
+}
+
+fc::string error_frame::to_detail_string()const {
+    fc::stringstream ss;
+    ss << to_string() << "\n\t";
+    ss << file << ":" << line << "\t"<<method;
+    if( meta ) ss << "\t" <<fc::json::to_string(*meta);
+    return ss.str();
+}
+fc::string error_frame::to_string()const {
+    fc::stringstream ss;
+    int64_t prev = 0;
+    auto next = desc.find( '$' );
+    while( prev != int64_t(fc::string::npos) && prev < int64_t(desc.size()) ) {
+      // print everything from the last pos until the first '$'
+      ss << desc.substr( prev, next );
+
+      // if we got to the end, return it.
+      if( next == string::npos ) { return ss.str(); }
+
+      // if we are not at the end, then update the start
+      prev = next + 1;
+
+      if( desc[prev] == '{' ) { 
+         // if the next char is a open, then find close
+          next = desc.find( '}', prev );
+          // if we found close... 
+          if( next != fc::string::npos ) {
+            // the key is between prev and next
+            fc::string key = desc.substr( prev+1, (next-prev-1) );
+            if( meta ) {
+                auto itr = meta->find( key.c_str() );
+                if( itr != meta->end() ) {
+                   ss << fc::json::to_string( itr->val );
+                } else {
+                   ss << "???";
+                }
+            }
+            prev = next + 1;
+            // find the next $
+            next = desc.find( '$', prev );
+          } else {
+            // we didn't find it.. continue to while...
+          }
+      } else  {
+         ss << desc[prev];
+         ++prev;
+         next = desc.find( '$', prev );
+      }
+    }
+    return ss.str();
+}
+fc::string error_report::to_string()const {
+  fc::stringstream ss;
+  for( int i = 0; i < stack.size(); ++i ) {
+    ss << stack[i].to_string() << "\n";
+  }
+  return ss.str();
+}
+fc::string error_report::to_detail_string()const {
+  fc::stringstream ss;
+  for( int i = 0; i < stack.size(); ++i ) {
+    ss << stack[i].to_detail_string() << "\n";
+  }
+  return ss.str();
 }
 
 } // namespace fc

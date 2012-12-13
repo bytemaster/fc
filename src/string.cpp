@@ -36,7 +36,7 @@ namespace fc  {
   void       string::clear()                       { my->clear(); }
   void       string::resize( uint64_t s )          { my->resize(s); }
                                             
-  fc::string string::substr( int32_t start, int32_t len ) { return my->substr(start,len); }
+  fc::string string::substr( int32_t start, int32_t len )const { return my->substr(start,len); }
   const char* string::c_str()const                        { return my->c_str(); }
 
   bool    string::operator == ( const char* s )const   { return *my == s; }

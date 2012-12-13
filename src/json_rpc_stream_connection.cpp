@@ -28,21 +28,24 @@ namespace fc { namespace json {
 
       fc::future<void> _read_loop_complete;
       void read_loop() {
-        fc::string line;
-        fc::getline( in, line );
-        while( !in.eof() ) {
-            try {
-                fc::value v= fc::json::from_string( line );
-                //slog( "%s", fc::json::to_string(v).c_str() );
-                self.handle_message(v);
-            } catch (...) {
-              wlog( "%s", fc::except_str().c_str() );
-              return;
-            }
-            fc::getline( in, line );
-        }
-        self.cancel_pending_requests();
-        if( !!on_close ) on_close();
+         try {
+           fc::string line;
+           fc::getline( in, line );
+           while( !in.eof() ) {
+               try {
+                 fc::value v= fc::json::from_string( line );
+                 self.handle_message(v);
+               } catch (...) {
+                 wlog( "%s", fc::except_str().c_str() );
+                 return;
+               }
+               fc::getline( in, line );
+           }
+         } catch ( ... ) {
+             wlog( "%s", fc::except_str().c_str() );
+         }
+         self.cancel_pending_requests();
+         if( !!on_close ) on_close();
       }
   };
 
@@ -80,24 +83,28 @@ namespace fc { namespace json {
     ss<<"{\"id\":"<<id<<",\"method\":\""<<m<<"\",\"params\":"<<fc::json::to_string(param)<<"}\n";
     fc::string o = ss.str();
     my->out.write( o.c_str(), o.size() );
+    my->out.flush();
   }
   void rpc_stream_connection::send_notice( const fc::string& m, value&& param ) {
     fc::stringstream ss;
     ss<<"{\"method\":\""<<m<<"\",\"params\":"<<fc::json::to_string(param)<<"}\n";
     fc::string o = ss.str();
     my->out.write( o.c_str(), o.size() );
+    my->out.flush();
   }
   void rpc_stream_connection::send_error( uint64_t id, const json::error_object& eo ) {
     fc::stringstream ss;
     ss<<"{\"id\":"<<id<<",\"error\":"<<fc::json::to_string(eo)<<"}\n";
     fc::string o = ss.str();
     my->out.write( o.c_str(), o.size() );
+    my->out.flush();
   }
   void rpc_stream_connection::send_result( uint64_t id, value&& r ) {
     fc::stringstream ss;
     ss<<"{\"id\":"<<id<<",\"result\":"<<fc::json::to_string(r)<<"}\n";
     fc::string o = ss.str();
     my->out.write( o.c_str(), o.size() );
+    my->out.flush();
   }
 
 } } // fc::json

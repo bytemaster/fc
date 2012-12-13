@@ -34,7 +34,6 @@ namespace fc {
       cur_task(0)
     {
       my_context.fc_stack.base = alloc.allocate( bc::default_stacksize() );
-   //   slog( "new stack %1% bytes at %2%", bc::default_stacksize(), my_context.fc_stack.base );
       my_context.fc_stack.limit = 
         static_cast<char*>( my_context.fc_stack.base) - bc::default_stacksize();
       make_fcontext( &my_context, sf );

@@ -93,19 +93,16 @@ namespace fc {
       */
       template<typename T>
       inline void pack_helper( const T& v, const char* name )const {
-        slog( "%s", name );
         fc::pack( obj[name], v ); 
       }
       template<typename T>
       inline void pack_helper( const fc::optional<T>& v, const char* name )const {
-        slog( "%s", name );
         if( !!v ) {
           fc::pack( obj[name], *v ); 
         }
       }
       template<typename T, typename C, T (C::*p)>
       inline void operator()( const char* name )const {
-        slog( "%s", name );
         pack_helper( c.*p, name );
       }
 

@@ -9,7 +9,7 @@ namespace fc {
 
   class tcp_socket::impl {
     public:
-      impl():_sock( fc::asio::default_io_service() ){ slog( "creating socket %p", &_sock); }
+      impl():_sock( fc::asio::default_io_service() ){  }
       ~impl(){
         if( _sock.is_open() ) _sock.close();
       }
@@ -87,7 +87,6 @@ namespace fc {
     public:
       impl(uint16_t port):
       _accept( fc::asio::default_io_service(), boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), port) ){
-        slog( "... tcp server port %d", port );
       }
       ~impl(){
         _accept.close();
@@ -108,23 +107,18 @@ namespace fc {
 
 
   bool tcp_server::accept( tcp_socket& s ) {
+    if( !my ) return false;
     fc::promise<boost::system::error_code>::ptr p( new promise<boost::system::error_code>("tcp::accept") );
-    slog( "accept socket %p", &s.my->_sock );
     my->_accept.async_accept( s.my->_sock, [=]( const boost::system::error_code& e ) {
                   p->set_value(e);
               } );
-    slog( ".");
     auto ec = p->wait();
-    slog( ".");
     if( !ec ) s.my->_sock.non_blocking(true);
-    slog( ".");
     if( ec ) BOOST_THROW_EXCEPTION( boost::system::system_error(ec) );
-    slog( ".");
     return true;
   }
   void tcp_server::listen( uint16_t port ) {
     if( my ) delete my;
-    slog( "Listen %d", port );
     my = new impl(port);
   }
 

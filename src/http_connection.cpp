@@ -9,6 +9,8 @@
 FC_START_SHARED_IMPL(fc::http::connection)
    fc::tcp_socket sock;
    fc::ip::endpoint ep;
+   impl() {
+   }
 
    int read_until( char* buffer, char* end, char c = '\n' ) {
       char* p = buffer;

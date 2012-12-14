@@ -10,6 +10,9 @@ namespace fc {
   namespace http {
 
   struct header {
+    header( fc::string k, fc::string v )
+    :key(fc::move(k)),val(fc::move(v)){}
+    header(){}
     fc::string key;
     fc::string val;
   };

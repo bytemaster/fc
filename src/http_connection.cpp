@@ -121,8 +121,37 @@ fc::tcp_socket& connection::get_socket()const {
 }
 
 http::request    connection::read_request()const {
-  http::request r;
-  return r;
+  http::request req;
+  fc::vector<char> line(1024*8);
+  int s = my->read_until( line.data(), line.data()+line.size(), ' ' ); // METHOD
+  req.method = line.data();
+  s = my->read_until( line.data(), line.data()+line.size(), ' ' ); // PATH
+  req.path = line.data();
+  s = my->read_until( line.data(), line.data()+line.size(), '\n' ); // HTTP/1.0
+  
+  while( (s = my->read_until( line.data(), line.data()+line.size(), '\n' )) > 1 ) {
+    fc::http::header h;
+    char* end = line.data();
+    while( *end != ':' )++end;
+    h.key = fc::string(line.data(),end);
+    ++end; // skip ':'
+    ++end; // skip space
+    char* skey = end;
+    while( *end != '\r' ) ++end;
+    h.val = fc::string(skey,end);
+    req.headers.push_back(h);
+    if( h.key == "Content-Length" ) {
+       req.body.resize( fc::lexical_cast<int>( fc::string(h.val) ) );
+    }
+    if( h.key == "Host" ) {
+       req.domain = h.val;
+    }
+  }
+  if( req.body.size() ) {
+    slog( "Reading body size %d", req.body.size() );
+    my->sock.read( req.body.data(), req.body.size() );
+  }
+  return req;
 }
 
 } } // fc::http

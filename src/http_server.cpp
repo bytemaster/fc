@@ -1,6 +1,7 @@
 #include <fc/http/server.hpp>
 #include <fc/thread.hpp>
 #include <fc/tcp_socket.hpp>
+#include <fc/sstream.hpp>
 
 
 namespace fc { namespace http {
@@ -8,9 +9,30 @@ namespace fc { namespace http {
   class server::response::impl : public fc::retainable {
     public:
       impl( const fc::http::connection& c, const std::function<void()>& cont = std::function<void()>() )
-      :con(c),handle_next_req(cont)
+      :body_bytes_sent(0),body_length(0),con(c),handle_next_req(cont)
       {}
 
+      void send_header() {
+         fc::stringstream ss;
+         ss << "HTTP/1.1 " << rep.status << " ";
+         switch( rep.status ) {
+            case fc::http::reply::OK: ss << "OK\n\r"; break;
+            case fc::http::reply::RecordCreated: ss << "Record Created\n\r"; break;
+            case fc::http::reply::NotFound: ss << "Not Found\n\r"; break;
+            case fc::http::reply::Found: ss << "Found\n\r"; break;
+            case fc::http::reply::InternalServerError: ss << "Internal Server Error\r\n"; break;
+         }
+         for( uint32_t i = 0; i < rep.headers.size(); ++i ) {
+            ss << rep.headers[i].key <<": "<<rep.headers[i].val <<"\r\n";
+         }
+         ss << "Content-Length: "<<body_length<<"\r\n\r\n";
+         auto s = ss.str();
+         con.get_socket().write( s.c_str(), s.size() );
+      }
+
+      http::reply           rep;
+      int64_t               body_bytes_sent;
+      uint64_t              body_length;
       http::connection      con;
       std::function<void()> handle_next_req;
   };
@@ -78,7 +100,37 @@ namespace fc { namespace http {
   server::response& server::response::operator=(const server::response& s) { my = s.my; return *this; }
   server::response& server::response::operator=(server::response&& s)      { fc_swap(my,s.my); return *this; }
 
+  void server::response::add_header( const fc::string& key, const fc::string& val )const {
+     wlog( "Attempt to add header after sending headers" );
+     my->rep.headers.push_back( fc::http::header( key, val ) );
+  }
+  void server::response::set_status( const http::reply::status_code& s )const {
+     if( my->body_bytes_sent != 0 ) {
+       wlog( "Attempt to set status after sending headers" );
+     }
+     my->rep.status = s;
+  }
+  void server::response::set_length( uint64_t s )const {
+    if( my->body_bytes_sent != 0 ) {
+      wlog( "Attempt to set length after sending headers" );
+    }
+    my->body_length = s; 
+  }
+  void server::response::write( const char* data, uint64_t len )const {
+    if( my->body_bytes_sent + len > my->body_length ) {
+      wlog( "Attempt to send to many bytes.." );
+      len = my->body_bytes_sent + len - my->body_length;
+    }
+    if( my->body_bytes_sent == 0 ) {
+      my->send_header();
+    }
+    my->body_bytes_sent += len;
+    my->con.get_socket().write( data, len ); 
+  }
+
   server::response::~response(){}
+  void server::on_request( const std::function<void(const http::request&, const server::response& s )>& cb )
+  { my->on_req = cb; }
 
 
 

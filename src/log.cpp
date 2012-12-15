@@ -8,12 +8,14 @@
 #include <unistd.h>
 #endif
 
+#include <fc/filesystem.hpp>
 #include <iostream>
 
 namespace fc {
   const char* thread_name();
   void*       thread_ptr();
 
+  /*
   const char* short_name( const char* file_name ) { 
     const char* end = file_name + strlen(file_name);
     --end;
@@ -25,6 +27,7 @@ namespace fc {
     }
     return file_name;
   } 
+  */
 
   #ifdef WIN32 
     #define isatty _isatty
@@ -39,7 +42,7 @@ namespace fc {
       std::cerr<<"\r"<<color;
     #endif
     
-    fprintf( stderr, "%-15s %-15s %-5zd %-15s ", thread_name(), short_name(file_name), line_num, method_name );
+    fprintf( stderr, "%-15s %-15s %-5zd %-15s ", thread_name(), fc::path(file_name).filename().generic_string().c_str(), line_num, method_name );
     //std::cerr<<thread_ptr()<< thread_name()<< short_name(file_name)<< line_num<< method_name ;
     va_list args;
     va_start(args,format);

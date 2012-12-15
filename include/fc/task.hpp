@@ -61,12 +61,13 @@ namespace fc {
     public:
       template<typename Functor>
       task( Functor&& f ):task_base(&_functor) {
+        typedef typename fc::deduce<Functor>::type FunctorType;
         static_assert( sizeof(f) <= sizeof(_functor), "sizeof(Functor) is larger than FunctorSize" );
-        new ((char*)&_functor) Functor( fc::forward<Functor>(f) );
-        _destroy_functor = &detail::functor_destructor<Functor>::destroy;
+        new ((char*)&_functor) FunctorType( fc::forward<Functor>(f) );
+        _destroy_functor = &detail::functor_destructor<FunctorType>::destroy;
 
         _promise_impl = static_cast<promise<R>*>(this);
-        _run_functor  = &detail::functor_run<Functor>::run;
+        _run_functor  = &detail::functor_run<FunctorType>::run;
       }
       aligned<FunctorSize> _functor;
     private:
@@ -77,12 +78,13 @@ namespace fc {
     public:
       template<typename Functor>
       task( Functor&& f ):task_base(&_functor) {
+        typedef typename fc::deduce<Functor>::type FunctorType;
         static_assert( sizeof(f) <= sizeof(_functor), "sizeof(Functor) is larger than FunctorSize"  );
-        new ((char*)&_functor) Functor( fc::forward<Functor>(f) );
-        _destroy_functor = &detail::functor_destructor<Functor>::destroy;
+        new ((char*)&_functor) FunctorType( fc::forward<Functor>(f) );
+        _destroy_functor = &detail::functor_destructor<FunctorType>::destroy;
 
         _promise_impl = static_cast<promise<void>*>(this);
-        _run_functor  = &detail::void_functor_run<Functor>::run;
+        _run_functor  = &detail::void_functor_run<FunctorType>::run;
       }
       aligned<FunctorSize> _functor;
     private:

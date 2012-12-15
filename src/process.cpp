@@ -43,9 +43,13 @@ namespace fc {
         try {
             return static_cast<std::streamsize>(fc::asio::read_some( *m_pi, boost::asio::buffer( s, static_cast<size_t>(n) ) ));
         } catch ( const boost::system::system_error& e ) {
+          wlog( "%s", fc::except_str().c_str() );
           if( e.code() == boost::asio::error::eof ) 
               return -1;
           throw;
+        } catch ( ... ) {
+          wlog( "%s", fc::except_str().c_str() );
+          return -1;
         }
       }
     private:
@@ -69,9 +73,13 @@ FC_START_SHARED_IMPL( fc::process )
       if( inp ) {
         inp->close();
       }
-      child->terminate();
+      if( _exited.valid() && !_exited.ready()) {
+         slog( "terminate...");
+         child->terminate();
+         _exited.wait();
+      }
     }catch(...) {
-      wlog( "caught exception cleaning up process" );
+      wlog( "caught exception cleaning up process: %s", fc::except_str().c_str() );
     }
   }
 
@@ -87,6 +95,8 @@ FC_START_SHARED_IMPL( fc::process )
   io::stream<fc::process_source>   std_out;
   io::stream<fc::process_source>   std_err;
   io::stream<fc::process_sink>     std_in;
+
+  fc::future<int>                  _exited;
 
   // adapt to ostream and istream interfaces
   fc::ostream_wrapper              _ins;
@@ -163,8 +173,7 @@ fc::future<int> process::exec( const fc::path& exe, fc::vector<fc::string>&& arg
        }
        else p->set_exception( fc::copy_exception( boost::system::system_error(ec) ) );
     });
-  return p;
-
+  return my->_exited = p;
 }
 
 /**

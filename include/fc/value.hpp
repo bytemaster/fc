@@ -85,6 +85,7 @@ namespace fc {
 
         value& operator=( value&& v );
         value& operator=( const value& v );
+        value& operator=( value& v );
 
 
         /**

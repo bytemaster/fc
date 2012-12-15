@@ -113,6 +113,7 @@ namespace fc {
     shared_impl( U&& u );
 
     shared_impl( const shared_impl& u );
+    shared_impl( shared_impl& u );
     shared_impl( shared_impl&& u );
     shared_impl& operator=( shared_impl&& u );
     shared_impl& operator=( const shared_impl& u );
@@ -131,6 +132,7 @@ namespace fc {
       TYPE( TYPE*  ); \
       TYPE( TYPE&&  ); \
       TYPE( const TYPE&  ); \
+      TYPE( TYPE&  ); \
       template<typename A1> \
       TYPE( A1&&  ); \
       template<typename A1,typename A2> \

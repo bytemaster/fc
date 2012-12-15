@@ -10,6 +10,9 @@ namespace fc {
   namespace http {
 
   struct header {
+    header( fc::string k, fc::string v )
+    :key(fc::move(k)),val(fc::move(v)){}
+    header(){}
     fc::string key;
     fc::string val;
   };
@@ -47,10 +50,9 @@ namespace fc {
       http::reply  request( const fc::string& method, const fc::string& url, const fc::string& body );
 
       // used for servers
-      fc::tcp_socket& get_socket();
+      fc::tcp_socket& get_socket()const;
 
-      http::request    read_request();
-      void             send_reply( const http::reply& );
+      http::request    read_request()const;
 
       FC_REFERENCE_TYPE(connection)
   };

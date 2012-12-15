@@ -4,6 +4,7 @@
 #include <fc/sstream.hpp>
 #include <fc/filesystem.hpp>
 #include <fc/interprocess/file_mapping.hpp>
+#include <fc/error_report.hpp>
 #include <map>
 
 
@@ -918,15 +919,17 @@ fc::string pretty_print( fc::vector<char>&& v, uint8_t indent ) {
 
   value from_file( const fc::path& local_path ) {
     if( !exists(local_path) ) {
-      FC_THROW_MSG( "Source file '%s' does not exist", local_path.string() );
+      FC_THROW_REPORT( "Source file ${filename} does not exist", value().set("filename",local_path.string()) );
     }
     if( is_directory( local_path ) ) {
-      FC_THROW_MSG( "Source path '%s' is a directory, expected a file.", local_path.string() );
+      FC_THROW_REPORT( "Source path ${path} is a directory; a file was expected", 
+                       value().set("path",local_path.string()) );
     }
 
     // memory map the file
-    file_mapping fmap( local_path.string().c_str(), read_only );
     size_t       fsize = static_cast<size_t>(file_size(local_path));
+    if( fsize == 0 ) { return value(); }
+    file_mapping fmap( local_path.string().c_str(), read_only );
 
 
     mapped_region mr( fmap, fc::read_only, 0, fsize );

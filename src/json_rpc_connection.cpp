@@ -2,6 +2,8 @@
 #include <fc/log.hpp>
 #include <fc/thread.hpp>
 #include <fc/error.hpp>
+#include <fc/error_report.hpp>
+#include <fc/json_rpc_error_object.hpp>
 #include <unordered_map>
 #include <string>
 
@@ -57,7 +59,7 @@ namespace fc { namespace json {
           if( id_itr != end )  {
             // TODO: send invalid method reply
             auto id = value_cast<uint64_t>(id_itr->val);
-            send_error( id, -1, "Unknown method '"+mname+"'");
+            send_error( id, fc::json::error_object( "Unknown method '"+mname+"'" ));
           }
           // nothing to do, unknown method
         } else { // known method, attempt to call it and send reply;
@@ -65,14 +67,22 @@ namespace fc { namespace json {
 
           value nul;
           const value& params = (p_itr != end) ? p_itr->val : nul;
-          slog( "params '%s'", to_string( params ).c_str() );
+     //     slog( "params '%s'", to_string( params ).c_str() );
 
           if( id_itr != end ) { // capture reply
             auto id = value_cast<uint64_t>(id_itr->val);
             try {
                send_result( id, smeth->second->call(params) );
+            } catch ( fc::error_report& eo ) {
+               if( eo.stack.size() ) {
+                  send_error( id, error_object( eo.current().desc, fc::value(eo) ) );
+               } else {
+                  send_error( id, error_object( "error report", fc::value(eo) ) );
+               }
+            } catch ( const fc::json::error_object& eo ) {
+               send_error( id, eo );
             } catch ( ... ) {
-               send_error( id, -1, fc::except_str() );
+               send_error( id, error_object( fc::except_str(), fc::value() ) );
             }
           } else { // ignore exception + result
             try { smeth->second->call( params ); }catch(...){}
@@ -96,13 +106,11 @@ namespace fc { namespace json {
                   } else {
                     auto e_itr = v.find( "error" );
                     if( e_itr != end ) {
-                      cur->set_exception( 
-                        fc::copy_exception( 
-                          fc::generic_exception( 
-                            value_cast<fc::string>(
-                              e_itr->val["message"] ) ) ) );
+                      cur->set_exception( fc::value_cast<error_report>(e_itr->val["data"]).copy_exception() );
+                    } else {
+                       elog( "no result nor error field" );
                     }
-                  }
+                  } 
               } catch( ... ) {
                 cur->set_exception( fc::current_exception() );
               }

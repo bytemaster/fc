@@ -9,7 +9,7 @@ namespace fc {
 
   class tcp_socket::impl {
     public:
-      impl():_sock( fc::asio::default_io_service() ){ }
+      impl():_sock( fc::asio::default_io_service() ){  }
       ~impl(){
         if( _sock.is_open() ) _sock.close();
       }
@@ -85,7 +85,9 @@ namespace fc {
 
   class tcp_server::impl {
     public:
-      impl(uint16_t port):_accept( fc::asio::default_io_service(), boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), port) ){}
+      impl(uint16_t port):
+      _accept( fc::asio::default_io_service(), boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), port) ){
+      }
       ~impl(){
         _accept.close();
       }
@@ -105,7 +107,8 @@ namespace fc {
 
 
   bool tcp_server::accept( tcp_socket& s ) {
-    fc::promise<boost::system::error_code>::ptr p( new promise<boost::system::error_code>("mace::cmt::asio::tcp::accept") );
+    if( !my ) return false;
+    fc::promise<boost::system::error_code>::ptr p( new promise<boost::system::error_code>("tcp::accept") );
     my->_accept.async_accept( s.my->_sock, [=]( const boost::system::error_code& e ) {
                   p->set_value(e);
               } );

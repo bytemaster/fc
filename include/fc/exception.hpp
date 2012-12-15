@@ -48,7 +48,7 @@ namespace fc {
     try { throw e; } catch (...) { return current_exception(); }  
     return exception_ptr();
   }
-  void          rethrow_exception( const exception_ptr& e );
+  void rethrow_exception( const exception_ptr& e );
 
   void throw_exception( const char* func, const char* file, int line, const char* msg );
   void throw_exception_( const char* func, const char* file, int line, const char* msg, 

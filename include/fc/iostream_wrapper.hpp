@@ -64,14 +64,18 @@ namespace fc {
 
       virtual ~istream_wrapper(){};
 
-      virtual size_t readsome( char* buf, size_t len ) { return my->readsome(buf,len); }
+      virtual size_t readsome( char* buf, size_t len ) { 
+         return my->readsome(buf,len); 
+      }
       virtual istream& read( char* buf, size_t len ) {
+       // slog( "%p %lld", my.get(), len );
         my->read(buf,len);
         return *this;
       }
       virtual void   close() { }
       virtual bool   eof()const{ return my->eof(); }
 
+      /*
       virtual istream& read( int64_t&    ) { return *this; }
       virtual istream& read( uint64_t&   ) { return *this; }
       virtual istream& read( int32_t&    ) { return *this; }
@@ -85,6 +89,7 @@ namespace fc {
       virtual istream& read( bool&       ) { return *this; }
       virtual istream& read( char&       ) { return *this; }
       virtual istream& read( fc::string& ) { return *this; }
+      */
 
     protected:
       struct impl_base : public fc::retainable  {

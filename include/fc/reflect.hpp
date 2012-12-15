@@ -17,6 +17,7 @@
 #include <stdint.h>
 
 #include <fc/exception.hpp>
+#include <fc/typename.hpp>
 
 namespace fc { 
 
@@ -79,8 +80,7 @@ struct reflector{
 #endif
 //#include <boost/typeof/typeof.hpp>
 #define FC_REFLECT_VISIT_MEMBER( r, visitor, elem ) \
-
-//  visitor.TEMPLATE operator()<decltype(((type*)0)->elem), type, &type::elem>( BOOST_PP_STRINGIZE(elem) );
+  visitor.TEMPLATE operator()<decltype(((type*)0)->elem), type, &type::elem>( BOOST_PP_STRINGIZE(elem) );
 
 
 #define FC_REFLECT_BASE_MEMBER_COUNT( r, OP, elem ) \
@@ -147,6 +147,7 @@ template<> struct reflector<ENUM> { \
  */
 #define FC_REFLECT_DERIVED( TYPE, INHERITS, MEMBERS ) \
 namespace fc {  \
+  template<> struct get_typename<TYPE>  { static const char* name()  { return BOOST_PP_STRINGIZE(TYPE);  } }; \
 template<> struct reflector<TYPE> {\
     typedef TYPE type; \
     typedef fc::true_type  is_defined; \
@@ -172,6 +173,7 @@ template<> struct reflector<TYPE> {\
 
 #define FC_REFLECT_FWD( TYPE ) \
 namespace fc { \
+  template<> struct get_typename<TYPE>  { static const char* name()  { return BOOST_PP_STRINGIZE(TYPE);  } }; \
 template<> struct reflector<TYPE> {\
     typedef TYPE type; \
     typedef fc::true_type is_defined; \

@@ -94,6 +94,7 @@ namespace fc {
   void copy( const path& f, const path& t ) { boost::filesystem::copy( f, t ); }
   bool remove( const path& f ) { return boost::filesystem::remove( f ); }
   fc::path canonical( const fc::path& p ) { return boost::filesystem::canonical(p); }
+  fc::path absolute( const fc::path& p ) { return boost::filesystem::absolute(p); }
   path     unique_path() { return boost::filesystem::unique_path(); }
   path     temp_directory_path() { return boost::filesystem::temp_directory_path(); }
 }

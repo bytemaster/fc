@@ -48,6 +48,7 @@ include_directories( include )
 
 set( sources 
   src/ssh.cpp
+  src/url.cpp
   src/process.cpp
   src/http_connection.cpp
   src/http_server.cpp

@@ -1,5 +1,4 @@
-#ifndef _TORNET_RPC_RAW_HPP_
-#define _TORNET_RPC_RAW_HPP_
+#pragma once
 #include <fc/reflect.hpp>
 #include <fc/datastream.hpp>
 #include <fc/varint.hpp>
@@ -7,7 +6,6 @@
 #include <fc/vector.hpp>
 #include <fc/fwd.hpp>
 #include <fc/array.hpp>
-//#include <fc/value.hpp>
 
 namespace fc { 
     class value; 
@@ -280,4 +278,3 @@ namespace fc {
     
 } } // namespace fc::raw
 
-#endif // BOOST_RPC_RAW_HPP

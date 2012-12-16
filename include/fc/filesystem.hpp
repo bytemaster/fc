@@ -1,5 +1,4 @@
-#ifndef _FC_FILESYSTEM_HPP_
-#define _FC_FILESYSTEM_HPP_
+#pragma once
 #include <fc/string.hpp>
 #include <fc/fwd.hpp>
 
@@ -72,4 +71,3 @@ namespace fc {
   path     temp_directory_path();
 }
 
-#endif // _FC_FILESYSTEM_HPP_

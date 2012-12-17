@@ -1,6 +1,8 @@
+//#define BOOST_NO_SCOPED_ENUMS
 #include <fc/filesystem.hpp>
 #include <fc/fwd_impl.hpp>
 #include <fc/utility.hpp>
+#include <boost/config.hpp>
 #include <boost/filesystem.hpp>
 
 namespace fc {
@@ -91,7 +93,7 @@ namespace fc {
   bool is_directory( const path& p ) { return boost::filesystem::is_directory(p); }
   bool is_regular_file( const path& p ) { return boost::filesystem::is_regular_file(p); }
   uint64_t file_size( const path& p ) { return boost::filesystem::file_size(p); }
-  void copy( const path& f, const path& t ) { boost::filesystem::copy( f, t ); }
+  void copy( const path& f, const path& t ) { boost::filesystem::copy( boost::filesystem::path(f), boost::filesystem::path(t) ); }
   bool remove( const path& f ) { return boost::filesystem::remove( f ); }
   fc::path canonical( const fc::path& p ) { return boost::filesystem::canonical(p); }
   fc::path absolute( const fc::path& p ) { return boost::filesystem::absolute(p); }

@@ -1,5 +1,4 @@
-#ifndef _FC_DATASTREAM_HPP_
-#define _FC_DATASTREAM_HPP_
+#pragma once
 #include <fc/utility.hpp>
 #include <fc/error_report.hpp>
 #include <string.h>
@@ -114,4 +113,3 @@ private:
 
 } // namespace fc
 
-#endif

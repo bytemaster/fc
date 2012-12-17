@@ -2,8 +2,15 @@
 #include <fc/fwd_impl.hpp>
 #include <fc/utility.hpp>
 #include <boost/filesystem.hpp>
+#include <fc/value_cast.hpp>
 
 namespace fc {
+  void pack( fc::value& v, const fc::path& s ) {
+      v = s.generic_string();
+  }
+  void unpack( const fc::value& v, fc::path& s ) {
+      s = path(fc::value_cast<fc::string>(v));
+  }
 
    path::path(){}
    path::~path(){};

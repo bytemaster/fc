@@ -3,6 +3,7 @@
 #include <fc/exception.hpp>
 #include <fc/raw.hpp>
 #include <fc/value.hpp>
+#include <fc/value_cast.hpp>
 #include <fc/base58.hpp>
 #include <iostream>
 #include <fc/sha1.hpp>

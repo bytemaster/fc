@@ -69,5 +69,9 @@ namespace fc {
 
   path     unique_path();
   path     temp_directory_path();
+
+  class value;
+  void pack( fc::value& , const fc::path&  );
+  void unpack( const fc::value& , fc::path&  );
 }
 

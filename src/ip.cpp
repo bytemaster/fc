@@ -1,4 +1,5 @@
 #include <fc/ip.hpp>
+#include <fc/value_cast.hpp>
 #include <boost/asio.hpp>
 #include <boost/lexical_cast.hpp>
 #include <string>
@@ -53,4 +54,12 @@ namespace fc { namespace ip {
     return string(_ip) + ':' + fc::string(boost::lexical_cast<std::string>(_port).c_str());
   }
 
-} } 
+} 
+  void pack( fc::value& v, const fc::ip::endpoint& s ) {
+      v = fc::string(s);
+  }
+  void unpack( const fc::value& v, fc::ip::endpoint& s ) {
+      s = fc::ip::endpoint::from_string(fc::value_cast<fc::string>(v));
+  }
+
+} 

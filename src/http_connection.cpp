@@ -4,6 +4,8 @@
 #include <fc/iostream.hpp>
 #include <fc/exception.hpp>
 #include <fc/ip.hpp>
+#include <fc/error_report.hpp>
+#include <fc/hex.hpp>
 
 
 FC_START_SHARED_IMPL(fc::http::connection)
@@ -152,6 +154,44 @@ http::request    connection::read_request()const {
     my->sock.read( req.body.data(), req.body.size() );
   }
   return req;
+}
+
+fc::string request::get_header( const fc::string& key )const {
+  for( auto itr = headers.begin(); itr != headers.end(); ++itr ) {
+    if( itr->key == key ) { return itr->val; } 
+  }
+  return fc::string();
+}
+fc::vector<header> parse_urlencoded_params( const fc::string& f ) {
+  int num_args = 0;
+  for( size_t i = 0; i < f.size(); ++i ) {
+    if( f[i] == '=' ) ++num_args;
+  }
+  fc::vector<header> h(num_args);
+  int arg = 0;
+  for( size_t i = 0; i < f.size(); ++i ) {
+    while( f[i] != '=' && i < f.size() ) {
+      if( f[i] == '%' ) { 
+        h[arg].key += char((fc::from_hex(f[i+1]) << 4) | fc::from_hex(f[i+2]));
+        i += 3;
+      } else {
+          h[arg].key += f[i];
+          ++i;
+      }
+    }
+    ++i;
+    while( i < f.size() && f[i] != '&' ) {
+      if( f[i] == '%' ) { 
+        h[arg].val += char((fc::from_hex(f[i+1]) << 4) | fc::from_hex(f[i+2]));
+        i += 3;
+      } else {
+        h[arg].val += f[i] == '+' ? ' ' : f[i];
+        ++i;
+      }
+    }
+    ++arg;
+  }
+  return h;
 }
 
 } } // fc::http

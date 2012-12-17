@@ -1,5 +1,4 @@
-#ifndef _FC_IP_HPP_
-#define _FC_IP_HPP_
+#pragma once
 #include <fc/string.hpp>
 
 namespace fc {
@@ -47,5 +46,7 @@ namespace fc {
         uint32_t _port; 
     };
   }
+  class value;
+  void pack( fc::value& , const fc::ip::endpoint&  );
+  void unpack( const fc::value& , fc::ip::endpoint&  );
 }
-#endif // _FC_ENDPOINT_HPP_

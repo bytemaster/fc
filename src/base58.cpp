@@ -24,6 +24,7 @@
 #include <fc/log.hpp>
 #include <fc/string.hpp>
 #include <fc/exception.hpp>
+#include <fc/error_report.hpp>
 
 #include <stdexcept>
 #include <vector>
@@ -609,6 +610,13 @@ fc::string to_base58( const char* d, uint32_t s ) {
   return EncodeBase58( (const unsigned char*)d, (const unsigned char*)d+s ).c_str();
 }
 
+fc::vector<char> from_base58( const fc::string& base58_str ) {
+   std::vector<unsigned char> out;
+   if( !DecodeBase58( base58_str.c_str(), out ) ) {
+     FC_THROW_REPORT( "Unable to decode base58 string ${base58_str}", fc::value().set("base58_str",base58_str) );
+   }
+   return fc::vector<char>((const char*)out.data(), ((const char*)out.data())+out.size() );
+}
 /**
  *  @return the number of bytes decoded
  */
@@ -616,7 +624,7 @@ size_t from_base58( const fc::string& base58_str, char* out_data, size_t out_dat
   //slog( "%s", base58_str.c_str() );
   std::vector<unsigned char> out;
   if( !DecodeBase58( base58_str.c_str(), out ) ) {
-    FC_THROW_MSG( "Unable to decode base58 string '%s'", base58_str );
+    FC_THROW_REPORT( "Unable to decode base58 string ${base58_str}", fc::value().set("base58_str",base58_str) );
   }
   
   memcpy( out_data, out.data(), out.size() );

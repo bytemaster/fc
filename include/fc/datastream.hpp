@@ -1,7 +1,6 @@
-#ifndef _FC_DATASTREAM_HPP_
-#define _FC_DATASTREAM_HPP_
+#pragma once
 #include <fc/utility.hpp>
-#include <fc/exception.hpp>
+#include <fc/error_report.hpp>
 #include <string.h>
 #include <stdint.h>
 
@@ -40,8 +39,8 @@ struct datastream {
           m_pos += s;
           return true;
         }
-        FC_THROW_MSG( "Attempt to read %s bytes beyond end of buffer of size %s", 
-                        int64_t(-((m_end-m_pos) - s)), int64_t(m_end-m_start) );
+        FC_THROW_REPORT( "Attempt to read ${bytes_past} bytes beyond end of buffer with size ${buffer_size} ", 
+                        fc::value().set("bytes_past",int64_t(-((m_end-m_pos) - s))).set("buffer_size", int64_t(m_end-m_start)) );
         return false;
       }
       
@@ -51,7 +50,8 @@ struct datastream {
           m_pos += s;
           return true;
         }
-        FC_THROW_MSG( "Attempt to write %s bytes beyond end of buffer of size %s", int64_t(-((m_end-m_pos) - s)),int64_t(m_end-m_start) );
+        FC_THROW_REPORT( "Attempt to write ${bytes_past} bytes beyond end of buffer with size ${buffer_size} ", 
+                        fc::value().set("bytes_past",int64_t(-((m_end-m_pos) - s))).set("buffer_size", int64_t(m_end-m_start)) );
         return false;
       }
       
@@ -61,7 +61,8 @@ struct datastream {
           ++m_pos; 
           return true;
         }
-        FC_THROW_MSG( "Attempt to write %s byte beyond end of buffer of size %s", int64_t(-((m_end-m_pos) - 1)), int64_t(m_end-m_start) );
+        FC_THROW_REPORT( "Attempt to write ${bytes_past} bytes beyond end of buffer with size ${buffer_size} ", 
+                        fc::value().set("bytes_past",int64_t(-((m_end-m_pos) - 1))).set("buffer_size", int64_t(m_end-m_start)) );
         return  false;
       }
       
@@ -72,7 +73,8 @@ struct datastream {
           ++m_pos; 
           return true;
         }
-        FC_THROW_MSG( "Attempt to read %s byte beyond end of buffer of size %s", int64_t(-((m_end-m_pos) - 1)), int64_t(m_end-m_start) );
+        FC_THROW_REPORT( "Attempt to read ${bytes_past} bytes beyond end of buffer of size ${buffer_size} ", 
+                        fc::value().set("bytes_past",int64_t(-((m_end-m_pos) - 1))).set("buffer_size", int64_t(m_end-m_start)) );
         ++m_pos; 
         return  false;
       }
@@ -111,4 +113,3 @@ private:
 
 } // namespace fc
 
-#endif

@@ -86,8 +86,9 @@ fc::string error_frame::to_string()const {
     int64_t prev = 0;
     auto next = desc.find( '$' );
     while( prev != int64_t(fc::string::npos) && prev < int64_t(desc.size()) ) {
+   //   slog( "prev: %d next %d   %s", prev, next, desc.substr(prev,next).c_str() );
       // print everything from the last pos until the first '$'
-      ss << desc.substr( prev, next );
+      ss << desc.substr( prev, next-prev );
 
       // if we got to the end, return it.
       if( next == string::npos ) { return ss.str(); }
@@ -102,6 +103,7 @@ fc::string error_frame::to_string()const {
           if( next != fc::string::npos ) {
             // the key is between prev and next
             fc::string key = desc.substr( prev+1, (next-prev-1) );
+            //slog( "key '%s'", key.c_str() );
             if( meta ) {
                 auto itr = meta->find( key.c_str() );
                 if( itr != meta->end() ) {

@@ -56,6 +56,7 @@ namespace fc { namespace http {
           try {
             http::connection con;
             while( tcp_serv.accept( con.get_socket() ) ) {
+              slog( "Accept Connection" );
               fc::async( [=](){ handle_connection( con, on_req ); } );
               con = http::connection();
             }
@@ -66,9 +67,14 @@ namespace fc { namespace http {
 
       void handle_connection( const http::connection& c,  
                               std::function<void(const http::request&, const server::response& s )> do_on_req ) {
-         http::server::response rep( fc::shared_ptr<response::impl>( new response::impl(c, [=](){ this->handle_connection(c,do_on_req); } ) ) );
-         auto req = c.read_request();
-         if( do_on_req ) do_on_req( req, rep );
+         wlog( "reading request.." );
+         try {
+             http::server::response rep( fc::shared_ptr<response::impl>( new response::impl(c, [=](){ this->handle_connection(c,do_on_req); } ) ) );
+             auto req = c.read_request();
+             if( do_on_req ) do_on_req( req, rep );
+          } catch ( ... ) {
+             wlog( "unable to read request %s", fc::except_str().c_str());
+          }
       }
       std::function<void(const http::request&, const server::response& s )> on_req;
       fc::tcp_server                                                        tcp_serv;
@@ -126,6 +132,13 @@ namespace fc { namespace http {
     }
     my->body_bytes_sent += len;
     my->con.get_socket().write( data, len ); 
+    if( my->body_bytes_sent == int64_t(my->body_length) ) {
+      if( my->handle_next_req ) {
+        slog( "handle next request..." );
+        //fc::async( std::function<void()>(my->handle_next_req) );
+        fc::async( my->handle_next_req );
+      }
+    }
   }
 
   server::response::~response(){}

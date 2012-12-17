@@ -1,5 +1,4 @@
-#ifndef _FC_FILESYSTEM_HPP_
-#define _FC_FILESYSTEM_HPP_
+#pragma once
 #include <fc/string.hpp>
 #include <fc/fwd.hpp>
 
@@ -70,6 +69,9 @@ namespace fc {
 
   path     unique_path();
   path     temp_directory_path();
+
+  class value;
+  void pack( fc::value& , const fc::path&  );
+  void unpack( const fc::value& , fc::path&  );
 }
 
-#endif // _FC_FILESYSTEM_HPP_

@@ -1,7 +1,7 @@
-#ifndef _FC_TIME_HPP_
-#define _FC_TIME_HPP_
+#pragma once
 #include <stdint.h>
 #include <fc/string.hpp>
+#include <fc/raw.hpp>
 
 namespace fc {
   class microseconds { 
@@ -41,5 +41,16 @@ namespace fc {
     private:
         microseconds elapsed; 
   };
+
+  // forward declare io
+  class value;
+  void pack( fc::value& , const fc::time_point&  );
+  void unpack( const fc::value& , fc::time_point&  );
+
+  namespace raw {
+    template<typename Stream, typename T>
+    void unpack( Stream& s, fc::time_point& v );
+    template<typename Stream, typename T>
+    void pack( Stream& s, const fc::time_point& v );
+  }
 }
-#endif // _FC_TIME_HPP_

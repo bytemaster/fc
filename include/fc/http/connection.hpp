@@ -32,12 +32,15 @@ namespace fc {
   };
 
   struct request {
+     fc::string get_header( const fc::string& key )const;
      fc::string              method;
      fc::string              domain;
      fc::string              path;
      fc::vector<header>      headers;
      fc::vector<char>        body;
   };
+
+  fc::vector<header> parse_urlencoded_params( const fc::string& f );
 
   /**
    *  Connections have reference semantics, all copies refer to the same

@@ -82,7 +82,7 @@ namespace fc {
     template<typename T,unsigned int S,typename A>
     fwd<T,S,A>::fwd() {
       check_size<sizeof(T),sizeof(_store)>();
-      new (this) T();
+      new (this) T;
     }
     template<typename T,unsigned int S,typename A>
     fwd<T,S,A>::fwd( const fwd<T,S,A>& f ){

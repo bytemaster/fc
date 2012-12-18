@@ -1,9 +1,9 @@
 #pragma once
 #include <fc/utility.hpp>
 #include <fc/lexical_cast.hpp>
+#include <fc/string.hpp>
 
 namespace fc {
-  class string;
 
   class istream {
     public:

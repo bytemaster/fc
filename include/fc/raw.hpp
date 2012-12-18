@@ -246,7 +246,7 @@ namespace fc {
       raw::pack(ps,v );
       fc::vector<char> vec(ps.tellp());
       if( vec.size() ) {
-        datastream<char*>  ds( vec.data(), vec.size() ); 
+        datastream<char*>  ds( vec.data(), size_t(vec.size()) ); 
         raw::pack(ds,v);
       }
       return vec;
@@ -256,7 +256,7 @@ namespace fc {
     inline T unpack( const fc::vector<char>& s ) {
       T tmp;
       if( s.size() ) {
-        datastream<const char*>  ds( s.data(), s.size() ); 
+        datastream<const char*>  ds( s.data(), size_t(s.size()) ); 
         raw::unpack(ds,tmp);
       }
       return tmp;

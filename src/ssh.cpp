@@ -478,7 +478,7 @@ namespace fc { namespace ssh {
       }
     }
     try {
-      uint64_t   wrote = 0;
+      size_t   wrote = 0;
       char* pos = reinterpret_cast<char*>(mr.get_address());
       while( progress( wrote, fsize ) && wrote < fsize ) {
           int r = libssh2_channel_write( chan, pos, fsize - wrote );
@@ -800,7 +800,7 @@ namespace fc { namespace ssh {
    }
 
    bool detail::process_istream::eof()const { 
-      return libssh2_channel_eof( proc.chan );
+      return 0 != libssh2_channel_eof( proc.chan );
    }
 
    ostream& detail::process_ostream::write( const char* buf, size_t len ) { 

@@ -1,5 +1,6 @@
 #pragma once
 #include <fc/utility.hpp>
+#include <fc/log.hpp>
 
 namespace fc {
 
@@ -30,24 +31,20 @@ namespace fc {
       :_ptr(o.get()) {
         if(_ptr != nullptr ) _ptr->retain();
       }
+      shared_ptr( const shared_ptr& o ) 
+      :_ptr(o.get()) {
+        if(_ptr != nullptr ) _ptr->retain();
+      }
       
       shared_ptr( T* t, bool inc = false )
       :_ptr(t) { if( inc && t != nullptr) t->retain();  }
 
       shared_ptr():_ptr(nullptr){}
 
-      shared_ptr( const shared_ptr& p ) {
-        _ptr = p._ptr;
-        if( _ptr ) _ptr->retain();
-      }
-      shared_ptr( shared_ptr& p ) {
-        _ptr = p._ptr;
-        if( _ptr != nullptr ) _ptr->retain();
-      }
-      shared_ptr( shared_ptr&& p ) {
-        _ptr = p._ptr;
-        p._ptr = nullptr;
-      }
+     
+      shared_ptr( shared_ptr&& p )
+      :_ptr(p._ptr){ p._ptr = nullptr; }
+
       ~shared_ptr() { if( nullptr != _ptr ) { _ptr->release(); } }
 
       shared_ptr& reset( T* v = nullptr, bool inc = false )  {
@@ -60,9 +57,9 @@ namespace fc {
 
       shared_ptr& operator=(const shared_ptr& p ) {
         if( _ptr == p._ptr ) return *this;
+        if( p._ptr != nullptr ) p._ptr->retain();
         if( _ptr != nullptr ) _ptr->release();
         _ptr = p._ptr;
-        if( _ptr != nullptr ) _ptr->retain();
         return *this;
       }
       shared_ptr& operator=(shared_ptr&& p ) {

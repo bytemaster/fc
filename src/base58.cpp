@@ -606,7 +606,7 @@ inline bool DecodeBase58(const std::string& str, std::vector<unsigned char>& vch
 
 namespace fc {
 
-fc::string to_base58( const char* d, uint32_t s ) {
+fc::string to_base58( const char* d, size_t s ) {
   return EncodeBase58( (const unsigned char*)d, (const unsigned char*)d+s ).c_str();
 }
 

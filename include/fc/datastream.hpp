@@ -15,26 +15,13 @@ namespace fc {
  */
 template<typename T>
 struct datastream {
-      datastream( T start, uint32_t s )
+      datastream( T start, size_t s )
       :m_start(start),m_pos(start),m_end(start+s){};
       
-      template<typename DATA>
-      inline datastream& operator<<(const DATA& d) {
-        static_assert( !fc::is_class<DATA>::type::value, "no serialization defined" );
-        write( (const char*)&d, sizeof(d) );
-        return *this;
-      }
       
-      template<typename DATA>
-      inline datastream& operator>>(DATA& d) {
-        static_assert( !fc::is_class<DATA>::type::value, "no serialization defined" );
-        read((char*)&d, sizeof(d) );
-        return *this;
-      }
-      
-      inline void skip( uint32_t s ){ m_pos += s; }
-      inline bool read( char* d, uint32_t s ) {
-        if( m_end - m_pos >= (int32_t)s ) {
+      inline void skip( size_t s ){ m_pos += s; }
+      inline bool read( char* d, size_t s ) {
+        if( m_end - m_pos >= (size_t)s ) {
           memcpy( d, m_pos, s );
           m_pos += s;
           return true;
@@ -44,7 +31,7 @@ struct datastream {
         return false;
       }
       
-      inline bool write( const char* d, uint32_t s ) {
+      inline bool write( const char* d, size_t s ) {
         if( m_end - m_pos >= (int32_t)s ) {
           memcpy( m_pos, d, s );
           m_pos += s;
@@ -81,9 +68,9 @@ struct datastream {
       
       T               pos()const        { return m_pos;                               }
       inline bool     valid()const      { return m_pos <= m_end && m_pos >= m_start;  }
-      inline bool     seekp(uint32_t p) { m_pos = m_start + p; return m_pos <= m_end; }
-      inline uint32_t tellp()const      { return m_pos - m_start;                     }
-      inline uint32_t remaining()const  { return m_end - m_pos;                       }
+      inline bool     seekp(size_t p) { m_pos = m_start + p; return m_pos <= m_end; }
+      inline size_t   tellp()const      { return m_pos - m_start;                     }
+      inline size_t   remaining()const  { return m_end - m_pos;                       }
     private:
       T m_start;
       T m_pos;
@@ -93,22 +80,116 @@ struct datastream {
 template<>
 struct datastream<size_t> {
   datastream( size_t init_size = 0):m_size(init_size){};
-  template<typename DATA>
-  inline datastream& operator<<(const DATA& d) {
-    static_assert( !fc::is_class<DATA>::type::value, "no serialzation defined" );
-    m_size += sizeof(d);
-    return *this;
-  }
-  inline bool     skip( uint32_t s )                 { m_size += s; return true; }
-  inline bool     write( const char* d, uint32_t s ) { m_size += s; return true; }
+  inline bool     skip( size_t s )                 { m_size += s; return true; }
+  inline bool     write( const char* d,size_t s ) { m_size += s; return true; }
   inline bool     put(char c)                        { ++m_size; return  true; }
   inline bool     valid()const                       { return true;              }
-  inline bool     seekp(uint32_t p)                  { m_size = p;  return true; }
-  inline uint32_t tellp()const                       { return m_size;            }
-  inline uint32_t remaining()const                   { return 0;                 }
+  inline bool     seekp(size_t p)                  { m_size = p;  return true; }
+  inline size_t   tellp()const                       { return m_size;            }
+  inline size_t   remaining()const                   { return 0;                 }
 private:
-  uint32_t m_size;
+  size_t m_size;
 };
+
+/*
+template<typename ST>
+inline datastream<ST>& operator<<(datastream<ST>& ds, const size_t& d) {
+  ds.write( (const char*)&d, sizeof(d) );
+  return *this;
+}
+template<typename ST, typename DATA>
+inline datastream<ST>& operator>>(datastream<ST>& ds, size_t& d) {
+  ds.read((char*)&d, sizeof(d) );
+  return *this;
+}
+*/
+template<typename ST>
+inline datastream<ST>& operator<<(datastream<ST>& ds, const int32_t& d) {
+  ds.write( (const char*)&d, sizeof(d) );
+  return ds;
+}
+template<typename ST, typename DATA>
+inline datastream<ST>& operator>>(datastream<ST>& ds, int32_t& d) {
+  ds.read((char*)&d, sizeof(d) );
+  return ds;
+}
+template<typename ST>
+inline datastream<ST>& operator<<(datastream<ST>& ds, const uint32_t& d) {
+  ds.write( (const char*)&d, sizeof(d) );
+  return ds;
+}
+
+template<typename ST, typename DATA>
+inline datastream<ST>& operator>>(datastream<ST>& ds, uint32_t& d) {
+  ds.read((char*)&d, sizeof(d) );
+  return ds;
+}
+template<typename ST>
+inline datastream<ST>& operator<<(datastream<ST>& ds, const int64_t& d) {
+  ds.write( (const char*)&d, sizeof(d) );
+  return ds;
+}
+
+template<typename ST, typename DATA>
+inline datastream<ST>& operator>>(datastream<ST>& ds, int64_t& d) {
+  ds.read((char*)&d, sizeof(d) );
+  return ds;
+}
+template<typename ST>
+inline datastream<ST>& operator<<(datastream<ST>& ds, const uint64_t& d) {
+  ds.write( (const char*)&d, sizeof(d) );
+  return ds;
+}
+
+template<typename ST, typename DATA>
+inline datastream<ST>& operator>>(datastream<ST>& ds, uint64_t& d) {
+  ds.read((char*)&d, sizeof(d) );
+  return ds;
+}
+template<typename ST>
+inline datastream<ST>& operator<<(datastream<ST>& ds, const int16_t& d) {
+  ds.write( (const char*)&d, sizeof(d) );
+  return ds;
+}
+
+template<typename ST, typename DATA>
+inline datastream<ST>& operator>>(datastream<ST>& ds, int16_t& d) {
+  ds.read((char*)&d, sizeof(d) );
+  return ds;
+}
+template<typename ST>
+inline datastream<ST>& operator<<(datastream<ST>& ds, const uint16_t& d) {
+  ds.write( (const char*)&d, sizeof(d) );
+  return ds;
+}
+
+template<typename ST, typename DATA>
+inline datastream<ST>& operator>>(datastream<ST>& ds, uint16_t& d) {
+  ds.read((char*)&d, sizeof(d) );
+  return ds;
+}
+template<typename ST>
+inline datastream<ST>& operator<<(datastream<ST>& ds, const int8_t& d) {
+  ds.write( (const char*)&d, sizeof(d) );
+  return ds;
+}
+
+template<typename ST, typename DATA>
+inline datastream<ST>& operator>>(datastream<ST>& ds, int8_t& d) {
+  ds.read((char*)&d, sizeof(d) );
+  return ds;
+}
+template<typename ST>
+inline datastream<ST>& operator<<(datastream<ST>& ds, const uint8_t& d) {
+  ds.write( (const char*)&d, sizeof(d) );
+  return ds;
+}
+
+template<typename ST, typename DATA>
+inline datastream<ST>& operator>>(datastream<ST>& ds, uint8_t& d) {
+  ds.read((char*)&d, sizeof(d) );
+  return ds;
+}
 
 
 } // namespace fc

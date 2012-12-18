@@ -16,7 +16,7 @@
 namespace fc {
     void pack( fc::value& v, const fc::public_key_t& s ) {
         fc::vector<char> ve = fc::raw::pack( s );
-        v = to_base58( ve.data(), ve.size() );
+        v = to_base58( ve.data(), size_t(ve.size()) );
     }
     void unpack( const fc::value& v, fc::public_key_t& s ) {
       try {
@@ -71,9 +71,9 @@ namespace fc {
     bool verify_data( const char* key, uint32_t key_size, uint32_t pe, const sha1& digest, const char* sig )
     {
         RSA* pub = get_pub( key,key_size,pe);
-        bool v = RSA_verify( NID_sha1, (const uint8_t*)digest.data(), 20, (uint8_t*)sig, key_size, pub );
+        auto v = RSA_verify( NID_sha1, (const uint8_t*)digest.data(), 20, (uint8_t*)sig, key_size, pub );
         RSA_free(pub);
-        return v;
+        return 0 != v;
     }
     bool sign_data( const fc::vector<char>& key, uint32_t key_size, uint32_t pe, const sha1& digest, char* sig )
     {

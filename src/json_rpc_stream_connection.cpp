@@ -4,6 +4,8 @@
 #include <fc/sstream.hpp>
 #include <fc/thread.hpp>
 
+#include <iostream>
+
 namespace fc { namespace json {
 
   class rpc_stream_connection::impl : public fc::retainable {
@@ -32,6 +34,8 @@ namespace fc { namespace json {
            fc::string line;
            fc::getline( in, line );
            while( !in.eof() ) {
+	    // std::cerr<<"\n**line size: "<<line.size()<<"\n\n";
+            //   slog( "line size: '%d'", line.size() );
                try {
                  fc::value v= fc::json::from_string( line );
                  self.handle_message(v);
@@ -51,11 +55,12 @@ namespace fc { namespace json {
 
   rpc_stream_connection::rpc_stream_connection( fc::istream& i, fc::ostream& o )
   :my( new impl(i,o,*this) ){
+  	slog( "%p", this );
   }
-  rpc_stream_connection::rpc_stream_connection(){  }
-  rpc_stream_connection::rpc_stream_connection(const rpc_stream_connection& c):my(c.my){}
+  rpc_stream_connection::rpc_stream_connection(){ slog( "%p...",this); }
+  rpc_stream_connection::rpc_stream_connection(const rpc_stream_connection& c):my(c.my){ slog( "%p",this); }
   rpc_stream_connection::~rpc_stream_connection(){ 
-   // slog( "%p", my.get() ); 
+    slog( "my %p", my.get() ); 
    }
 
   // the life of the streams must exceed the life of all copies

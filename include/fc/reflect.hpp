@@ -78,9 +78,11 @@ struct reflector{
 #else
   #define TEMPLATE
 #endif
-//#include <boost/typeof/typeof.hpp>
+
 #define FC_REFLECT_VISIT_MEMBER( r, visitor, elem ) \
-  visitor.TEMPLATE operator()<decltype(((type*)0)->elem), type, &type::elem>( BOOST_PP_STRINGIZE(elem) );
+{ typedef decltype(((type*)nullptr)->elem) member_type;  \
+  visitor.TEMPLATE operator()<member_type,type,&type::elem>( BOOST_PP_STRINGIZE(elem) ); \
+}
 
 
 #define FC_REFLECT_BASE_MEMBER_COUNT( r, OP, elem ) \

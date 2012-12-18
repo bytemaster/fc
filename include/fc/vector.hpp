@@ -10,11 +10,11 @@ namespace fc {
   namespace detail {
     template<typename T>
     struct data {
-      uint64_t size;
-      uint64_t capacity;
+      size_t size;
+      size_t capacity;
       T        first;
 
-      static data* allocate( uint64_t cap ) {
+      static data* allocate( size_t cap ) {
         data* d = nullptr;
         if( cap ){
           d = (data*)malloc(sizeof(data) + sizeof(T)*(static_cast<size_t>(cap)-1));
@@ -26,7 +26,7 @@ namespace fc {
         d->size = 0;
         return d;
       }
-      static data* reallocate( data* d, uint64_t cap ) {
+      static data* reallocate( data* d, size_t cap ) {
         if( cap ){
           d = (data*)realloc(d,sizeof(data) + sizeof(T)*(static_cast<size_t>(cap)-1));
           d->capacity = static_cast<size_t>(cap);
@@ -62,7 +62,7 @@ namespace fc {
             resize(e-b);
             if( size() ) memcpy( data(), b, static_cast<size_t>(size()) );
           }
-          vector_impl(uint64_t s):_data(nullptr){
+          vector_impl(size_t s):_data(nullptr){
             resize(s);
           }
           ~vector_impl() {
@@ -70,8 +70,8 @@ namespace fc {
           }
 
 
-          uint64_t size()const     { return _data ? _data->size : 0;     }
-          uint64_t capacity()const { return _data ? _data->capacity : 0; }
+          size_t size()const     { return _data ? _data->size : 0;     }
+          size_t capacity()const { return _data ? _data->capacity : 0; }
 
           T&       back()       { return (&_data->first)[-1+_data->size]; }
           const T& back()const  { return (&_data->first)[-1+_data->size]; }
@@ -85,11 +85,11 @@ namespace fc {
           iterator       end()        { return _data ? (&back())+1: 0;}
           const_iterator end()const   { return _data ? (&back())+1: 0;}
 
-          T&       operator[]( uint64_t i )      { return (&_data->first)[i]; }
-          const T& operator[]( uint64_t i )const { return (&_data->first)[i]; }
+          T&       operator[]( size_t i )      { return (&_data->first)[i]; }
+          const T& operator[]( size_t i )const { return (&_data->first)[i]; }
 
-          T&       at( uint64_t i )      { return (&_data->first)[i]; }
-          const T& at( uint64_t i )const { return (&_data->first)[i]; }
+          T&       at( size_t i )      { return (&_data->first)[i]; }
+          const T& at( size_t i )const { return (&_data->first)[i]; }
 
           void pop_back() { erase( &back() ); }
 
@@ -100,11 +100,11 @@ namespace fc {
             _data = nullptr;
           }
 
-          void     reserve( uint64_t i ) {
+          void     reserve( size_t i ) {
             _data = detail::data<T>::reallocate( _data, i );
           }
 
-          void     resize( uint64_t i ) {
+          void     resize( size_t i ) {
             if( capacity() < i ) {
                if( _data )
                    _data = detail::data<T>::reallocate( _data, i );
@@ -122,7 +122,7 @@ namespace fc {
 
           template<typename U>
           iterator insert( const_iterator loc, U&& t ) {
-            uint64_t pos = loc - begin();
+            size_t pos = loc - begin();
             resize( size()+1 );
             char* src = &at(pos);
             if( src != &back() ) 
@@ -134,11 +134,11 @@ namespace fc {
           iterator insert( iterator pos, const_iterator first, const_iterator last ) {
             if( first >= last ) return pos;
 
-            uint64_t loc = pos - begin();
-            uint64_t right_size = size() - loc;
+            size_t loc = pos - begin();
+            size_t right_size = size() - loc;
             resize( size() + (last-first) );
             char* src = &at(loc);
-            uint64_t s = last-first;
+            size_t s = last-first;
             memmove( src + s, src, right_size );
             memcpy( src, first, s );
             _data->size += (last-first);
@@ -201,7 +201,7 @@ namespace fc {
             }
           }
 
-          vector_impl(uint64_t s):_data(nullptr){
+          vector_impl(size_t s):_data(nullptr){
             resize(s);
           }
           ~vector_impl() {
@@ -209,8 +209,8 @@ namespace fc {
           }
 
 
-          uint64_t size()const     { return _data ? _data->size : 0;     }
-          uint64_t capacity()const { return _data ? _data->capacity : 0; }
+          size_t size()const     { return _data ? _data->size : 0;     }
+          size_t capacity()const { return _data ? _data->capacity : 0; }
 
           T&       back()       { return (&_data->first)[-1+_data->size]; }
           const T& back()const  { return (&_data->first)[-1+_data->size]; }
@@ -223,11 +223,11 @@ namespace fc {
           const_iterator begin()const { return _data ? &front()   : 0;}
           const_iterator end()const   { return _data ? (&back())+1: 0;}
 
-          T&       operator[]( uint64_t i )      { return (&_data->first)[i]; }
-          const T& operator[]( uint64_t i )const { return (&_data->first)[i]; }
+          T&       operator[]( size_t i )      { return (&_data->first)[i]; }
+          const T& operator[]( size_t i )const { return (&_data->first)[i]; }
 
-          T&       at( uint64_t i )      { return (&_data->first)[i]; }
-          const T& at( uint64_t i )const { return (&_data->first)[i]; }
+          T&       at( size_t i )      { return (&_data->first)[i]; }
+          const T& at( size_t i )const { return (&_data->first)[i]; }
 
           void pop_back() { erase( &back() ); }
 
@@ -245,7 +245,7 @@ namespace fc {
             this->_data = nullptr;
           }
 
-          void     reserve( uint64_t i ) {
+          void     reserve( size_t i ) {
             if( nullptr != this->_data && i <= this->_data->capacity ) 
                return;
             
@@ -264,7 +264,7 @@ namespace fc {
             if( _ndata ) free(_ndata);
           }
 
-          void     resize( uint64_t i ) {
+          void     resize( size_t i ) {
             this->reserve(i);
             while( i < this->_data->size ) {
               this->back().~T();
@@ -285,7 +285,7 @@ namespace fc {
 
           template<typename U>
           iterator insert( const_iterator loc, U&& t ) {
-            uint64_t pos = loc - this->begin();
+            size_t pos = loc - this->begin();
             this->reserve( this->size()+1 );
             loc = this->begin() + pos;
             if( this->size() != 0 ) {
@@ -351,7 +351,7 @@ namespace fc {
   class vector : public detail::vector_impl<T, typename fc::is_class<T>::type> {
     public:
       vector(){}
-      vector( uint64_t s ):detail::vector_impl<T, typename fc::is_class<T>::type>(s){}
+      vector( size_t s ):detail::vector_impl<T, typename fc::is_class<T>::type>(s){}
       vector( const vector& v ):detail::vector_impl<T, typename fc::is_class<T>::type>(v){}
       vector( vector&& v ):detail::vector_impl<T, typename fc::is_class<T>::type>(fc::move(v)){}
 

@@ -99,7 +99,7 @@ namespace fc {
   void create_directories( const path& p ) { boost::filesystem::create_directories(p); }
   bool is_directory( const path& p ) { return boost::filesystem::is_directory(p); }
   bool is_regular_file( const path& p ) { return boost::filesystem::is_regular_file(p); }
-  uint64_t file_size( const path& p ) { return boost::filesystem::file_size(p); }
+  size_t file_size( const path& p ) { return boost::filesystem::file_size(p); }
   void copy( const path& f, const path& t ) { boost::filesystem::copy( boost::filesystem::path(f), boost::filesystem::path(t) ); }
   bool remove( const path& f ) { return boost::filesystem::remove( f ); }
   fc::path canonical( const fc::path& p ) { return boost::filesystem::canonical(p); }

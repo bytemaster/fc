@@ -103,10 +103,10 @@ namespace fc {
 
   size_t cin_t::readsome( char* buf, size_t len ) {
     cin_buffer& b = get_cin_buffer();
-    size_t avail = b.write_pos - b.read_pos;
-    avail = (fc::min)(len,avail);
-    size_t u = 0;
-    while( avail && len ) {
+    int64_t avail = b.write_pos - b.read_pos;
+    avail = (fc::min)(int64_t(len),avail);
+    int64_t u = 0;
+    while( (avail>0) && (len>0) ) {
       *buf = b.buf[b.read_pos&0xfffff]; 
       ++b.read_pos;
       ++buf;
@@ -114,7 +114,7 @@ namespace fc {
       --len;
       ++u;
     }
-    return u;
+    return size_t(u);
   }
 
   cin_t::~cin_t() {

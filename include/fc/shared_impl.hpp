@@ -110,10 +110,10 @@ namespace fc {
     bool operator !()const;
 
     template<typename U>
-    shared_impl( U&& u );
+    explicit shared_impl( U&& u );
 
     shared_impl( const shared_impl& u );
-    shared_impl( shared_impl& u );
+  //  shared_impl( shared_impl& u );
     shared_impl( shared_impl&& u );
     shared_impl& operator=( shared_impl&& u );
     shared_impl& operator=( const shared_impl& u );
@@ -132,7 +132,6 @@ namespace fc {
       TYPE( TYPE*  ); \
       TYPE( TYPE&&  ); \
       TYPE( const TYPE&  ); \
-      TYPE( TYPE&  ); \
       template<typename A1> \
       TYPE( A1&&  ); \
       template<typename A1,typename A2> \
@@ -155,7 +154,8 @@ namespace fc {
 #define FC_START_SHARED_IMPL( SCOPED_TYPE )  \
 namespace fc { \
 template<> \
-struct fc::shared_impl<SCOPED_TYPE>::impl : public fc::retainable { \
+class fc::shared_impl<SCOPED_TYPE>::impl : public fc::retainable { \
+  public:\
    SCOPED_TYPE self() { return SCOPED_TYPE(this); } \
 
 

@@ -15,7 +15,6 @@ namespace fc {
   const char* thread_name();
   void*       thread_ptr();
 
-  /*
   const char* short_name( const char* file_name ) { 
     const char* end = file_name + strlen(file_name);
     --end;
@@ -27,7 +26,6 @@ namespace fc {
     }
     return file_name;
   } 
-  */
 
   #ifdef WIN32 
     #define isatty _isatty
@@ -36,14 +34,13 @@ namespace fc {
 
   void log( const char* color, const char* file_name, size_t line_num, 
             const char* method_name, const char* format, ... ) {
-    fc::unique_lock<boost::mutex> lock(log_mutex());
     #ifndef WIN32
     if(isatty(fileno(stderr)))
-      std::cerr<<"\r"<<color;
+      fprintf( stderr, "\r%s",color);
     #endif
-    
-    fprintf( stderr, "%-15s %-15s %-5zd %-15s ", thread_name(), fc::path(file_name).filename().generic_string().c_str(), line_num, method_name );
-    //std::cerr<<thread_ptr()<< thread_name()<< short_name(file_name)<< line_num<< method_name ;
+    fc::unique_lock<boost::mutex> lock(log_mutex());
+ //   fc::string sname = fc::path(file_name).filename().generic_string();
+    fprintf( stderr, "%-15s %-15s %-5d %-15s ", thread_name(), short_name(file_name), int(line_num), method_name );
     va_list args;
     va_start(args,format);
     vfprintf( stderr, format, args );
@@ -54,6 +51,7 @@ namespace fc {
     #endif
     fprintf( stderr, "\n" );
     fflush( stderr );
+    return;
   }
 
   /** used to add extra fields to be printed (thread,fiber,time,etc) */

@@ -132,7 +132,7 @@ fc::future<int> process::exec( const fc::path& exe, fc::vector<fc::string>&& arg
       my->pctx.streams[boost::process::stdin_id]  = bp::behavior::close();
 
   std::vector<std::string> a;
-  a.reserve(args.size());
+  a.reserve(size_t(args.size()));
   for( uint32_t i = 0; i < args.size(); ++i ) {
     a.push_back( args[i] ); 
   }

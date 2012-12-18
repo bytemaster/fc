@@ -1,12 +1,12 @@
 #pragma once
 #include <fc/shared_impl.hpp>
 #include <fc/future.hpp>
+#include <fc/string.hpp>
 
 namespace fc {
   class istream;
   class ostream;
   class path;
-  class string;
   template<typename> class vector;
 
   /**

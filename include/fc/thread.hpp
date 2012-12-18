@@ -2,9 +2,9 @@
 #define _FC_THREAD_HPP_
 #include <fc/task.hpp>
 #include <fc/vector.hpp>
+#include <fc/string.hpp>
 
 namespace fc {
-  class string;
   class time_point;
   class microseconds;
 

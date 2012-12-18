@@ -22,6 +22,7 @@ namespace std {
 }
 
 namespace fc {
+ // typedef std::string string;
   /**
    *  Including <string> results in 4000 lines of code
    *  that must be included to build your header.  This
@@ -55,17 +56,17 @@ namespace fc {
       const_iterator begin()const;
       const_iterator end()const;
 
-      char&       operator[](uint64_t idx);
-      const char& operator[](uint64_t idx)const;
+      char&       operator[](size_t idx);
+      const char& operator[](size_t idx)const;
 
       string& operator =( const string& c );
       string& operator =( string&& c );
 
-      void      reserve( uint64_t );
-      uint64_t  size()const;
-      uint64_t  find( char c, uint64_t pos = 0 )const;
+      void    reserve( size_t );
+      size_t  size()const;
+      size_t  find( char c, size_t pos = 0 )const;
 
-      void    resize( uint64_t s );
+      void    resize( size_t s );
       void    clear();
 
       const char* c_str()const;
@@ -82,11 +83,11 @@ namespace fc {
       friend string operator + ( const string&, const string&  );
       friend string operator + ( const string&, char c );
 
-      fc::string substr( int32_t start, int32_t len = 0x7fffffff )const;
+      fc::string substr( size_t start, size_t len = fc::string::npos )const;
     
     private:
        fc::fwd<std::string,32> my;
   };
 
-} // namespace FC
+} // namespace fc
 

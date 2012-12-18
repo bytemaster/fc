@@ -39,7 +39,7 @@ namespace fc {
     return *this;
   }
   size_t   stringstream::readsome( char* buf, size_t len ) {
-    return my->ss.readsome(buf,len);
+    return static_cast<size_t>(my->ss.readsome(buf,len));
   }
   istream&   stringstream::read( char* buf, size_t len ) {
     my->ss.read(buf,len);

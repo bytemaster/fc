@@ -274,6 +274,7 @@ namespace fc {
          virtual value_holder* copy_helper( char* c )const;
        };
 
+       void new_value_holder_void( value* v );
     } // namespace detail
 
 
@@ -300,9 +301,15 @@ namespace fc {
     }
 
     template<typename T>
-    value::value( T&& v ) {
-      new (holder) detail::value_holder(); 
-      fc::pack( *this, fc::forward<T>(v) );
+    value::value( const T& v ) {
+      detail::new_value_holder_void(this);
+      fc::pack( *this, v);
     }
-
+    template<typename T>
+    value& value::operator=(  const T& v ) {
+       this->~value();
+       value tmp(v);
+       *this = fc::move(tmp);
+       return *this;
+    }
 }

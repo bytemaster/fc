@@ -44,6 +44,7 @@ namespace fc {
   };
 
   struct cin_t : virtual public istream { 
+      ~cin_t();
       virtual size_t readsome( char* buf, size_t len );
       virtual istream& read( char* buf, size_t len );
       virtual bool eof()const;

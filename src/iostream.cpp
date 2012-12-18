@@ -4,7 +4,10 @@
 #include <iostream>
 #include <string.h>
 #include <fc/log.hpp>
+#include <fc/mutex.hpp>
+#include <fc/scoped_lock.hpp>
 #include <string>
+#include <boost/thread/mutex.hpp>
 
 namespace fc {
   ostream& operator<<( ostream& o, const char* v ) {
@@ -32,18 +35,27 @@ namespace fc {
         buf[write_pos&0xfffff] = c;
         ++write_pos;
 
-        auto tmp = read_ready; // copy read_ready because it is accessed from multiple threads
+        fc::promise<void>::ptr tmp;
+        { // copy read_ready because it is accessed from multiple threads
+          fc::scoped_lock<boost::mutex> lock( read_ready_mutex ); 
+          tmp = read_ready; 
+        }
         if( tmp && !tmp->ready() ) { 
           tmp->set_value(); 
         }
         std::cin.read(&c,1);
       }
       eof = true;
-      auto tmp = read_ready; // copy read_ready because it is accessed from multiple threads
+      fc::promise<void>::ptr tmp;
+      {  // copy read_ready because it is accessed from multiple threads
+        fc::scoped_lock<boost::mutex> lock( read_ready_mutex ); 
+        tmp = read_ready;
+      }
       if( tmp && !tmp->ready() ) { 
         tmp->set_value(); 
       }
     }
+    boost::mutex              read_ready_mutex;
     fc::promise<void>::ptr read_ready;
     fc::promise<void>::ptr write_ready;
     
@@ -105,17 +117,34 @@ namespace fc {
     return u;
   }
 
+  cin_t::~cin_t() {
+    wlog( "~cin_t" );
+    /*
+    cin_buffer& b = get_cin_buffer();
+    if( b.read_ready ) {
+        b.read_ready->wait();
+    }
+    */
+  }
   istream& cin_t::read( char* buf, size_t len ) {
     cin_buffer& b = get_cin_buffer();
     do {
         while( !b.eof &&  (b.write_pos - b.read_pos)==0 ){ 
            // wait for more... 
            fc::promise<void>::ptr rr( new fc::promise<void>() );
-           b.read_ready = rr;
+     //      b.read_ready = rr;
+           {  // copy read_ready because it is accessed from multiple threads
+             fc::scoped_lock<boost::mutex> lock( b.read_ready_mutex ); 
+             b.read_ready = rr;
+           }
            if( b.write_pos - b.read_pos == 0 ) {
              rr->wait();
            }
            b.read_ready.reset();
+           {  // copy read_ready because it is accessed from multiple threads
+             fc::scoped_lock<boost::mutex> lock( b.read_ready_mutex ); 
+             b.read_ready.reset();
+           }
         }
         if( b.eof ) return *this;
         size_t r = readsome( buf, len );

@@ -28,11 +28,11 @@ namespace fc {
       template<typename Other>
       shared_ptr( const shared_ptr<Other>& o )
       :_ptr(o.get()) {
-        if(_ptr) _ptr->retain();
+        if(_ptr != nullptr ) _ptr->retain();
       }
       
       shared_ptr( T* t, bool inc = false )
-      :_ptr(t) { if( inc ) t->retain();  }
+      :_ptr(t) { if( inc && t != nullptr) t->retain();  }
 
       shared_ptr():_ptr(nullptr){}
 
@@ -42,25 +42,27 @@ namespace fc {
       }
       shared_ptr( shared_ptr& p ) {
         _ptr = p._ptr;
-        if( _ptr ) _ptr->retain();
+        if( _ptr != nullptr ) _ptr->retain();
       }
       shared_ptr( shared_ptr&& p ) {
         _ptr = p._ptr;
         p._ptr = nullptr;
       }
-      ~shared_ptr() { if( _ptr ) { _ptr->release(); } }
+      ~shared_ptr() { if( nullptr != _ptr ) { _ptr->release(); } }
 
-      shared_ptr& reset( T* v = 0, bool inc = false )  {
+      shared_ptr& reset( T* v = nullptr, bool inc = false )  {
         if( v == _ptr ) return *this;
-        if( _ptr ) _ptr->release();
+        if( inc &&  nullptr != v ) v->retain();
+        if( nullptr != _ptr ) _ptr->release();
         _ptr = v;
-        if( _ptr && inc ) _ptr->retain();
         return *this;
       }
 
       shared_ptr& operator=(const shared_ptr& p ) {
-        shared_ptr tmp(p);
-        fc_swap(tmp._ptr,_ptr);
+        if( _ptr == p._ptr ) return *this;
+        if( _ptr != nullptr ) _ptr->release();
+        _ptr = p._ptr;
+        if( _ptr != nullptr ) _ptr->retain();
         return *this;
       }
       shared_ptr& operator=(shared_ptr&& p ) {

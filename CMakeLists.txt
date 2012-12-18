@@ -51,8 +51,7 @@ set( sources
   src/url.cpp
   src/process.cpp
   src/http_connection.cpp
-  src/url.cpp
-#  src/http_server.cpp
+  src/http_server.cpp
   src/json_rpc_connection.cpp
   src/json_rpc_stream_connection.cpp
   src/json_rpc_tcp_connection.cpp

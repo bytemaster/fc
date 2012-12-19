@@ -41,7 +41,7 @@ option( UNITY_BUILD OFF )
 
 FIND_PACKAGE( OpenSSL )
 
-include_directories( vendor/boost/process/include )
+include_directories( vendor/libssh2-1.4.2/include )
 include_directories( ${Boost_INCLUDE_DIR} )
 include_directories( ${OPENSSL_INCLUDE_DIR} )
 include_directories( include )

@@ -68,6 +68,9 @@ namespace fc {
    fc::path path::filename()const {
     return _p->filename();
    }
+   void     path::replace_extension( const fc::path& e ) {
+        _p->replace_extension(e);
+   }
    fc::path path::extension()const {
     return _p->extension();
    }
@@ -95,12 +98,32 @@ namespace fc {
         return *r._p != *l._p;
       }
 
+
+      recursive_directory_iterator::recursive_directory_iterator( const fc::path& p )
+      :_p(p){}
+
+      recursive_directory_iterator::recursive_directory_iterator(){}
+      recursive_directory_iterator::~recursive_directory_iterator(){}
+
+      fc::path            recursive_directory_iterator::operator*()const { return boost::filesystem::path(*(*_p)); }
+      recursive_directory_iterator& recursive_directory_iterator::operator++(int)  { (*_p)++; return *this; }
+      recursive_directory_iterator& recursive_directory_iterator::operator++()     { (*_p)++; return *this; }
+
+      bool operator==( const recursive_directory_iterator& r, const recursive_directory_iterator& l) {
+        return *r._p == *l._p;
+      }
+      bool operator!=( const recursive_directory_iterator& r, const recursive_directory_iterator& l) {
+        return *r._p != *l._p;
+      }
+
+
   bool exists( const path& p ) { return boost::filesystem::exists(p); }
   void create_directories( const path& p ) { boost::filesystem::create_directories(p); }
   bool is_directory( const path& p ) { return boost::filesystem::is_directory(p); }
   bool is_regular_file( const path& p ) { return boost::filesystem::is_regular_file(p); }
   size_t file_size( const path& p ) { return boost::filesystem::file_size(p); }
   void copy( const path& f, const path& t ) { boost::filesystem::copy( boost::filesystem::path(f), boost::filesystem::path(t) ); }
+  void create_hard_link( const path& f, const path& t ) { boost::filesystem::create_hard_link( f, t ); }
   bool remove( const path& f ) { return boost::filesystem::remove( f ); }
   fc::path canonical( const fc::path& p ) { return boost::filesystem::canonical(p); }
   fc::path absolute( const fc::path& p ) { return boost::filesystem::absolute(p); }

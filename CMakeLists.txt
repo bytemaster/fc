@@ -93,7 +93,7 @@ set( sources
 #  src/program_options.cpp
 )
 
-#add_subdirectory(vendor/libssh2-1.4.2)
+add_subdirectory(vendor) #/libssh2-1.4.2)
 
 setup_library( fc SOURCES ${sources} )
 

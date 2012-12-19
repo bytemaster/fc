@@ -100,6 +100,9 @@ namespace fc {
 
         template<typename T>
         value& operator=(  const T& v );
+
+        template<typename T>
+        T cast()const;
 	/*
 	{
 	    slog("operator= %p", this);

@@ -34,7 +34,7 @@ FC_STUB( test, (add)(namep_test)(sub)(sub1)(sub2)(sub3)(sub4)(sub5)(sub6)(sub7)(
 int main( int argc, char** argv ) {
   try {
    slog( "Hello World\n" );
-   fc::value v = std::string("goodbye");
+   fc::value v = fc::string("goodbye");
    slog(".");
    fc::value v2;
    slog("..");
@@ -44,7 +44,7 @@ int main( int argc, char** argv ) {
    slog("...");
    fc::value& b = v2["b"];
    slog( "....");
-   b = std::string("hello");
+   b = fc::string("hello");
    slog(".....");
    return 0;
 

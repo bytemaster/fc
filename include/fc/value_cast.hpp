@@ -312,4 +312,8 @@ namespace fc {
        *this = fc::move(tmp);
        return *this;
     }
+    template<typename T>
+    T value::cast()const {
+        return value_cast<T>(*this);
+    }
 }

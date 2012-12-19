@@ -6,6 +6,7 @@ namespace boost {
   namespace filesystem {
     class path;
     class directory_iterator;
+    class recursive_directory_iterator;
   }
 }
 
@@ -31,6 +32,7 @@ namespace fc {
       operator boost::filesystem::path& ();
       operator const boost::filesystem::path& ()const;
 
+      void       replace_extension( const fc::path& e );
       fc::path   stem()const;
       fc::path   extension()const;
       fc::path   filename()const;
@@ -56,6 +58,21 @@ namespace fc {
     private:
       fwd<boost::filesystem::directory_iterator,16> _p; 
   };
+  class recursive_directory_iterator {
+    public:
+      recursive_directory_iterator( const fc::path& p );
+      recursive_directory_iterator();
+      ~recursive_directory_iterator();
+
+      fc::path            operator*()const;
+      recursive_directory_iterator& operator++(int);
+      recursive_directory_iterator& operator++();
+
+      friend bool operator==( const recursive_directory_iterator&, const recursive_directory_iterator& );
+      friend bool operator!=( const recursive_directory_iterator&, const recursive_directory_iterator& );
+    private:
+      fwd<boost::filesystem::recursive_directory_iterator,16> _p; 
+  };
 
   bool     exists( const path& p );
   bool     is_directory( const path& p );
@@ -66,6 +83,7 @@ namespace fc {
   size_t   file_size( const path& p );
   bool     remove( const path& p );
   void     copy( const path& from, const path& to );
+  void     create_hard_link( const path& from, const path& to );
 
   path     unique_path();
   path     temp_directory_path();

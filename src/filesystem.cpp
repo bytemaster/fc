@@ -5,6 +5,7 @@
 #include <boost/config.hpp>
 #include <boost/filesystem.hpp>
 #include <fc/value_cast.hpp>
+#include <fc/error_report.hpp>
 
 namespace fc {
   void pack( fc::value& v, const fc::path& s ) {
@@ -121,8 +122,19 @@ namespace fc {
   void create_directories( const path& p ) { boost::filesystem::create_directories(p); }
   bool is_directory( const path& p ) { return boost::filesystem::is_directory(p); }
   bool is_regular_file( const path& p ) { return boost::filesystem::is_regular_file(p); }
-  size_t file_size( const path& p ) { return boost::filesystem::file_size(p); }
-  void copy( const path& f, const path& t ) { boost::filesystem::copy( boost::filesystem::path(f), boost::filesystem::path(t) ); }
+  uint64_t file_size( const path& p ) { return boost::filesystem::file_size(p); }
+  void remove_all( const path& p ) { boost::filesystem::remove_all(p); }
+  void copy( const path& f, const path& t ) { 
+     try {
+  	boost::filesystem::copy( boost::filesystem::path(f), boost::filesystem::path(t) ); 
+     } catch ( boost::system::system_error& e ) {
+     	FC_THROW_REPORT( "Copy from ${srcfile} to ${dstfile} failed because ${reason}",
+	         fc::value().set("srcfile",f).set("dstfile",t).set("reason",e.what() ) );
+     } catch ( ... ) {
+     	FC_THROW_REPORT( "Copy from ${srcfile} to ${dstfile} failed",
+	         fc::value().set("srcfile",f).set("dstfile",t).set("inner", fc::except_str() ) );
+     }
+  }
   void create_hard_link( const path& f, const path& t ) { boost::filesystem::create_hard_link( f, t ); }
   bool remove( const path& f ) { return boost::filesystem::remove( f ); }
   fc::path canonical( const fc::path& p ) { return boost::filesystem::canonical(p); }

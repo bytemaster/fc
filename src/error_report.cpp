@@ -107,7 +107,11 @@ fc::string error_frame::to_string()const {
             if( meta ) {
                 auto itr = meta->find( key.c_str() );
                 if( itr != meta->end() ) {
-                   ss << fc::json::to_string( itr->val );
+		   if( itr->val.is_string() ) {
+		     ss<<itr->val.cast<fc::string>();
+		   } else {
+                     ss << fc::json::to_string( itr->val );
+		   }
                 } else {
                    ss << "???";
                 }

@@ -26,6 +26,9 @@ namespace fc {
     }
     return file_name;
   } 
+   boost::mutex& log_mutex() {
+    static boost::mutex* m = new boost::mutex(); return *m;
+   }
 
   #ifdef WIN32 
     #define isatty _isatty

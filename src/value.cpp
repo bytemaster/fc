@@ -2,6 +2,7 @@
 #include <fc/exception.hpp>
 #include <fc/typename.hpp>
 #include <string.h>
+#include <fc/error_report.hpp>
 
 namespace fc {
 
@@ -290,6 +291,9 @@ value& value::operator=( const value& v ){
 bool value::is_null()const {
     return strcmp(gh(holder)->type(), "void") == 0;
 }
+bool value::is_string()const {
+    return strcmp(gh(holder)->type(), "string") == 0;
+}
 
 
 value::object::const_iterator value::find( const char* key )const {
@@ -302,7 +306,7 @@ value::object::const_iterator value::find( const char* key )const {
     }
     return o->val.fields.end();
   }
-  FC_THROW_MSG( "Bad cast of %s to object", gh(holder)->type() );
+  //FC_THROW_MSG( "Bad cast of %s to object", gh(holder)->type() );
   return value::object::const_iterator();
 }
 value::object::const_iterator value::begin()const {
@@ -310,7 +314,7 @@ value::object::const_iterator value::begin()const {
     const detail::value_holder_impl<value::object>* o = static_cast<const detail::value_holder_impl<value::object>*>(gh(holder));
     return o->val.fields.begin();
   }
-  FC_THROW_MSG( "Bad cast of %s to object", gh(holder)->type() );
+ //// FC_THROW_MSG( "Bad cast of %s to object", gh(holder)->type() );
   return value::object::const_iterator();
   //return nullptr; 
 }
@@ -319,7 +323,7 @@ value::object::const_iterator value::end()const {
     const detail::value_holder_impl<value::object>* o = static_cast<const detail::value_holder_impl<value::object>*>(gh(holder));
     return o->val.fields.end();
   }
-  FC_THROW_MSG( "Bad cast of %s to object", gh(holder)->type() );
+  ////FC_THROW_MSG( "Bad cast of %s to object", gh(holder)->type() );
   return value::object::const_iterator();
   //return nullptr; 
 }
@@ -338,7 +342,7 @@ value&       value::operator[]( const char* key ) {
     new (gh(holder)) detail::value_holder_impl<value::object>(value::object());
     return (*this)[key];
   }
-  FC_THROW_MSG( "Bad cast of %s to object", gh(holder)->type() );
+  FC_THROW_REPORT( "Bad cast of ${type} to object", fc::value().set("type",gh(holder)->type()) );
   return *((value*)0);
 }
 value&       value::operator[]( const fc::string& key )      { return (*this)[key.c_str()]; }

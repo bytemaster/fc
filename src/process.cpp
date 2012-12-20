@@ -43,12 +43,13 @@ namespace fc {
         try {
             return static_cast<std::streamsize>(fc::asio::read_some( *m_pi, boost::asio::buffer( s, static_cast<size_t>(n) ) ));
         } catch ( const boost::system::system_error& e ) {
-          wlog( "%s", fc::except_str().c_str() );
+         // wlog( "%s", fc::except_str().c_str() );
           if( e.code() == boost::asio::error::eof ) 
               return -1;
+          wlog( "%s", fc::except_str().c_str() );
           throw;
         } catch ( ... ) {
-          wlog( "%s", fc::except_str().c_str() );
+          //wlog( "%s", fc::except_str().c_str() );
           return -1;
         }
       }
@@ -74,8 +75,7 @@ FC_START_SHARED_IMPL( fc::process )
         inp->close();
       }
       if( _exited.valid() && !_exited.ready()) {
-         slog( "terminate...");
-         child->terminate();
+         //child->terminate();
          _exited.wait();
       }
     }catch(...) {

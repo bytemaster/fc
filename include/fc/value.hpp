@@ -6,9 +6,6 @@
 #include <fc/typename.hpp>
 #include <boost/preprocessor/repetition/enum_params.hpp>
 
-#include <vector>
-#include <iostream>
-
 namespace fc {
     template<BOOST_PP_ENUM_PARAMS(9, typename A)> struct tuple;
 
@@ -30,14 +27,14 @@ namespace fc {
         class key_val;
         class object {
 	  public:
-          typedef std::vector<key_val>::const_iterator const_iterator;
+          typedef fc::vector<key_val>::const_iterator const_iterator;
           //fc::string           type;
-          std::vector<key_val>  fields;
+          fc::vector<key_val>  fields;
         };
         class array {
 	  public:
           array( size_t s = 0 ):fields(s){}
-          std::vector<value>    fields;
+          fc::vector<value>    fields;
         };
 
         struct const_visitor {
@@ -141,6 +138,7 @@ namespace fc {
         /** gets the stored type **/
         const char*  type()const;
         bool         is_null()const;
+        bool         is_string()const;
 
         void         visit( const_visitor&& v )const;
 

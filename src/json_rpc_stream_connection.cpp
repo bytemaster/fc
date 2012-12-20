@@ -55,12 +55,10 @@ namespace fc { namespace json {
 
   rpc_stream_connection::rpc_stream_connection( fc::istream& i, fc::ostream& o )
   :my( new impl(i,o,*this) ){
-  	slog( "%p", this );
   }
   rpc_stream_connection::rpc_stream_connection(){ slog( "%p...",this); }
   rpc_stream_connection::rpc_stream_connection(const rpc_stream_connection& c):my(c.my){ slog( "%p",this); }
   rpc_stream_connection::~rpc_stream_connection(){ 
-    slog( "my %p", my.get() ); 
    }
 
   // the life of the streams must exceed the life of all copies

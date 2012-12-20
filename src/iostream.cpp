@@ -118,7 +118,6 @@ namespace fc {
   }
 
   cin_t::~cin_t() {
-    wlog( "~cin_t" );
     /*
     cin_buffer& b = get_cin_buffer();
     if( b.read_ready ) {

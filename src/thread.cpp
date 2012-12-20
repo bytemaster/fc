@@ -9,9 +9,6 @@ namespace fc {
   void* thread_ptr() {
     return &thread::current();
   }
-   boost::mutex& log_mutex() {
-    static boost::mutex m; return m;
-   }
 
    thread*& current_thread() {
       #ifdef _MSC_VER

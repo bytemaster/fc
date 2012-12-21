@@ -1,0 +1,2 @@
+/opt/local/bin/ar cr libsigar.a  CMakeFiles/sigar.dir/src/os/darwin/darwin_sigar.c.o CMakeFiles/sigar.dir/src/sigar.c.o CMakeFiles/sigar.dir/src/sigar_cache.c.o CMakeFiles/sigar.dir/src/sigar_fileinfo.c.o CMakeFiles/sigar.dir/src/sigar_format.c.o CMakeFiles/sigar.dir/src/sigar_getline.c.o CMakeFiles/sigar.dir/src/sigar_ptql.c.o CMakeFiles/sigar.dir/src/sigar_signal.c.o CMakeFiles/sigar.dir/src/sigar_util.c.o CMakeFiles/sigar.dir/src/sigar_version_autoconf.c.o
+/opt/local/bin/ranlib libsigar.a

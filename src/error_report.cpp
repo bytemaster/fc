@@ -139,7 +139,7 @@ fc::string error_report::to_string()const {
 }
 fc::string error_report::to_detail_string()const {
   fc::stringstream ss;
-  for( int i = 0; i < stack.size(); ++i ) {
+  for( uint32_t i = 0; i < stack.size(); ++i ) {
     ss << stack[i].to_detail_string() << "\n";
   }
   return ss.str();

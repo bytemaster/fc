@@ -4,13 +4,28 @@
 #include <fc/asio.hpp>
 #include <fc/filesystem.hpp>
 #include <fc/vector.hpp>
-#include <boost/process.hpp>
+#include <fc/error_report.hpp>
+#include <fc/value.hpp>
+#include <boost/process/all.hpp>
 #include <boost/iostreams/stream.hpp>
+#include <cstdlib>
 
 namespace fc {
-
   namespace bp = boost::process;
   namespace io = boost::iostreams;
+
+  fc::path find_executable_in_path( const fc::string name ) {
+    try {
+      return fc::string(bp::find_executable_in_path( std::string(name), "" ));
+    } catch (...) {
+      const char* p = std::getenv("PATH");
+      FC_THROW_REPORT( "Unable to find executable ${exe} in path.", 
+        fc::value().set("exe", name)
+                   .set("inner", fc::except_str() )
+                   .set("PATH", fc::string(p!=nullptr?p:"") ) );
+    }
+    return fc::path();
+  }
 
   class process_sink : public io::sink {
     public:

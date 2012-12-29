@@ -81,6 +81,8 @@ namespace fc {
    fc::path path::parent_path()const {
     return _p->parent_path();
    }
+  bool path::is_relative()const { return _p->is_relative(); }
+  bool path::is_absolute()const { return _p->is_absolute(); }
 
       directory_iterator::directory_iterator( const fc::path& p )
       :_p(p){}
@@ -119,7 +121,13 @@ namespace fc {
 
 
   bool exists( const path& p ) { return boost::filesystem::exists(p); }
-  void create_directories( const path& p ) { boost::filesystem::create_directories(p); }
+  void create_directories( const path& p ) { 
+    try {
+        boost::filesystem::create_directories(p); 
+    } catch ( ... ) {
+      FC_THROW_REPORT( "Unable to create directories ${path}", fc::value().set("path", p ).set("inner", fc::except_str() ) );
+    }
+  }
   bool is_directory( const path& p ) { return boost::filesystem::is_directory(p); }
   bool is_regular_file( const path& p ) { return boost::filesystem::is_regular_file(p); }
   uint64_t file_size( const path& p ) { return boost::filesystem::file_size(p); }

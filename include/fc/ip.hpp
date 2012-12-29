@@ -35,7 +35,6 @@ namespace fc {
         friend bool operator==( const endpoint& a, const endpoint& b );
     
       private:
-        address  _ip;
         /**
          *  The compiler pads endpoint to a full 8 bytes, so while
          *  a port number is limited in range to 16 bits, we specify
@@ -44,6 +43,7 @@ namespace fc {
          *  where they are stored.
          */
         uint32_t _port; 
+        address  _ip;
     };
   }
   class value;

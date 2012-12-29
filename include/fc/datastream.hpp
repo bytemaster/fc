@@ -21,7 +21,7 @@ struct datastream {
       
       inline void skip( size_t s ){ m_pos += s; }
       inline bool read( char* d, size_t s ) {
-        if( m_end - m_pos >= (size_t)s ) {
+        if( size_t(m_end - m_pos) >= (size_t)s ) {
           memcpy( d, m_pos, s );
           m_pos += s;
           return true;

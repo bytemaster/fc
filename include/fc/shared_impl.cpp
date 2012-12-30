@@ -14,8 +14,8 @@ shared_impl<T>::shared_impl( U&& u ):_impl(fc::forward<U>(u)){}
 
 template<typename T>
 shared_impl<T>::shared_impl( const shared_impl<T>& u ):_impl(u._impl){}
-template<typename T>
-shared_impl<T>::shared_impl( shared_impl<T>& u ):_impl(u._impl){}
+//template<typename T>
+//shared_impl<T>::shared_impl( shared_impl<T>& u ):_impl(u._impl){}
 
 template<typename T>
 shared_impl<T>::shared_impl( shared_impl<T>&& u ):_impl(fc::move(u._impl)){}
@@ -56,8 +56,6 @@ TYPE::TYPE( TYPE* c )\
 TYPE::TYPE( TYPE&& c )\
 :my(fc::move(c.my)){}\
 TYPE::TYPE( const TYPE& c )\
-:my(c.my){}\
-TYPE::TYPE( TYPE& c )\
 :my(c.my){}\
 TYPE::TYPE() \
 :my( new fc::shared_impl<TYPE>::impl( ) ){}\

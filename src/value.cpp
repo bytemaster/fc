@@ -2,6 +2,7 @@
 #include <fc/exception.hpp>
 #include <fc/typename.hpp>
 #include <string.h>
+#include <fc/error_report.hpp>
 
 namespace fc {
 
@@ -32,6 +33,9 @@ namespace fc {
       template<typename T>
       struct value_holder_impl : value_holder {
         static_assert( !fc::is_class<T>::value, "only fundamental types can be stored without specialization" );
+	value_holder_impl(){
+        	static_assert( sizeof(value_holder_impl) <= 40, "Validate size" );
+	}
         virtual const char* type()const             { return fc::get_typename<T>::name(); }
         virtual void visit( value::const_visitor&& v )const{ v(val); }
         virtual void visit( value_visitor&& v )           { v(val); }
@@ -53,14 +57,12 @@ namespace fc {
         virtual void visit( value::const_visitor&& v )const{ v(); }
         virtual void visit( value_visitor&& v )           { v(); }
        // typedef void_t T;
-      /*
-        virtual const char* type()const             { return "void"; }
-        virtual void clear()                        {  }
-        virtual size_t size()const                  { return 0; }
+      //  virtual const char* type()const             { return "void"; }
+      //  virtual void clear()                        {  }
+       // virtual size_t size()const                  { return 0; }
       
-        virtual value_holder* move_helper( char* c ){ return new(c) value_holder_impl(); }
-        virtual value_holder* copy_helper( char* c )const{ return new(c) value_holder_impl();}
-        */
+        virtual value_holder* move_helper( char* c ){ return new(c) value_holder_impl<void>(); }
+        virtual value_holder* copy_helper( char* c )const{ return new(c) value_holder_impl<void>();}
       };
       
       
@@ -68,7 +70,9 @@ namespace fc {
       template<>
       struct value_holder_impl<fc::string> : value_holder {
         template<typename V>
-        value_holder_impl( V&& v ):val( fc::forward<V>(v) ){}
+        value_holder_impl( V&& v ):val( fc::forward<V>(v) ){
+        	static_assert( sizeof(value_holder_impl<fc::string>) <= 40, "Validate size" );
+	}
       
         virtual const char* type()const              { return "string"; }
         virtual void visit( value::const_visitor&& v )const { v(val); }
@@ -124,12 +128,17 @@ namespace fc {
         
         value::array val; 
       };
+      static_assert( sizeof( value_holder_impl<value::object> ) <= 40, "sanity check" );
+      static_assert( sizeof( value_holder_impl<value::array> ) <= 40, "sanity check" );
 
       value_holder::~value_holder(){}
       const char* value_holder::type()const  { return "void"; }
-      value_holder* value_holder::move_helper( char* c )      { return new(c) value_holder(); }
-      value_holder* value_holder::copy_helper( char* c )const { return new(c) value_holder(); }
+      value_holder* value_holder::move_helper( char* c )      { return new(c) value_holder_impl<void>(); }
+      value_holder* value_holder::copy_helper( char* c )const { return new(c) value_holder_impl<void>(); }
 
+      void new_value_holder_void( value* v ) {
+      	new (v) value_holder_impl<void>();
+      }
 
       void value_holder::clear()                             {}
       size_t value_holder::size()const                       { return 0; }
@@ -150,7 +159,7 @@ namespace fc {
       value_holder* value_holder_impl<value::array>::copy_helper( char* c )const{ return new(c) value_holder_impl(val);              }
 
       void value_holder_impl<value::array>::clear()                        { val.fields.clear();        }
-      size_t value_holder_impl<value::array>::size()const                  { return val.fields.size();  }
+      size_t value_holder_impl<value::array>::size()const                  { return static_cast<size_t>(val.fields.size());  }
       void value_holder_impl<value::array>::visit( value::const_visitor&& v )const { v(val); }
       void value_holder_impl<value::array>::visit( value_visitor&& v )            { v(val); }
       void value_holder_impl<value::array>::push_back( value&& v )          { val.fields.push_back( fc::move(v) ); }
@@ -158,19 +167,19 @@ namespace fc {
 
       void value_holder_impl<value::object>::visit( value::const_visitor&& v )const { v(val); }
       void value_holder_impl<value::object>::visit( value_visitor&& v )            { v(val); }
-      value_holder* value_holder_impl<value::object>::move_helper( char* c ) { return new(c) value_holder_impl( fc::move(val) ); }
-      value_holder* value_holder_impl<value::object>::copy_helper( char* c )const { return new(c) value_holder_impl(val);              }
+      value_holder* value_holder_impl<value::object>::move_helper( char* c ) { return new(c) value_holder_impl<value::object>( fc::move(val) ); }
+      value_holder* value_holder_impl<value::object>::copy_helper( char* c )const { return new(c) value_holder_impl<value::object>(val);              }
       void value_holder_impl<value::object>::reserve( size_t s )             { val.fields.reserve(s); }
 
       void value_holder_impl<value::object>::clear()                         { val = value::object(); }
       size_t value_holder_impl<value::object>::size()const                   { return val.fields.size();  }
   } // namespace detail
 
-static detail::value_holder* gh( aligned<24>& h ) {
+static detail::value_holder* gh( aligned<40>& h ) {
   return (detail::value_holder*)h._store._data;
 }
-static const detail::value_holder* gh( const aligned<24>& h ) {
-  return (const detail::value_holder*)&h._store._data;
+static const detail::value_holder* gh( const aligned<40>& h ) {
+  return (const detail::value_holder*)h._store._data;
 }
   
 value::value() {
@@ -224,12 +233,15 @@ value::value( bool v){
   new (holder) detail::value_holder_impl<bool>(v);
 }
 value::value( fc::string&& v){
+  static_assert( sizeof(holder) >= sizeof( detail::value_holder_impl<fc::string> ), "size check" );
   new (holder) detail::value_holder_impl<fc::string>(fc::move(v));
 }
 value::value( fc::string& v){
+  static_assert( sizeof(holder) >= sizeof( detail::value_holder_impl<fc::string> ), "size check" );
   new (holder) detail::value_holder_impl<fc::string>(v);
 }
 value::value( const fc::string& v){
+  static_assert( sizeof(holder) >= sizeof( detail::value_holder_impl<fc::string> ), "size check" );
   new (holder) detail::value_holder_impl<fc::string>(v);
 }
 value::value( value::object&& o ){
@@ -276,14 +288,11 @@ value& value::operator=( const value& v ){
   gh(v.holder)->copy_helper(holder);
   return *this;
 }
-value& value::operator=( value& v ){
-  if( this == &v ) return *this;
-  gh(holder)->~value_holder();
-  gh(v.holder)->copy_helper(holder);
-  return *this;
-}
 bool value::is_null()const {
     return strcmp(gh(holder)->type(), "void") == 0;
+}
+bool value::is_string()const {
+    return strcmp(gh(holder)->type(), "string") == 0;
 }
 
 
@@ -297,40 +306,43 @@ value::object::const_iterator value::find( const char* key )const {
     }
     return o->val.fields.end();
   }
-  FC_THROW_MSG( "Bad cast of %s to object", gh(holder)->type() );
-  return nullptr; 
+  //FC_THROW_MSG( "Bad cast of %s to object", gh(holder)->type() );
+  return value::object::const_iterator();
 }
 value::object::const_iterator value::begin()const {
   if( strcmp(gh(holder)->type(), "object") == 0 ) {
     const detail::value_holder_impl<value::object>* o = static_cast<const detail::value_holder_impl<value::object>*>(gh(holder));
     return o->val.fields.begin();
   }
-  FC_THROW_MSG( "Bad cast of %s to object", gh(holder)->type() );
-  return nullptr; 
+ //// FC_THROW_MSG( "Bad cast of %s to object", gh(holder)->type() );
+  return value::object::const_iterator();
+  //return nullptr; 
 }
 value::object::const_iterator value::end()const {
   if( strcmp(gh(holder)->type(), "object" ) == 0 ) {
     const detail::value_holder_impl<value::object>* o = static_cast<const detail::value_holder_impl<value::object>*>(gh(holder));
     return o->val.fields.end();
   }
-  FC_THROW_MSG( "Bad cast of %s to object", gh(holder)->type() );
-  return nullptr; 
+  ////FC_THROW_MSG( "Bad cast of %s to object", gh(holder)->type() );
+  return value::object::const_iterator();
+  //return nullptr; 
 }
 value&       value::operator[]( const char* key ) {
   if( strcmp(gh(holder)->type(), "object") == 0) {
-    detail::value_holder_impl<value::object>* o = static_cast<detail::value_holder_impl<value::object>*>(gh(holder));
+    detail::value_holder_impl<value::object>* o = dynamic_cast<detail::value_holder_impl<value::object>*>(gh(holder));
     for( auto i  = o->val.fields.begin();
               i != o->val.fields.end(); ++i ) {
       if( strcmp( i->key.c_str(), key ) == 0 )
         return i->val;
     }
+    o->val.fields.reserve(o->val.fields.size()+1);
     o->val.fields.push_back( key_val(key) );
     return o->val.fields.back().val;
   } else if (strcmp(gh(holder)->type(), "void" ) == 0 ) {
-    new (holder) detail::value_holder_impl<value::object>(value::object());
+    new (gh(holder)) detail::value_holder_impl<value::object>(value::object());
     return (*this)[key];
   }
-  FC_THROW_MSG( "Bad cast of %s to object", gh(holder)->type() );
+  FC_THROW_REPORT( "Bad cast of ${type} to object", fc::value().set("type",gh(holder)->type()) );
   return *((value*)0);
 }
 value&       value::operator[]( const fc::string& key )      { return (*this)[key.c_str()]; }

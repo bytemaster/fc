@@ -1,5 +1,4 @@
-#ifndef _FC_IP_HPP_
-#define _FC_IP_HPP_
+#pragma once
 #include <fc/string.hpp>
 
 namespace fc {
@@ -36,7 +35,6 @@ namespace fc {
         friend bool operator==( const endpoint& a, const endpoint& b );
     
       private:
-        address  _ip;
         /**
          *  The compiler pads endpoint to a full 8 bytes, so while
          *  a port number is limited in range to 16 bits, we specify
@@ -45,7 +43,10 @@ namespace fc {
          *  where they are stored.
          */
         uint32_t _port; 
+        address  _ip;
     };
   }
+  class value;
+  void pack( fc::value& , const fc::ip::endpoint&  );
+  void unpack( const fc::value& , fc::ip::endpoint&  );
 }
-#endif // _FC_ENDPOINT_HPP_

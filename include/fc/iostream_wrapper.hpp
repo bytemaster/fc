@@ -103,7 +103,7 @@ namespace fc {
       struct impl : public impl_base {
           impl(T& i):st(i){}
 
-          virtual size_t readsome( char* buf, size_t len ) { return st.readsome(buf,len); }
+          virtual size_t readsome( char* buf, size_t len ) { return size_t(st.readsome(buf,len)); }
           virtual void read( char* buf, size_t len ) {
             st.read(buf,len);
           }

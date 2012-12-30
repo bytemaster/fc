@@ -1,5 +1,4 @@
-#ifndef _TORNET_RPC_RAW_HPP_
-#define _TORNET_RPC_RAW_HPP_
+#pragma once
 #include <fc/reflect.hpp>
 #include <fc/datastream.hpp>
 #include <fc/varint.hpp>
@@ -7,7 +6,6 @@
 #include <fc/vector.hpp>
 #include <fc/fwd.hpp>
 #include <fc/array.hpp>
-//#include <fc/value.hpp>
 
 namespace fc { 
     class value; 
@@ -248,7 +246,7 @@ namespace fc {
       raw::pack(ps,v );
       fc::vector<char> vec(ps.tellp());
       if( vec.size() ) {
-        datastream<char*>  ds( vec.data(), vec.size() ); 
+        datastream<char*>  ds( vec.data(), size_t(vec.size()) ); 
         raw::pack(ds,v);
       }
       return vec;
@@ -258,7 +256,7 @@ namespace fc {
     inline T unpack( const fc::vector<char>& s ) {
       T tmp;
       if( s.size() ) {
-        datastream<const char*>  ds( s.data(), s.size() ); 
+        datastream<const char*>  ds( s.data(), size_t(s.size()) ); 
         raw::unpack(ds,tmp);
       }
       return tmp;
@@ -280,4 +278,3 @@ namespace fc {
     
 } } // namespace fc::raw
 
-#endif // BOOST_RPC_RAW_HPP

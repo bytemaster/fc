@@ -1,13 +1,15 @@
 #pragma once
 #include <fc/shared_impl.hpp>
 #include <fc/future.hpp>
+#include <fc/string.hpp>
 
 namespace fc {
   class istream;
   class ostream;
   class path;
-  class string;
   template<typename> class vector;
+
+  fc::path find_executable_in_path( const fc::string name );
 
   /**
    *  @brief start and manage an external process
@@ -23,6 +25,7 @@ namespace fc {
         open_stderr = 0x04,
         open_all    = open_stdin|open_stdout|open_stderr,
       };
+
       /**
        *  Return a new process executing the specified exe with the specified args.
        */

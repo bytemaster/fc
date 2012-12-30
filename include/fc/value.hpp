@@ -3,6 +3,7 @@
 #include <fc/string.hpp>
 #include <fc/vector.hpp>
 #include <fc/aligned.hpp>
+#include <fc/typename.hpp>
 #include <boost/preprocessor/repetition/enum_params.hpp>
 
 namespace fc {
@@ -23,15 +24,16 @@ namespace fc {
      */
     class value {
       public:
-        struct key_val;
-        struct object {
+        class key_val;
+        class object {
+	  public:
           typedef fc::vector<key_val>::const_iterator const_iterator;
           //fc::string           type;
           fc::vector<key_val>  fields;
         };
-        struct array {
+        class array {
+	  public:
           array( size_t s = 0 ):fields(s){}
-          //fc::string           type;
           fc::vector<value>    fields;
         };
 
@@ -85,21 +87,31 @@ namespace fc {
 
         value& operator=( value&& v );
         value& operator=( const value& v );
-        value& operator=( value& v );
 
 
         /**
          *  Include fc/value_cast.hpp for implementation
          */
         template<typename T>
-        explicit value( T&& v );
+        explicit value( const T& v );
 
         template<typename T>
-        value& operator=( T&& v ) {
-          value tmp(fc::forward<T>(v) );
-          fc_swap(*this,tmp);
-          return *this;
+        value& operator=(  const T& v );
+
+        template<typename T>
+        T cast()const;
+	/*
+	{
+	    slog("operator= %p", this);
+	    value tmp(fc::forward<T>(v));
+	    slog( "swap...tmp %p this %p", &tmp, this );
+    T tmp = fc::move(a);
+    a = fc::move(b);
+    b = fc::move(tmp);
+	    slog( "return" );
+	    return *this;
         }
+	*/
 
         /** used to iterate over object fields, use array index + size to iterate over array */
         object::const_iterator find( const char* key )const;
@@ -126,6 +138,7 @@ namespace fc {
         /** gets the stored type **/
         const char*  type()const;
         bool         is_null()const;
+        bool         is_string()const;
 
         void         visit( const_visitor&& v )const;
 
@@ -145,30 +158,45 @@ namespace fc {
         template<typename T>
         friend T value_cast( const value& v );
 
-        aligned<24> holder;
+        aligned<40> holder;
     };
     bool operator == ( const value& v, std::nullptr_t );
     bool operator != ( const value& v, std::nullptr_t );
 
-    struct value::key_val {
+    class value::key_val {
+       public:
        key_val(){};
        
-       key_val( fc::string k, value v = value())
-       :key(fc::move(k)),val(fc::move(v)){}
+       key_val( fc::string k )
+       :key(fc::move(k)){}
+
+     //  key_val( fc::string k, value v )
+     //  :key(fc::move(k)),val(fc::move(v)){
+      // slog("key_val(key,val)");}
+
+       key_val( const fc::string& k, const value& v )
+       :key(k),val(v){}
        
        key_val( key_val&& m )
-       :key(fc::move(m.key)),val(fc::move(m.val)){}
+       :key(fc::move(m.key)),val(fc::move(m.val)){ }
        
        key_val( const key_val& m )
        :key(m.key),val(m.val){}
+
+       ~key_val(){ }
        
        key_val& operator=( key_val&& k ) {
-         key = fc::move(k.key);
-         val = fc::move(k.val);
+         slog( "swap key");
+         fc_swap( key, k.key );
+         slog( "swap val");
+	 fc_swap( val, k.val );
          return *this;
        }
+
        key_val& operator=( const key_val& k ) {
+         slog( "copy key");
          key = k.key;
+         slog( "copy val");
          val = k.val;
          return *this;
        }

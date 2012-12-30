@@ -1,5 +1,4 @@
-#ifndef _FC_LOG_HPP_
-#define _FC_LOG_HPP_
+#pragma once
 #include <fc/utility.hpp>
 
 namespace boost { class mutex; }
@@ -30,4 +29,3 @@ namespace fc {
 #define elog(...) do { fc::log(  CONSOLE_RED,     __FILE__, __LINE__, __func__,  __VA_ARGS__ ); }while(false)
 
 
-#endif // _FC_LOG_HPP_

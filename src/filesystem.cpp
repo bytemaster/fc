@@ -1,9 +1,19 @@
+//#define BOOST_NO_SCOPED_ENUMS
 #include <fc/filesystem.hpp>
 #include <fc/fwd_impl.hpp>
 #include <fc/utility.hpp>
+#include <boost/config.hpp>
 #include <boost/filesystem.hpp>
+#include <fc/value_cast.hpp>
+#include <fc/error_report.hpp>
 
 namespace fc {
+  void pack( fc::value& v, const fc::path& s ) {
+      v = s.generic_string();
+  }
+  void unpack( const fc::value& v, fc::path& s ) {
+      s = path(fc::value_cast<fc::string>(v));
+  }
 
    path::path(){}
    path::~path(){};
@@ -59,6 +69,9 @@ namespace fc {
    fc::path path::filename()const {
     return _p->filename();
    }
+   void     path::replace_extension( const fc::path& e ) {
+        _p->replace_extension(e);
+   }
    fc::path path::extension()const {
     return _p->extension();
    }
@@ -68,6 +81,8 @@ namespace fc {
    fc::path path::parent_path()const {
     return _p->parent_path();
    }
+  bool path::is_relative()const { return _p->is_relative(); }
+  bool path::is_absolute()const { return _p->is_absolute(); }
 
       directory_iterator::directory_iterator( const fc::path& p )
       :_p(p){}
@@ -86,12 +101,49 @@ namespace fc {
         return *r._p != *l._p;
       }
 
+
+      recursive_directory_iterator::recursive_directory_iterator( const fc::path& p )
+      :_p(p){}
+
+      recursive_directory_iterator::recursive_directory_iterator(){}
+      recursive_directory_iterator::~recursive_directory_iterator(){}
+
+      fc::path            recursive_directory_iterator::operator*()const { return boost::filesystem::path(*(*_p)); }
+      recursive_directory_iterator& recursive_directory_iterator::operator++(int)  { (*_p)++; return *this; }
+      recursive_directory_iterator& recursive_directory_iterator::operator++()     { (*_p)++; return *this; }
+
+      bool operator==( const recursive_directory_iterator& r, const recursive_directory_iterator& l) {
+        return *r._p == *l._p;
+      }
+      bool operator!=( const recursive_directory_iterator& r, const recursive_directory_iterator& l) {
+        return *r._p != *l._p;
+      }
+
+
   bool exists( const path& p ) { return boost::filesystem::exists(p); }
-  void create_directories( const path& p ) { boost::filesystem::create_directories(p); }
+  void create_directories( const path& p ) { 
+    try {
+        boost::filesystem::create_directories(p); 
+    } catch ( ... ) {
+      FC_THROW_REPORT( "Unable to create directories ${path}", fc::value().set("path", p ).set("inner", fc::except_str() ) );
+    }
+  }
   bool is_directory( const path& p ) { return boost::filesystem::is_directory(p); }
   bool is_regular_file( const path& p ) { return boost::filesystem::is_regular_file(p); }
   uint64_t file_size( const path& p ) { return boost::filesystem::file_size(p); }
-  void copy( const path& f, const path& t ) { boost::filesystem::copy( f, t ); }
+  void remove_all( const path& p ) { boost::filesystem::remove_all(p); }
+  void copy( const path& f, const path& t ) { 
+     try {
+  	boost::filesystem::copy( boost::filesystem::path(f), boost::filesystem::path(t) ); 
+     } catch ( boost::system::system_error& e ) {
+     	FC_THROW_REPORT( "Copy from ${srcfile} to ${dstfile} failed because ${reason}",
+	         fc::value().set("srcfile",f).set("dstfile",t).set("reason",e.what() ) );
+     } catch ( ... ) {
+     	FC_THROW_REPORT( "Copy from ${srcfile} to ${dstfile} failed",
+	         fc::value().set("srcfile",f).set("dstfile",t).set("inner", fc::except_str() ) );
+     }
+  }
+  void create_hard_link( const path& f, const path& t ) { boost::filesystem::create_hard_link( f, t ); }
   bool remove( const path& f ) { return boost::filesystem::remove( f ); }
   fc::path canonical( const fc::path& p ) { return boost::filesystem::canonical(p); }
   fc::path absolute( const fc::path& p ) { return boost::filesystem::absolute(p); }

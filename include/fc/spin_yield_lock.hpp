@@ -1,5 +1,4 @@
-#ifndef _FC_SPIN_YIELD_LOCK_HPP_
-#define _FC_SPIN_YIELD_LOCK_HPP_
+#pragma once
 
 namespace boost {
   template<typename T> class atomic;
@@ -38,4 +37,3 @@ namespace fc {
 
 } // namespace fc
 
-#endif // _FC_SPIN_YIELD_LOCK_HPP_

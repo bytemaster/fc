@@ -83,12 +83,12 @@ fc::string error_frame::to_detail_string()const {
 }
 fc::string error_frame::to_string()const {
     fc::stringstream ss;
-    int64_t prev = 0;
+    size_t prev = 0;
     auto next = desc.find( '$' );
-    while( prev != int64_t(fc::string::npos) && prev < int64_t(desc.size()) ) {
+    while( prev != size_t(fc::string::npos) && prev < size_t(desc.size()) ) {
    //   slog( "prev: %d next %d   %s", prev, next, desc.substr(prev,next).c_str() );
       // print everything from the last pos until the first '$'
-      ss << desc.substr( prev, next-prev );
+      ss << desc.substr( prev, size_t(next-prev) );
 
       // if we got to the end, return it.
       if( next == string::npos ) { return ss.str(); }
@@ -107,7 +107,11 @@ fc::string error_frame::to_string()const {
             if( meta ) {
                 auto itr = meta->find( key.c_str() );
                 if( itr != meta->end() ) {
-                   ss << fc::json::to_string( itr->val );
+		   if( itr->val.is_string() ) {
+		     ss<<itr->val.cast<fc::string>();
+		   } else {
+                     ss << fc::json::to_string( itr->val );
+		   }
                 } else {
                    ss << "???";
                 }
@@ -128,14 +132,14 @@ fc::string error_frame::to_string()const {
 }
 fc::string error_report::to_string()const {
   fc::stringstream ss;
-  for( int i = 0; i < stack.size(); ++i ) {
+  for( uint32_t i = 0; i < stack.size(); ++i ) {
     ss << stack[i].to_string() << "\n";
   }
   return ss.str();
 }
 fc::string error_report::to_detail_string()const {
   fc::stringstream ss;
-  for( int i = 0; i < stack.size(); ++i ) {
+  for( uint32_t i = 0; i < stack.size(); ++i ) {
     ss << stack[i].to_detail_string() << "\n";
   }
   return ss.str();

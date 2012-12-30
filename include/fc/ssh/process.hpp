@@ -6,7 +6,6 @@ namespace fc {
 
   class istream;
   class ostream;
-  class string;
 
   namespace ssh {
 

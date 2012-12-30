@@ -19,6 +19,7 @@ namespace fc {
     inline uint64_t to_uint64( uint64_t d ) { return d; }
 
     fc::string to_string( double d   );
+    fc::string to_string( size_t d   );
     fc::string to_string( uint64_t d );
     fc::string to_string( uint32_t d  );
     fc::string to_string( uint16_t d  );

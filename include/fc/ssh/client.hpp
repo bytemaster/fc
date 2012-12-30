@@ -37,7 +37,7 @@ namespace fc {
   struct file_attrib {
     file_attrib();
 
-    size_t   size;
+    uint64_t size;
     uint32_t uid;
     uint32_t gid;
     uint32_t permissions;

@@ -75,7 +75,7 @@ namespace fc {
          virtual void operator()( const float& v       ){ m_out = fc::lexical_cast<fc::string>(v); }
          virtual void operator()( const double& v      ){ m_out = fc::lexical_cast<fc::string>(v); }
          virtual void operator()( const bool& v        ){ m_out = v != 0 ? "true" : "false";       }
-         virtual void operator()( const fc::string& v ){ m_out = v;                                }
+         virtual void operator()( const fc::string& v ) { m_out = v;                               }
          virtual void operator()( const value::object&  )      { FC_THROW_MSG("bad cast"); }
          virtual void operator()( const value::array&  )       { FC_THROW_MSG("bad cast"); }
          virtual void operator()( )                     { FC_THROW_MSG("bad cast");        }
@@ -274,6 +274,7 @@ namespace fc {
          virtual value_holder* copy_helper( char* c )const;
        };
 
+       void new_value_holder_void( value* v );
     } // namespace detail
 
 
@@ -300,9 +301,19 @@ namespace fc {
     }
 
     template<typename T>
-    value::value( T&& v ) {
-      new (holder) detail::value_holder(); 
-      fc::pack( *this, fc::forward<T>(v) );
+    value::value( const T& v ) {
+      detail::new_value_holder_void(this);
+      fc::pack( *this, v);
     }
-
+    template<typename T>
+    value& value::operator=(  const T& v ) {
+       this->~value();
+       value tmp(v);
+       *this = fc::move(tmp);
+       return *this;
+    }
+    template<typename T>
+    T value::cast()const {
+        return value_cast<T>(*this);
+    }
 }

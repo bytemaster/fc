@@ -1,7 +1,7 @@
-#ifndef FC_PKE_HPP_
-#define FC_PKE_HPP_
+#pragma once
 #include <fc/sha1.hpp>
 #include <fc/vector.hpp>
+#include <fc/reflect.hpp>
 
 /**
  *  Define common crypto methods and data types to abstract underlying implementation.  
@@ -143,7 +143,13 @@ namespace fc {
   typedef private_key<> private_key_t;
   typedef signature<>   signature_t;
 
+  class value;
+  void pack( fc::value& , const fc::signature_t&  );
+  void unpack( const fc::value& , fc::signature_t&  );
+  void pack( fc::value& , const fc::public_key_t&  );
+  void unpack( const fc::value& , fc::private_key_t&  );
+  void pack( fc::value& , const fc::private_key_t&  );
+  void unpack( const fc::value& , fc::public_key_t&  );
 } // namespace fc
 
 
-#endif

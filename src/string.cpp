@@ -12,8 +12,8 @@ namespace fc  {
 
   string::string(const char* s, int l) :my(s,l){ }
   string::string(){}
-  string::string( const string& c ):my(c.my) { }
-  string::string( string&& m ):my(fc::move(m.my)) {}
+  string::string( const fc::string& c ):my(*c.my) { }
+  string::string( string&& m ):my(fc::move(*m.my)) {}
   string::string( const char* c ):my(c){}
   string::string( const_iterator b, const_iterator e ):my(b,e){}
   string::string( const std::string& s ):my(s) {}
@@ -27,16 +27,18 @@ namespace fc  {
   string::const_iterator string::begin()const { return my->c_str(); }
   string::const_iterator string::end()const   { return my->c_str() + my->size(); }
 
-  char&       string::operator[](uint64_t idx)      { return (*my)[idx]; }
-  const char& string::operator[](uint64_t idx)const { return (*my)[idx]; }
+  char&       string::operator[](size_t idx)      { return (*my)[idx]; }
+  const char& string::operator[](size_t idx)const { return (*my)[idx]; }
 
-  void       string::reserve(uint64_t r)           { my->reserve(r); }
-  uint64_t   string::size()const                   { return my->size(); }
-  uint64_t   string::find(char c, uint64_t p)const { return my->find(c,p); }
+  void       string::reserve(size_t r)           { my->reserve(r); }
+  size_t   string::size()const                   { return my->size(); }
+  size_t   string::find(char c, size_t p)const { return my->find(c,p); }
+  size_t   string::rfind(char c, size_t p)const { return my->rfind(c,p); }
+  size_t   string::rfind(const fc::string& c, size_t p)const { return my->rfind(c,p); }
   void       string::clear()                       { my->clear(); }
-  void       string::resize( uint64_t s )          { my->resize(s); }
+  void       string::resize( size_t s )          { my->resize(s); }
                                             
-  fc::string string::substr( int32_t start, int32_t len )const { return my->substr(start,len); }
+  fc::string string::substr( size_t start, size_t len )const { return my->substr(start,len); }
   const char* string::c_str()const                        { return my->c_str(); }
 
   bool    string::operator == ( const char* s )const   { return *my == s; }

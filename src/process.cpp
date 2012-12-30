@@ -4,13 +4,28 @@
 #include <fc/asio.hpp>
 #include <fc/filesystem.hpp>
 #include <fc/vector.hpp>
-#include <boost/process.hpp>
+#include <fc/error_report.hpp>
+#include <fc/value.hpp>
+#include <boost/process/all.hpp>
 #include <boost/iostreams/stream.hpp>
+#include <cstdlib>
 
 namespace fc {
-
   namespace bp = boost::process;
   namespace io = boost::iostreams;
+
+  fc::path find_executable_in_path( const fc::string name ) {
+    try {
+      return fc::string(bp::find_executable_in_path( std::string(name), "" ));
+    } catch (...) {
+      const char* p = std::getenv("PATH");
+      FC_THROW_REPORT( "Unable to find executable ${exe} in path.", 
+        fc::value().set("exe", name)
+                   .set("inner", fc::except_str() )
+                   .set("PATH", fc::string(p!=nullptr?p:"") ) );
+    }
+    return fc::path();
+  }
 
   class process_sink : public io::sink {
     public:
@@ -43,12 +58,13 @@ namespace fc {
         try {
             return static_cast<std::streamsize>(fc::asio::read_some( *m_pi, boost::asio::buffer( s, static_cast<size_t>(n) ) ));
         } catch ( const boost::system::system_error& e ) {
-          wlog( "%s", fc::except_str().c_str() );
+         // wlog( "%s", fc::except_str().c_str() );
           if( e.code() == boost::asio::error::eof ) 
               return -1;
+          wlog( "%s", fc::except_str().c_str() );
           throw;
         } catch ( ... ) {
-          wlog( "%s", fc::except_str().c_str() );
+          //wlog( "%s", fc::except_str().c_str() );
           return -1;
         }
       }
@@ -74,8 +90,7 @@ FC_START_SHARED_IMPL( fc::process )
         inp->close();
       }
       if( _exited.valid() && !_exited.ready()) {
-         slog( "terminate...");
-         child->terminate();
+         //child->terminate();
          _exited.wait();
       }
     }catch(...) {
@@ -132,7 +147,7 @@ fc::future<int> process::exec( const fc::path& exe, fc::vector<fc::string>&& arg
       my->pctx.streams[boost::process::stdin_id]  = bp::behavior::close();
 
   std::vector<std::string> a;
-  a.reserve(args.size());
+  a.reserve(size_t(args.size()));
   for( uint32_t i = 0; i < args.size(); ++i ) {
     a.push_back( args[i] ); 
   }

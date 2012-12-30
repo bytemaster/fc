@@ -49,7 +49,7 @@ namespace fc {
       my->ifs.open( file.string().c_str(), std::ios::binary );
    }
    size_t ifstream::readsome( char* buf, size_t len ) {
-      return my->ifs.readsome( buf, len );
+      return size_t(my->ifs.readsome( buf, len ));
    }
    ifstream& ifstream::read( char* buf, size_t len ) {
         my->ifs.read(buf,len);
@@ -61,6 +61,7 @@ namespace fc {
         case cur: my->ifs.seekg( p, std::ios_base::cur ); return *this;
         case end: my->ifs.seekg( p, std::ios_base::end ); return *this;
       }
+      return *this;
    }
    void   ifstream::close() { return my->ifs.close(); }
 

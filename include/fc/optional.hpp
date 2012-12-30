@@ -36,7 +36,6 @@ namespace fc {
 
       template<typename U>
       optional& operator=( U&& u ) {
-        if( &u == &**this ) return *this;
         if( !_valid ) {
           new (&**this) T( fc::forward<U>(u) );
           _valid = true;

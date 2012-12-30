@@ -45,7 +45,7 @@ namespace fc {
   inline void pack( fc::value& jsv, const int16_t& v )      { jsv = v; }
   inline void pack( fc::value& jsv, const int32_t& v )      { jsv = v; }
   inline void pack( fc::value& jsv, const int64_t& v )      { jsv = v; }
-  inline void pack( fc::value& jsv, const fc::string& v )   { jsv = v; }
+  inline void pack( fc::value& jsv, const fc::string& v )   { jsv = value(v); }
   inline void pack( fc::value& jsv, fc::string& v )         { jsv = v; }
   inline void pack( fc::value& jsv, fc::string&& v )        { jsv = fc::move(v); }
   inline void pack( fc::value& jsv, const char* v )         { jsv = fc::string(v); }
@@ -93,7 +93,8 @@ namespace fc {
       */
       template<typename T>
       inline void pack_helper( const T& v, const char* name )const {
-        fc::pack( obj[name], v ); 
+		value* o = &obj[name];
+        fc::pack( *o, v ); 
       }
       template<typename T>
       inline void pack_helper( const fc::optional<T>& v, const char* name )const {

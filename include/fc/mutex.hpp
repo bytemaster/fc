@@ -1,5 +1,4 @@
-#ifndef FC_MUTEX_HPP_
-#define FC_MUTEX_HPP_
+#pragma once
 #include <fc/time.hpp>
 #include <fc/spin_yield_lock.hpp>
 
@@ -107,4 +106,3 @@ namespace fc {
   
 } // namespace fc
 
-#endif // MACE_CMT_MUTEX_HPP_

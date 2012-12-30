@@ -6,6 +6,8 @@
 #include <fc/interprocess/file_mapping.hpp>
 #include <fc/error_report.hpp>
 #include <map>
+#include <vector>
+#include <string>
 
 
 namespace fc { namespace json {
@@ -21,7 +23,7 @@ namespace fc { namespace json {
       string(){}
 
       string& operator=( const fc::string& s ) {
-        json_data = fc::vector<char>(s.begin(),s.end());
+        json_data = std::vector<char>(s.begin(),s.end());
         return *this;
       }
       template<typename T>
@@ -38,7 +40,7 @@ namespace fc { namespace json {
         json_data = s.json_data;
         return *this;
       }
-      fc::vector<char> json_data;
+      std::vector<char> json_data;
   };
 
 } }
@@ -444,6 +446,7 @@ struct temp_set {
  * Warn on extra ',' or missing ','
  */
 void  read_values( fc::value::array& a, char* in, char* end, error_collector& ec ) {
+  if( in >= end ) return;
   char* ve = 0;
   char* v = read_value( in, end, ve );
   while( *v == ',' ) {
@@ -571,7 +574,7 @@ char* read_key_val( std::map<fc::string,fc::json::string>& obj, bool sc, char* i
   temp_set ntemp(name_end,'\0');
   temp_set vtemp(val_end,'\0');
   //slog( "name: '%1%'", fc::string(name,name_end) );
-  obj[name] = fc::vector<char>(val,val_end);
+  obj[name] = std::vector<char>(val,val_end);
 //  obj.fields.push_back( key_val( name, to_value( val, val_end, ec ) ) );
   return val_end;
 }
@@ -664,7 +667,6 @@ char* read_key_val( fc::value::object& obj, bool sc, char* in, char* end, error_
   }
   temp_set ntemp(name_end,'\0');
   temp_set vtemp(val_end,'\0');
-  //slog( "name: '%1%'", fc::string(name,name_end) );
   obj.fields.push_back( fc::value::key_val( name, to_value( val, val_end, ec ) ) );
   return val_end;
 }
@@ -701,7 +703,7 @@ std::map<fc::string,fc::json::string> read_key_vals( char* in, char* end, error_
  */
 fc::value to_value( fc::vector<char>&& v, error_collector& ec  ) {
   if( v.size() == 0 ) return fc::value();
-  return to_value( &v.front(), &v.front() + v.size(), ec );
+  return to_value( v.data(), v.data() + v.size(), ec );
 }
 
 /**
@@ -945,7 +947,9 @@ fc::string pretty_print( fc::vector<char>&& v, uint8_t indent ) {
   }
 
   value from_string( const fc::string& s ) {
-    return from_string( s.c_str(), s.c_str() + s.size() );
+    std::vector<char> v(s.begin(),s.end());
+    //slog( "from_string( '%s' )", s.c_str() );
+    return from_string( v.data(), v.data()+v.size() );
   }
   value from_string( fc::vector<char>&& v ) {
     error_collector ec;

@@ -80,8 +80,10 @@ namespace fc { namespace json {
                   send_error( id, error_object( "error report", fc::value(eo) ) );
                }
             } catch ( const fc::json::error_object& eo ) {
+	       wlog( "%s", eo.message.c_str() );
                send_error( id, eo );
             } catch ( ... ) {
+	       wlog( "%s", fc::except_str().c_str() );
                send_error( id, error_object( fc::except_str(), fc::value() ) );
             }
           } else { // ignore exception + result

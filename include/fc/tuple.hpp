@@ -85,9 +85,8 @@ namespace fc {
         struct tuple<BOOST_PP_ENUM_PARAMS(n,A)> { \
             enum size_enum { size = n }; \
             template<BOOST_PP_ENUM_PARAMS( n, typename AA)> \
-            tuple( BOOST_PP_ENUM(n, RREF_PARAMS, unused ) )BOOST_PP_IF(n,:,BOOST_PP_EMPTY())BOOST_PP_ENUM( n, ILIST_PARAMS,unused){} \
+            explicit tuple( BOOST_PP_ENUM(n, RREF_PARAMS, unused ) )BOOST_PP_IF(n,:,BOOST_PP_EMPTY())BOOST_PP_ENUM( n, ILIST_PARAMS,unused){} \
             tuple( const tuple& t )BOOST_PP_IF(n,:,BOOST_PP_EMPTY())BOOST_PP_ENUM( n, ILIST_PARAMS_COPY,unused){} \
-            tuple( tuple& t )BOOST_PP_IF(n,:,BOOST_PP_EMPTY())BOOST_PP_ENUM( n, ILIST_PARAMS_COPY,unused){} \
             tuple( tuple&& t )BOOST_PP_IF(n,:,BOOST_PP_EMPTY())BOOST_PP_ENUM( n, ILIST_PARAMS_COPY,unused){} \
             tuple(){}\
             template<typename V>\

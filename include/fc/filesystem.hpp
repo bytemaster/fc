@@ -1,5 +1,4 @@
-#ifndef _FC_FILESYSTEM_HPP_
-#define _FC_FILESYSTEM_HPP_
+#pragma once
 #include <fc/string.hpp>
 #include <fc/fwd.hpp>
 
@@ -7,6 +6,7 @@ namespace boost {
   namespace filesystem {
     class path;
     class directory_iterator;
+    class recursive_directory_iterator;
   }
 }
 
@@ -32,12 +32,15 @@ namespace fc {
       operator boost::filesystem::path& ();
       operator const boost::filesystem::path& ()const;
 
+      void       replace_extension( const fc::path& e );
       fc::path   stem()const;
       fc::path   extension()const;
       fc::path   filename()const;
       fc::path   parent_path()const;
       fc::string string()const;
       fc::string generic_string()const;
+      bool       is_relative()const;
+      bool       is_absolute()const;
     private:
       fwd<boost::filesystem::path,32> _p; 
   };
@@ -57,19 +60,39 @@ namespace fc {
     private:
       fwd<boost::filesystem::directory_iterator,16> _p; 
   };
+  class recursive_directory_iterator {
+    public:
+      recursive_directory_iterator( const fc::path& p );
+      recursive_directory_iterator();
+      ~recursive_directory_iterator();
+
+      fc::path            operator*()const;
+      recursive_directory_iterator& operator++(int);
+      recursive_directory_iterator& operator++();
+
+      friend bool operator==( const recursive_directory_iterator&, const recursive_directory_iterator& );
+      friend bool operator!=( const recursive_directory_iterator&, const recursive_directory_iterator& );
+    private:
+      fwd<boost::filesystem::recursive_directory_iterator,16> _p; 
+  };
 
   bool     exists( const path& p );
   bool     is_directory( const path& p );
   bool     is_regular_file( const path& p );
   void     create_directories( const path& p );
+  void     remove_all( const path& p );
   path     absolute( const path& p );
   path     canonical( const path& p );
   uint64_t file_size( const path& p );
   bool     remove( const path& p );
   void     copy( const path& from, const path& to );
+  void     create_hard_link( const path& from, const path& to );
 
   path     unique_path();
   path     temp_directory_path();
+
+  class value;
+  void pack( fc::value& , const fc::path&  );
+  void unpack( const fc::value& , fc::path&  );
 }
 
-#endif // _FC_FILESYSTEM_HPP_

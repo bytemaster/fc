@@ -1,5 +1,4 @@
-#ifndef _FC_INTERPROCESS_FILEMAPPING_HPP_
-#define _FC_INTERPROCESS_FILEMAPPING_HPP_
+#pragma once
 #include <fc/fwd.hpp>
 #include <fc/utility.hpp>
 
@@ -35,4 +34,3 @@ namespace fc {
       fc::fwd<boost::interprocess::mapped_region,40> my;
   };
 }
-#endif

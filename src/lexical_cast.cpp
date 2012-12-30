@@ -13,6 +13,7 @@ namespace fc {
       return boost::lexical_cast<uint64_t>(s.c_str());
     }
     fc::string to_string( double d   ){ return boost::lexical_cast<std::string>(d); }
+    fc::string to_string( size_t d   ){ return boost::lexical_cast<std::string>(d); }
     fc::string to_string( uint64_t d ){ return boost::lexical_cast<std::string>(d); }
     fc::string to_string( uint32_t d  ){ return boost::lexical_cast<std::string>(d); }
     fc::string to_string( uint16_t d  ){ return boost::lexical_cast<std::string>(d); }

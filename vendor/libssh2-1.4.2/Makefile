@@ -39,10 +39,10 @@ RM = /opt/local/bin/cmake -E remove -f
 CMAKE_EDIT_COMMAND = /opt/local/bin/ccmake
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /Users/dlarimer/projects/AthenaRuntime
+CMAKE_SOURCE_DIR = /Users/dlarimer/projects/atc/gate
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /Users/dlarimer/projects/AthenaRuntime
+CMAKE_BINARY_DIR = /Users/dlarimer/projects/atc/gate
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -110,14 +110,14 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	cd /Users/dlarimer/projects/AthenaRuntime && $(CMAKE_COMMAND) -E cmake_progress_start /Users/dlarimer/projects/AthenaRuntime/CMakeFiles /Users/dlarimer/projects/AthenaRuntime/vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/progress.marks
-	cd /Users/dlarimer/projects/AthenaRuntime && $(MAKE) -f CMakeFiles/Makefile2 vendor/fc/vendor/libssh2-1.4.2/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/dlarimer/projects/AthenaRuntime/CMakeFiles 0
+	cd /Users/dlarimer/projects/atc/gate && $(CMAKE_COMMAND) -E cmake_progress_start /Users/dlarimer/projects/atc/gate/CMakeFiles /Users/dlarimer/projects/atc/gate/fc/vendor/libssh2-1.4.2/CMakeFiles/progress.marks
+	cd /Users/dlarimer/projects/atc/gate && $(MAKE) -f CMakeFiles/Makefile2 fc/vendor/libssh2-1.4.2/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/dlarimer/projects/atc/gate/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
 clean:
-	cd /Users/dlarimer/projects/AthenaRuntime && $(MAKE) -f CMakeFiles/Makefile2 vendor/fc/vendor/libssh2-1.4.2/clean
+	cd /Users/dlarimer/projects/atc/gate && $(MAKE) -f CMakeFiles/Makefile2 fc/vendor/libssh2-1.4.2/clean
 .PHONY : clean
 
 # The main clean target
@@ -126,31 +126,31 @@ clean/fast: clean
 
 # Prepare targets for installation.
 preinstall: all
-	cd /Users/dlarimer/projects/AthenaRuntime && $(MAKE) -f CMakeFiles/Makefile2 vendor/fc/vendor/libssh2-1.4.2/preinstall
+	cd /Users/dlarimer/projects/atc/gate && $(MAKE) -f CMakeFiles/Makefile2 fc/vendor/libssh2-1.4.2/preinstall
 .PHONY : preinstall
 
 # Prepare targets for installation.
 preinstall/fast:
-	cd /Users/dlarimer/projects/AthenaRuntime && $(MAKE) -f CMakeFiles/Makefile2 vendor/fc/vendor/libssh2-1.4.2/preinstall
+	cd /Users/dlarimer/projects/atc/gate && $(MAKE) -f CMakeFiles/Makefile2 fc/vendor/libssh2-1.4.2/preinstall
 .PHONY : preinstall/fast
 
 # clear depends
 depend:
-	cd /Users/dlarimer/projects/AthenaRuntime && $(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
+	cd /Users/dlarimer/projects/atc/gate && $(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
 # Convenience name for target.
-vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/rule:
-	cd /Users/dlarimer/projects/AthenaRuntime && $(MAKE) -f CMakeFiles/Makefile2 vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/rule
-.PHONY : vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/rule
+fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/rule:
+	cd /Users/dlarimer/projects/atc/gate && $(MAKE) -f CMakeFiles/Makefile2 fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/rule
+.PHONY : fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/rule
 
 # Convenience name for target.
-ssh2: vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/rule
+ssh2: fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/rule
 .PHONY : ssh2
 
 # fast build rule for target.
 ssh2/fast:
-	cd /Users/dlarimer/projects/AthenaRuntime && $(MAKE) -f vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build
+	cd /Users/dlarimer/projects/atc/gate && $(MAKE) -f fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build
 .PHONY : ssh2/fast
 
 src/agent.o: src/agent.c.o
@@ -158,7 +158,7 @@ src/agent.o: src/agent.c.o
 
 # target to build an object file
 src/agent.c.o:
-	cd /Users/dlarimer/projects/AthenaRuntime && $(MAKE) -f vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/agent.c.o
+	cd /Users/dlarimer/projects/atc/gate && $(MAKE) -f fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/agent.c.o
 .PHONY : src/agent.c.o
 
 src/agent.i: src/agent.c.i
@@ -166,7 +166,7 @@ src/agent.i: src/agent.c.i
 
 # target to preprocess a source file
 src/agent.c.i:
-	cd /Users/dlarimer/projects/AthenaRuntime && $(MAKE) -f vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/agent.c.i
+	cd /Users/dlarimer/projects/atc/gate && $(MAKE) -f fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/agent.c.i
 .PHONY : src/agent.c.i
 
 src/agent.s: src/agent.c.s
@@ -174,7 +174,7 @@ src/agent.s: src/agent.c.s
 
 # target to generate assembly for a file
 src/agent.c.s:
-	cd /Users/dlarimer/projects/AthenaRuntime && $(MAKE) -f vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/agent.c.s
+	cd /Users/dlarimer/projects/atc/gate && $(MAKE) -f fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/agent.c.s
 .PHONY : src/agent.c.s
 
 src/channel.o: src/channel.c.o
@@ -182,7 +182,7 @@ src/channel.o: src/channel.c.o
 
 # target to build an object file
 src/channel.c.o:
-	cd /Users/dlarimer/projects/AthenaRuntime && $(MAKE) -f vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/channel.c.o
+	cd /Users/dlarimer/projects/atc/gate && $(MAKE) -f fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/channel.c.o
 .PHONY : src/channel.c.o
 
 src/channel.i: src/channel.c.i
@@ -190,7 +190,7 @@ src/channel.i: src/channel.c.i
 
 # target to preprocess a source file
 src/channel.c.i:
-	cd /Users/dlarimer/projects/AthenaRuntime && $(MAKE) -f vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/channel.c.i
+	cd /Users/dlarimer/projects/atc/gate && $(MAKE) -f fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/channel.c.i
 .PHONY : src/channel.c.i
 
 src/channel.s: src/channel.c.s
@@ -198,7 +198,7 @@ src/channel.s: src/channel.c.s
 
 # target to generate assembly for a file
 src/channel.c.s:
-	cd /Users/dlarimer/projects/AthenaRuntime && $(MAKE) -f vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/channel.c.s
+	cd /Users/dlarimer/projects/atc/gate && $(MAKE) -f fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/channel.c.s
 .PHONY : src/channel.c.s
 
 src/comp.o: src/comp.c.o
@@ -206,7 +206,7 @@ src/comp.o: src/comp.c.o
 
 # target to build an object file
 src/comp.c.o:
-	cd /Users/dlarimer/projects/AthenaRuntime && $(MAKE) -f vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/comp.c.o
+	cd /Users/dlarimer/projects/atc/gate && $(MAKE) -f fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/comp.c.o
 .PHONY : src/comp.c.o
 
 src/comp.i: src/comp.c.i
@@ -214,7 +214,7 @@ src/comp.i: src/comp.c.i
 
 # target to preprocess a source file
 src/comp.c.i:
-	cd /Users/dlarimer/projects/AthenaRuntime && $(MAKE) -f vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/comp.c.i
+	cd /Users/dlarimer/projects/atc/gate && $(MAKE) -f fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/comp.c.i
 .PHONY : src/comp.c.i
 
 src/comp.s: src/comp.c.s
@@ -222,7 +222,7 @@ src/comp.s: src/comp.c.s
 
 # target to generate assembly for a file
 src/comp.c.s:
-	cd /Users/dlarimer/projects/AthenaRuntime && $(MAKE) -f vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/comp.c.s
+	cd /Users/dlarimer/projects/atc/gate && $(MAKE) -f fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/comp.c.s
 .PHONY : src/comp.c.s
 
 src/crypt.o: src/crypt.c.o
@@ -230,7 +230,7 @@ src/crypt.o: src/crypt.c.o
 
 # target to build an object file
 src/crypt.c.o:
-	cd /Users/dlarimer/projects/AthenaRuntime && $(MAKE) -f vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/crypt.c.o
+	cd /Users/dlarimer/projects/atc/gate && $(MAKE) -f fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/crypt.c.o
 .PHONY : src/crypt.c.o
 
 src/crypt.i: src/crypt.c.i
@@ -238,7 +238,7 @@ src/crypt.i: src/crypt.c.i
 
 # target to preprocess a source file
 src/crypt.c.i:
-	cd /Users/dlarimer/projects/AthenaRuntime && $(MAKE) -f vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/crypt.c.i
+	cd /Users/dlarimer/projects/atc/gate && $(MAKE) -f fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/crypt.c.i
 .PHONY : src/crypt.c.i
 
 src/crypt.s: src/crypt.c.s
@@ -246,7 +246,7 @@ src/crypt.s: src/crypt.c.s
 
 # target to generate assembly for a file
 src/crypt.c.s:
-	cd /Users/dlarimer/projects/AthenaRuntime && $(MAKE) -f vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/crypt.c.s
+	cd /Users/dlarimer/projects/atc/gate && $(MAKE) -f fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/crypt.c.s
 .PHONY : src/crypt.c.s
 
 src/global.o: src/global.c.o
@@ -254,7 +254,7 @@ src/global.o: src/global.c.o
 
 # target to build an object file
 src/global.c.o:
-	cd /Users/dlarimer/projects/AthenaRuntime && $(MAKE) -f vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/global.c.o
+	cd /Users/dlarimer/projects/atc/gate && $(MAKE) -f fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/global.c.o
 .PHONY : src/global.c.o
 
 src/global.i: src/global.c.i
@@ -262,7 +262,7 @@ src/global.i: src/global.c.i
 
 # target to preprocess a source file
 src/global.c.i:
-	cd /Users/dlarimer/projects/AthenaRuntime && $(MAKE) -f vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/global.c.i
+	cd /Users/dlarimer/projects/atc/gate && $(MAKE) -f fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/global.c.i
 .PHONY : src/global.c.i
 
 src/global.s: src/global.c.s
@@ -270,7 +270,7 @@ src/global.s: src/global.c.s
 
 # target to generate assembly for a file
 src/global.c.s:
-	cd /Users/dlarimer/projects/AthenaRuntime && $(MAKE) -f vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/global.c.s
+	cd /Users/dlarimer/projects/atc/gate && $(MAKE) -f fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/global.c.s
 .PHONY : src/global.c.s
 
 src/hostkey.o: src/hostkey.c.o
@@ -278,7 +278,7 @@ src/hostkey.o: src/hostkey.c.o
 
 # target to build an object file
 src/hostkey.c.o:
-	cd /Users/dlarimer/projects/AthenaRuntime && $(MAKE) -f vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/hostkey.c.o
+	cd /Users/dlarimer/projects/atc/gate && $(MAKE) -f fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/hostkey.c.o
 .PHONY : src/hostkey.c.o
 
 src/hostkey.i: src/hostkey.c.i
@@ -286,7 +286,7 @@ src/hostkey.i: src/hostkey.c.i
 
 # target to preprocess a source file
 src/hostkey.c.i:
-	cd /Users/dlarimer/projects/AthenaRuntime && $(MAKE) -f vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/hostkey.c.i
+	cd /Users/dlarimer/projects/atc/gate && $(MAKE) -f fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/hostkey.c.i
 .PHONY : src/hostkey.c.i
 
 src/hostkey.s: src/hostkey.c.s
@@ -294,7 +294,7 @@ src/hostkey.s: src/hostkey.c.s
 
 # target to generate assembly for a file
 src/hostkey.c.s:
-	cd /Users/dlarimer/projects/AthenaRuntime && $(MAKE) -f vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/hostkey.c.s
+	cd /Users/dlarimer/projects/atc/gate && $(MAKE) -f fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/hostkey.c.s
 .PHONY : src/hostkey.c.s
 
 src/keepalive.o: src/keepalive.c.o
@@ -302,7 +302,7 @@ src/keepalive.o: src/keepalive.c.o
 
 # target to build an object file
 src/keepalive.c.o:
-	cd /Users/dlarimer/projects/AthenaRuntime && $(MAKE) -f vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/keepalive.c.o
+	cd /Users/dlarimer/projects/atc/gate && $(MAKE) -f fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/keepalive.c.o
 .PHONY : src/keepalive.c.o
 
 src/keepalive.i: src/keepalive.c.i
@@ -310,7 +310,7 @@ src/keepalive.i: src/keepalive.c.i
 
 # target to preprocess a source file
 src/keepalive.c.i:
-	cd /Users/dlarimer/projects/AthenaRuntime && $(MAKE) -f vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/keepalive.c.i
+	cd /Users/dlarimer/projects/atc/gate && $(MAKE) -f fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/keepalive.c.i
 .PHONY : src/keepalive.c.i
 
 src/keepalive.s: src/keepalive.c.s
@@ -318,7 +318,7 @@ src/keepalive.s: src/keepalive.c.s
 
 # target to generate assembly for a file
 src/keepalive.c.s:
-	cd /Users/dlarimer/projects/AthenaRuntime && $(MAKE) -f vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/keepalive.c.s
+	cd /Users/dlarimer/projects/atc/gate && $(MAKE) -f fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/keepalive.c.s
 .PHONY : src/keepalive.c.s
 
 src/kex.o: src/kex.c.o
@@ -326,7 +326,7 @@ src/kex.o: src/kex.c.o
 
 # target to build an object file
 src/kex.c.o:
-	cd /Users/dlarimer/projects/AthenaRuntime && $(MAKE) -f vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/kex.c.o
+	cd /Users/dlarimer/projects/atc/gate && $(MAKE) -f fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/kex.c.o
 .PHONY : src/kex.c.o
 
 src/kex.i: src/kex.c.i
@@ -334,7 +334,7 @@ src/kex.i: src/kex.c.i
 
 # target to preprocess a source file
 src/kex.c.i:
-	cd /Users/dlarimer/projects/AthenaRuntime && $(MAKE) -f vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/kex.c.i
+	cd /Users/dlarimer/projects/atc/gate && $(MAKE) -f fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/kex.c.i
 .PHONY : src/kex.c.i
 
 src/kex.s: src/kex.c.s
@@ -342,7 +342,7 @@ src/kex.s: src/kex.c.s
 
 # target to generate assembly for a file
 src/kex.c.s:
-	cd /Users/dlarimer/projects/AthenaRuntime && $(MAKE) -f vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/kex.c.s
+	cd /Users/dlarimer/projects/atc/gate && $(MAKE) -f fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/kex.c.s
 .PHONY : src/kex.c.s
 
 src/knownhost.o: src/knownhost.c.o
@@ -350,7 +350,7 @@ src/knownhost.o: src/knownhost.c.o
 
 # target to build an object file
 src/knownhost.c.o:
-	cd /Users/dlarimer/projects/AthenaRuntime && $(MAKE) -f vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/knownhost.c.o
+	cd /Users/dlarimer/projects/atc/gate && $(MAKE) -f fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/knownhost.c.o
 .PHONY : src/knownhost.c.o
 
 src/knownhost.i: src/knownhost.c.i
@@ -358,7 +358,7 @@ src/knownhost.i: src/knownhost.c.i
 
 # target to preprocess a source file
 src/knownhost.c.i:
-	cd /Users/dlarimer/projects/AthenaRuntime && $(MAKE) -f vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/knownhost.c.i
+	cd /Users/dlarimer/projects/atc/gate && $(MAKE) -f fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/knownhost.c.i
 .PHONY : src/knownhost.c.i
 
 src/knownhost.s: src/knownhost.c.s
@@ -366,7 +366,7 @@ src/knownhost.s: src/knownhost.c.s
 
 # target to generate assembly for a file
 src/knownhost.c.s:
-	cd /Users/dlarimer/projects/AthenaRuntime && $(MAKE) -f vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/knownhost.c.s
+	cd /Users/dlarimer/projects/atc/gate && $(MAKE) -f fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/knownhost.c.s
 .PHONY : src/knownhost.c.s
 
 src/libgcrypt.o: src/libgcrypt.c.o
@@ -374,7 +374,7 @@ src/libgcrypt.o: src/libgcrypt.c.o
 
 # target to build an object file
 src/libgcrypt.c.o:
-	cd /Users/dlarimer/projects/AthenaRuntime && $(MAKE) -f vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/libgcrypt.c.o
+	cd /Users/dlarimer/projects/atc/gate && $(MAKE) -f fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/libgcrypt.c.o
 .PHONY : src/libgcrypt.c.o
 
 src/libgcrypt.i: src/libgcrypt.c.i
@@ -382,7 +382,7 @@ src/libgcrypt.i: src/libgcrypt.c.i
 
 # target to preprocess a source file
 src/libgcrypt.c.i:
-	cd /Users/dlarimer/projects/AthenaRuntime && $(MAKE) -f vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/libgcrypt.c.i
+	cd /Users/dlarimer/projects/atc/gate && $(MAKE) -f fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/libgcrypt.c.i
 .PHONY : src/libgcrypt.c.i
 
 src/libgcrypt.s: src/libgcrypt.c.s
@@ -390,7 +390,7 @@ src/libgcrypt.s: src/libgcrypt.c.s
 
 # target to generate assembly for a file
 src/libgcrypt.c.s:
-	cd /Users/dlarimer/projects/AthenaRuntime && $(MAKE) -f vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/libgcrypt.c.s
+	cd /Users/dlarimer/projects/atc/gate && $(MAKE) -f fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/libgcrypt.c.s
 .PHONY : src/libgcrypt.c.s
 
 src/mac.o: src/mac.c.o
@@ -398,7 +398,7 @@ src/mac.o: src/mac.c.o
 
 # target to build an object file
 src/mac.c.o:
-	cd /Users/dlarimer/projects/AthenaRuntime && $(MAKE) -f vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/mac.c.o
+	cd /Users/dlarimer/projects/atc/gate && $(MAKE) -f fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/mac.c.o
 .PHONY : src/mac.c.o
 
 src/mac.i: src/mac.c.i
@@ -406,7 +406,7 @@ src/mac.i: src/mac.c.i
 
 # target to preprocess a source file
 src/mac.c.i:
-	cd /Users/dlarimer/projects/AthenaRuntime && $(MAKE) -f vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/mac.c.i
+	cd /Users/dlarimer/projects/atc/gate && $(MAKE) -f fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/mac.c.i
 .PHONY : src/mac.c.i
 
 src/mac.s: src/mac.c.s
@@ -414,7 +414,7 @@ src/mac.s: src/mac.c.s
 
 # target to generate assembly for a file
 src/mac.c.s:
-	cd /Users/dlarimer/projects/AthenaRuntime && $(MAKE) -f vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/mac.c.s
+	cd /Users/dlarimer/projects/atc/gate && $(MAKE) -f fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/mac.c.s
 .PHONY : src/mac.c.s
 
 src/misc.o: src/misc.c.o
@@ -422,7 +422,7 @@ src/misc.o: src/misc.c.o
 
 # target to build an object file
 src/misc.c.o:
-	cd /Users/dlarimer/projects/AthenaRuntime && $(MAKE) -f vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/misc.c.o
+	cd /Users/dlarimer/projects/atc/gate && $(MAKE) -f fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/misc.c.o
 .PHONY : src/misc.c.o
 
 src/misc.i: src/misc.c.i
@@ -430,7 +430,7 @@ src/misc.i: src/misc.c.i
 
 # target to preprocess a source file
 src/misc.c.i:
-	cd /Users/dlarimer/projects/AthenaRuntime && $(MAKE) -f vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/misc.c.i
+	cd /Users/dlarimer/projects/atc/gate && $(MAKE) -f fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/misc.c.i
 .PHONY : src/misc.c.i
 
 src/misc.s: src/misc.c.s
@@ -438,7 +438,7 @@ src/misc.s: src/misc.c.s
 
 # target to generate assembly for a file
 src/misc.c.s:
-	cd /Users/dlarimer/projects/AthenaRuntime && $(MAKE) -f vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/misc.c.s
+	cd /Users/dlarimer/projects/atc/gate && $(MAKE) -f fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/misc.c.s
 .PHONY : src/misc.c.s
 
 src/openssl.o: src/openssl.c.o
@@ -446,7 +446,7 @@ src/openssl.o: src/openssl.c.o
 
 # target to build an object file
 src/openssl.c.o:
-	cd /Users/dlarimer/projects/AthenaRuntime && $(MAKE) -f vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/openssl.c.o
+	cd /Users/dlarimer/projects/atc/gate && $(MAKE) -f fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/openssl.c.o
 .PHONY : src/openssl.c.o
 
 src/openssl.i: src/openssl.c.i
@@ -454,7 +454,7 @@ src/openssl.i: src/openssl.c.i
 
 # target to preprocess a source file
 src/openssl.c.i:
-	cd /Users/dlarimer/projects/AthenaRuntime && $(MAKE) -f vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/openssl.c.i
+	cd /Users/dlarimer/projects/atc/gate && $(MAKE) -f fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/openssl.c.i
 .PHONY : src/openssl.c.i
 
 src/openssl.s: src/openssl.c.s
@@ -462,7 +462,7 @@ src/openssl.s: src/openssl.c.s
 
 # target to generate assembly for a file
 src/openssl.c.s:
-	cd /Users/dlarimer/projects/AthenaRuntime && $(MAKE) -f vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/openssl.c.s
+	cd /Users/dlarimer/projects/atc/gate && $(MAKE) -f fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/openssl.c.s
 .PHONY : src/openssl.c.s
 
 src/packet.o: src/packet.c.o
@@ -470,7 +470,7 @@ src/packet.o: src/packet.c.o
 
 # target to build an object file
 src/packet.c.o:
-	cd /Users/dlarimer/projects/AthenaRuntime && $(MAKE) -f vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/packet.c.o
+	cd /Users/dlarimer/projects/atc/gate && $(MAKE) -f fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/packet.c.o
 .PHONY : src/packet.c.o
 
 src/packet.i: src/packet.c.i
@@ -478,7 +478,7 @@ src/packet.i: src/packet.c.i
 
 # target to preprocess a source file
 src/packet.c.i:
-	cd /Users/dlarimer/projects/AthenaRuntime && $(MAKE) -f vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/packet.c.i
+	cd /Users/dlarimer/projects/atc/gate && $(MAKE) -f fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/packet.c.i
 .PHONY : src/packet.c.i
 
 src/packet.s: src/packet.c.s
@@ -486,7 +486,7 @@ src/packet.s: src/packet.c.s
 
 # target to generate assembly for a file
 src/packet.c.s:
-	cd /Users/dlarimer/projects/AthenaRuntime && $(MAKE) -f vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/packet.c.s
+	cd /Users/dlarimer/projects/atc/gate && $(MAKE) -f fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/packet.c.s
 .PHONY : src/packet.c.s
 
 src/pem.o: src/pem.c.o
@@ -494,7 +494,7 @@ src/pem.o: src/pem.c.o
 
 # target to build an object file
 src/pem.c.o:
-	cd /Users/dlarimer/projects/AthenaRuntime && $(MAKE) -f vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/pem.c.o
+	cd /Users/dlarimer/projects/atc/gate && $(MAKE) -f fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/pem.c.o
 .PHONY : src/pem.c.o
 
 src/pem.i: src/pem.c.i
@@ -502,7 +502,7 @@ src/pem.i: src/pem.c.i
 
 # target to preprocess a source file
 src/pem.c.i:
-	cd /Users/dlarimer/projects/AthenaRuntime && $(MAKE) -f vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/pem.c.i
+	cd /Users/dlarimer/projects/atc/gate && $(MAKE) -f fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/pem.c.i
 .PHONY : src/pem.c.i
 
 src/pem.s: src/pem.c.s
@@ -510,7 +510,7 @@ src/pem.s: src/pem.c.s
 
 # target to generate assembly for a file
 src/pem.c.s:
-	cd /Users/dlarimer/projects/AthenaRuntime && $(MAKE) -f vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/pem.c.s
+	cd /Users/dlarimer/projects/atc/gate && $(MAKE) -f fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/pem.c.s
 .PHONY : src/pem.c.s
 
 src/publickey.o: src/publickey.c.o
@@ -518,7 +518,7 @@ src/publickey.o: src/publickey.c.o
 
 # target to build an object file
 src/publickey.c.o:
-	cd /Users/dlarimer/projects/AthenaRuntime && $(MAKE) -f vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/publickey.c.o
+	cd /Users/dlarimer/projects/atc/gate && $(MAKE) -f fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/publickey.c.o
 .PHONY : src/publickey.c.o
 
 src/publickey.i: src/publickey.c.i
@@ -526,7 +526,7 @@ src/publickey.i: src/publickey.c.i
 
 # target to preprocess a source file
 src/publickey.c.i:
-	cd /Users/dlarimer/projects/AthenaRuntime && $(MAKE) -f vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/publickey.c.i
+	cd /Users/dlarimer/projects/atc/gate && $(MAKE) -f fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/publickey.c.i
 .PHONY : src/publickey.c.i
 
 src/publickey.s: src/publickey.c.s
@@ -534,7 +534,7 @@ src/publickey.s: src/publickey.c.s
 
 # target to generate assembly for a file
 src/publickey.c.s:
-	cd /Users/dlarimer/projects/AthenaRuntime && $(MAKE) -f vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/publickey.c.s
+	cd /Users/dlarimer/projects/atc/gate && $(MAKE) -f fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/publickey.c.s
 .PHONY : src/publickey.c.s
 
 src/scp.o: src/scp.c.o
@@ -542,7 +542,7 @@ src/scp.o: src/scp.c.o
 
 # target to build an object file
 src/scp.c.o:
-	cd /Users/dlarimer/projects/AthenaRuntime && $(MAKE) -f vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/scp.c.o
+	cd /Users/dlarimer/projects/atc/gate && $(MAKE) -f fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/scp.c.o
 .PHONY : src/scp.c.o
 
 src/scp.i: src/scp.c.i
@@ -550,7 +550,7 @@ src/scp.i: src/scp.c.i
 
 # target to preprocess a source file
 src/scp.c.i:
-	cd /Users/dlarimer/projects/AthenaRuntime && $(MAKE) -f vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/scp.c.i
+	cd /Users/dlarimer/projects/atc/gate && $(MAKE) -f fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/scp.c.i
 .PHONY : src/scp.c.i
 
 src/scp.s: src/scp.c.s
@@ -558,7 +558,7 @@ src/scp.s: src/scp.c.s
 
 # target to generate assembly for a file
 src/scp.c.s:
-	cd /Users/dlarimer/projects/AthenaRuntime && $(MAKE) -f vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/scp.c.s
+	cd /Users/dlarimer/projects/atc/gate && $(MAKE) -f fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/scp.c.s
 .PHONY : src/scp.c.s
 
 src/session.o: src/session.c.o
@@ -566,7 +566,7 @@ src/session.o: src/session.c.o
 
 # target to build an object file
 src/session.c.o:
-	cd /Users/dlarimer/projects/AthenaRuntime && $(MAKE) -f vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/session.c.o
+	cd /Users/dlarimer/projects/atc/gate && $(MAKE) -f fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/session.c.o
 .PHONY : src/session.c.o
 
 src/session.i: src/session.c.i
@@ -574,7 +574,7 @@ src/session.i: src/session.c.i
 
 # target to preprocess a source file
 src/session.c.i:
-	cd /Users/dlarimer/projects/AthenaRuntime && $(MAKE) -f vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/session.c.i
+	cd /Users/dlarimer/projects/atc/gate && $(MAKE) -f fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/session.c.i
 .PHONY : src/session.c.i
 
 src/session.s: src/session.c.s
@@ -582,7 +582,7 @@ src/session.s: src/session.c.s
 
 # target to generate assembly for a file
 src/session.c.s:
-	cd /Users/dlarimer/projects/AthenaRuntime && $(MAKE) -f vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/session.c.s
+	cd /Users/dlarimer/projects/atc/gate && $(MAKE) -f fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/session.c.s
 .PHONY : src/session.c.s
 
 src/sftp.o: src/sftp.c.o
@@ -590,7 +590,7 @@ src/sftp.o: src/sftp.c.o
 
 # target to build an object file
 src/sftp.c.o:
-	cd /Users/dlarimer/projects/AthenaRuntime && $(MAKE) -f vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/sftp.c.o
+	cd /Users/dlarimer/projects/atc/gate && $(MAKE) -f fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/sftp.c.o
 .PHONY : src/sftp.c.o
 
 src/sftp.i: src/sftp.c.i
@@ -598,7 +598,7 @@ src/sftp.i: src/sftp.c.i
 
 # target to preprocess a source file
 src/sftp.c.i:
-	cd /Users/dlarimer/projects/AthenaRuntime && $(MAKE) -f vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/sftp.c.i
+	cd /Users/dlarimer/projects/atc/gate && $(MAKE) -f fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/sftp.c.i
 .PHONY : src/sftp.c.i
 
 src/sftp.s: src/sftp.c.s
@@ -606,7 +606,7 @@ src/sftp.s: src/sftp.c.s
 
 # target to generate assembly for a file
 src/sftp.c.s:
-	cd /Users/dlarimer/projects/AthenaRuntime && $(MAKE) -f vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/sftp.c.s
+	cd /Users/dlarimer/projects/atc/gate && $(MAKE) -f fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/sftp.c.s
 .PHONY : src/sftp.c.s
 
 src/transport.o: src/transport.c.o
@@ -614,7 +614,7 @@ src/transport.o: src/transport.c.o
 
 # target to build an object file
 src/transport.c.o:
-	cd /Users/dlarimer/projects/AthenaRuntime && $(MAKE) -f vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/transport.c.o
+	cd /Users/dlarimer/projects/atc/gate && $(MAKE) -f fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/transport.c.o
 .PHONY : src/transport.c.o
 
 src/transport.i: src/transport.c.i
@@ -622,7 +622,7 @@ src/transport.i: src/transport.c.i
 
 # target to preprocess a source file
 src/transport.c.i:
-	cd /Users/dlarimer/projects/AthenaRuntime && $(MAKE) -f vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/transport.c.i
+	cd /Users/dlarimer/projects/atc/gate && $(MAKE) -f fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/transport.c.i
 .PHONY : src/transport.c.i
 
 src/transport.s: src/transport.c.s
@@ -630,7 +630,7 @@ src/transport.s: src/transport.c.s
 
 # target to generate assembly for a file
 src/transport.c.s:
-	cd /Users/dlarimer/projects/AthenaRuntime && $(MAKE) -f vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/transport.c.s
+	cd /Users/dlarimer/projects/atc/gate && $(MAKE) -f fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/transport.c.s
 .PHONY : src/transport.c.s
 
 src/userauth.o: src/userauth.c.o
@@ -638,7 +638,7 @@ src/userauth.o: src/userauth.c.o
 
 # target to build an object file
 src/userauth.c.o:
-	cd /Users/dlarimer/projects/AthenaRuntime && $(MAKE) -f vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/userauth.c.o
+	cd /Users/dlarimer/projects/atc/gate && $(MAKE) -f fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/userauth.c.o
 .PHONY : src/userauth.c.o
 
 src/userauth.i: src/userauth.c.i
@@ -646,7 +646,7 @@ src/userauth.i: src/userauth.c.i
 
 # target to preprocess a source file
 src/userauth.c.i:
-	cd /Users/dlarimer/projects/AthenaRuntime && $(MAKE) -f vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/userauth.c.i
+	cd /Users/dlarimer/projects/atc/gate && $(MAKE) -f fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/userauth.c.i
 .PHONY : src/userauth.c.i
 
 src/userauth.s: src/userauth.c.s
@@ -654,7 +654,7 @@ src/userauth.s: src/userauth.c.s
 
 # target to generate assembly for a file
 src/userauth.c.s:
-	cd /Users/dlarimer/projects/AthenaRuntime && $(MAKE) -f vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/userauth.c.s
+	cd /Users/dlarimer/projects/atc/gate && $(MAKE) -f fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/userauth.c.s
 .PHONY : src/userauth.c.s
 
 src/version.o: src/version.c.o
@@ -662,7 +662,7 @@ src/version.o: src/version.c.o
 
 # target to build an object file
 src/version.c.o:
-	cd /Users/dlarimer/projects/AthenaRuntime && $(MAKE) -f vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/version.c.o
+	cd /Users/dlarimer/projects/atc/gate && $(MAKE) -f fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/version.c.o
 .PHONY : src/version.c.o
 
 src/version.i: src/version.c.i
@@ -670,7 +670,7 @@ src/version.i: src/version.c.i
 
 # target to preprocess a source file
 src/version.c.i:
-	cd /Users/dlarimer/projects/AthenaRuntime && $(MAKE) -f vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/version.c.i
+	cd /Users/dlarimer/projects/atc/gate && $(MAKE) -f fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/version.c.i
 .PHONY : src/version.c.i
 
 src/version.s: src/version.c.s
@@ -678,7 +678,7 @@ src/version.s: src/version.c.s
 
 # target to generate assembly for a file
 src/version.c.s:
-	cd /Users/dlarimer/projects/AthenaRuntime && $(MAKE) -f vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make vendor/fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/version.c.s
+	cd /Users/dlarimer/projects/atc/gate && $(MAKE) -f fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/build.make fc/vendor/libssh2-1.4.2/CMakeFiles/ssh2.dir/src/version.c.s
 .PHONY : src/version.c.s
 
 # Help Target
@@ -771,6 +771,6 @@ help:
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:
-	cd /Users/dlarimer/projects/AthenaRuntime && $(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
+	cd /Users/dlarimer/projects/atc/gate && $(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
 .PHONY : cmake_check_build_system
 

@@ -1,5 +1,3 @@
-#ifndef _FC_SIGNALS_HPP
-#define _FC_SIGNALS_HPP
 #include <boost/signal.hpp>
 #include <fc/future.hpp>
 #include <fc/thread.hpp>
@@ -27,4 +25,3 @@ namespace fc {
    }
 } 
 
-#endif

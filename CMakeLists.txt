@@ -40,6 +40,7 @@ endif()
 option( UNITY_BUILD OFF )
 
 FIND_PACKAGE( OpenSSL )
+#FIND_PACKAGE( ZLIB )
 
 include_directories( vendor/zlib-1.2.7/)
 include_directories( vendor/libssh2-1.4.2/include )
@@ -98,7 +99,7 @@ add_subdirectory(vendor)
 
 setup_library( fc SOURCES ${sources} )
 
-#setup_executable( json_rpc_test SOURCES tests/json_rpc_test.cpp LIBRARIES fc ${pthread_library} ${rt_library} ${Boost_THREAD_LIBRARY} ${Boost_CONTEXT_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${Boost_CHRONO_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${rt_library}  ${Boost_DATE_TIME_LIBRARY})
+#setup_executable( json_rpc_test SOURCES tests/json_rpc_test.cpp LIBRARIES fc ${ZLIB_LIBRARY} ${pthread_library} ${rt_library} ${Boost_THREAD_LIBRARY} ${Boost_CONTEXT_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${Boost_CHRONO_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${rt_library}  ${Boost_DATE_TIME_LIBRARY})
 #setup_executable( ssh_test SOURCES tests/ssh.cpp LIBRARIES fc ${pthread_library} ${rt_library} ${Boost_THREAD_LIBRARY} ${Boost_CONTEXT_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${Boost_CHRONO_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${rt_library} ssh2 ${OPENSSL_LIBRARY} ${OPENSSL_CRYPTO_LIBRARY} ${ZLIB_LIBRARY} ${ALL_OPENSSL_LIBRARIES} ${Boost_DATE_TIME_LIBRARY})
 
 #add_executable( test_vec tests/vector_test.cpp )

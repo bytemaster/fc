@@ -1,5 +1,4 @@
-#ifndef _FC_THREAD_HPP_
-#define _FC_THREAD_HPP_
+#pragma once
 #include <fc/task.hpp>
 #include <fc/vector.hpp>
 #include <fc/string.hpp>
@@ -175,4 +174,3 @@ namespace fc {
    }
 }
 
-#endif

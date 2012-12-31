@@ -65,8 +65,9 @@ namespace fc {
       void    reserve( size_t );
       size_t  size()const;
       size_t  find( char c, size_t pos = 0 )const;
-      size_t  rfind( char c, size_t pos = 0 )const;
-      size_t  rfind( const fc::string& c, size_t pos = 0 )const;
+      size_t  rfind( char c, size_t pos = npos )const;
+      size_t  rfind( const char* c, size_t pos = npos )const;
+      size_t  rfind( const fc::string& c, size_t pos = npos )const;
 
       void    resize( size_t s );
       void    clear();

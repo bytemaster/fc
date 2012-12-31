@@ -1,5 +1,6 @@
 #include <fc/thread.hpp>
 #include <fc/vector.hpp>
+#include <fc/sstream.hpp>
 #include "thread_d.hpp"
 
 namespace fc {
@@ -179,8 +180,13 @@ namespace fc {
          if( p[i]->ready() ) return i;
        }
 
-       if( timeout < time_point::now() ) 
-           BOOST_THROW_EXCEPTION( future_wait_timeout() );
+       if( timeout < time_point::now() ) {
+           fc::stringstream ss;
+           for( auto i = p.begin(); i != p.end(); ++i ) {
+            ss << (*i)->get_desc() <<", ";
+           }
+           BOOST_THROW_EXCEPTION( future_wait_timeout( ss.str() ) );
+       }
        
        if( !my->current ) { 
          my->current = new fc::context(&fc::thread::current()); 
@@ -264,7 +270,7 @@ namespace fc {
    void thread::wait_until( promise_base::ptr&& p, const time_point& timeout ) {
          if( p->ready() ) return;
          if( timeout < time_point::now() ) 
-             BOOST_THROW_EXCEPTION( future_wait_timeout() );
+             BOOST_THROW_EXCEPTION( future_wait_timeout( p->get_desc() ) );
          
          if( !my->current ) { 
            my->current = new fc::context(&fc::thread::current()); 

@@ -1,4 +1,5 @@
 #include <fc/tcp_socket.hpp>
+#include <fc/hex.hpp>
 #include <fc/ip.hpp>
 #include <fc/fwd_impl.hpp>
 #include <fc/log.hpp>
@@ -52,7 +53,9 @@ namespace fc {
       p->wait();
     } else if( ec ) {
       elog( "throw... write data failed %s", boost::system::system_error(ec).what() );
-      throw boost::system::system_error(ec);
+      FC_THROW_REPORT( "Failed to write data to tcp socket", 
+                        fc::value().set("reason", fc::string(boost::system::system_error(ec).what())) 
+                                   .set("data", fc::to_hex(buf,len) ) );
     }
     return *this;
   }

@@ -12,6 +12,7 @@ namespace fc {
 
         bool operator==(const microseconds& c)const { return _count == c._count; }
         friend bool operator>(const microseconds& a, const microseconds& b){ return a._count > b._count; }
+        friend bool operator<(const microseconds& a, const microseconds& b){ return a._count < b._count; }
         microseconds& operator+=(const microseconds& c) { _count += c._count; return *this; }
         int64_t count()const { return _count; }
     private:

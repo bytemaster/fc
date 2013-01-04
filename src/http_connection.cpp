@@ -33,7 +33,7 @@ FC_START_SHARED_IMPL(fc::http::connection)
 
    fc::http::reply parse_reply() {
       fc::http::reply rep;
-      //try {
+      try {
         fc::vector<char> line(1024*8);
         int s = read_until( line.data(), line.data()+line.size(), ' ' ); // HTTP/1.1
         s = read_until( line.data(), line.data()+line.size(), ' ' ); // CODE
@@ -56,16 +56,17 @@ FC_START_SHARED_IMPL(fc::http::connection)
           }
         }
         if( rep.body.size() ) {
-          slog( "Reading body size %d", rep.body.size() );
+          //slog( "Reading body size %d", rep.body.size() );
           sock.read( rep.body.data(), rep.body.size() );
         }
         return rep;
-     /* } catch ( ... ) {
+      } catch ( ... ) {
         elog( "%s", fc::except_str().c_str() );
         sock.close();
+        FC_THROW_REPORT( "Error parsing reply" );
         rep.status = http::reply::InternalServerError;
         return rep;
-      } */
+      } 
    }
 
 FC_END_SHARED_IMPL 
@@ -92,7 +93,7 @@ http::reply connection::request( const fc::string& method,
     wlog( "Re-open socket!" );
     my->sock.connect_to( my->ep );
   }
-  //try {
+  try {
       fc::stringstream req;
       req << method <<" "<<url<<" HTTP/1.1\r\n";
       req << "Host: localhost\r\n";
@@ -111,10 +112,11 @@ http::reply connection::request( const fc::string& method,
     //  fc::cerr.flush();
 
       return my->parse_reply();
- // } catch ( ... ) {
-  //    my->sock.close();
+  } catch ( ... ) {
+      my->sock.close();
+      FC_THROW_REPORT( "Error Sending HTTP Request" ); // TODO: provide more info
    //  return http::reply( http::reply::InternalServerError ); // TODO: replace with connection error
- // }
+  }
 }
 
 // used for servers

@@ -34,6 +34,7 @@ namespace fc  {
   size_t   string::size()const                   { return my->size(); }
   size_t   string::find(char c, size_t p)const { return my->find(c,p); }
   size_t   string::rfind(char c, size_t p)const { return my->rfind(c,p); }
+  size_t   string::rfind(const char* c, size_t p)const { return my->rfind(c,p); }
   size_t   string::rfind(const fc::string& c, size_t p)const { return my->rfind(c,p); }
   void       string::clear()                       { my->clear(); }
   void       string::resize( size_t s )          { my->resize(s); }

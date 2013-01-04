@@ -1,9 +1,14 @@
-#ifndef _FC_ERROR_HPP_
-#define _FC_ERROR_HPP_
+#pragma once
 #include <fc/string.hpp>
 
 namespace fc {
-  struct future_wait_timeout: public std::exception{};
+  struct future_wait_timeout: public std::exception{
+     future_wait_timeout( const fc::string& msg = "" ):m_msg(msg){}
+     ~future_wait_timeout()throw() {}
+     const char*  what()const throw() { return m_msg.c_str(); }
+     private:
+       fc::string m_msg;
+  };
   struct task_canceled: public std::exception{};
   struct thread_quit: public std::exception{};
   struct wait_any_error: public std::exception{};
@@ -29,4 +34,3 @@ namespace fc {
   };
 }
 
-#endif // _FC_ERROR_HPP_

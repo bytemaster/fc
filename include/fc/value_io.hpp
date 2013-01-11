@@ -5,6 +5,7 @@
 #include <fc/value.hpp>
 #include <fc/value_cast.hpp>
 #include <fc/tuple.hpp>
+#include <fc/error_report.hpp>
 
 namespace fc {
   template<typename T>
@@ -129,7 +130,11 @@ namespace fc {
       template<typename T, typename C, T (C::*p)>
       void operator()( const char* name )const {
          if( obj.find(name) != obj.end()) {
+            try { 
              fc::unpack( obj[name], c.*p );
+            } catch ( fc::error_report& er ) {
+                throw FC_REPORT_PUSH( er, "Error parsing field '${field_name}'", fc::value().set("field_name",name) );
+            }
          }
          else {
             if( !is_optional< typename fc::remove_reference<decltype(c.*p)>::type >::type::value ) {

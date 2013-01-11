@@ -15,7 +15,7 @@ namespace fc {
 
         uint32_t ip()const { return _ip; }
 
-d
+
       private:
         uint32_t _ip;
     };

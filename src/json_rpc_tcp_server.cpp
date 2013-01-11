@@ -31,7 +31,20 @@ namespace fc {
             slog( "new connection!" );
             my->on_con( *con ); 
             con->start();
+            rpc_tcp_connection* tcpc = con.get();
             my->cons.push_back(con);
+            con->on_close( [=]() {
+               for( int i = 0; i < my->cons.size(); ++i ) {
+                  if( my->cons[i].get() == tcpc ) {
+                    fc_swap( my->cons[i], my->cons.back() );
+                    auto tmp = my->cons.back();
+                    my->cons.pop_back();
+                    fc::async([tmp](){slog("free con");});
+                    // TODO: swap to end, pop back
+                    return;
+                  }
+               }
+            });
             con.reset(new rpc_tcp_connection() );
           }
         } catch ( ... ) {

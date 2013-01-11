@@ -21,13 +21,13 @@ namespace fc {
     return my->_sock.is_open();
   }
 
-  tcp_socket::tcp_socket(){}
+  tcp_socket::tcp_socket(){};
 
-  tcp_socket::~tcp_socket(){  }
+  tcp_socket::~tcp_socket(){};
 
   void tcp_socket::flush() {}
   void tcp_socket::close() {
-    my->_sock.close();
+    if( is_open() ) my->_sock.close();
   }
 
   bool tcp_socket::eof()const {
@@ -63,14 +63,16 @@ namespace fc {
     boost::system::error_code ec;
     size_t w = my->_sock.read_some( boost::asio::buffer( buf, len ), ec );
     if( ec == boost::asio::error::would_block ) {
-      promise<size_t>::ptr p(new promise<size_t>("tcp_socket::write"));
+      promise<size_t>::ptr p(new promise<size_t>("tcp_socket::readsome"));
       my->_sock.async_read_some( boost::asio::buffer(buf, len),
                 [=]( const boost::system::error_code& ec, size_t bt ) {
+                     slog( "%d  ec: %s", bt, boost::system::system_error(ec).what() );
                     if( !ec ) p->set_value(bt);
                     else p->set_exception( fc::copy_exception( boost::system::system_error(ec) ) );
                 });
       return p->wait();
     } else if (ec ) {
+      slog( "throw!" );
       throw boost::system::system_error(ec);
     }
     return w;

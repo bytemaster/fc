@@ -2,8 +2,7 @@
  *  @file fc/cmt/asio.hpp
  *  @brief defines wrappers for boost::asio functions
  */
-#ifndef _FC_ASIO_HPP_
-#define _FC_ASIO_HPP_
+#pragma once
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
 #include <fc/future.hpp>
@@ -262,4 +261,3 @@ namespace asio {
 
 } } // namespace fc::asio
 
-#endif // _BOOST_CMT_ASIO_HPP_

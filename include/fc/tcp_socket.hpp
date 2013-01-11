@@ -1,5 +1,4 @@
-#ifndef _FC_TCP_SOCKET_HPP_
-#define _FC_TCP_SOCKET_HPP_
+#pragma once
 #include <fc/utility.hpp>
 #include <fc/fwd.hpp>
 #include <fc/iostream.hpp>
@@ -55,4 +54,3 @@ namespace fc {
 
 } // namesapce fc
 
-#endif // _FC_TCP_SOCKET_HPP_

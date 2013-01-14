@@ -123,7 +123,7 @@ namespace fc {
   bool exists( const path& p ) { return boost::filesystem::exists(p); }
   void create_directories( const path& p ) { 
     try {
-        boost::filesystem::create_directories(p); 
+      boost::filesystem::create_directories(p); 
     } catch ( ... ) {
       FC_THROW_REPORT( "Unable to create directories ${path}", fc::value().set("path", p ).set("inner", fc::except_str() ) );
     }

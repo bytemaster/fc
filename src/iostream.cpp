@@ -17,6 +17,7 @@ namespace fc {
   
   struct cin_buffer {
     cin_buffer():eof(false),write_pos(0),read_pos(0),cinthread("cin"){
+    
       cinthread.async( [=](){read();} );
     }
 
@@ -131,7 +132,6 @@ namespace fc {
         while( !b.eof &&  (b.write_pos - b.read_pos)==0 ){ 
            // wait for more... 
            fc::promise<void>::ptr rr( new fc::promise<void>() );
-     //      b.read_ready = rr;
            {  // copy read_ready because it is accessed from multiple threads
              fc::scoped_lock<boost::mutex> lock( b.read_ready_mutex ); 
              b.read_ready = rr;
@@ -139,7 +139,7 @@ namespace fc {
            if( b.write_pos - b.read_pos == 0 ) {
              rr->wait();
            }
-           b.read_ready.reset();
+         //  b.read_ready.reset();
            {  // copy read_ready because it is accessed from multiple threads
              fc::scoped_lock<boost::mutex> lock( b.read_ready_mutex ); 
              b.read_ready.reset();

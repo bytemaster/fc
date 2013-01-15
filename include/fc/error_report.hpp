@@ -54,6 +54,7 @@ namespace fc {
          fc::exception_ptr copy_exception();
    };
 
+   fc::string substitute( const fc::string& format, const fc::value& keys );
 
 } // namespace fc
 

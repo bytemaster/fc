@@ -82,6 +82,9 @@ fc::string error_frame::to_detail_string()const {
     return ss.str();
 }
 fc::string error_frame::to_string()const {
+   return substitute( desc, meta );
+}
+#if 0
     fc::stringstream ss;
     size_t prev = 0;
     auto next = desc.find( '$' );
@@ -130,6 +133,59 @@ fc::string error_frame::to_string()const {
     }
     return ss.str();
 }
+#endif
+
+fc::string substitute( const fc::string& format, const fc::value& keys ) {
+    fc::stringstream ss;
+    size_t prev = 0;
+    auto next = format.find( '$' );
+    while( prev != size_t(fc::string::npos) && prev < size_t(format.size()) ) {
+   //   slog( "prev: %d next %d   %s", prev, next, format.substr(prev,next).c_str() );
+      // print everything from the last pos until the first '$'
+      ss << format.substr( prev, size_t(next-prev) );
+
+      // if we got to the end, return it.
+      if( next == string::npos ) { return ss.str(); }
+
+      // if we are not at the end, then update the start
+      prev = next + 1;
+
+      if( format[prev] == '{' ) { 
+         // if the next char is a open, then find close
+          next = format.find( '}', prev );
+          // if we found close... 
+          if( next != fc::string::npos ) {
+            // the key is between prev and next
+            fc::string key = format.substr( prev+1, (next-prev-1) );
+            //slog( "key '%s'", key.c_str() );
+            if( keys ) {
+                auto itr = keys->find( key.c_str() );
+                if( itr != keys->end() ) {
+		   if( itr->val.is_string() ) {
+		     ss<<itr->val.cast<fc::string>();
+		   } else {
+                     ss << fc::json::to_string( itr->val );
+		   }
+                } else {
+                   ss << "???";
+                }
+            }
+            prev = next + 1;
+            // find the next $
+            next = format.find( '$', prev );
+          } else {
+            // we didn't find it.. continue to while...
+          }
+      } else  {
+         ss << format[prev];
+         ++prev;
+         next = format.find( '$', prev );
+      }
+    }
+    return ss.str();
+}
+
+
 fc::string error_report::to_string()const {
   fc::stringstream ss;
   for( uint32_t i = 0; i < stack.size(); ++i ) {

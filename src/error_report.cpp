@@ -82,7 +82,7 @@ fc::string error_frame::to_detail_string()const {
     return ss.str();
 }
 fc::string error_frame::to_string()const {
-   return substitute( desc, meta );
+   return substitute( desc, meta ? *meta : fc::value() );
 }
 #if 0
     fc::stringstream ss;
@@ -158,18 +158,18 @@ fc::string substitute( const fc::string& format, const fc::value& keys ) {
             // the key is between prev and next
             fc::string key = format.substr( prev+1, (next-prev-1) );
             //slog( "key '%s'", key.c_str() );
-            if( keys ) {
-                auto itr = keys->find( key.c_str() );
-                if( itr != keys->end() ) {
-		   if( itr->val.is_string() ) {
-		     ss<<itr->val.cast<fc::string>();
-		   } else {
-                     ss << fc::json::to_string( itr->val );
-		   }
+          //  if( keys ) {
+                auto itr = keys.find( key.c_str() );
+                if( itr != keys.end() ) {
+		               if( itr->val.is_string() ) {
+		                 ss<<itr->val.cast<fc::string>();
+		               } else {
+                                 ss << fc::json::to_string( itr->val );
+		               }
                 } else {
                    ss << "???";
                 }
-            }
+          //  }
             prev = next + 1;
             // find the next $
             next = format.find( '$', prev );

@@ -139,6 +139,8 @@ namespace fc {
         const char*  type()const;
         bool         is_null()const;
         bool         is_string()const;
+        bool         is_object()const;
+        bool         is_array()const;
 
         void         visit( const_visitor&& v )const;
 

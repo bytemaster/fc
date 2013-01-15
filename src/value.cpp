@@ -291,6 +291,12 @@ value& value::operator=( const value& v ){
 bool value::is_null()const {
     return strcmp(gh(holder)->type(), "void") == 0;
 }
+bool value::is_object()const {
+    return strcmp(gh(holder)->type(), "object") == 0;
+}
+bool value::is_array()const {
+    return strcmp(gh(holder)->type(), "array") == 0;
+}
 bool value::is_string()const {
     return strcmp(gh(holder)->type(), "string") == 0;
 }

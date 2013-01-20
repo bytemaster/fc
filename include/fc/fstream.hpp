@@ -1,5 +1,6 @@
 #pragma once 
 #include <fc/shared_ptr.hpp>
+#include <fc/filesystem.hpp>
 #include <fc/iostream.hpp>
 
 namespace fc {

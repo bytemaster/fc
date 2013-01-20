@@ -14,4 +14,15 @@ namespace fc {
       time_t tt = bch::system_clock::to_time_t(tp);
       return boost::posix_time::to_iso_string( boost::posix_time::from_time_t(tt) );
   }
+  time_point time_point::from_iso_string( const fc::string& s ) {
+     auto pt = boost::posix_time::from_iso_string(s);
+     return fc::time_point(fc::seconds( (pt - boost::posix_time::from_time_t(0)).total_seconds() ));
+  }
+  class value;
+  void pack( fc::value&  v, const fc::time_point& t ) {
+    v = fc::string(t);
+  }
+  void unpack( const fc::value& v, fc::time_point& t ) {
+    t = fc::time_point::from_iso_string(v.cast<fc::string>());
+  }
 }

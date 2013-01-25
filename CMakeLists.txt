@@ -97,6 +97,9 @@ set( sources
 
 add_subdirectory(vendor) 
 
+add_executable( date t.cpp )
+target_link_libraries( date fc ${Boost_THREAD_LIBRARY} ${Boost_CONTEXT_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${Boost_CHRONO_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${rt_library}  ${Boost_DATE_TIME_LIBRARY})
+
 setup_library( fc SOURCES ${sources} )
 
 #setup_executable( json_rpc_test SOURCES tests/json_rpc_test.cpp LIBRARIES fc ${ZLIB_LIBRARY} ${pthread_library} ${rt_library} ${Boost_THREAD_LIBRARY} ${Boost_CONTEXT_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${Boost_CHRONO_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${rt_library}  ${Boost_DATE_TIME_LIBRARY})

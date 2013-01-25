@@ -28,6 +28,7 @@ namespace fc {
       friend path operator /( const fc::path& p, const fc::path& );
       friend bool operator ==( const fc::path& p, const fc::path& );
       friend bool operator !=( const fc::path& p, const fc::path& );
+      friend bool operator < ( const fc::path& p, const fc::path& );
 
       operator boost::filesystem::path& ();
       operator const boost::filesystem::path& ()const;
@@ -69,6 +70,9 @@ namespace fc {
       fc::path            operator*()const;
       recursive_directory_iterator& operator++(int);
       recursive_directory_iterator& operator++();
+      void pop();
+      int  level();
+
 
       friend bool operator==( const recursive_directory_iterator&, const recursive_directory_iterator& );
       friend bool operator!=( const recursive_directory_iterator&, const recursive_directory_iterator& );

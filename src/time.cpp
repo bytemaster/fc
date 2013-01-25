@@ -1,3 +1,4 @@
+#include <fc/value_cast.hpp>
 #include <boost/chrono/system_clocks.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <fc/time.hpp>

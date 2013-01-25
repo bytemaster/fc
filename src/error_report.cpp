@@ -84,56 +84,6 @@ fc::string error_frame::to_detail_string()const {
 fc::string error_frame::to_string()const {
    return substitute( desc, meta ? *meta : fc::value() );
 }
-#if 0
-    fc::stringstream ss;
-    size_t prev = 0;
-    auto next = desc.find( '$' );
-    while( prev != size_t(fc::string::npos) && prev < size_t(desc.size()) ) {
-   //   slog( "prev: %d next %d   %s", prev, next, desc.substr(prev,next).c_str() );
-      // print everything from the last pos until the first '$'
-      ss << desc.substr( prev, size_t(next-prev) );
-
-      // if we got to the end, return it.
-      if( next == string::npos ) { return ss.str(); }
-
-      // if we are not at the end, then update the start
-      prev = next + 1;
-
-      if( desc[prev] == '{' ) { 
-         // if the next char is a open, then find close
-          next = desc.find( '}', prev );
-          // if we found close... 
-          if( next != fc::string::npos ) {
-            // the key is between prev and next
-            fc::string key = desc.substr( prev+1, (next-prev-1) );
-            //slog( "key '%s'", key.c_str() );
-            if( meta ) {
-                auto itr = meta->find( key.c_str() );
-                if( itr != meta->end() ) {
-		   if( itr->val.is_string() ) {
-		     ss<<itr->val.cast<fc::string>();
-		   } else {
-                     ss << fc::json::to_string( itr->val );
-		   }
-                } else {
-                   ss << "???";
-                }
-            }
-            prev = next + 1;
-            // find the next $
-            next = desc.find( '$', prev );
-          } else {
-            // we didn't find it.. continue to while...
-          }
-      } else  {
-         ss << desc[prev];
-         ++prev;
-         next = desc.find( '$', prev );
-      }
-    }
-    return ss.str();
-}
-#endif
 
 fc::string substitute( const fc::string& format, const fc::value& keys ) {
     fc::stringstream ss;
@@ -164,10 +114,10 @@ fc::string substitute( const fc::string& format, const fc::value& keys ) {
 		               if( itr->val.is_string() ) {
 		                 ss<<itr->val.cast<fc::string>();
 		               } else {
-                                 ss << fc::json::to_string( itr->val );
+                     ss << fc::json::to_string( itr->val );
 		               }
                 } else {
-                   ss << "???";
+                   ss << "${"<<key<<"}";
                 }
           //  }
             prev = next + 1;

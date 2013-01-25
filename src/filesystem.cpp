@@ -40,6 +40,7 @@ namespace fc {
     return *this;
    }
 
+   bool operator <( const fc::path& l, const fc::path& r ) { return *l._p < *r._p; }
    bool operator ==( const fc::path& l, const fc::path& r ) { return *l._p == *r._p; }
    bool operator !=( const fc::path& l, const fc::path& r ) { return *l._p != *r._p; }
 
@@ -111,6 +112,9 @@ namespace fc {
       fc::path            recursive_directory_iterator::operator*()const { return boost::filesystem::path(*(*_p)); }
       recursive_directory_iterator& recursive_directory_iterator::operator++(int)  { (*_p)++; return *this; }
       recursive_directory_iterator& recursive_directory_iterator::operator++()     { (*_p)++; return *this; }
+
+      void recursive_directory_iterator::pop() { (*_p).pop(); }
+      int recursive_directory_iterator::level() { return _p->level(); }
 
       bool operator==( const recursive_directory_iterator& r, const recursive_directory_iterator& l) {
         return *r._p == *l._p;

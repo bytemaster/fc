@@ -24,12 +24,18 @@ namespace std {
 namespace fc {
  // typedef std::string string;
   /**
+   * @brief wrapper on std::string
+   *
    *  Including <string> results in 4000 lines of code
    *  that must be included to build your header.  This
    *  class hides all of those details while maintaining
    *  compatability with std::string. Using fc::string
    *  instead of std::string can accelerate compile times
    *  10x.
+   *
+   *  The implementation of this class is std::string, this header simply
+   *  accelerates compile times.   fc::string is automatically convertable to / from
+   *  std::string.
    */
   class string {
     public:

@@ -347,6 +347,15 @@ namespace fc {
     };
   }
 
+  /**
+   *  @brief provides a light-weight vector similar to std::vector except that
+   *  it prevents needing to include <vector> which requires many more headers
+   *  and increases compile times.  
+   *
+   *  This class should have the same API as std::vector and can be expanded as
+   *  additional features of std::vector are required.
+   *
+   */
   template<typename T>
   class vector : public detail::vector_impl<T, typename fc::is_class<T>::type> {
     public:

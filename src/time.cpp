@@ -1,7 +1,7 @@
+#include <fc/time.hpp>
 #include <fc/value_cast.hpp>
 #include <boost/chrono/system_clocks.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
-#include <fc/time.hpp>
 #include <sstream>
 
 namespace fc {
@@ -13,7 +13,8 @@ namespace fc {
       bch::system_clock::time_point tp; 
       tp += bch::microseconds( elapsed._count);
       time_t tt = bch::system_clock::to_time_t(tp);
-      return boost::posix_time::to_iso_string( boost::posix_time::from_time_t(tt) + boost::posix_time::microseconds( elapsed._count - tt*1000000 ));
+      
+      return boost::posix_time::to_iso_string( boost::posix_time::from_time_t(tt) + boost::posix_time::microseconds( elapsed._count % 1000000 ) ); 
   }
   time_point time_point::from_iso_string( const fc::string& s ) {
      auto pt = boost::posix_time::from_iso_string(s);

@@ -28,6 +28,7 @@ namespace fc {
       mapped_region( const file_mapping& fm, mode_t m, size_t start, size_t size );
       mapped_region( const file_mapping& fm, mode_t m );
       ~mapped_region();
+      void  flush();
       void* get_address()const;
       size_t get_size()const;
     private:

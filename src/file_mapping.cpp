@@ -16,5 +16,6 @@ namespace fc {
   :my( *fm.my, m == read_only ? boost::interprocess::read_only : boost::interprocess::read_write) { }
   mapped_region::~mapped_region(){}
   void* mapped_region::get_address()const { return my->get_address(); }
+  void mapped_region::flush(){ my->flush(); }
   size_t mapped_region::get_size()const { return my->get_size();    }
 }

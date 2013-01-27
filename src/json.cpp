@@ -1,8 +1,8 @@
+#include <fc/filesystem.hpp>
 #include <fc/json.hpp>
 #include <fc/hex.hpp>
 #include <fc/exception.hpp>
 #include <fc/sstream.hpp>
-#include <fc/filesystem.hpp>
 #include <fc/interprocess/file_mapping.hpp>
 #include <fc/error_report.hpp>
 #include <map>
@@ -785,6 +785,88 @@ fc::value to_value( char* start, char* end, error_collector& ec ) {
 }
 namespace fc { namespace json {
 
+fc::string pretty_print( const fc::string& v, uint8_t indent ) {
+  int level = 0;
+  fc::stringstream ss;
+  bool first = false;
+  bool quote = false;
+  bool escape = false;
+  for( uint32_t i = 0; i < v.size(); ++i ) {
+     switch( v[i] ) {
+        case '\\':
+          if( !escape ) {
+            if( quote ) 
+              escape = true;
+          } else { escape = false; }
+          ss<<v[i];
+          break;
+        case ':':
+          if( !quote ) {
+            ss<<": ";
+          } else {
+            ss<<':';
+          }
+          break;
+        case '"':
+          if( first ) {
+             ss<<'\n';
+             for( int i = 0; i < level*indent; ++i ) ss<<' ';
+             first = false;
+          }
+          if( !escape ) {
+            quote = !quote;
+          } 
+          escape = false;
+          ss<<'"';
+          break;
+        case '{':
+        case '[':
+          ss<<v[i];
+          if( !quote ) {
+            ++level;
+            first = true;
+          }else {
+            escape = false;
+          }
+          break;
+        case '}':
+        case ']':
+          if( !quote ) {
+            if( v[i-1] != '[' && v[i-1] != '{' ) {
+              ss<<'\n';
+            }
+            --level;
+            if( !first ) {
+              for( int i = 0; i < level*indent; ++i ) ss<<' ';
+            }
+            ss<<v[i];
+            break;
+          } else {
+            escape = false;
+            ss<<v[i];
+          }
+          break;
+        case ',':
+          if( !quote ) {
+            ss<<',';
+            first = true;
+          } else {
+            escape = false;
+            ss<<',';
+          }
+          break;
+        default:
+          if( first ) {
+             ss<<'\n';
+             for( int i = 0; i < level*indent; ++i ) ss<<' ';
+             first = false;
+          }
+          ss << v[i];
+     }
+  }
+  return ss.str();
+}
+
 fc::string pretty_print( fc::vector<char>&& v, uint8_t indent ) {
   int level = 0;
   fc::stringstream ss;
@@ -919,6 +1001,10 @@ fc::string pretty_print( fc::vector<char>&& v, uint8_t indent ) {
     return ss.str();
   }
 
+  fc::string to_pretty_string( const fc::value& v ) {
+    return pretty_print( to_string(v), 4 );
+  }
+
   value from_file( const fc::path& local_path ) {
     if( !exists(local_path) ) {
       FC_THROW_REPORT( "Source file ${filename} does not exist", value().set("filename",local_path.string()) );
@@ -927,23 +1013,29 @@ fc::string pretty_print( fc::vector<char>&& v, uint8_t indent ) {
       FC_THROW_REPORT( "Source path ${path} is a directory; a file was expected", 
                        value().set("path",local_path.string()) );
     }
-
-    // memory map the file
-    size_t       fsize = static_cast<size_t>(file_size(local_path));
-    if( fsize == 0 ) { return value(); }
-    file_mapping fmap( local_path.string().c_str(), read_only );
-
-
-    mapped_region mr( fmap, fc::read_only, 0, fsize );
-
-    const char* pos = reinterpret_cast<const char*>(mr.get_address());
-    const char* end = pos + fsize;
-
-    // TODO: implement a const version of to_value 
-    fc::vector<char> tmp(pos,end);
-
-    error_collector ec;
-    return to_value(tmp.data(), tmp.data()+fsize,ec);
+    try {
+      // memory map the file
+      size_t       fsize = static_cast<size_t>(file_size(local_path));
+      if( fsize == 0 ) { return value(); }
+      file_mapping fmap( local_path.string().c_str(), read_only );
+    
+    
+      mapped_region mr( fmap, fc::read_only, 0, fsize );
+    
+      const char* pos = reinterpret_cast<const char*>(mr.get_address());
+      const char* end = pos + fsize;
+    
+      // TODO: implement a const version of to_value 
+      fc::vector<char> tmp(pos,end);
+    
+      error_collector ec;
+      return to_value(tmp.data(), tmp.data()+fsize,ec);
+    } catch ( ... ) {
+      FC_THROW_REPORT( "Error loading JSON object from file '${path}'", 
+                       fc::value().set( "file", local_path )
+                                  .set( "exception", fc::except_str() )
+                       );
+    }
   }
 
   value from_string( const fc::string& s ) {

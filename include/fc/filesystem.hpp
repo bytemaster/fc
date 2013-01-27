@@ -1,5 +1,6 @@
 #pragma once
 #include <fc/string.hpp>
+#include <fc/typename.hpp>
 #include <fc/fwd.hpp>
 
 namespace boost {
@@ -98,5 +99,7 @@ namespace fc {
   class value;
   void pack( fc::value& , const fc::path&  );
   void unpack( const fc::value& , fc::path&  );
+
+  template<> struct get_typename<path> { static const char* name()   { return "path";   } };
 }
 

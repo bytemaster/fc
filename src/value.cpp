@@ -333,6 +333,24 @@ value::object::const_iterator value::end()const {
   return value::object::const_iterator();
   //return nullptr; 
 }
+/**
+ *  If this value is an object, remove key from the object
+ *
+ *  @return *this;
+ */
+value&       value::clear( const fc::string& key ) {
+  if( strcmp(gh(holder)->type(), "object") == 0) {
+    detail::value_holder_impl<value::object>* o = dynamic_cast<detail::value_holder_impl<value::object>*>(gh(holder));
+    for( auto i  = o->val.fields.begin();
+              i != o->val.fields.end(); ++i ) {
+      if( strcmp( i->key.c_str(), key.c_str() ) == 0 ) {
+         o->val.fields.erase(i);
+         return *this;
+      }
+    }
+  } 
+  return *this;
+}
 value&       value::operator[]( const char* key ) {
   if( strcmp(gh(holder)->type(), "object") == 0) {
     detail::value_holder_impl<value::object>* o = dynamic_cast<detail::value_holder_impl<value::object>*>(gh(holder));

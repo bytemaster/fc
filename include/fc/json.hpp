@@ -11,6 +11,7 @@ namespace fc {
 
    namespace json {
      string to_string( const value& o );
+     string to_pretty_string( const value& v );
 
 
      value from_string( const string& s );
@@ -32,6 +33,10 @@ namespace fc {
      string to_string( const T& o ) { 
         return json::to_string(value(o)); 
      }
+     template<typename T>
+     string to_pretty_string( const T& o ) { 
+        return json::to_pretty_string(value(o)); 
+     }
 
      template<typename T>
      T  from_string( const string& s ) {
@@ -43,6 +48,7 @@ namespace fc {
      T  from_file( const fc::path& s ) {
         return value_cast<T>( fc::json::from_file(s) );
      }
+
   } // namespace json 
 } // fc
 

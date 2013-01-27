@@ -181,7 +181,8 @@ namespace fc {
             int idx = 0;
             for( auto i = a.fields.begin(); i != a.fields.end(); ++i ) {
               try {
-                m_out.push_back( value_cast<T>( *i ) );
+                m_out.push_back(T());
+                unpack( *i, m_out.back()  );
               } catch( fc::error_report& er ) {
                  throw FC_REPORT_PUSH( er, "Error parsing array index ${index} to ${type}", 
                                            fc::value().set("index", idx).set("type",fc::get_typename<T>::name()) );
@@ -233,7 +234,9 @@ namespace fc {
              template<typename Member>
              void operator()( Member& m ) {
                try {
-                  m = value_cast<Member>(_val[idx]);
+                  //m = value_cast<Member>(_val[idx]);
+                  unpack( _val[idx], m );
+                //  m = value_cast<Member>(_val[idx]);
                } catch ( fc::error_report& er ) {
                   throw FC_REPORT_PUSH( er, "Error parsing tuple element ${index}", fc::value().set("index",idx) );
                }
@@ -329,6 +332,9 @@ namespace fc {
     }
     template<typename T>
     T value::cast()const {
-        return value_cast<T>(*this);
+         T tmp;
+         unpack(*this,tmp);
+         return tmp;
+//        return unpackvalue_cast<T>(*this);
     }
 }

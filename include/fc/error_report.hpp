@@ -27,7 +27,7 @@ namespace fc {
          fc::string                  file;
          int64_t                     line;
          fc::string                  method;
-         uint64_t                    time;
+         fc::string                  time;
          fc::optional<fc::value>     meta;
    };
    typedef fc::vector<error_frame> error_context;

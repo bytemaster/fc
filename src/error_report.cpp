@@ -3,11 +3,12 @@
 #include <fc/sstream.hpp>
 #include <fc/value.hpp>
 #include <fc/json.hpp>
+#include <fc/time.hpp>
 #include <boost/exception_ptr.hpp>
 namespace fc {
 
 error_frame::error_frame( const fc::string& f, uint64_t l, const fc::string& m, const fc::string& d, fc::value met )
-:desc(d),file(fc::path(f).filename().generic_string()),line(l),method(m),meta(fc::move(met)){}
+:desc(d),file(fc::path(f).filename().generic_string()),line(l),method(m),meta(fc::move(met)),time(fc::time_point::now()){}
 
 error_report::error_report()
 {

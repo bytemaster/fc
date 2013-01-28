@@ -135,6 +135,28 @@ fc::string substitute( const fc::string& format, const fc::value& keys ) {
     return ss.str();
 }
 
+/**
+ *   Performs variable substitution on all strings in keys or values of 'in' with 
+ *   values from keys.
+ */
+fc::value recursive_substitute( const value& in, const fc::value& keys ) {
+  fc::value out;
+  if( in.is_string() ) {
+      return fc::substitute( in.cast<string>(), keys );
+  }
+  else if( in.is_object() ) {
+    for( auto itr = in.begin(); itr != in.end(); ++itr ) {
+      out[fc::substitute(itr->key, keys)] = recursive_substitute( itr->val, keys );
+    }
+    return out;
+  }
+  else if( in.is_array() ) {
+    for( size_t i = 0; i < in.size(); ++i ) {
+       out.push_back( recursive_substitute( in[i], keys ) );
+    }
+  }
+  return in;
+}
 
 fc::string error_report::to_string()const {
   fc::stringstream ss;

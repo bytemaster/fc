@@ -39,6 +39,7 @@ namespace fc { namespace json {
            while( !in.eof() ) {
 	    // std::cerr<<"\n**line size: "<<line.size()<<"\n\n";
             //   slog( "line size: '%d'", line.size() );
+            //   slog( "%s", line.c_str() );
                try {
                  fc::value v= fc::json::from_string( line );
                  self.handle_message(v);

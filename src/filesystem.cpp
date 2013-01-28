@@ -138,7 +138,7 @@ namespace fc {
   void remove_all( const path& p ) { boost::filesystem::remove_all(p); }
   void copy( const path& f, const path& t ) { 
      try {
-  	boost::filesystem::copy( boost::filesystem::path(f), boost::filesystem::path(t) ); 
+  	    boost::filesystem::copy( boost::filesystem::path(f), boost::filesystem::path(t) ); 
      } catch ( boost::system::system_error& e ) {
      	FC_THROW_REPORT( "Copy from ${srcfile} to ${dstfile} failed because ${reason}",
 	         fc::value().set("srcfile",f).set("dstfile",t).set("reason",e.what() ) );
@@ -147,9 +147,29 @@ namespace fc {
 	         fc::value().set("srcfile",f).set("dstfile",t).set("inner", fc::except_str() ) );
      }
   }
-  void create_hard_link( const path& f, const path& t ) { boost::filesystem::create_hard_link( f, t ); }
-  bool remove( const path& f ) { return boost::filesystem::remove( f ); }
-  fc::path canonical( const fc::path& p ) { return boost::filesystem::canonical(p); }
+  void create_hard_link( const path& f, const path& t ) { 
+     try {
+        boost::filesystem::create_hard_link( f, t ); 
+     } catch ( ... ) {
+         FC_THROW_REPORT( "Unable to create hard link from '${from}' to '${to}'", 
+                          fc::value().set( "from", f )
+                          .set("to",t).set("exception", fc::except_str() ) );
+     }
+  }
+  bool remove( const path& f ) { 
+     try {
+        boost::filesystem::remove( f ); 
+     } catch ( ... ) {
+         FC_THROW_REPORT( "Unable to remove '${path}'", fc::value().set( "path", f ).set("exception", fc::except_str() ) );
+     }
+  }
+  fc::path canonical( const fc::path& p ) { 
+     try {
+        return boost::filesystem::canonical(p); 
+     } catch ( ... ) {
+         FC_THROW_REPORT( "Unable to resolve path '${path}'", fc::value().set( "path", p ).set("exception", fc::except_str() ) );
+     }
+  }
   fc::path absolute( const fc::path& p ) { return boost::filesystem::absolute(p); }
   path     unique_path() { return boost::filesystem::unique_path(); }
   path     temp_directory_path() { return boost::filesystem::temp_directory_path(); }

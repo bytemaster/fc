@@ -13,7 +13,7 @@ namespace fc {
    class error_frame {
       public:
          error_frame( const fc::string& file, uint64_t line, const fc::string& method, const fc::string& desc, fc::value m );
-         error_frame(){}
+         error_frame():file("unknown-file"),line(0){}
          error_frame(const error_frame& );
          error_frame(error_frame&& );
 
@@ -55,6 +55,7 @@ namespace fc {
    };
 
    fc::string substitute( const fc::string& format, const fc::value& keys );
+   fc::value  recursive_substitute( const value& in, const fc::value& keys );
 
 } // namespace fc
 

@@ -189,10 +189,8 @@ namespace fc {
        ~key_val(){ }
        
        key_val& operator=( key_val&& k ) {
-         slog( "swap key");
          fc_swap( key, k.key );
-         slog( "swap val");
-	 fc_swap( val, k.val );
+	       fc_swap( val, k.val );
          return *this;
        }
 

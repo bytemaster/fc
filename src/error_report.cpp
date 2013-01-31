@@ -8,21 +8,24 @@
 namespace fc {
 
 error_frame::error_frame( const fc::string& f, uint64_t l, const fc::string& m, const fc::string& d, fc::value met )
-:desc(d),file(fc::path(f).filename().generic_string()),line(l),method(m),meta(fc::move(met)),time(fc::time_point::now()){}
+:desc(d),file(fc::path(f).filename().generic_string()),line(l),method(m),meta(fc::move(met)),time(fc::time_point::now()),detail(false){}
 
+error_frame::error_frame( bool is_detail, const fc::string& f, uint64_t l, const fc::string& m, const fc::string& d, fc::value met )
+:desc(d),file(fc::path(f).filename().generic_string()),line(l),method(m),meta(fc::move(met)),time(fc::time_point::now()),detail(is_detail){}
 error_report::error_report()
 {
 }
 error_frame::error_frame(const fc::error_frame& e)
-:desc(e.desc),file(e.file),line(e.line),method(e.method),time(e.time),meta(e.meta){}
+:desc(e.desc),file(e.file),line(e.line),method(e.method),meta(e.meta),time(e.time),detail(e.detail){}
 
 error_frame::error_frame(fc::error_frame&& e)
 :desc(fc::move(e.desc)),
  file(fc::move(e.file)),
  line(e.line),
  method(fc::move(e.method)),
+ meta(fc::move(e.meta)),
  time(e.time),
- meta(fc::move(e.meta))
+ detail(e.detail)
   {}
 
 fc::error_frame& fc::error_frame::operator=(const fc::error_frame& f ) {
@@ -38,6 +41,7 @@ fc::error_frame& fc::error_frame::operator=(fc::error_frame&& e )
     method=fc::move(e.method);
     time=e.time;
     meta=fc::move(e.meta);
+    detail = e.detail;
     return *this;
 }
 

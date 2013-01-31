@@ -158,7 +158,7 @@ namespace fc {
   }
   bool remove( const path& f ) { 
      try {
-        boost::filesystem::remove( f ); 
+        return boost::filesystem::remove( f ); 
      } catch ( ... ) {
          FC_THROW_REPORT( "Unable to remove '${path}'", fc::value().set( "path", f ).set("exception", fc::except_str() ) );
      }

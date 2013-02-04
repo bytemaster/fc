@@ -161,23 +161,31 @@ namespace fc {  namespace json {
 
     template<typename InterfaceType>
     template<typename R, typename A1>
-    void add_method_visitor<InterfaceType>::operator()( const char* name, std::function<R(A1)>& meth)    {
-        _con.add_method( name, rpc_server_method::ptr( new rpc_server_method_impl<R,tuple<A1>,R(A1) >(meth) ) );
+    void add_method_visitor<InterfaceType>::operator()( const char* name, 
+                                                        std::function<R(A1)>& meth)    {
+        _con.add_method( name, rpc_server_method::ptr( 
+                               new rpc_server_method_impl<R,tuple<A1>,R(A1) >(meth) ) );
     }
     template<typename InterfaceType>
     template<typename R, typename A1, typename A2>
-    void add_method_visitor<InterfaceType>::operator()( const char* name, std::function<R(A1,A2)>& meth)    {
-        _con.add_method( name, rpc_server_method::ptr( new rpc_server_method_impl<R,tuple<A1,A2>,R(A1,A2) >(meth) ) );
+    void add_method_visitor<InterfaceType>::operator()( const char* name, 
+                                                        std::function<R(A1,A2)>& meth)    {
+        _con.add_method( name, rpc_server_method::ptr( 
+                               new rpc_server_method_impl<R,tuple<A1,A2>,R(A1,A2) >(meth) ) );
     }
     template<typename InterfaceType>
     template<typename R, typename A1, typename A2, typename A3>
-    void add_method_visitor<InterfaceType>::operator()( const char* name, std::function<R(A1,A2,A3)>& meth)    {
-        _con.add_method( name, rpc_server_method::ptr( new rpc_server_method_impl<R,tuple<A1,A2,A3>,R(A1,A2,A3) >(meth) ) );
+    void add_method_visitor<InterfaceType>::operator()( const char* name, 
+                                                        std::function<R(A1,A2,A3)>& meth)    {
+        _con.add_method( name, rpc_server_method::ptr( 
+                               new rpc_server_method_impl<R,tuple<A1,A2,A3>,R(A1,A2,A3) >(meth) ) );
     }
     template<typename InterfaceType>
     template<typename R>
-    void add_method_visitor<InterfaceType>::operator()( const char* name, std::function<R()>& meth)    {
-        _con.add_method( name, rpc_server_method::ptr( new rpc_server_method_impl<R,tuple<>,R() >(meth) ) );
+    void add_method_visitor<InterfaceType>::operator()( const char* name, 
+                                                        std::function<R()>& meth)    {
+        _con.add_method( name, rpc_server_method::ptr( 
+                               new rpc_server_method_impl<R,tuple<>,R() >(meth) ) );
     }
 
   } // namespace detail

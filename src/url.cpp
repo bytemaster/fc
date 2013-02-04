@@ -52,10 +52,11 @@ namespace fc {
      */
     url&   url::from_string( const string& s ) {
        fc::stringstream ss(s);
-       fc::string _proto,skip,_user,_pass,_host,_port,_path,_args;
-       fc::getline( ss, _proto, ':' );
+       fc::string skip,_user,_pass,_host,_port,_path,_args;
+       fc::getline( ss, proto, ':' );
        fc::getline( ss, skip, '/' );
        fc::getline( ss, skip, '/' );
+
        if( s.find('@') != fc::string::npos ) {
          fc::string user_pass;
          fc::getline( ss, user_pass, '@' );

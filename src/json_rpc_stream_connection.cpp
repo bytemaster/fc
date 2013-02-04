@@ -23,7 +23,6 @@ namespace fc { namespace json {
       ~impl() {
         try {
             self.cancel_pending_requests();
-            self.close();
             _read_loop_complete.cancel();
             _read_loop_complete.wait();
         } catch ( ... ) {}
@@ -64,6 +63,7 @@ namespace fc { namespace json {
   rpc_stream_connection::rpc_stream_connection(const rpc_stream_connection& c):my(c.my){ }
   rpc_stream_connection::~rpc_stream_connection(){ 
     wlog( "%p", this );
+    close();
   }
 
   // the life of the streams must exceed the life of all copies

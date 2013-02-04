@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <fc/string.hpp>
 #include <fc/raw.hpp>
+#include <fc/optional.hpp>
 
 namespace fc {
   class microseconds { 
@@ -56,4 +57,6 @@ namespace fc {
     template<typename Stream, typename T>
     void pack( Stream& s, const fc::time_point& v );
   }
+
+  typedef fc::optional<time_point> otime_point;
 }

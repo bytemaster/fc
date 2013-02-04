@@ -139,6 +139,8 @@ namespace fc {  namespace json {
 
       void add_method( const fc::string& name, const fc::json::rpc_server_method::ptr& func );
 
+      virtual void close(){};
+
     protected:
       void         handle_message( const value& m );
       virtual void send_notice(  const fc::string& m, value&& param ) = 0;

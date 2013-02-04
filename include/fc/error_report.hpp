@@ -48,6 +48,7 @@ namespace fc {
          error_frame&  current();
          error_report& pop_frame();
          error_report& push_frame( const fc::string& file, uint64_t line, const fc::string& method, const fc::string& desc, fc::value meta = fc::value() );
+         error_report& push_frame( bool detail, const fc::string& file, uint64_t line, const fc::string& method, const fc::string& desc, fc::value meta = fc::value() );
          error_report& append( const error_report& e );
 
          fc::string    to_string()const;
@@ -70,5 +71,5 @@ FC_REFLECT( fc::error_report, (stack) )
 #define FC_THROW_REPORT( ... )      FC_THROW( fc::error_report( __FILE__, __LINE__, __func__, __VA_ARGS__ ))
 #define FC_REPORT_CURRENT(ER, ... ) (ER).pop_frame().push_frame( __FILE__, __LINE__, __func__, __VA_ARGS__ )
 #define FC_REPORT_PUSH( ER, ... )   (ER).push_frame( __FILE__, __LINE__, __func__, __VA_ARGS__ );
-#define FC_REPORT_PUSH_DETAIL( ER, ... )   (ER).push_frame( true, __FILE__, __LINE__, __func__, __VA_ARGS__ );
+#define FC_REPORT_PUSH_DETAIL( ER, ... )   (ER).push_frame( true, __FILE__, __LINE__, __func__, __VA_ARGS__ )
 #define FC_REPORT_POP(ER)           (ER).pop_frame()

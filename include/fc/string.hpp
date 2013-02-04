@@ -1,6 +1,7 @@
 #pragma once
 #include <fc/utility.hpp>
 #include <fc/fwd.hpp>
+#include <fc/optional.hpp>
 
 
 /**
@@ -97,6 +98,8 @@ namespace fc {
     private:
        fc::fwd<std::string,32> my;
   };
+
+  typedef fc::optional<fc::string> ostring;
 
 } // namespace fc
 

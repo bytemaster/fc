@@ -68,6 +68,11 @@ fc::error_report& error_report::push_frame( const fc::string& file, uint64_t lin
    stack.push_back( fc::error_frame( file, line, method, desc, meta ) );
    return *this;
 }
+fc::error_report& error_report::push_frame( bool detail, const fc::string& file, uint64_t line, const fc::string& method, const fc::string& desc, fc::value meta  )
+{
+   stack.push_back( fc::error_frame( detail, file, line, method, desc, meta ) );
+   return *this;
+}
 
 fc::error_report&         error_report::append( const error_report& e )
 {

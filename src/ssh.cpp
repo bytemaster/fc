@@ -1,3 +1,6 @@
+#include <fc/filesystem.hpp>
+#include <fc/value_cast.hpp>
+#include <boost/filesystem.hpp>
 #include <fc/ssh/client.hpp>
 #include <fc/ssh/process.hpp>
 #include <fc/exception.hpp>
@@ -8,6 +11,7 @@
 #include <fc/interprocess/file_mapping.hpp>
 #include <fc/unique_lock.hpp>
 #include <fc/mutex.hpp>
+#include <fc/error_report.hpp>
 #include <libssh2.h>
 #include <libssh2_sftp.h>
 #include <memory>
@@ -146,11 +150,11 @@ namespace fc { namespace ssh {
 
         void connect() {
           try {
-            if( libssh2_init(0) < 0  ) { FC_THROW_MSG( "Unable to init libssh2" ); }
+            if( libssh2_init(0) < 0  ) { FC_THROW_REPORT( "Unable to init libssh2" ); }
            
             auto eps = fc::asio::tcp::resolve( hostname, fc::lexical_cast<fc::string>(port) );
             if( eps.size() == 0 ) {
-               FC_THROW_MSG( "Unable to resolve '%s'", hostname );
+               FC_THROW_REPORT( "Unable to resolve host '${host}'", fc::value().set("host",hostname) );
             }
             sock.reset( new boost::asio::ip::tcp::socket( fc::asio::default_io_service() ) );
             
@@ -173,15 +177,16 @@ namespace fc { namespace ssh {
             if( ec < 0 ) {
               char* msg;
               libssh2_session_last_error( session, &msg, 0, 0 );
-              FC_THROW_MSG( "Handshake error: %s - %s", ec, msg );
+              FC_THROW_REPORT( "SSH Handshake error: ${code} - ${message}", 
+                               fc::value().set("code",ec).set("message", msg) );
             }
             /*const char* fingerprint = */libssh2_hostkey_hash(session, LIBSSH2_HOSTKEY_HASH_SHA1);
              
             // try to authenticate, throw on error.
             authenticate();
-          } catch (...) {
+          } catch ( error_report& er ) {
              close();
-             throw;
+             throw FC_REPORT_PUSH( er, "Unable to connect to ssh server" );;
           }
         }
 
@@ -238,6 +243,7 @@ namespace fc { namespace ssh {
         }
 
         void authenticate() {
+           try {
             char * alist = libssh2_userauth_list(session, uname.c_str(),uname.size());
             char * msg   = 0;
             int    ec    = 0;
@@ -254,7 +260,8 @@ namespace fc { namespace ssh {
                     ec = libssh2_session_last_error(session,&msg,NULL,0);
                 }
                 if( !alist ) {
-                    FC_THROW_MSG( "Error getting authorization list: %s - %s", ec, msg );
+                    FC_THROW_REPORT( "Error getting authorization list: ${code} - ${message}", 
+                                     fc::value().set("code",ec).set("message",msg));
                 }
             }
 
@@ -290,7 +297,10 @@ namespace fc { namespace ssh {
               if( try_keyboard() )
                 return;
             }
-            FC_THROW_MSG( "Unable to authenticate" );
+           } catch ( error_report er ) {
+              throw FC_REPORT_PUSH( er, "Unable to authenticate ssh connection" );
+           }
+           FC_THROW_REPORT( "Unable to authenticate ssh connection" );
         } // authenticate()
 
         bool try_pass() {
@@ -386,10 +396,14 @@ namespace fc { namespace ssh {
             }
           } else if( rprom ) {
               if( rprom->wait() ) { 
-                FC_THROW( boost::system::system_error(rprom->wait() ) ); 
+                FC_THROW_REPORT( "Socket Error ${message}", 
+                                 fc::value().set( "message", boost::system::system_error(rprom->wait() ).what() ) ); 
               }
           } else if( wprom ) {
-              if( wprom->wait() ) { FC_THROW( boost::system::system_error(wprom->wait() ) ); }
+              if( wprom->wait() ) { 
+                FC_THROW_REPORT( "Socket Error ${message}", 
+                                 fc::value().set( "message", boost::system::system_error(wprom->wait() ).what() ) ); 
+              }
           }
         }
         void init_sftp() {
@@ -402,7 +416,7 @@ namespace fc { namespace ssh {
                   wait_on_socket();
                   sftp = libssh2_sftp_init(session);
                 } else {
-                  FC_THROW_MSG( "init sftp error %s: %s", ec, msg );
+                  FC_THROW_REPORT( "init sftp error ${code} - ${message}", fc::value().set("code",ec).set("message",msg) );
                 }
              }
           }
@@ -450,10 +464,10 @@ namespace fc { namespace ssh {
 
 //    using namespace boost::filesystem;
     if( !fc::exists(local_path) ) {
-      FC_THROW_MSG( "Source file '%s' does not exist", local_path.string() );
+      FC_THROW_REPORT( "Source file '${file}' does not exist", fc::value().set("file",local_path) ) ;
     }
     if( is_directory( local_path ) ) {
-      FC_THROW_MSG( "Source path '%s' is a directory, expected a file.", local_path.string());
+      FC_THROW_REPORT( "Source file '${file}' is a directory, expected a file", fc::value().set("file",local_path) ) ;
     }
 
     // memory map the file
@@ -474,7 +488,8 @@ namespace fc { namespace ssh {
         my->wait_on_socket();
         chan = libssh2_scp_send64( my->session, local_path.generic_string().c_str(), 0700, fsize, now, now );
       } else {
-          FC_THROW_MSG( "scp %s to %s failed %s - %s",local_path.string(), remote_path.string(), ec, msg );
+         FC_THROW_REPORT( "scp ${local_file} to ${remote_file} failed ${code} - ${message}", 
+          fc::value().set("local_file", local_path).set("remote_file",remote_path).set("code",ec).set("message",msg) );
       }
     }
     try {
@@ -489,7 +504,8 @@ namespace fc { namespace ssh {
           if( r < 0 ) {
              char* msg = 0;
              int ec = libssh2_session_last_error( my->session, &msg, 0, 0 );
-             FC_THROW_MSG( "scp failed %s - %s", ec, msg );
+             FC_THROW_REPORT( "scp failed ${code} - ${message}", 
+                              fc::value().set("code",ec).set("message",msg) );
           }
           wrote += r;
           pos   += r;
@@ -511,30 +527,35 @@ namespace fc { namespace ssh {
     if( ec < 0 ) {
        char* msg = 0;
        int ec = libssh2_session_last_error( my->session, &msg, 0, 0 );
-       FC_THROW_MSG( "scp failed %s - %s", ec, msg );
+       FC_THROW_REPORT( "scp failed ${code} - ${message}", 
+                        fc::value().set("code",ec).set("message",msg) );
     }
     
   }
 
 
   void client::rm( const fc::path& remote_path ) {
-    auto s = stat(remote_path);
-    if( s.is_directory() ) {
-      FC_THROW_MSG( "Directory exists at path %s", remote_path.string() );
-    }
-    else if( !s.exists() ) {
-      return; // nothing to do
-    }
+    try {
+       auto s = stat(remote_path);
+       if( s.is_directory() ) {
+         FC_THROW_REPORT( "sftp cannot remove directory ${path}", fc::value().set("path",remote_path) );
+       }
+       else if( !s.exists() ) {
+         return; // nothing to do
+       }
 
-    int rc = libssh2_sftp_unlink(my->sftp, remote_path.generic_string().c_str() );
-    while( rc == LIBSSH2_ERROR_EAGAIN ) {
-      my->wait_on_socket();
-      rc = libssh2_sftp_unlink(my->sftp, remote_path.generic_string().c_str() );
-    }
-    if( 0 != rc ) {
-       rc = libssh2_sftp_last_error(my->sftp);
-       FC_THROW_MSG( "rm error %s", rc );
-    }
+       int rc = libssh2_sftp_unlink(my->sftp, remote_path.generic_string().c_str() );
+       while( rc == LIBSSH2_ERROR_EAGAIN ) {
+         my->wait_on_socket();
+         rc = libssh2_sftp_unlink(my->sftp, remote_path.generic_string().c_str() );
+       }
+       if( 0 != rc ) {
+          rc = libssh2_sftp_last_error(my->sftp);
+          FC_THROW_REPORT( "sftp rm failed ${code}", fc::value().set("code",rc) );
+       }
+     } catch ( error_report& er ) {
+         throw FC_REPORT_PUSH( er, "sftp remove '${remote_path}' failed", fc::value().set("remote_path",remote_path) );
+     }
   }
 
   file_attrib client::stat( const fc::path& remote_path ){
@@ -553,23 +574,39 @@ namespace fc { namespace ssh {
      ft.permissions = att.permissions;
      return ft;
   }
+  void client::create_directories( const fc::path& rdir, int mode ) {
+     boost::filesystem::path dir = rdir;
+     boost::filesystem::path p;
+     auto pitr = dir.begin();
+     while( pitr != dir.end() ) {
+       p /= *pitr;
+       if( !stat( p ).exists() ) {
+         mkdir(p,mode);
+       } 
+       ++pitr;
+     }
+  }
 
   void client::mkdir( const fc::path& rdir, int mode ) {
-    auto s = stat(rdir);
-    if( s.is_directory() ) return;
-    else if( s.exists() ) {
-      FC_THROW_MSG( "Non directory exists at path %s", rdir.generic_string().c_str() );
-    }
+     try {
+       auto s = stat(rdir);
+       if( s.is_directory() ) return;
+       else if( s.exists() ) {
+         FC_THROW_REPORT( "File already exists at path ${path}", fc::value().set("path",rdir) );
+       }
 
-    int rc = libssh2_sftp_mkdir(my->sftp, rdir.generic_string().c_str(), mode );
-    while( rc == LIBSSH2_ERROR_EAGAIN ) {
-      my->wait_on_socket();
-      rc = libssh2_sftp_mkdir(my->sftp, rdir.generic_string().c_str(), mode );
-    }
-    if( 0 != rc ) {
-       rc = libssh2_sftp_last_error(my->sftp);
-       FC_THROW_MSG( "mkdir error %s", rc );
-    }
+       int rc = libssh2_sftp_mkdir(my->sftp, rdir.generic_string().c_str(), mode );
+       while( rc == LIBSSH2_ERROR_EAGAIN ) {
+         my->wait_on_socket();
+         rc = libssh2_sftp_mkdir(my->sftp, rdir.generic_string().c_str(), mode );
+       }
+       if( 0 != rc ) {
+          rc = libssh2_sftp_last_error(my->sftp);
+          FC_THROW_REPORT( "sftp mkdir error", fc::value().set("code",rc) );
+       }
+     } catch ( error_report& er ) {
+          throw FC_REPORT_PUSH( er, "sftp failed to create directory '${directory}'", fc::value().set( "directory", rdir ) );
+     }
   }
 
   void client::close() {
@@ -693,11 +730,11 @@ namespace fc { namespace ssh {
         ec = libssh2_channel_flush_ex( chan, LIBSSH2_CHANNEL_FLUSH_EXTENDED_DATA );
       }
       if( ec < 0 ) {
-        FC_THROW_MSG( "flush failed: channel error %d", ec  );
+        FC_THROW_REPORT( "ssh flush failed", fc::value().set( "channel_error", ec)  );
       }
   }
   int detail::process_impl::read_some( char* data, size_t len, int stream_id ){
-       if( !sshc.my->session ) { FC_THROW_MSG( "Session closed" ); }
+       if( !sshc.my->session ) { FC_THROW_REPORT( "Session closed" ); }
        
        int rc;
        char* buf = data;
@@ -725,16 +762,16 @@ namespace fc { namespace ssh {
                }
              } else {
                char* msg;
-               if( !sshc.my || !sshc.my->session ) { FC_THROW_MSG( "Session closed" ); }
+               if( !sshc.my || !sshc.my->session ) { FC_THROW_REPORT( "Session closed" ); }
                rc   = libssh2_session_last_error( sshc.my->session, &msg, 0, 0 );
-               FC_THROW_MSG( "read failed: %s - %s", rc, msg  ); return buf-data;
+               FC_THROW_REPORT( "read failed: ${message}", fc::value().set("message", msg).set("code", rc) ); 
              }
            }
        } while( rc >= 0 && buflen);
        return buf-data;
   }
   int detail::process_impl::write_some( const char* data, size_t len, int stream_id ) {
-     if( !sshc.my->session ) { FC_THROW_MSG( "Session closed" ); }
+     if( !sshc.my->session ) { FC_THROW_REPORT( "Session closed" ); }
 
      int rc;
      const char* buf = data;
@@ -747,8 +784,7 @@ namespace fc { namespace ssh {
             return buf-data;
          } else if( rc == 0 ) {
             if( libssh2_channel_eof( chan ) )  {
-               elog( "return %1%", -1 );
-              FC_THROW_MSG( "EOF" );
+              FC_THROW_REPORT( "EOF" );
               //return -1; // eof
             }
          } else {
@@ -765,7 +801,7 @@ namespace fc { namespace ssh {
            } else {
              char* msg;
              rc   = libssh2_session_last_error( sshc.my->session, &msg, 0, 0 );
-             FC_THROW_MSG( "write failed: %s - %s", rc, msg  );
+             FC_THROW_REPORT( "write failed: ${message}", fc::value().set("message",msg).set("code",rc) );
              return buf-data;
            }
          }
@@ -782,7 +818,7 @@ namespace fc { namespace ssh {
       if( ec ) {
         char* msg = 0;
         ec = libssh2_session_last_error( sshc.my->session, &msg, 0, 0 );
-        FC_THROW_MSG( "send eof failed: %s - %s", ec, msg  );
+        FC_THROW_REPORT( "send eof failed: ${message}", fc::value().set("message",msg).set("code",ec) );
       }
     }
   }
@@ -854,7 +890,7 @@ namespace fc { namespace ssh {
         if( ec ) {
            char* msg = 0;
            ec   = libssh2_session_last_error( sshc.my->session, &msg, 0, 0 );
-           FC_THROW_MSG( "libssh2_channel_exec failed: %s - %s", ec, msg  );
+           FC_THROW_REPORT( "exec failed: ${message}", fc::value().set("message",msg).set("code",ec) );
         }
    }
    LIBSSH2_CHANNEL*   detail::client_impl::open_channel( const fc::string& pty_type ) {
@@ -869,7 +905,7 @@ namespace fc { namespace ssh {
               ec   = libssh2_session_last_error( session, &msg, 0, 0 );
            }
            if( !chan ) {
-              FC_THROW_MSG( "libssh2_channel_open_session failed: %s - %s", ec, msg  );
+              FC_THROW_REPORT( "libssh2_channel_open_session failed: ${message}", fc::value().set("message",msg).set("code",ec) );
            }
         }
 
@@ -882,10 +918,14 @@ namespace fc { namespace ssh {
             if( 0 != ec ) {
                char* msg;
                ec = libssh2_session_last_error( session, &msg, 0, 0 );
-               FC_THROW_MSG( "libssh2_channel_req_pty failed: %s - %s", ec, msg  );
+               FC_THROW_REPORT( "libssh2_channel_req_pty failed: ${message}", fc::value().set("message",msg).set("code",ec) );
             }
         }
         return chan;
     }
 
+   process& process::operator=( const process& p ) {
+        my = p.my;
+      return *this;
+   }
 } }

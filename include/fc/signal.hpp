@@ -16,19 +16,45 @@ namespace fc {
          _handlers.push_back( c );
          return reinterpret_cast<connection_id_type>(c);
       }
-
+#ifdef WIN32
+      template<typename Arg>
+      void emit( Arg&& arg ) {
+        for( size_t i = 0; i < _handlers.size(); ++i ) {
+          (*_handlers[i])( fc::forward<Arg>(arg) );
+        }
+      }
+      template<typename Arg>
+      void operator()( Arg&& arg ) {
+        for( size_t i = 0; i < _handlers.size(); ++i ) {
+          (*_handlers[i])( fc::forward<Arg>(arg) );
+        }
+      }
+      template<typename Arg,typename Arg2>
+      void emit( Arg&& arg, Arg2&& arg2 ) {
+        for( size_t i = 0; i < _handlers.size(); ++i ) {
+          (*_handlers[i])( fc::forward<Arg>(arg), fc::forward<Arg2>(arg2) );
+        }
+      }
+      template<typename Arg, typename Arg2>
+      void operator()( Arg&& arg, Arg2&& arg2 ) {
+        for( size_t i = 0; i < _handlers.size(); ++i ) {
+          (*_handlers[i])( fc::forward<Arg>(arg), fc::forward<Arg2>(arg2) );
+        }
+      }
+#else
       template<typename... Args>
       void emit( Args&&... args ) {
         for( size_t i = 0; i < _handlers.size(); ++i ) {
-          (*_handlers[i])( args... );
+          (*_handlers[i])( fc::forward<Args>(args)... );
         }
       }
       template<typename... Args>
       void operator()( Args&&... args ) {
         for( size_t i = 0; i < _handlers.size(); ++i ) {
-          (*_handlers[i])( args... );
+          (*_handlers[i])( fc::forward<Args>(args)... );
         }
       }
+#endif
 
       void disconnect( connection_id_type cid ) {
         auto itr = _handlers.begin();

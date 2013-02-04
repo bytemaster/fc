@@ -103,6 +103,13 @@ namespace fc {
        */
       void mkdir( const fc::path& remote_dir, int mode = owner_read|owner_write|owner_exec );
 
+      /**
+       *  Create all parent directories for remote_dir if they do not exist.
+       *
+       *  @post remote_dir exists.
+       */
+      void create_directories( const fc::path& remote_dir, int mode = owner_read|owner_write|owner_exec );
+
       void close();
 
       client();

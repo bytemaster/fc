@@ -65,7 +65,7 @@ namespace fc { namespace json {
         this->_vtable.reset(new fc::detail::vtable<InterfaceType,fc::detail::actor_member>() );
         this->_vtable->template visit_other<InterfaceType>( fc::json::detail::vtable_visitor(_con) );
       }
-      const rpc_connection& connection()const { return _con; }
+      const rpc_connection::ptr& connection()const { return _con; }
 
     private:
       rpc_connection::ptr  _con; 

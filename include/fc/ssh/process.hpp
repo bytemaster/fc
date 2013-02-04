@@ -48,6 +48,8 @@ namespace fc {
        *  @brief returns a stream that reads from the process' stderr
        */
       fc::istream& err_stream()const;
+
+      process& operator=( const process& p );
     private:
       friend class client;
       process( client& c, const fc::string& cmd, const fc::string& pty_type = fc::string() );

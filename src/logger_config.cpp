@@ -8,6 +8,7 @@
 namespace fc {
    std::unordered_map<std::string,logger>& get_logger_map();
    std::unordered_map<std::string,appender::ptr>& get_appender_map();
+   logger_config& logger_config::add_appender( const string& s ) { appenders.push_back(s); return *this; }
 
    void configure_logging( const fc::path& lc )
    {
@@ -26,13 +27,15 @@ namespace fc {
       for( size_t i = 0; i < cfg.loggers.size(); ++i ) {
          auto lgr = logger::get( cfg.loggers[i].name );
 
-         // TODO: configure logger here...
+         // TODO: finish configure logger here...
+         if( cfg.loggers[i].parent ) {
+            lgr.set_parent( logger::get( *cfg.loggers[i].parent ) );
+         }
          lgr.set_name(cfg.loggers[i].name);
          lgr.set_log_level( *cfg.loggers[i].level );
          
 
-         for( auto a = cfg.loggers[i].appenders.begin(); 
-              a != cfg.loggers[i].appenders.end(); ++a ){
+         for( auto a = cfg.loggers[i].appenders.begin(); a != cfg.loggers[i].appenders.end(); ++a ){
             auto ap = appender::get( *a );
             if( ap ) { lgr.add_appender(ap); }
          }

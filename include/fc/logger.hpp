@@ -22,6 +22,7 @@ namespace fc  {
       ostring         context;
       ostring         thread;
       ostring         fiber;
+      ostring         host;
       string          file;
       int             line;
       string          method;
@@ -102,7 +103,7 @@ namespace fc  {
 } // namespace fc
 
 #include <fc/reflect.hpp>
-FC_REFLECT( fc::log_message, (when)(level)(context)(thread)(method)(file)(line)(format)(args)(meta) )
+FC_REFLECT( fc::log_message, (when)(level)(context)(thread)(fiber)(host)(method)(file)(line)(format)(args)(meta) )
 FC_REFLECT_ENUM( fc::log_level::type, (all)(trace)(debug)(info)(warn)(error)(fatal)(off) )
 
 #define fc_scope_log( LOGGER, FORMAT, ... ) \

@@ -22,6 +22,8 @@ namespace fc {
       /// if any appenders are sepecified, then parent's appenders are not set.
       bool                             additivity;
       fc::vector<string>               appenders;
+
+      logger_config& add_appender( const string& s );
    };
 
    struct logging_config {

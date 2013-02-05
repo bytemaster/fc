@@ -50,6 +50,8 @@ include_directories( include )
 
 set( sources 
   src/logger.cpp
+  src/console_appender.cpp
+  src/file_appender.cpp
   src/appender.cpp
   src/logger_config.cpp
   src/ssh.cpp

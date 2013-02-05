@@ -4,6 +4,7 @@
 #include <fc/vector.hpp>
 #include <fc/aligned.hpp>
 #include <fc/typename.hpp>
+#include <fc/optional.hpp>
 #include <boost/preprocessor/repetition/enum_params.hpp>
 
 namespace fc {
@@ -131,7 +132,8 @@ namespace fc {
         /** array interface **/
         void         resize( size_t s );
         void         reserve( size_t s );
-        void         push_back( value&& v );
+        value&       push_back( value&& v );
+        value&       push_back( const value& v );
         value&       operator[]( int32_t idx );
         const value& operator[]( int32_t idx )const;
 
@@ -163,6 +165,7 @@ namespace fc {
 
         aligned<40> holder;
     };
+    typedef fc::optional<value> ovalue;
     bool operator == ( const value& v, std::nullptr_t );
     bool operator != ( const value& v, std::nullptr_t );
 

@@ -172,7 +172,7 @@ namespace fc {
             v = fc::reflector<T>::from_string( fc::value_cast<fc::string>(jsv).c_str() );
          } else {
             // throw if invalid int, by attempting to convert to string
-            fc::reflector<T>::to_string( v = value_cast<int64_t>(jsv) );
+            fc::reflector<T>::to_string( v = static_cast<T>(value_cast<int64_t>(jsv)) );
          }
       }
     };

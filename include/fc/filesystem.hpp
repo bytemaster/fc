@@ -41,6 +41,7 @@ namespace fc {
       fc::path   parent_path()const;
       fc::string string()const;
       fc::string generic_string()const;
+
       bool       is_relative()const;
       bool       is_absolute()const;
     private:

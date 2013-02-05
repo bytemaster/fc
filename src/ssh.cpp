@@ -450,8 +450,41 @@ namespace fc { namespace ssh {
     return ssh::process( *this, cmd, pty_type ); 
   }
 
+  /**
+   *  @todo implement progress reporting.
+   */
+  void client::scp_send_dir( const fc::path& local_dir, const fc::path& remote_path, 
+                              std::function<bool(size_t,size_t)> progress )
+  {
+      fc::path remote_dir = remote_path;
+      if( remote_dir.filename() == fc::path(".") ) 
+         remote_dir /= local_dir.filename();
+
+      slog( "scp -r %s  %s", local_dir.generic_string().c_str(), remote_dir.generic_string().c_str() );
+      create_directories( remote_dir );
+
+      directory_iterator ditr(local_dir);
+      directory_iterator dend;
+
+      while( ditr != dend ) {
+          if( (*ditr).filename() == "."  ||
+              (*ditr).filename() == ".." )
+          { } 
+          else if( fc::is_directory(*ditr) )
+          {
+             scp_send_dir( (*ditr), remote_dir / (*ditr).filename() );
+          } else if( fc::is_regular_file(*ditr) ) {
+             scp_send( *ditr, remote_dir / (*ditr).filename() );
+          } else {
+             wlog( "Skipping %s", fc::canonical(*ditr).generic_string().c_str() );
+          }
+          ++ditr;
+      }
+  }
+
   void client::scp_send( const fc::path& local_path, const fc::path& remote_path, 
                         std::function<bool(size_t,size_t)> progress ) {
+      slog( "scp %s  %s", local_path.generic_string().c_str(), remote_path.generic_string().c_str() );
     /**
      *  Tests have shown that if one scp is 'blocked' by a need to read (presumably to 
      *  ack recv for the trx window), and then a second transfer begins that the first
@@ -471,15 +504,21 @@ namespace fc { namespace ssh {
     }
 
     // memory map the file
-    file_mapping fmap( local_path.string().c_str(), read_only );
     size_t       fsize = file_size(local_path);
-
+    if( fsize == 0 ) {
+        // TODO: handle empty file case
+        if( progress ) progress(0,0);
+        return;
+    }
+    file_mapping fmap( local_path.string().c_str(), read_only );
     mapped_region mr( fmap, fc::read_only, 0, fsize );
 
     LIBSSH2_CHANNEL*                      chan = 0;
     time_t now;
     memset( &now, 0, sizeof(now) );
+
     // TODO: preserve creation / modification date
+    // TODO: perserve permissions / exec bit?
     chan = libssh2_scp_send64( my->session, remote_path.generic_string().c_str(), 0700, fsize, now, now );
     while( chan == 0 ) {
       char* msg;

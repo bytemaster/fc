@@ -88,6 +88,16 @@ namespace fc {
       void scp_send( const fc::path& local_path, const fc::path& remote_path, 
                               std::function<bool(size_t,size_t)> progress = [](size_t,size_t){return true;} );
 
+      /**
+       *  @brief recursively sends the contents of local_dir to the remote_path
+       *
+       *  If remote_path ends in '/' then a new directory at <code>remote_path/local_dir.filename()</code> will 
+       *  be created, otherwise <code>local_dir / *</code> will be copied to <code>remote_path / *</code>
+       *
+       *  Progress will be reported as total bytes transferred for all files.
+       */
+      void scp_send_dir( const fc::path& local_dir, const fc::path& remote_path, 
+                              std::function<bool(size_t,size_t)> progress = [](size_t,size_t){return true;} );
 
       /**
        *  @pre remote_path is not a directory

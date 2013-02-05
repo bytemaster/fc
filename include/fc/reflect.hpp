@@ -105,13 +105,13 @@ void fc::reflector<TYPE>::visit( const Visitor& v ) { \
 #endif // DOXYGEN
 
 
-#define FC_REFLECT_VISIT_ENUM( r, visitor, elem ) \
-  visitor.TEMPLATE operator()<elem>(BOOST_PP_STRINGIZE(elem));
-#define FC_REFLECT_ENUM_TO_STRING( r, visitor, elem ) \
-  case elem: return BOOST_PP_STRINGIZE(elem);
+#define FC_REFLECT_VISIT_ENUM( r, enum_type, elem ) \
+  v.TEMPLATE operator()<enum_type::elem>(BOOST_PP_STRINGIZE(elem));
+#define FC_REFLECT_ENUM_TO_STRING( r, enum_type, elem ) \
+   case enum_type::elem: return BOOST_PP_STRINGIZE(elem);
 
-#define FC_REFLECT_ENUM_FROM_STRING( r, visitor, elem ) \
-  if( strcmp( s, BOOST_PP_STRINGIZE(elem)  ) == 0 ) return elem;
+#define FC_REFLECT_ENUM_FROM_STRING( r, enum_type, elem ) \
+  if( strcmp( s, BOOST_PP_STRINGIZE(elem)  ) == 0 ) return enum_type::elem;
 
 #define FC_REFLECT_ENUM( ENUM, FIELDS ) \
 namespace fc { \
@@ -120,18 +120,21 @@ template<> struct reflector<ENUM> { \
     typedef fc::true_type is_enum; \
     template<typename Visitor> \
     static inline void visit( const Visitor& v ) { \
-        BOOST_PP_SEQ_FOR_EACH( FC_REFLECT_VISIT_ENUM, v, FIELDS ) \
+        BOOST_PP_SEQ_FOR_EACH( FC_REFLECT_VISIT_ENUM, ENUM, FIELDS ) \
     }\
     static const char* to_string(int64_t i) { \
       switch( ENUM(i) ) { \
-        BOOST_PP_SEQ_FOR_EACH( FC_REFLECT_ENUM_TO_STRING, v, FIELDS ) \
+        BOOST_PP_SEQ_FOR_EACH( FC_REFLECT_ENUM_TO_STRING, ENUM, FIELDS ) \
         default: \
-        FC_THROW_MSG(  "Unknown field %s not in enum '%s'", i, BOOST_PP_STRINGIZE(ENUM) ); \
+        FC_THROW_REPORT(  "Unknown field ${field} not in enum ${enum}", \
+                          fc::value().set("field",i).set("enum",BOOST_PP_STRINGIZE(ENUM)) ); \
       }\
+      return nullptr; \
     } \
     static ENUM from_string( const char* s ) { \
-        BOOST_PP_SEQ_FOR_EACH( FC_REFLECT_ENUM_FROM_STRING, v, FIELDS ) \
-        FC_THROW_MSG(  "Unknown field %s not in enum '%s'", s, BOOST_PP_STRINGIZE(ENUM) ); \
+        BOOST_PP_SEQ_FOR_EACH( FC_REFLECT_ENUM_FROM_STRING, ENUM, FIELDS ) \
+        FC_THROW_REPORT(  "Unknown field ${field} not in enum ${enum}", \
+                          fc::value().set("field",s).set("enum",BOOST_PP_STRINGIZE(ENUM)) ); \
     } \
 };  \
 } 

@@ -391,8 +391,21 @@ void         value::resize( size_t s ) {
 void         value::reserve( size_t s ) {
   gh(holder)->reserve(s);  
 }
-void         value::push_back( value&& v ) {
+value&         value::push_back( value&& v ) {
+  if (strcmp(gh(holder)->type(), "void" ) == 0 ) {
+    new (gh(holder)) detail::value_holder_impl<value::array>(value::array());
+    return push_back( fc::move(v) );
+  }
   gh(holder)->push_back(fc::move(v));  
+  return *this;
+}
+value&         value::push_back( const value& v ) {
+  if (strcmp(gh(holder)->type(), "void" ) == 0 ) {
+    new (gh(holder)) detail::value_holder_impl<value::array>(value::array());
+    return push_back( v );
+  }
+  gh(holder)->push_back(value(v));
+  return *this;
 }
 value&       value::operator[]( int32_t idx ) {
   return gh(holder)->at(idx);  

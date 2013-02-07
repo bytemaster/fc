@@ -82,7 +82,7 @@ namespace fc {
     i.read( &c, 1 );
     while( !i.eof() ) {
       if( c == delim ) { s = ss.str();  return i; }
-      ss.write(&c,1);
+      if( c != '\r' ) ss.write(&c,1);
       i.read( &c, 1 );
     }
     s = ss.str();

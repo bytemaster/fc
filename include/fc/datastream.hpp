@@ -27,7 +27,8 @@ struct datastream {
           return true;
         }
         FC_THROW_REPORT( "Attempt to read ${bytes_past} bytes beyond end of buffer with size ${buffer_size} ", 
-                        fc::value().set("bytes_past",int64_t(-((m_end-m_pos) - s))).set("buffer_size", int64_t(m_end-m_start)) );
+                            fc::value("bytes_past",int64_t(-((m_end-m_pos) - s)))
+                                     ("buffer_size", int64_t(m_end-m_start)) );
         return false;
       }
       
@@ -38,7 +39,8 @@ struct datastream {
           return true;
         }
         FC_THROW_REPORT( "Attempt to write ${bytes_past} bytes beyond end of buffer with size ${buffer_size} ", 
-                        fc::value().set("bytes_past",int64_t(-((m_end-m_pos) - s))).set("buffer_size", int64_t(m_end-m_start)) );
+                        fc::value("bytes_past",int64_t(-((m_end-m_pos) - s))) 
+                                 ("buffer_size", int64_t(m_end-m_start)) );
         return false;
       }
       
@@ -49,8 +51,8 @@ struct datastream {
           return true;
         }
         FC_THROW_REPORT( "Attempt to write ${bytes_past} bytes beyond end of buffer with size ${buffer_size} ", 
-                        fc::value().set("bytes_past",int64_t(-((m_end-m_pos) - 1))).set("buffer_size", int64_t(m_end-m_start)) );
-        return  false;
+                        fc::value("bytes_past",int64_t(-((m_end-m_pos) - 1)))
+                        ("buffer_size", int64_t(m_end-m_start)) );
       }
       
       inline bool   get( unsigned char& c ) { return get( *(char*)&c ); }
@@ -61,9 +63,8 @@ struct datastream {
           return true;
         }
         FC_THROW_REPORT( "Attempt to read ${bytes_past} bytes beyond end of buffer of size ${buffer_size} ", 
-                        fc::value().set("bytes_past",int64_t(-((m_end-m_pos) - 1))).set("buffer_size", int64_t(m_end-m_start)) );
-        ++m_pos; 
-        return  false;
+                        fc::value("bytes_past",int64_t(-((m_end-m_pos) - 1)))
+                        ("buffer_size", int64_t(m_end-m_start)) );
       }
       
       T               pos()const        { return m_pos;                               }

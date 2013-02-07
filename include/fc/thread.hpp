@@ -105,11 +105,11 @@ namespace fc {
       ~thread();
 
        template<typename T1, typename T2>
-       int wait_any( const fc::future<T1>& f1, const fc::future<T2>& f2) {
+       int wait_any( const fc::future<T1>& f1, const fc::future<T2>& f2, const microseconds& timeout_us = microseconds::max()) {
           fc::vector<fc::promise_base::ptr> proms(2);
           proms[0] = fc::static_pointer_cast<fc::promise_base>(f1.m_prom);
           proms[1] = fc::static_pointer_cast<fc::promise_base>(f2.m_prom);
-          return wait_any_until(fc::move(proms), fc::time_point::max() );
+          return wait_any_until(fc::move(proms), fc::time_point::now()+timeout_us );
        }
     private:
       thread( class thread_d* );
@@ -162,8 +162,8 @@ namespace fc {
     * @return 0 if f1 is ready, 1 if f2 is ready or throw on error.
     */
    template<typename T1, typename T2>
-   int wait_any( const fc::future<T1>& f1, const fc::future<T2>& f2) {
-      return fc::thread::current().wait_any(f1,f2);
+   int wait_any( const fc::future<T1>& f1, const fc::future<T2>& f2, const microseconds timeout_us = microseconds::max()) {
+      return fc::thread::current().wait_any(f1,f2,timeout_us);
    }
    int wait_any( fc::vector<promise_base::ptr>&& v, const microseconds& timeout_us = microseconds::max() );
    int wait_any_until( fc::vector<promise_base::ptr>&& v, const time_point& tp );

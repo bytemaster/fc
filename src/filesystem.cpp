@@ -63,6 +63,17 @@ namespace fc {
    fc::string path::generic_string()const {
     return _p->generic_string();
    }
+   /**
+    *  @todo use iterators instead of indexes for 
+    *  faster performance
+    */
+   fc::string path::windows_string()const {
+     auto gs = _p->generic_string();
+     for( int i =0 ; i < gs.size(); ++i ) {
+       if( gs[i] == '/' ) gs[i] = '\\';
+     }
+     return gs;
+   }
 
    fc::string path::string()const {
     return _p->string().c_str();

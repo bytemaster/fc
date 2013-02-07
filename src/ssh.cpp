@@ -11,10 +11,12 @@
 #include <fc/interprocess/file_mapping.hpp>
 #include <fc/unique_lock.hpp>
 #include <fc/mutex.hpp>
+#include <fc/ip.hpp>
 #include <fc/error_report.hpp>
 #include <libssh2.h>
 #include <libssh2_sftp.h>
 #include <memory>
+#include <sstream>
 #include <fc/asio.hpp>
 #include <boost/asio.hpp>
 #include <boost/algorithm/string.hpp>
@@ -73,6 +75,11 @@ namespace fc { namespace ssh {
 
     class client_impl : public fc::retainable {
       public:
+         client_impl() {
+      sftp = nullptr;
+      session = nullptr;
+      knownhosts = nullptr;
+   }
         LIBSSH2_SESSION*            session;
         LIBSSH2_KNOWNHOSTS*         knownhosts;
         LIBSSH2_SFTP*               sftp;
@@ -104,6 +111,7 @@ namespace fc { namespace ssh {
                 char buf[1024];
                 client_impl* self = (client_impl*)*abstract;
         
+              //slog( "Keyboard-interactive authentication" );
         //        printf("Performing keyboard-interactive authentication.\n");
         
          //       printf("Authentication name: '");
@@ -158,13 +166,25 @@ namespace fc { namespace ssh {
             }
             sock.reset( new boost::asio::ip::tcp::socket( fc::asio::default_io_service() ) );
             
+     bool resolved = false;
             for( uint32_t i = 0; i < eps.size(); ++i ) {
                try {
+            boost::system::error_code ec;
+       std::stringstream ss; ss << eps[i];
+            slog( "Attempting to connect to %s", ss.str().c_str() );
                  fc::asio::tcp::connect( *sock, eps[i] );
                  endpt = eps[i];
+       resolved = true;
                  break;
-               } catch ( ... ) {}
+               } catch ( ... ) {
+              wlog( "%s", fc::except_str().c_str() );
+       sock->close();
+          }
             }
+       if( !resolved ) {
+          FC_THROW_REPORT( "Unable to connect to any resolved endpoint for ${host}:${port}", 
+            fc::value().set("host", hostname).set("port",port) );
+       }
             session = libssh2_session_init(); 
             *libssh2_session_abstract(session) = this;
             
@@ -180,14 +200,20 @@ namespace fc { namespace ssh {
               FC_THROW_REPORT( "SSH Handshake error: ${code} - ${message}", 
                                fc::value().set("code",ec).set("message", msg) );
             }
-            /*const char* fingerprint = */libssh2_hostkey_hash(session, LIBSSH2_HOSTKEY_HASH_SHA1);
+            const char* fingerprint = libssh2_hostkey_hash(session, LIBSSH2_HOSTKEY_HASH_SHA1);
+       //slog( "fingerprint: %s", fingerprint );
              
             // try to authenticate, throw on error.
             authenticate();
+     //slog(".");
           } catch ( error_report& er ) {
+        elog( "%s", er.to_detail_string().c_str() );
              close();
              throw FC_REPORT_PUSH( er, "Unable to connect to ssh server" );;
-          }
+          } catch ( ... ) {
+             close();
+             FC_THROW_REPORT( "Unable to connect to ssh server", fc::value().set("exception", fc::except_str() ) );
+     }
         }
 
         void close() {
@@ -243,6 +269,7 @@ namespace fc { namespace ssh {
         }
 
         void authenticate() {
+      //slog( "auth" );
            try {
             char * alist = libssh2_userauth_list(session, uname.c_str(),uname.size());
             char * msg   = 0;
@@ -304,6 +331,7 @@ namespace fc { namespace ssh {
         } // authenticate()
 
         bool try_pass() {
+        //slog( "try pass" );
             int ec = libssh2_userauth_password(session, uname.c_str(), upass.c_str() );
             while( ec == LIBSSH2_ERROR_EAGAIN ) {
               wait_on_socket();
@@ -313,6 +341,7 @@ namespace fc { namespace ssh {
             return !ec;
         }
         bool try_keyboard() {
+        //slog( "try keyboard" );
             int ec = libssh2_userauth_keyboard_interactive(session, uname.c_str(), 
                                                              &client_impl::kbd_callback);
             while( ec == LIBSSH2_ERROR_EAGAIN ) {
@@ -324,6 +353,7 @@ namespace fc { namespace ssh {
         }
 
         bool try_pub_key() {
+        //slog( "try pub key" );
             int ec = libssh2_userauth_publickey_fromfile(session,
                                                        uname.c_str(),
                                                        pubkey.c_str(),
@@ -341,7 +371,13 @@ namespace fc { namespace ssh {
             return !ec;
         }
 
+        /**
+         *  @todo figure out why this method results in deadlocks...
+         */
         void wait_on_socket() {
+          fc::usleep( fc::microseconds(10000) );
+          return;
+
           auto dir = libssh2_session_block_directions(session);
           if( !dir ) return;
 
@@ -384,10 +420,12 @@ namespace fc { namespace ssh {
            // elog( "************* Attempt to wait in either direction currently waits for both directions ****** " );
             //wlog( "rprom %1%   wprom %2%", rprom.get(), write_prom.get() );
         //     wlog( "wait on read %1% or write %2% ", rprom.get(), wprom.get() );
+            wlog( "wait both dir" );
+
             typedef fc::future<boost::system::error_code> fprom;
             fprom fw(wprom);
             fprom fr(rprom);
-            int r = fc::wait_any( fw, fr );
+            int r = fc::wait_any( fw, fr, fc::seconds(5) );
             switch( r ) {
               case 0:
                 break;
@@ -506,6 +544,7 @@ namespace fc { namespace ssh {
     // memory map the file
     size_t       fsize = file_size(local_path);
     if( fsize == 0 ) {
+    	elog( "file size %d", fsize );
         // TODO: handle empty file case
         if( progress ) progress(0,0);
         return;
@@ -549,14 +588,32 @@ namespace fc { namespace ssh {
           wrote += r;
           pos   += r;
       } 
-    } catch ( ... ) {
+
+      auto ec = libssh2_channel_send_eof( chan );
+      while( ec == LIBSSH2_ERROR_EAGAIN ) {
+        my->wait_on_socket();
+        ec = libssh2_channel_send_eof( chan );
+      }
+      ec = libssh2_channel_wait_eof( chan );
+      while( ec == LIBSSH2_ERROR_EAGAIN ) {
+        my->wait_on_socket();
+        ec = libssh2_channel_wait_eof( chan );
+      }
+
+      ec = libssh2_channel_close( chan );
+      while( ec == LIBSSH2_ERROR_EAGAIN ) {
+        my->wait_on_socket();
+        ec = libssh2_channel_close( chan );
+      }
+    } catch ( error_report& er ) {
+      wlog( "%s", er.to_detail_string().c_str() );
       // clean up chan
       int ec = libssh2_channel_free(chan );  
       while( ec == LIBSSH2_ERROR_EAGAIN ) {
         my->wait_on_socket();
         ec = libssh2_channel_free( chan );  
       }
-      throw;
+      throw er;
     }
     int ec = libssh2_channel_free( chan );  
     while( ec == LIBSSH2_ERROR_EAGAIN ) {
@@ -729,7 +786,24 @@ namespace fc { namespace ssh {
    *  Blocks until the result code of the process has been returned.
    */
   int process::result() {
-    return 0;
+    char* msg = 0;
+
+    int ec = libssh2_channel_wait_eof( my->chan );
+    while( ec == LIBSSH2_ERROR_EAGAIN ) {
+      my->sshc.my->wait_on_socket();
+      ec = libssh2_channel_wait_eof( my->chan );
+    }
+
+    ec = libssh2_channel_wait_closed( my->chan );
+    while( ec == LIBSSH2_ERROR_EAGAIN ) {
+      my->sshc.my->wait_on_socket();
+      ec = libssh2_channel_wait_closed( my->chan );
+    }
+    ec   = libssh2_session_last_error( my->sshc.my->session, &msg, 0, 0 );
+    if( !ec ) {
+      FC_THROW_REPORT( "Error waiting on socket to close: ${message}", fc::value().set("message",msg) );//%ec %msg );
+    }
+    return libssh2_channel_get_exit_status( my->chan );
   }
   /**
    *  @brief returns a stream that writes to the procss' stdin
@@ -767,6 +841,11 @@ namespace fc { namespace ssh {
       while( ec == LIBSSH2_ERROR_EAGAIN ) {
         sshc.my->wait_on_socket();
         ec = libssh2_channel_flush_ex( chan, LIBSSH2_CHANNEL_FLUSH_EXTENDED_DATA );
+      }
+      ec = libssh2_channel_flush_ex( chan, 0 );
+      while( ec == LIBSSH2_ERROR_EAGAIN ) {
+        sshc.my->wait_on_socket();
+        ec = libssh2_channel_flush_ex( chan, 0 );
       }
       if( ec < 0 ) {
         FC_THROW_REPORT( "ssh flush failed", fc::value().set( "channel_error", ec)  );
@@ -896,17 +975,6 @@ namespace fc { namespace ssh {
    { 
         chan = c.my->open_channel(pty_type); 
 
-        /*
-        unsigned int rw_size = 0;
-        int ec = libssh2_channel_receive_window_adjust2(chan, 1024*64, 0, &rw_size );
-        while( ec == LIBSSH2_ERROR_EAGAIN ) {
-          sshc->my->wait_on_socket();
-          ec = libssh2_channel_receive_window_adjust2(chan, 1024*64, 0, &rw_size );
-        }
-        elog( "rwindow size %1%", rw_size );
-        */
-
-
         int ec = libssh2_channel_handle_extended_data2(chan, LIBSSH2_CHANNEL_EXTENDED_DATA_NORMAL );
         while( ec == LIBSSH2_ERROR_EAGAIN ) {
           sshc.my->wait_on_socket();
@@ -920,6 +988,7 @@ namespace fc { namespace ssh {
               ec = libssh2_channel_shell(chan);
             }
         } else {
+	    //slog( "%s", cmd.c_str() );
             ec = libssh2_channel_exec( chan, cmd.c_str() );
             while( ec == LIBSSH2_ERROR_EAGAIN ) {
               sshc.my->wait_on_socket();
@@ -927,6 +996,7 @@ namespace fc { namespace ssh {
             }
         }
         if( ec ) {
+           elog( "error starting process" );
            char* msg = 0;
            ec   = libssh2_session_last_error( sshc.my->session, &msg, 0, 0 );
            FC_THROW_REPORT( "exec failed: ${message}", fc::value().set("message",msg).set("code",ec) );

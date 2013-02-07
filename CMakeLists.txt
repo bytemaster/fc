@@ -97,6 +97,7 @@ set( sources
   src/asio.cpp
   src/super_fast_hash.cpp
   src/file_mapping.cpp
+  src/reflect.cpp
 #  src/program_options.cpp
 )
 

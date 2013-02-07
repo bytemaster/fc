@@ -67,9 +67,10 @@ namespace fc {
 FC_REFLECT( fc::error_frame,  (desc)(file)(line)(method)(time)(meta)(detail) )
 FC_REFLECT( fc::error_report, (stack) )
 
+#define FC_IDENT(...) __VA_ARGS__
 #define FC_REPORT( X, ... )         fc::error_report X( __FILE__, __LINE__, __func__, __VA_ARGS__ )
-#define FC_THROW_REPORT( ... )      FC_THROW( fc::error_report( __FILE__, __LINE__, __func__, __VA_ARGS__ ))
+#define FC_THROW_REPORT( ... )      FC_THROW( fc::error_report( __FILE__, __LINE__, __func__,  __VA_ARGS__ ))
 #define FC_REPORT_CURRENT(ER, ... ) (ER).pop_frame().push_frame( __FILE__, __LINE__, __func__, __VA_ARGS__ )
 #define FC_REPORT_PUSH( ER, ... )   (ER).push_frame( __FILE__, __LINE__, __func__, __VA_ARGS__ );
-#define FC_REPORT_PUSH_DETAIL( ER, ... )   (ER).push_frame( true, __FILE__, __LINE__, __func__, __VA_ARGS__ )
+#define FC_REPORT_PUSH_DETAIL( ER, ... )   (ER).push_frame( true, __FILE__, __LINE__, __func__,  __VA_ARGS__ )
 #define FC_REPORT_POP(ER)           (ER).pop_frame()

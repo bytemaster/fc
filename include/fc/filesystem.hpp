@@ -13,6 +13,15 @@ namespace boost {
 
 
 namespace fc {
+  /**
+   *  @brief wraps boost::filesystem::path to provide platform independent path manipulation.
+   *
+   *  Most calls are simply a passthrough to boost::filesystem::path, however exceptions are
+   *  wrapped in an fc::error_report and the additional helper method fc::path::windows_string(),
+   *  can be used to calculate paths intended for systems different than the host.
+   *
+   *  @note Serializes to a fc::value() as the result of generic_string()
+   */
   class path {
     public:
       path();
@@ -41,6 +50,13 @@ namespace fc {
       fc::path   parent_path()const;
       fc::string string()const;
       fc::string generic_string()const;
+
+      /**
+       * @brief replaces '/' with '\' in the result of generic_string()
+       *
+       * @note not part of boost::filesystem::path
+       */
+      fc::string windows_string()const;
 
       bool       is_relative()const;
       bool       is_absolute()const;

@@ -9,6 +9,7 @@
 #include <boost/atomic.hpp>
 #include <vector>
 #include <fc/log.hpp>
+#include <fc/logger.hpp>
 
 namespace fc {
     struct sleep_priority_less {
@@ -33,7 +34,7 @@ namespace fc {
               cnt++;
             }
             ~thread_d(){
-              slog( "...%p %s",this,name.c_str() );
+              fc_ilog( logger::get("fc_context"), "thread ${name} exited}", ( "name", name) );
             }
            fc::thread&             self;
            boost::thread* boost_thread;
@@ -61,6 +62,7 @@ namespace fc {
 
 
            void debug( const fc::string& s ) {
+	      return;
               boost::unique_lock<boost::mutex> lock(log_mutex());
 
               std::cerr<<"--------------------- "<<s.c_str()<<" - "<<current;
@@ -123,29 +125,34 @@ namespace fc {
               */
            }
            fc::context::ptr ready_pop_front() {
-                fc::context::ptr tmp = 0;
+                fc::context::ptr tmp = nullptr;
                 if( ready_head ) {
                     tmp        = ready_head;
                     ready_head = tmp->next;
                     if( !ready_head )   
-                        ready_tail = 0;
-                    tmp->next = 0;
+                        ready_tail = nullptr;
+                    tmp->next = nullptr;
                 }
                 return tmp;
            }
            void ready_push_front( const fc::context::ptr& c ) {
-           //     c->ready_time = time_point::now();
+                BOOST_ASSERT( c->next == nullptr );
+                BOOST_ASSERT( c != current );
+	        //if( c == current ) wlog( "pushing current to ready??" );
                 c->next = ready_head;
                 ready_head = c;
                 if( !ready_tail ) 
                     ready_tail = c;
            }
            void ready_push_back( const fc::context::ptr& c ) {
-            //    c->ready_time = time_point::now();
+                BOOST_ASSERT( c->next == nullptr );
+                BOOST_ASSERT( c != current );
+	        //if( c == current ) wlog( "pushing current to ready??" );
                 c->next = 0;
                 if( ready_tail ) { 
                     ready_tail->next = c;
                 } else {
+            assert( !ready_head );
                     ready_head = c;
                 }
                 ready_tail = c;
@@ -228,33 +235,45 @@ namespace fc {
               // check to see if any other contexts are ready
               if( ready_head ) { 
                 fc::context* next = ready_pop_front();
+                if( next == current ) {
+                   elog( "next == current... something went wrong" );
+                   return false;
+                }
                 BOOST_ASSERT( next != current ); 
-                if( reschedule ) ready_push_back(current);
 
                 // jump to next context, saving current context
                 fc::context* prev = current;
                 current = next;
-                bc::jump_fcontext( &prev->my_context, &next->my_context, 0 );
-                current = prev;
-                BOOST_ASSERT( current );
+                if( reschedule ) ready_push_back(prev);
+          //         slog( "jump to %p from %p", next, prev );
+                    fc_dlog( logger::get("fc_context"), "from ${from} to ${to}", ( "from", int64_t(prev) )( "to", int64_t(next) ) );
+                   bc::jump_fcontext( &prev->my_context, &next->my_context, 0 );
+                   BOOST_ASSERT( current );
+                   BOOST_ASSERT( current == prev );
+                //current = prev;
               } else { // all contexts are blocked, create a new context 
                        // that will process posted tasks...
-                if( reschedule )  ready_push_back(current);
-                
-                fc::context* next;
-                if( pt_head ) {
+                fc::context* prev = current;
+
+                fc::context* next = nullptr;
+                if( pt_head ) { // grab cached context
                   next = pt_head;
                   pt_head = pt_head->next;
                   next->next = 0;
-                } else {
+                } else { // create new context.
                   next = new fc::context( &thread_d::start_process_tasks, stack_alloc,
                                                                       &fc::thread::current() );
                 }
-                fc::context* prev = current;
+
                 current = next;
+                if( reschedule )  ready_push_back(prev);
+
+         //       slog( "jump to %p from %p", next, prev );
+                fc_dlog( logger::get("fc_context"), "from ${from} to ${to}", ( "from", int64_t(prev) )( "to", int64_t(next) ) );
                 bc::jump_fcontext( &prev->my_context, &next->my_context, (intptr_t)this );
-                current = prev;
                 BOOST_ASSERT( current );
+                BOOST_ASSERT( current == prev );
+                //current = prev;
               }
 
               if( current->canceled )
@@ -360,19 +379,20 @@ namespace fc {
             if( c->blocking_prom.size() ) {
                 c->timeout_blocking_promises();
             }
-            else { ready_push_front( c ); }
+            else { 
+	      if( c != current ) ready_push_front( c ); 
+            }
         }
         return time_point::min();
     }
 
     void unblock( fc::context* c ) {
-      if(  fc::thread::current().my != this ) {
-        async( [=](){ unblock(c); } );
-        return;
-      }
-      ready_push_front(c); 
+        if(  fc::thread::current().my != this ) {
+          async( [=](){ unblock(c); } );
+          return;
+        }
+	if( c != current ) ready_push_front(c); 
     }
-
         void yield_until( const time_point& tp, bool reschedule ) {
           check_fiber_exceptions();
 

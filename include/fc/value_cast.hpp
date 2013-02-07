@@ -16,212 +16,54 @@ namespace fc {
 
     namespace detail {
 
-       template<typename T>
-       struct cast_visitor : value::const_visitor {
-         cast_visitor( T& out )
-         :m_out(out){}
-         virtual void operator()( const int8_t& v      )  { m_out = fc::numeric_cast<T>(v); }
-         virtual void operator()( const int16_t& v     )  { m_out = fc::numeric_cast<T>(v); }
-         virtual void operator()( const int32_t& v     )  { m_out = fc::numeric_cast<T>(v); }
-         virtual void operator()( const int64_t& v     )  { m_out = fc::numeric_cast<T>(v); }
-         virtual void operator()( const uint8_t& v     )  { m_out = fc::numeric_cast<T>(v); }
-         virtual void operator()( const uint16_t& v    )  { m_out = fc::numeric_cast<T>(v); }
-         virtual void operator()( const uint32_t& v    )  { m_out = fc::numeric_cast<T>(v); }
-         virtual void operator()( const uint64_t& v    )  { m_out = fc::numeric_cast<T>(v); }
-         virtual void operator()( const float& v       )  { m_out = fc::numeric_cast<T>(v); }
-         virtual void operator()( const double& v      )  { m_out = fc::numeric_cast<T>(v); }
-         virtual void operator()( const bool& v        )  { m_out = v; }
-         virtual void operator()( const fc::string& v )   { m_out = fc::lexical_cast<T>(v); }
-         virtual void operator()( const value::object&  ) { FC_THROW_REPORT("bad cast to ${type} from object", 
-                                                                            fc::value().set("type",fc::get_typename<T>::name())); }
-         virtual void operator()( const value::array&  )  { FC_THROW_REPORT("bad cast to ${type} from array",
-                                                                            fc::value().set("type",fc::get_typename<T>::name())); }
-         virtual void operator()( )                       { FC_THROW_REPORT("bad cast to ${type} from null",
-                                                                            fc::value().set("type",fc::get_typename<T>::name())); } 
-         private:
-         T& m_out;
-       };
-       template<>
-       struct cast_visitor<bool> : value::const_visitor {
-         cast_visitor( bool& out )
-         :m_out(out){}
-         virtual void operator()( const int8_t& v      ){ m_out = v != 0; }
-         virtual void operator()( const int16_t& v     ){ m_out = v != 0; }
-         virtual void operator()( const int32_t& v     ){ m_out = v != 0; }
-         virtual void operator()( const int64_t& v     ){ m_out = v != 0; }
-         virtual void operator()( const uint8_t& v     ){ m_out = v != 0; }
-         virtual void operator()( const uint16_t& v    ){ m_out = v != 0; }
-         virtual void operator()( const uint32_t& v    ){ m_out = v != 0; }
-         virtual void operator()( const uint64_t& v    ){ m_out = v != 0; }
-         virtual void operator()( const float& v       ){ m_out = v != 0; }
-         virtual void operator()( const double& v      ){ m_out = v != 0; }
-         virtual void operator()( const bool& v        ){ m_out = v; }
-         virtual void operator()( const fc::string& v ) { m_out = !(v != "true"); }
-         virtual void operator()( const value::object&  )      { FC_THROW_REPORT("bad cast to bool from object"); }
-         virtual void operator()( const value::array&  )       { FC_THROW_REPORT("bad cast to bool from array");  }
-         virtual void operator()( )                            { FC_THROW_REPORT("bad cast to bool from null");   }
-         private:
-         bool& m_out;
-       };
-     
-       template<>
-       struct cast_visitor<fc::string> : value::const_visitor {
-         cast_visitor( fc::string& out )
-         :m_out(out){}
-         virtual void operator()( const int8_t& v      ) { m_out = fc::lexical_cast<fc::string>(v); }
-         virtual void operator()( const int16_t& v     ) { m_out = fc::lexical_cast<fc::string>(v); }
-         virtual void operator()( const int32_t& v     ) { m_out = fc::lexical_cast<fc::string>(v); }
-         virtual void operator()( const int64_t& v     ) { m_out = fc::lexical_cast<fc::string>(v); }
-         virtual void operator()( const uint8_t& v     ) { m_out = fc::lexical_cast<fc::string>(v); }
-         virtual void operator()( const uint16_t& v    ) { m_out = fc::lexical_cast<fc::string>(v); }
-         virtual void operator()( const uint32_t& v    ) { m_out = fc::lexical_cast<fc::string>(v); }
-         virtual void operator()( const uint64_t& v    ) { m_out = fc::lexical_cast<fc::string>(v); }
-         virtual void operator()( const float& v       ) { m_out = fc::lexical_cast<fc::string>(v); }
-         virtual void operator()( const double& v      ) { m_out = fc::lexical_cast<fc::string>(v); }
-         virtual void operator()( const bool& v        ) { m_out = v != 0 ? "true" : "false";       }
-         virtual void operator()( const fc::string& v )  { m_out = v;                               }
-         virtual void operator()( const value::object&  ){ FC_THROW_REPORT("bad cast to string from object"); }
-         virtual void operator()( const value::array&  ) { FC_THROW_REPORT("bad cast to string from array"); }
-         virtual void operator()( )                      { m_out = fc::string(); }
-     
-         private:
-         fc::string& m_out;
-       };
-     
-       template<>
-       struct cast_visitor<value::array> : value::const_visitor {
-         cast_visitor( value::array& out )
-         :m_out(out){}
-         virtual void operator()( const int8_t& v      )   { FC_THROW_REPORT("bad cast to array from int8");}
-         virtual void operator()( const int16_t& v     )   { FC_THROW_REPORT("bad cast to array from int16");}
-         virtual void operator()( const int32_t& v     )   { FC_THROW_REPORT("bad cast to array from int32");}
-         virtual void operator()( const int64_t& v     )   { FC_THROW_REPORT("bad cast to array from int32");}
-         virtual void operator()( const uint8_t& v     )   { FC_THROW_REPORT("bad cast to array from uint8");}
-         virtual void operator()( const uint16_t& v    )   { FC_THROW_REPORT("bad cast to array from uint16");}
-         virtual void operator()( const uint32_t& v    )   { FC_THROW_REPORT("bad cast to array from uint32");}
-         virtual void operator()( const uint64_t& v    )   { FC_THROW_REPORT("bad cast to array from uint64");}
-         virtual void operator()( const float& v       )   { FC_THROW_REPORT("bad cast to array from float");}
-         virtual void operator()( const double& v      )   { FC_THROW_REPORT("bad cast to array from double");}
-         virtual void operator()( const bool& v        )   { FC_THROW_REPORT("bad cast to array from bool");}
-         virtual void operator()( const fc::string& v )    { FC_THROW_REPORT("bad cast to array from string");}
-         virtual void operator()( const value::object&  )  { FC_THROW_REPORT("bad cast to array from object");}
-         virtual void operator()( const value::array& a )  { m_out = a;              }
-         virtual void operator()( )                        { m_out = value::array(); }
-     
-         private:
-         value::array& m_out;
-       };
-     
-       template<>
-       struct cast_visitor<value::object> : value::const_visitor {
-         cast_visitor( value::object& out )
-         :m_out(out){}
-         virtual void operator()( const int8_t& v      ){ FC_THROW_REPORT("bad cast to array from int8");}
-         virtual void operator()( const int16_t& v     ){ FC_THROW_REPORT("bad cast to array from int16");}
-         virtual void operator()( const int32_t& v     ){ FC_THROW_REPORT("bad cast to array from int32");}
-         virtual void operator()( const int64_t& v     ){ FC_THROW_REPORT("bad cast to array from int32");}
-         virtual void operator()( const uint8_t& v     ){ FC_THROW_REPORT("bad cast to array from uint8");}
-         virtual void operator()( const uint16_t& v    ){ FC_THROW_REPORT("bad cast to array from uint16");}
-         virtual void operator()( const uint32_t& v    ){ FC_THROW_REPORT("bad cast to array from uint32");}
-         virtual void operator()( const uint64_t& v    ){ FC_THROW_REPORT("bad cast to array from uint64");}
-         virtual void operator()( const float& v       ){ FC_THROW_REPORT("bad cast to array from float");}
-         virtual void operator()( const double& v      ){ FC_THROW_REPORT("bad cast to array from double");}
-         virtual void operator()( const bool& v        ){ FC_THROW_REPORT("bad cast to array from bool");}
-         virtual void operator()( const fc::string& v ) { FC_THROW_REPORT("bad cast to array from string");}
-         virtual void operator()( const value::object& a )  { m_out = a;                  }
-         virtual void operator()( const value::array&  )    { FC_THROW_REPORT("bad cast");}
-         virtual void operator()( )                         { m_out = value::object();      }
-     
-         private:
-         value::object& m_out;
-       };
-       template<>
-       struct cast_visitor<fc::value> : value::const_visitor {
-         cast_visitor( value& out )
-         :m_out(out){}
-         virtual void operator()( const int8_t& v      )    { m_out = v; }
-         virtual void operator()( const int16_t& v     )    { m_out = v; }
-         virtual void operator()( const int32_t& v     )    { m_out = v; }
-         virtual void operator()( const int64_t& v     )    { m_out = v; }
-         virtual void operator()( const uint8_t& v     )    { m_out = v; }
-         virtual void operator()( const uint16_t& v    )    { m_out = v; }
-         virtual void operator()( const uint32_t& v    )    { m_out = v; }
-         virtual void operator()( const uint64_t& v    )    { m_out = v; }
-         virtual void operator()( const float& v       )    { m_out = v; }
-         virtual void operator()( const double& v      )    { m_out = v; }
-         virtual void operator()( const bool& v        )    { m_out = v; }
-         virtual void operator()( const fc::string& v )     { m_out = v; }
-         virtual void operator()( const value::object& a )  { m_out = a; }
-         virtual void operator()( const value::array& a )   { m_out = a; }
-         virtual void operator()( )                     { m_out = value(); }
-     
-         value& m_out;
-       };
+        void cast_value( const value& v, int8_t& );
+        void cast_value( const value& v, int16_t& );
+        void cast_value( const value& v, int32_t& );
+        void cast_value( const value& v, int64_t& );
+        void cast_value( const value& v, uint8_t& );
+        void cast_value( const value& v, uint16_t& );
+        void cast_value( const value& v, uint32_t& );
+        void cast_value( const value& v, uint64_t& );
+        void cast_value( const value& v, double& );
+        void cast_value( const value& v, float& );
+        void cast_value( const value& v, bool& );
+        void cast_value( const value& v, fc::string& );
+        void cast_value( const value& v, value& );
 
-       template<typename T>
-       struct cast_visitor<fc::vector<T>> : value::const_visitor {
-         cast_visitor( fc::vector<T>& out )
-         :m_out(out){}
-         virtual void operator()( const int8_t& v      )   { FC_THROW_REPORT("bad cast to vector<T> from int8");}
-         virtual void operator()( const int16_t& v     )   { FC_THROW_REPORT("bad cast to vector<T> from int16");}
-         virtual void operator()( const int32_t& v     )   { FC_THROW_REPORT("bad cast to vector<T> from int32");}
-         virtual void operator()( const int64_t& v     )   { FC_THROW_REPORT("bad cast to vector<T> from int64");}
-         virtual void operator()( const uint8_t& v     )   { FC_THROW_REPORT("bad cast to vector<T> from uint8");}
-         virtual void operator()( const uint16_t& v    )   { FC_THROW_REPORT("bad cast to vector<T> from uint16");}
-         virtual void operator()( const uint32_t& v    )   { FC_THROW_REPORT("bad cast to vector<T> from uint32");}
-         virtual void operator()( const uint64_t& v    )   { FC_THROW_REPORT("bad cast to vector<T> from uint64");}
-         virtual void operator()( const float& v       )   { FC_THROW_REPORT("bad cast to vector<T> from float");}
-         virtual void operator()( const double& v      )   { FC_THROW_REPORT("bad cast to vector<T> from double");}
-         virtual void operator()( const bool& v        )   { FC_THROW_REPORT("bad cast to vector<T> from bool");}
-         virtual void operator()( const fc::string& v )    { FC_THROW_REPORT("bad cast to vector<T> from string");}
-         virtual void operator()( const value::object& a ) { FC_THROW_REPORT("bad cast to vector<T> from object");} 
-         virtual void operator()( const value::array& a )  {
-            m_out.resize(0);
-            m_out.reserve( a.fields.size() );
-            int idx = 0;
-            for( auto i = a.fields.begin(); i != a.fields.end(); ++i ) {
+        template<typename T>
+        void cast_value( const value& v, T& t) {
+           unpack(v,t);
+        }
+       
+        template<typename T>
+        void cast_value( const value& v, fc::vector<T>& out ) {
+           if( v.type() != value::array_type ) {
+              FC_THROW_REPORT( "Error casting ${type} to array", fc::value("type", fc::reflector<value::value_type>::to_string(v.type()) ) );
+           }
+           out.resize(v.size());
+           const fc::vector<value>& val = v.as_array();
+           auto oitr = out.begin();
+           int  idx = 0;
+           for( auto itr = val.begin(); itr != val.end(); ++itr, ++oitr, ++idx ) {
               try {
-                m_out.push_back( value_cast<T>( *i ) );
-              } catch( fc::error_report& er ) {
-                 throw FC_REPORT_PUSH( er, "Error parsing array index ${index} to ${type}", 
-                                           fc::value().set("index", idx).set("type",fc::get_typename<T>::name()) );
+                 *oitr = value_cast<T>(*itr);
+                // value_cast( *itr, *oitr );
+              } catch ( fc::error_report& er ) {
+                 throw FC_REPORT_PUSH( er, "Error casting value[${index}] to ${type}", 
+                                       fc::value("index",idx)
+                                                ("type", fc::get_typename<T>::name())
+                                     );
               }
-              ++idx;
-            }
-         }
+           }
+        }
 
-         virtual void operator()( )                     { FC_THROW_REPORT("bad cast");}
-     
-         private:
-         fc::vector<T>& m_out;
-       };
-
-
-
-       template<>
-       struct cast_visitor<void> : value::const_visitor {
-         virtual void operator()( const int8_t& v      )       { FC_THROW_REPORT("bad cast");}
-         virtual void operator()( const int16_t& v     )       { FC_THROW_REPORT("bad cast");}
-         virtual void operator()( const int32_t& v     )       { FC_THROW_REPORT("bad cast");}
-         virtual void operator()( const int64_t& v     )       { FC_THROW_REPORT("bad cast");}
-         virtual void operator()( const uint8_t& v     )       { FC_THROW_REPORT("bad cast");}
-         virtual void operator()( const uint16_t& v    )       { FC_THROW_REPORT("bad cast");}
-         virtual void operator()( const uint32_t& v    )       { FC_THROW_REPORT("bad cast");}
-         virtual void operator()( const uint64_t& v    )       { FC_THROW_REPORT("bad cast");}
-         virtual void operator()( const float& v       )       { FC_THROW_REPORT("bad cast");}
-         virtual void operator()( const double& v      )       { FC_THROW_REPORT("bad cast");}
-         virtual void operator()( const bool& v        )       { FC_THROW_REPORT("bad cast");}
-         virtual void operator()( const fc::string& v )        { FC_THROW_REPORT("bad cast");}
-         virtual void operator()( const value::object& a )     { FC_THROW_REPORT("bad cast");}
-         virtual void operator()( const value::array&  )       { FC_THROW_REPORT("bad cast");}
-         virtual void operator()( )                     { }
-       };
         template<typename IsTuple=fc::false_type>
         struct cast_if_tuple {
           template<typename T>
           static T cast(  const value& v ) {
              typename fc::deduce<T>::type out;
-             v.visit(cast_visitor<decltype(out)>(out));
+             cast_value(v,out);
+           //  v.visit(cast_visitor<decltype(out)>(out));
              return out;
           }
         };
@@ -269,27 +111,7 @@ namespace fc {
           }
         };
 
-       class value_visitor;
-
-       struct value_holder {
-         virtual ~value_holder();
-         virtual const char* type()const;
-         virtual void visit( value::const_visitor&& v )const;
-         virtual void visit( value_visitor&& v );
-       
-         virtual void clear();
-         virtual size_t size()const;
-         virtual void resize( size_t );
-         virtual void reserve( size_t );
-         virtual value& at( size_t );
-         virtual const value& at( size_t )const;
-         virtual void push_back( value&& v );
-       
-         virtual value_holder* move_helper( char* c );
-         virtual value_holder* copy_helper( char* c )const;
-       };
-
-       void new_value_holder_void( value* v );
+        void new_value_holder_void( value* v );
     } // namespace detail
 
 

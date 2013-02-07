@@ -133,7 +133,7 @@ namespace fc {
             try { 
              fc::unpack( obj[name], c.*p );
             } catch ( fc::error_report& er ) {
-                throw FC_REPORT_PUSH( er, "Error parsing field '${field_name}'", fc::value().set("field_name",name) );
+                throw FC_REPORT_PUSH( er, "Error parsing field '${field_name}'", fc::value("field_name",name) );
             }
          }
          else {
@@ -168,7 +168,7 @@ namespace fc {
       }
       template<typename T>
       static inline void unpack( const fc::value& jsv, T& v ) { 
-         if( strcmp( jsv.type(), "string" ) == 0 ) {
+         if(  jsv.is_string() ) {
             v = fc::reflector<T>::from_string( fc::value_cast<fc::string>(jsv).c_str() );
          } else {
             // throw if invalid int, by attempting to convert to string
@@ -183,12 +183,10 @@ namespace fc {
       template<typename T>
       static inline void pack(fc::value& s, const T& v ) { 
         v.did_not_implement_reflect_macro();
-        wlog( "warning, ignoring unknown type" );
       }
       template<typename T>
       static inline void unpack( const fc::value& s, T& v ) { 
         v.did_not_implement_reflect_macro();
-        wlog( "warning, ignoring unknown type" );
       }
     };
 
@@ -230,7 +228,7 @@ namespace fc {
   }
   template<typename T> 
   void unpack( const fc::value& jsv, fc::optional<T>& v ) {
-    if( strcmp( jsv.type(), "void" ) != 0 ) {
+    if( !jsv.is_null() ) {
       T tmp;
       unpack(  jsv, tmp );
       v = fc::move(tmp);

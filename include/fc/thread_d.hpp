@@ -217,12 +217,12 @@ namespace fc {
               // check to see if any other contexts are ready
               if( ready_head ) { 
                 cmt::context* next = ready_pop_front();
-                BOOST_ASSERT( next != current ); 
-                if( reschedule ) ready_push_back(current);
-
                 // jump to next context, saving current context
                 cmt::context* prev = current;
                 current = next;
+                if( reschedule ) ready_push_back(current);
+
+                slog( "jump from %p to %p", prev, next );
                 bc::jump_fcontext( &prev->my_context, &next->my_context, 0 );
                 current = prev;
                 BOOST_ASSERT( current );
@@ -241,6 +241,7 @@ namespace fc {
                 }
                 cmt::context* prev = current;
                 current = next;
+                slog( "jump from %p to %p", prev, next );
                 bc::jump_fcontext( &prev->my_context, &next->my_context, (intptr_t)this );
                 current = prev;
                 BOOST_ASSERT( current );

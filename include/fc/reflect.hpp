@@ -64,7 +64,9 @@ struct reflector{
     #endif // DOXYGEN
 };
 
- } // namespace fc
+void throw_bad_enum_cast( int64_t i, const char* e );
+void throw_bad_enum_cast( const char* k, const char* e );
+} // namespace fc
 
 
 #ifndef DOXYGEN
@@ -113,6 +115,7 @@ void fc::reflector<TYPE>::visit( const Visitor& v ) { \
 #define FC_REFLECT_ENUM_FROM_STRING( r, enum_type, elem ) \
   if( strcmp( s, BOOST_PP_STRINGIZE(elem)  ) == 0 ) return enum_type::elem;
 
+
 #define FC_REFLECT_ENUM( ENUM, FIELDS ) \
 namespace fc { \
 template<> struct reflector<ENUM> { \
@@ -126,15 +129,14 @@ template<> struct reflector<ENUM> { \
       switch( ENUM(i) ) { \
         BOOST_PP_SEQ_FOR_EACH( FC_REFLECT_ENUM_TO_STRING, ENUM, FIELDS ) \
         default: \
-        FC_THROW_REPORT(  "Unknown field ${field} not in enum ${enum}", \
-                          fc::value().set("field",i).set("enum",BOOST_PP_STRINGIZE(ENUM)) ); \
+           fc::throw_bad_enum_cast( i, BOOST_PP_STRINGIZE(ENUM) ); \
       }\
       return nullptr; \
     } \
     static ENUM from_string( const char* s ) { \
         BOOST_PP_SEQ_FOR_EACH( FC_REFLECT_ENUM_FROM_STRING, ENUM, FIELDS ) \
-        FC_THROW_REPORT(  "Unknown field ${field} not in enum ${enum}", \
-                          fc::value().set("field",s).set("enum",BOOST_PP_STRINGIZE(ENUM)) ); \
+        fc::throw_bad_enum_cast( s, BOOST_PP_STRINGIZE(ENUM) ); \
+        return ENUM();\
     } \
 };  \
 } 

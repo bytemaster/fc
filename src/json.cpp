@@ -455,7 +455,7 @@ void  read_values( fc::value::array& a, char* in, char* end, error_collector& ec
   }
   if( v == ve ) return; // no values
 
-  { temp_set temp(ve,'\0'); a.fields.push_back( to_value( v, ve, ec ) ); }
+  { temp_set temp(ve,'\0'); a.push_back( to_value( v, ve, ec ) ); }
 
   char* c;
   char* ce = 0;
@@ -470,7 +470,7 @@ void  read_values( fc::value::array& a, char* in, char* end, error_collector& ec
     if( *c != ',' ) // we got a value when expecting ','
     {
        wlog( "missing ," );
-       temp_set temp(ce,'\0'); a.fields.push_back( to_value(c, ce, ec) );
+       temp_set temp(ce,'\0'); a.push_back( to_value(c, ce, ec) );
        ve = ce;
        continue; // start back at start
     }
@@ -487,7 +487,7 @@ void  read_values( fc::value::array& a, char* in, char* end, error_collector& ec
       wlog( "trailing comma at c->ce" );
     } else { // got value
       temp_set temp(ve,'\0'); 
-      a.fields.push_back( to_value( v, ve, ec) );
+      a.push_back( to_value( v, ve, ec) );
     }
   } while( ve < end );// expect comma + value | ''
 }
@@ -977,9 +977,9 @@ fc::string pretty_print( fc::vector<char>&& v, uint8_t indent ) {
     }
     virtual void operator()( const value::array& o ){
       os << '[';
-        for( uint32_t i = 0; i < o.fields.size(); ++i ) {
-          if( i ) os <<',';
-          o.fields[i].visit( value_visitor(*this) );
+        for( auto i = o.begin(); i != o.end(); ++i ) {
+          if( i != o.begin() ) os <<',';
+          i->visit( value_visitor(*this) );
         }
       os << ']';
     }

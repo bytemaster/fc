@@ -4,6 +4,8 @@
 #include <fc/filesystem.hpp>
 #include <unordered_map>
 #include <string>
+#include <fc/console_appender.hpp>
+#include <fc/file_appender.hpp>
 
 namespace fc {
    std::unordered_map<std::string,logger>& get_logger_map();
@@ -16,6 +18,8 @@ namespace fc {
    }
    bool configure_logging( const logging_config& cfg )
    {
+      static bool reg_console_appender = appender::register_appender<console_appender>( "console" );
+      static bool reg_file_appender = appender::register_appender<file_appender>( "file" );
       get_logger_map().clear();
       get_appender_map().clear();
 

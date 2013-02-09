@@ -436,6 +436,9 @@ value::value( value&& m ) {
 value::value( const value& m ){
   gh(m.holder)->copy_helper(holder._store._data);
 }
+value::value( const char* c ) {
+   new (holder) detail::value_holder_impl<fc::string>( c );
+}
 value::value( char* c ) {
    new (holder) detail::value_holder_impl<fc::string>( c );
 }

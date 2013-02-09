@@ -9,13 +9,10 @@
 #include <fc/console_defines.h>
 #include <fc/log.hpp>
 #include <fc/value_cast.hpp>
-#include <fc/console_appender.hpp>
-#include <fc/file_appender.hpp>
 
 
 namespace fc {
 
-   static fc::spin_lock appender_spinlock;
    std::unordered_map<std::string,appender::ptr>& get_appender_map() {
      static std::unordered_map<std::string,appender::ptr> lm;
      return lm;
@@ -25,7 +22,6 @@ namespace fc {
      return lm;
    }
    appender::ptr appender::get( const fc::string& s ) {
-      scoped_lock<spin_lock> lock(appender_spinlock);
       return get_appender_map()[s];
    }
    bool  appender::register_appender( const fc::string& type, const appender_factory::ptr& f )
@@ -45,6 +41,4 @@ namespace fc {
       return ap;
    }
    
-   static bool reg_console_appender = appender::register_appender<console_appender>( "console" );
-   static bool reg_file_appender = appender::register_appender<file_appender>( "file" );
 } // namespace fc

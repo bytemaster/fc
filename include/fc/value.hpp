@@ -64,6 +64,7 @@ namespace fc {
         value(value&& m );
         value(const value& m );
 
+        value(const char* c );
         value(char* c );
         value(int8_t );
         value(int16_t );
@@ -76,8 +77,6 @@ namespace fc {
         value(double );
         value(float );
         value(bool );
-        /// initialize an object with a single key/value pair
-        value(const fc::string&, const value& v );
         value(fc::string&& );
         value(fc::string& );
         value(const fc::string& );
@@ -85,6 +84,13 @@ namespace fc {
         value(object&& o );
         value(const object& o );
         value(object& o );
+
+        /// initialize an object with a single key/value pair
+        value(const fc::string&, const value& v );
+        template<typename T>
+        value(const fc::string& s, const T& v ) {
+           set( s, v );
+        }
 
         value(fc::vector<value>&& a );
         value(fc::vector<value>& a );

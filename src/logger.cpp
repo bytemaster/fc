@@ -86,13 +86,13 @@ namespace fc {
     void logger::set_name( const fc::string& n ) { my->_name = n; }
     const fc::string& logger::name()const { return my->_name; }
 
-    static fc::spin_lock logger_spinlock;
     std::unordered_map<std::string,logger>& get_logger_map() {
       static std::unordered_map<std::string,logger> lm;
       return lm;
     }
 
     logger logger::get( const fc::string& s ) {
+       static fc::spin_lock logger_spinlock;
        scoped_lock<spin_lock> lock(logger_spinlock);
        return get_logger_map()[s];
     }

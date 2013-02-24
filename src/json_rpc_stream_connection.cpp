@@ -37,13 +37,14 @@ namespace fc { namespace json {
 	    // std::cerr<<"\n**line size: "<<line.size()<<"\n\n";
             //   slog( "line size: '%d'", line.size() );
             //   slog( "%s", line.c_str() );
-               try {
-                 fc::value v= fc::json::from_string( line );
-                 self.handle_message(v);
-               } catch (...) {
-                 wlog( "%s", fc::except_str().c_str() );
-                 return;
-               }
+                fc::async( [=]() {
+                   try {
+                      fc::value v= fc::json::from_string( line );
+                      self.handle_message(v);
+                   } catch (...) {
+                     wlog( "%s", fc::except_str().c_str() );
+                   }
+                });
                fc::getline( in, line );
            }
          } catch ( ... ) {

@@ -3,6 +3,7 @@
 #include <fc/iostream.hpp>
 #include <fc/sstream.hpp>
 #include <fc/thread.hpp>
+#include <fc/logger.hpp>
 
 #include <iostream>
 
@@ -15,9 +16,12 @@ namespace fc { namespace json {
       rpc_stream_connection& self;
       std::function<void()>  on_close;
 
+      fc::logger             log;
+
       impl( fc::istream& i, fc::ostream& o, rpc_stream_connection& s )
       :in(i),out(o),self(s){
         _read_loop_complete = fc::async( [=](){ read_loop(); } ); 
+        log = logger::get( "fc::json::rpc_stream_connection" );
       }
       
       ~impl() {
@@ -38,10 +42,13 @@ namespace fc { namespace json {
             //   slog( "line size: '%d'", line.size() );
             //   slog( "%s", line.c_str() );
                try {
+                 fc_dlog( log, "Received: '${line}'", ("line",line) );
                  fc::value v= fc::json::from_string( line );
                  self.handle_message(v);
+               } catch ( fc::error_report& er ) {
+                 fc_wlog( log, "Error handling request '${line}'\n ${report}", ("line",line)("report",er.to_detail_string() ) );
                } catch (...) {
-                 wlog( "%s", fc::except_str().c_str() );
+                 fc_wlog( log, "Error handling request '${exception}'",("exception",fc::except_str()) );
                  return;
                }
                fc::getline( in, line );
@@ -62,7 +69,6 @@ namespace fc { namespace json {
   rpc_stream_connection::rpc_stream_connection(){  }
   rpc_stream_connection::rpc_stream_connection(const rpc_stream_connection& c):my(c.my){ }
   rpc_stream_connection::~rpc_stream_connection(){ 
-    wlog( "%p", this );
     close();
   }
 
@@ -90,6 +96,7 @@ namespace fc { namespace json {
     fc::stringstream ss;
     ss<<"{\"id\":"<<id<<",\"method\":\""<<m<<"\",\"params\":"<<fc::json::to_string(param)<<"}\n";
     fc::string o = ss.str();
+    fc_dlog( my->log, "Sent: '${line}'", ("line",o) );
     my->out.write( o.c_str(), o.size() );
     my->out.flush();
   }
@@ -97,6 +104,7 @@ namespace fc { namespace json {
     fc::stringstream ss;
     ss<<"{\"method\":\""<<m<<"\",\"params\":"<<fc::json::to_string(param)<<"}\n";
     fc::string o = ss.str();
+    fc_dlog( my->log, "Sent: '${line}'", ("line",o) );
     my->out.write( o.c_str(), o.size() );
     my->out.flush();
   }
@@ -104,6 +112,7 @@ namespace fc { namespace json {
     fc::stringstream ss;
     ss<<"{\"id\":"<<id<<",\"error\":"<<fc::json::to_string(eo)<<"}\n";
     fc::string o = ss.str();
+    fc_dlog( my->log, "Sent: '${line}'", ("line",o) );
     my->out.write( o.c_str(), o.size() );
     my->out.flush();
   }
@@ -111,6 +120,7 @@ namespace fc { namespace json {
     fc::stringstream ss;
     ss<<"{\"id\":"<<id<<",\"result\":"<<fc::json::to_string(r)<<"}\n";
     fc::string o = ss.str();
+    fc_dlog( my->log, "Sent: '${line}'", ("line",o) );
     my->out.write( o.c_str(), o.size() );
     my->out.flush();
   }

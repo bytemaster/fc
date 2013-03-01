@@ -41,6 +41,10 @@ namespace fc {
     struct lexical_cast<fc::string, R> {
        static fc::string cast( const R& v ) { return to_string( v ); }
     };
+    template<typename R> 
+    struct lexical_cast<std::string, R> {
+       static std::string cast( const R& v ) { return to_string( v ); }
+    };
 
     template<typename R> 
     struct lexical_cast<uint64_t, R> {

@@ -38,19 +38,18 @@ namespace fc { namespace json {
            fc::string line;
            fc::getline( in, line );
            while( !in.eof() ) {
-	    // std::cerr<<"\n**line size: "<<line.size()<<"\n\n";
-            //   slog( "line size: '%d'", line.size() );
-            //   slog( "%s", line.c_str() );
-               try {
-                 fc_dlog( log, "Received: '${line}'", ("line",line) );
-                 fc::value v= fc::json::from_string( line );
-                 self.handle_message(v);
-               } catch ( fc::error_report& er ) {
-                 fc_wlog( log, "Error handling request '${line}'\n ${report}", ("line",line)("report",er.to_detail_string() ) );
-               } catch (...) {
-                 fc_wlog( log, "Error handling request '${exception}'",("exception",fc::except_str()) );
-                 return;
-               }
+               fc::async( [=]() {
+                 try {
+                   fc_dlog( log, "Received: '${line}'", ("line",line) );
+                   fc::value v= fc::json::from_string( line );
+                   self.handle_message(v);
+                 } catch ( fc::error_report& er ) {
+                   fc_wlog( log, "Error handling request '${line}'\n ${report}", ("line",line)("report",er.to_detail_string() ) );
+                 } catch (...) {
+                   fc_wlog( log, "Error handling request '${exception}'",("exception",fc::except_str()) );
+                   return;
+                 }
+               });
                fc::getline( in, line );
            }
          } catch ( ... ) {

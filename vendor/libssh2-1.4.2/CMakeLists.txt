@@ -24,5 +24,5 @@ SET( sources
     src/userauth.c
     src/version.c
 )
-
+add_definitions( -DLIBSSH2DEBUG )
 SETUP_LIBRARY( ssh2 SOURCES ${sources} LIBRARIES  ${libraries} LIBRARY_TYPE STATIC )

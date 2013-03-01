@@ -75,9 +75,11 @@ void throw_bad_enum_cast( const char* k, const char* e );
   fc::reflector<base>::visit( visitor );
 
 
-#ifndef WIN32
+#ifndef _MSC_VER
   #define TEMPLATE template
 #else
+  // Disable warning C4482: nonstandard extention used: enum 'enum_type::enum_value' used in qualified name
+  #pragma warning( disable: 4482 )  
   #define TEMPLATE
 #endif
 
@@ -177,6 +179,11 @@ template<> struct reflector<TYPE> {\
  */
 #define FC_REFLECT( TYPE, MEMBERS ) \
     FC_REFLECT_DERIVED( TYPE, BOOST_PP_SEQ_NIL, MEMBERS )
+
+#define FC_REFLECT_TYPENAME( TYPE ) \
+namespace fc { \
+  template<> struct get_typename<TYPE>  { static const char* name()  { return BOOST_PP_STRINGIZE(TYPE);  } }; \
+}
 
 #define FC_REFLECT_FWD( TYPE ) \
 namespace fc { \

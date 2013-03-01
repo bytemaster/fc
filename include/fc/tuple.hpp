@@ -118,7 +118,7 @@ namespace fc {
           typedef fc::tuple<BOOST_PP_ENUM( n, DEDUCE_MEMBERS,unused)>  type; \
         }; 
 
-        BOOST_PP_REPEAT_FROM_TO( 1, 4, TUPLE, unused )
+        BOOST_PP_REPEAT_FROM_TO( 1, 5, TUPLE, unused )
 
 
         #undef FORWARD_PARAMS

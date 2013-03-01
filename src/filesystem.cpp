@@ -76,7 +76,7 @@ namespace fc {
    }
 
    fc::string path::string()const {
-    return _p->string().c_str();
+    return _p->string();
    }
    fc::path path::filename()const {
     return _p->filename();

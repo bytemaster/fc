@@ -109,7 +109,7 @@ add_subdirectory(vendor)
 setup_library( fc SOURCES ${sources} )
 
 #setup_executable( json_rpc_test SOURCES tests/json_rpc_test.cpp LIBRARIES fc ${ZLIB_LIBRARY} ${pthread_library} ${rt_library} ${Boost_THREAD_LIBRARY} ${Boost_CONTEXT_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${Boost_CHRONO_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${rt_library}  ${Boost_DATE_TIME_LIBRARY})
-#setup_executable( ssh_test SOURCES tests/ssh.cpp LIBRARIES fc ${pthread_library} ${rt_library} ${Boost_THREAD_LIBRARY} ${Boost_CONTEXT_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${Boost_CHRONO_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${rt_library} ssh2 ${OPENSSL_LIBRARY} ${OPENSSL_CRYPTO_LIBRARY} ${ZLIB_LIBRARY} ${ALL_OPENSSL_LIBRARIES} ${Boost_DATE_TIME_LIBRARY})
+setup_executable( ssh_test SOURCES tests/ssh.cpp LIBRARIES fc ${pthread_library} ${rt_library} ${Boost_THREAD_LIBRARY} ${Boost_CONTEXT_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${Boost_CHRONO_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${rt_library} ssh2 ${OPENSSL_LIBRARY} ${OPENSSL_CRYPTO_LIBRARY} ${ZLIB_LIBRARY} ${ALL_OPENSSL_LIBRARIES} ${Boost_DATE_TIME_LIBRARY})
 
 setup_executable( logger_test SOURCES tests/logger.cpp LIBRARIES fc ${pthread_library} ${rt_library} ${Boost_THREAD_LIBRARY} ${Boost_CONTEXT_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${Boost_CHRONO_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${rt_library} ssh2 ${OPENSSL_LIBRARY} ${OPENSSL_CRYPTO_LIBRARY} ${ZLIB_LIBRARY} ${ALL_OPENSSL_LIBRARIES} ${Boost_DATE_TIME_LIBRARY})
 

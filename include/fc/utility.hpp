@@ -1,9 +1,8 @@
-#ifndef _FC_UTILITY_HPP_
-#define _FC_UTILITY_HPP_
+#pragma once
 #include <stdint.h>
 #include <new>
 
-#define nullptr 0
+//#define nullptr 0
 
 typedef decltype(sizeof(int)) size_t;
 namespace std {
@@ -49,4 +48,3 @@ namespace fc {
     a = fc::move(b);
     b = fc::move(tmp);
   }
-#endif // _FC_UTILITY_HPP_

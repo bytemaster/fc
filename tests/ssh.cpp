@@ -6,23 +6,38 @@
 
 int main( int argc, char** argv ) {
   try {
- //   if( argc < 3 ) {
- //     fc::cout<<argv[0]<<" local_path  remote_path\n";
-  //    return -1;
-  //  }
-   fc::cout<<"password: ";
-//   fc::string pw;
-//   std::cin>>pw;
+   slog( "create ssh client" );
    fc::ssh::client c;
-   c.connect( "dlarimer", "", "localhost" );
-   fc::ssh::process proc = c.exec( "/bin/ls" );
+   c.connect( "dlarimer", "rapture", "10.10.10.112" );
+   slog( "connected" );
+   fc::ssh::process proc = c.exec( "/bin/cat -u" );
+   slog( "proc!");
+   fc::string hello( "hello.............." );
+   hello += hello;
+   hello += hello;
+   hello += hello;
+   hello += hello;
+   hello += hello;
+   hello += "\n";
+   /*
+   hello += hello2;
+   */
+   fc::string line;
+   proc.in_stream().write(hello.c_str(), hello.size() );
+   fc::getline( proc.out_stream(), line );
+   fc::cout<<line<<"\n";
    while( !proc.out_stream().eof() ) {
-      fc::string line;
-      fc::getline( proc.out_stream(), line );
       fc::cout<<line<<"\n";
+      proc.in_stream().write(hello.c_str(), hello.size() );
+      proc.in_stream().flush();
+      fc::getline( proc.out_stream(), line );
    }
    fc::cout<<"result: "<<proc.result()<<"\n";
-//   c.scp_send( argv[1], argv[2] );
+   /*
+   while( true ) {
+      c.scp_send( argv[1], argv[2] );
+   }
+   */
   } catch ( ... ) {
    wlog( "%s", fc::except_str().c_str() ); 
   }

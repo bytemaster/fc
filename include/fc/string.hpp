@@ -22,6 +22,8 @@ namespace std {
   typedef basic_string<char, char_traits<char>, allocator<char> > string;
 }
 
+#include <string>
+
 namespace fc {
  // typedef std::string string;
   /**

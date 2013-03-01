@@ -5,6 +5,7 @@
 
 namespace fc { 
   class path;
+  class logger;
   namespace ssh {
   namespace detail {
     class client_impl;
@@ -56,9 +57,37 @@ namespace fc {
    *  Because the client creates other resources that depend upon
    *  it, it can only be created as a std::shared_ptr<client> (aka client::ptr) 
    *  via client::create();
+   *
    */
   class client {
     public:
+      enum trace_level {
+        TRACE_NONE      = 0,
+        TRACE_TRANS     = (1<<1),
+        TRACE_KEX       = (1<<2),
+        TRACE_AUTH      = (1<<3),
+        TRACE_CONN      = (1<<4),
+        TRACE_SCP       = (1<<5),
+        TRACE_SFTP      = (1<<6), 
+        TRACE_ERROR     = (1<<7),
+        TRACE_PUBLICKEY = (1<<8),
+        TRACE_SOCKET    = (1<<9)
+      };
+      /**
+       * Everything but TRACE_ERROR will be logged at fc::log_level::debug, while
+       * TRACE_ERROR will be logged at fc::log_level::error
+       *
+       * @param bitmask comprised of values from trace_level 
+       **/
+      void           set_trace_level( int bitmask );
+      int            get_trace_level()const;
+
+      /**
+       *  Override the default logger used by fc::ssh::client
+       */
+      void           set_logger( const logger& lgr );
+      const logger&  get_logger()const;
+
       void connect( const fc::string& user, const fc::string& host, uint16_t port = 22);
 
       /**

@@ -23,7 +23,7 @@ namespace fc {
       get_logger_map().clear();
       get_appender_map().clear();
 
-      slog( "\n%s", fc::json::to_pretty_string(cfg).c_str() );
+      //slog( "\n%s", fc::json::to_pretty_string(cfg).c_str() );
       for( size_t i = 0; i < cfg.appenders.size(); ++i ) {
          appender::create( cfg.appenders[i].name, cfg.appenders[i].type, cfg.appenders[i].args );
         // TODO... process enabled
@@ -48,7 +48,7 @@ namespace fc {
    }
 
    logging_config logging_config::default_config() {
-      slog( "default cfg" );
+      //slog( "default cfg" );
       logging_config cfg;
       cfg.appenders.push_back( 
              appender_config( "stderr", "console", 

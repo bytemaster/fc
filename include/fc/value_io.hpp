@@ -277,6 +277,9 @@ namespace fc {
   }
   template<typename A, typename B, typename C, typename D>
   inline void unpack( const fc::value& val, tuple<A,B,C,D>& t ) {
+    if( val.size() < tuple<A,B,C,D>::size )
+       FC_THROW_REPORT( "Attempt to unpack tuple of size ${size} from array of size ${array_size}",
+                        fc::value( "size", tuple<A,B,C,D>::size)("array_size",val.size() ) );
     t.visit( tuple_from_value_visitor(val) );
   }
 

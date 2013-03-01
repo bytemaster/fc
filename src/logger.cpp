@@ -75,7 +75,8 @@ namespace fc {
     }
 
     void logger::log( log_message m ) {
-       m.context = my->_name;
+       if( !m.context ) m.context = my->_name;
+       else m.context = *m.context + "->" + my->_name;
        for( auto itr = my->_appenders.begin(); itr != my->_appenders.end(); ++itr )
           (*itr)->log( m );
 

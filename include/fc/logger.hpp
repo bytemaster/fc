@@ -31,6 +31,11 @@ namespace fc  {
       ovalue          meta;   
 
       // key based args
+      template<typename T> 
+      log_message& operator()( const string& arg, const T& v ) {
+         return (*this)(arg,value(v));
+      }
+
       log_message& operator()( const string& arg, value&& v );
       log_message& operator()( const string& arg, const value& v );
       // position based args...

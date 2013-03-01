@@ -120,9 +120,9 @@ namespace fc { namespace json {
             }
             cur = cur->next;
         }
-        FC_THROW_MSG( "Unexpected reply with id %s", id );
+        FC_THROW_REPORT( "Unexpected reply with id ${id}", id_itr->val );
      }
-     FC_THROW_MSG( "Method with no 'id' or 'method' field" );
+     FC_THROW_REPORT( "Method with no 'id' or 'method' field" );
   }
 
 

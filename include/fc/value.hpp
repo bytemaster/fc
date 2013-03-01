@@ -7,6 +7,11 @@
 #include <fc/optional.hpp>
 #include <boost/preprocessor/repetition/enum_params.hpp>
 
+#ifdef _MSC_VER
+  // Disable warning C4482: nonstandard extention used: enum 'enum_type::enum_value' used in qualified name
+  #pragma warning( disable: 4482 )  
+#endif 
+
 namespace fc {
     template<BOOST_PP_ENUM_PARAMS(9, typename A)> struct tuple;
 

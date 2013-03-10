@@ -2,7 +2,7 @@ PROJECT( fc )
 
 CMAKE_MINIMUM_REQUIRED( VERSION 2.8.0 )
 
-SET( CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/CMakeModules;${CMAKE_MODULE_PATH}" )
+SET( CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules;${CMAKE_MODULE_PATH}" )
 
 INCLUDE( VersionMacros )
 INCLUDE( SetupTargetMacros )
@@ -40,7 +40,7 @@ endif()
 option( UNITY_BUILD OFF )
 
 FIND_PACKAGE( OpenSSL )
-#FIND_PACKAGE( ZLIB )
+FIND_PACKAGE( ZLIB )
 
 include_directories( vendor/zlib-1.2.7/)
 include_directories( vendor/libssh2-1.4.2/include )
@@ -83,6 +83,7 @@ set( sources
   src/thread.cpp
   src/hex.cpp
   src/sha1.cpp
+  src/sha256.cpp
   src/filesystem.cpp
   src/ip.cpp
   src/bigint.cpp

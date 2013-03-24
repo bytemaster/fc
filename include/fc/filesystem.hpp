@@ -108,6 +108,7 @@ namespace fc {
   uint64_t file_size( const path& p );
   bool     remove( const path& p );
   void     copy( const path& from, const path& to );
+  void     rename( const path& from, const path& to );
   void     create_hard_link( const path& from, const path& to );
 
   path     unique_path();

@@ -91,4 +91,17 @@ namespace fc {
      my->_sock.connect( to_asio_ep(e) );
   }
 
+  void   udp_socket::set_multicast_enable_loopback( bool s )
+  {
+    my->_sock.set_option( boost::asio::ip::multicast::enable_loopback(s) );
+  }
+  void   udp_socket::set_reuse_address( bool s )
+  {
+    my->_sock.set_option( boost::asio::ip::udp::socket::reuse_address(s) );
+  }
+  void   udp_socket::join_multicast_group( const fc::ip::address& a )
+  {
+    my->_sock.set_option( boost::asio::ip::multicast::join_group( boost::asio::ip::address_v4(a) ) );
+  }
+
 }

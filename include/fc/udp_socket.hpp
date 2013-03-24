@@ -1,11 +1,11 @@
-#ifndef _FC_UDP_SOCKET_HPP_
-#define _FC_UDP_SOCKET_HPP_
+#pragma once
 #include <fc/utility.hpp>
 #include <fc/shared_ptr.hpp>
 
 namespace fc {
   namespace ip {
     class endpoint;
+    class address;
   }
 
   /**
@@ -25,6 +25,10 @@ namespace fc {
       size_t send_to( const char* b, size_t l, const fc::ip::endpoint& to ); 
       void   close();
 
+      void   set_multicast_enable_loopback( bool );
+      void   set_reuse_address( bool );
+      void   join_multicast_group( const fc::ip::address& a );
+
       void   connect( const fc::ip::endpoint& e );
       fc::ip::endpoint local_endpoint()const;
 
@@ -34,5 +38,3 @@ namespace fc {
   };
 
 }
-
-#endif

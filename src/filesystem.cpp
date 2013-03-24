@@ -147,6 +147,17 @@ namespace fc {
   bool is_regular_file( const path& p ) { return boost::filesystem::is_regular_file(p); }
   uint64_t file_size( const path& p ) { return boost::filesystem::file_size(p); }
   void remove_all( const path& p ) { boost::filesystem::remove_all(p); }
+  void rename( const path& f, const path& t ) { 
+     try {
+  	    boost::filesystem::rename( boost::filesystem::path(f), boost::filesystem::path(t) ); 
+     } catch ( boost::system::system_error& e ) {
+     	FC_THROW_REPORT( "Rename from ${srcfile} to ${dstfile} failed because ${reason}",
+	         fc::value().set("srcfile",f).set("dstfile",t).set("reason",e.what() ) );
+     } catch ( ... ) {
+     	FC_THROW_REPORT( "Rename from ${srcfile} to ${dstfile} failed",
+	         fc::value().set("srcfile",f).set("dstfile",t).set("inner", fc::except_str() ) );
+     }
+  }
   void copy( const path& f, const path& t ) { 
      try {
   	    boost::filesystem::copy( boost::filesystem::path(f), boost::filesystem::path(t) ); 

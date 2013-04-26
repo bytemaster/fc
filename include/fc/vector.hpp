@@ -4,6 +4,7 @@
 #include <string.h>
 #include <fc/utility.hpp>
 #include <fc/log.hpp>
+#include <vector>
 
 
 namespace fc {

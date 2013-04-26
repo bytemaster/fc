@@ -202,6 +202,7 @@ namespace fc {
 
        void cast_value( const value& v, int64_t& out ){
           v.visit( cast_visitor<int64_t>(out) );
+          slog( "cast_value( v, int64: %lld )", out );
        }
 
        void cast_value( const value& v, uint8_t& out ){

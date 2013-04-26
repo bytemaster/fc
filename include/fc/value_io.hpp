@@ -54,6 +54,8 @@ namespace fc {
   void pack( fc::value& jsv, const fc::vector<char>& value );
   template<typename T>
   void pack( fc::value& jsv, const fc::vector<T>& value );
+  template<typename T>
+  void pack( fc::value& jsv, const std::vector<T>& value );
 
 
   inline void unpack( const fc::value& jsv, fc::value& v ) { v = jsv; }
@@ -82,6 +84,8 @@ namespace fc {
   void unpack( const fc::value& jsv, fc::vector<char>& value );
   template<typename T>
   void unpack( const fc::value& jsv, fc::vector<T>& value );
+  template<typename T>
+  void unpack( const fc::value& jsv, std::vector<T>& value );
 
   namespace detail {
     template<typename Class>
@@ -249,6 +253,19 @@ namespace fc {
           ++i;
       }
   }
+  template<typename T>
+  inline void pack( fc::value& jsv, const std::vector<T>& value ) {
+      jsv = fc::value::array();
+      jsv.resize(value.size());
+      auto itr = value.begin();
+      auto end = value.end();
+      uint32_t i = 0;
+      while( itr != end ) {
+          fc::pack( jsv[i], *itr );
+          ++itr;
+          ++i;
+      }
+  }
   struct tuple_to_value_visitor {
     tuple_to_value_visitor( value& v ):_val(v),_count(0) { }
     template<typename T>
@@ -285,6 +302,14 @@ namespace fc {
 
   template<typename T>
   inline void unpack( const fc::value& jsv, fc::vector<T>& val ) {
+      val.resize( jsv.size() );
+      uint32_t s = jsv.size();
+      for( uint32_t i = 0; i < s; ++i ) {
+          unpack( jsv[i], val[i] );
+      }
+  }
+  template<typename T>
+  inline void unpack( const fc::value& jsv, std::vector<T>& val ) {
       val.resize( jsv.size() );
       uint32_t s = jsv.size();
       for( uint32_t i = 0; i < s; ++i ) {

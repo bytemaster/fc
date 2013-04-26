@@ -9,6 +9,7 @@
 #include <fc/vector.hpp>
 #include <fc/typename.hpp>
 #include <fc/error_report.hpp>
+#include <vector>
 
 //#include <typeinfo>
 
@@ -34,6 +35,28 @@ namespace fc {
         void cast_value( const value& v, T& t) {
            unpack(v,t);
         }
+        template<typename T>
+        void cast_value( const value& v, std::vector<T>& out ) {
+           if( v.type() != value::array_type ) {
+              FC_THROW_REPORT( "Error casting ${type} to array", fc::value("type", fc::reflector<value::value_type>::to_string(v.type()) ) );
+           }
+           out.resize(v.size());
+           slog( "out .size %d", out.size() );
+           const fc::vector<value>& val = v.as_array();
+           auto oitr = out.begin();
+           int  idx = 0;
+           for( auto itr = val.begin(); itr != val.end(); ++itr, ++oitr, ++idx ) {
+              try {
+                 *oitr = itr->cast<T>(); //value_cast<T>(*itr);
+                // value_cast( *itr, *oitr );
+              } catch ( fc::error_report& er ) {
+                 throw FC_REPORT_PUSH( er, "Error casting value[${index}] to ${type}", 
+                                       fc::value("index",idx)
+                                                ("type", fc::get_typename<T>::name())
+                                     );
+              }
+           }
+        }
        
         template<typename T>
         void cast_value( const value& v, fc::vector<T>& out ) {
@@ -41,12 +64,13 @@ namespace fc {
               FC_THROW_REPORT( "Error casting ${type} to array", fc::value("type", fc::reflector<value::value_type>::to_string(v.type()) ) );
            }
            out.resize(v.size());
+           slog( "out .size %d", out.size() );
            const fc::vector<value>& val = v.as_array();
            auto oitr = out.begin();
            int  idx = 0;
            for( auto itr = val.begin(); itr != val.end(); ++itr, ++oitr, ++idx ) {
               try {
-                 *oitr = value_cast<T>(*itr);
+                 *oitr = itr->cast<T>(); //value_cast<T>(*itr);
                 // value_cast( *itr, *oitr );
               } catch ( fc::error_report& er ) {
                  throw FC_REPORT_PUSH( er, "Error casting value[${index}] to ${type}", 

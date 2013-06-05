@@ -25,7 +25,7 @@ namespace fc {
   };
   class mapped_region {
     public:
-      mapped_region( const file_mapping& fm, mode_t m, size_t start, size_t size );
+      mapped_region( const file_mapping& fm, mode_t m, uint64_t start, size_t size );
       mapped_region( const file_mapping& fm, mode_t m );
       ~mapped_region();
       void  flush();

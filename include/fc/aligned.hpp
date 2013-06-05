@@ -1,5 +1,4 @@
-#ifndef _FC_ALIGNED_HPP_
-#define _FC_ALIGNED_HPP_
+#pragma once
 namespace fc {
 
   template<unsigned int S, typename T=double>
@@ -13,4 +12,3 @@ namespace fc {
   };
 
 }
-#endif // _FC_ALIGNED_HPP_

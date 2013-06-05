@@ -3,8 +3,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <fc/utility.hpp>
-#include <fc/log.hpp>
-#include <vector>
 
 
 namespace fc {
@@ -51,13 +49,11 @@ namespace fc {
           vector_impl():_data(nullptr){}
           vector_impl( vector_impl&& c):_data(c._data){c._data =nullptr; }
           vector_impl( const vector_impl& c):_data(nullptr) {
-            //slog( "copy: c.size %d", c.size() );
             if( c.size() ) {
               _data  = detail::data<T>::allocate( c.size() );
               _data->size = c.size();
               memcpy(begin(),c.begin(), static_cast<size_t>(c.size()) );
             }
-            //slog( "copy: this.size %d", size() );
           }
           vector_impl(const_iterator b, const_iterator e ):_data(nullptr) {
             resize(e-b);
@@ -102,7 +98,16 @@ namespace fc {
           }
 
           void     reserve( size_t i ) {
-            _data = detail::data<T>::reallocate( _data, i );
+            if( nullptr == _data )
+            {
+               _data = detail::data<T>::allocate( i );
+               _data->size = 0;
+               _data->capacity = i;
+            }
+            else
+            {
+              _data = detail::data<T>::reallocate( _data, i );
+            }
           }
 
           void     resize( size_t i ) {
@@ -117,6 +122,11 @@ namespace fc {
 
           template<typename U>
           void push_back( U&& v ) {
+            resize( size()+1 );
+            back() = fc::forward<U>(v);
+          }
+          template<typename U>
+          void emplace_back( U&& v ) {
             resize( size()+1 );
             back() = fc::forward<U>(v);
           }
@@ -223,6 +233,7 @@ namespace fc {
           iterator begin()            { return _data ? &front()   : 0;}
           const_iterator begin()const { return _data ? &front()   : 0;}
           const_iterator end()const   { return _data ? (&back())+1: 0;}
+          iterator       end(){ return _data ? (&back())+1: 0;}
 
           T&       operator[]( size_t i )      { return (&_data->first)[i]; }
           const T& operator[]( size_t i )const { return (&_data->first)[i]; }
@@ -283,6 +294,14 @@ namespace fc {
             new (&back()+1) T(fc::forward<U>(v));
             ++this->_data->size;
           }
+          template<typename U>
+          void emplace_back( U&& v ) {
+            this->reserve( this->size()+1 );
+            new (&back()+1) T(fc::forward<U>(v));
+            ++this->_data->size;
+          }
+
+
 
           template<typename U>
           iterator insert( const_iterator loc, U&& t ) {

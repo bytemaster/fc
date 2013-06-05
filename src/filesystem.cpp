@@ -1,19 +1,23 @@
 //#define BOOST_NO_SCOPED_ENUMS
 #include <fc/filesystem.hpp>
+#include <fc/exception/exception.hpp>
 #include <fc/fwd_impl.hpp>
 #include <fc/utility.hpp>
+#include <fc/io/fstream.hpp>
 #include <boost/config.hpp>
 #include <boost/filesystem.hpp>
-#include <fc/value_cast.hpp>
-#include <fc/error_report.hpp>
+#include <fc/variant.hpp>
 
 namespace fc {
-  void pack( fc::value& v, const fc::path& s ) {
-      v = s.generic_string();
+  void to_variant( const fc::path& t, variant& v ) {
+    v = t.generic_string();
   }
-  void unpack( const fc::value& v, fc::path& s ) {
-      s = path(fc::value_cast<fc::string>(v));
+  void from_variant( const fc::variant& v, fc::path& t ) {
+    t = fc::path(v.as_string());
   }
+
+   // Note: we can do this cast because the separator should be an ASCII character
+   char path::separator_char = static_cast<char>(boost::filesystem::path("/").make_preferred().native()[0]);
 
    path::path(){}
    path::~path(){};
@@ -69,7 +73,7 @@ namespace fc {
     */
    fc::string path::windows_string()const {
      auto gs = _p->generic_string();
-     for( int i =0 ; i < gs.size(); ++i ) {
+     for( size_t i =0 ; i < gs.size(); ++i ) {
        if( gs[i] == '/' ) gs[i] = '\\';
      }
      return gs;
@@ -140,59 +144,161 @@ namespace fc {
     try {
       boost::filesystem::create_directories(p); 
     } catch ( ... ) {
-      FC_THROW_REPORT( "Unable to create directories ${path}", fc::value().set("path", p ).set("inner", fc::except_str() ) );
+      FC_THROW( "Unable to create directories ${path}", ("path", p )("inner", fc::except_str() ) );
     }
   }
   bool is_directory( const path& p ) { return boost::filesystem::is_directory(p); }
   bool is_regular_file( const path& p ) { return boost::filesystem::is_regular_file(p); }
   uint64_t file_size( const path& p ) { return boost::filesystem::file_size(p); }
   void remove_all( const path& p ) { boost::filesystem::remove_all(p); }
-  void rename( const path& f, const path& t ) { 
-     try {
-  	    boost::filesystem::rename( boost::filesystem::path(f), boost::filesystem::path(t) ); 
-     } catch ( boost::system::system_error& e ) {
-     	FC_THROW_REPORT( "Rename from ${srcfile} to ${dstfile} failed because ${reason}",
-	         fc::value().set("srcfile",f).set("dstfile",t).set("reason",e.what() ) );
-     } catch ( ... ) {
-     	FC_THROW_REPORT( "Rename from ${srcfile} to ${dstfile} failed",
-	         fc::value().set("srcfile",f).set("dstfile",t).set("inner", fc::except_str() ) );
-     }
-  }
   void copy( const path& f, const path& t ) { 
      try {
   	    boost::filesystem::copy( boost::filesystem::path(f), boost::filesystem::path(t) ); 
      } catch ( boost::system::system_error& e ) {
-     	FC_THROW_REPORT( "Copy from ${srcfile} to ${dstfile} failed because ${reason}",
-	         fc::value().set("srcfile",f).set("dstfile",t).set("reason",e.what() ) );
+     	FC_THROW( "Copy from ${srcfile} to ${dstfile} failed because ${reason}",
+	         ("srcfile",f)("dstfile",t)("reason",e.what() ) );
      } catch ( ... ) {
-     	FC_THROW_REPORT( "Copy from ${srcfile} to ${dstfile} failed",
-	         fc::value().set("srcfile",f).set("dstfile",t).set("inner", fc::except_str() ) );
+     	FC_THROW( "Copy from ${srcfile} to ${dstfile} failed",
+	         ("srcfile",f)("dstfile",t)("inner", fc::except_str() ) );
+     }
+  }
+  void rename( const path& f, const path& t ) { 
+     try {
+  	    boost::filesystem::rename( boost::filesystem::path(f), boost::filesystem::path(t) ); 
+     } catch ( boost::system::system_error& e ) {
+     	FC_THROW( "Rename from ${srcfile} to ${dstfile} failed because ${reason}",
+	         ("srcfile",f)("dstfile",t)("reason",e.what() ) );
+     } catch ( ... ) {
+     	FC_THROW( "Rename from ${srcfile} to ${dstfile} failed",
+	         ("srcfile",f)("dstfile",t)("inner", fc::except_str() ) );
      }
   }
   void create_hard_link( const path& f, const path& t ) { 
      try {
         boost::filesystem::create_hard_link( f, t ); 
      } catch ( ... ) {
-         FC_THROW_REPORT( "Unable to create hard link from '${from}' to '${to}'", 
-                          fc::value().set( "from", f )
-                          .set("to",t).set("exception", fc::except_str() ) );
+         FC_THROW( "Unable to create hard link from '${from}' to '${to}'", 
+                          ( "from", f )("to",t)("exception", fc::except_str() ) );
      }
   }
   bool remove( const path& f ) { 
      try {
         return boost::filesystem::remove( f ); 
      } catch ( ... ) {
-         FC_THROW_REPORT( "Unable to remove '${path}'", fc::value().set( "path", f ).set("exception", fc::except_str() ) );
+         FC_THROW( "Unable to remove '${path}'", ( "path", f )("exception", fc::except_str() ) );
      }
   }
   fc::path canonical( const fc::path& p ) { 
      try {
         return boost::filesystem::canonical(p); 
      } catch ( ... ) {
-         FC_THROW_REPORT( "Unable to resolve path '${path}'", fc::value().set( "path", p ).set("exception", fc::except_str() ) );
+         FC_THROW( "Unable to resolve path '${path}'", ( "path", p )("exception", fc::except_str() ) );
      }
   }
   fc::path absolute( const fc::path& p ) { return boost::filesystem::absolute(p); }
   path     unique_path() { return boost::filesystem::unique_path(); }
   path     temp_directory_path() { return boost::filesystem::temp_directory_path(); }
+
+  // Return path when appended to a_From will resolve to same as a_To
+  fc::path make_relative(const fc::path& from, const fc::path& to) {
+    boost::filesystem::path a_From = boost::filesystem::absolute(from);
+    boost::filesystem::path a_To = boost::filesystem::absolute(to);
+    boost::filesystem::path ret;
+    boost::filesystem::path::const_iterator itrFrom(a_From.begin()), itrTo(a_To.begin());
+    // Find common base
+    for( boost::filesystem::path::const_iterator toEnd( a_To.end() ), fromEnd( a_From.end() ) ; itrFrom != fromEnd && itrTo != toEnd && *itrFrom == *itrTo; ++itrFrom, ++itrTo );
+    // Navigate backwards in directory to reach previously found base
+    for( boost::filesystem::path::const_iterator fromEnd( a_From.end() ); itrFrom != fromEnd; ++itrFrom ) {
+      if( (*itrFrom) != "." )
+         ret /= "..";
+    }
+    // Now navigate down the directory branch
+    for (; itrTo != a_To.end(); ++itrTo)
+      ret /= *itrTo;
+    return ret;
+  }
+
+   temp_file::temp_file(const fc::path& p, bool create)
+   : temp_file_base(p / fc::unique_path())
+   {
+      if (fc::exists(*_path))
+      {
+         FC_THROW( "Name collision: ${path}", ("path", _path->string()) );
+      }
+      if (create)
+      {
+         fc::ofstream ofs(*_path, fc::ofstream::out | fc::ofstream::binary);
+         ofs.close();
+      }
+   }
+
+   temp_file::temp_file(temp_file&& other)
+      : temp_file_base(std::move(other._path))
+   {
+   }
+
+   temp_file& temp_file::operator=(temp_file&& other)
+   {
+      if (this != &other)
+      {
+         remove();
+         _path = std::move(other._path);
+      }
+      return *this;
+   }
+
+   temp_directory::temp_directory(const fc::path& p)
+   : temp_file_base(p / fc::unique_path())
+   {
+      if (fc::exists(*_path))
+      {
+         FC_THROW( "Name collision: ${path}", ("path", _path->string()) );
+      }
+      fc::create_directories(*_path);
+   }
+
+   temp_directory::temp_directory(temp_directory&& other)
+      : temp_file_base(std::move(other._path))
+   {
+   }
+
+   temp_directory& temp_directory::operator=(temp_directory&& other)
+   {
+      if (this != &other)
+      {
+         remove();
+         _path = std::move(other._path);
+      }
+      return *this;
+   }
+
+   const fc::path& temp_file_base::path() const
+   {
+      if (!_path)
+      {
+         FC_THROW( "Temporary directory has been released." );
+      }
+      return *_path;
+   }
+
+   void temp_file_base::remove()
+   {
+      if (_path)
+      {
+         try
+         {
+            fc::remove_all(*_path);
+         }
+         catch (...)
+         {
+            // eat errors on cleanup
+         }
+         release();
+      }
+   }
+
+   void temp_file_base::release()
+   {
+      _path = fc::optional<fc::path>();
+   }
 }

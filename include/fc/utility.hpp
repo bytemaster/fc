@@ -2,14 +2,23 @@
 #include <stdint.h>
 #include <new>
 
-//#define nullptr 0
+#ifdef _MSC_VER
+#pragma warning(disable: 4482) // nonstandard extension used enum Name::Val, standard in C++11
+#define NO_RETURN __declspec(noreturn)
+#else
+#define NO_RETURN __attribute__((noreturn))
+#endif
 
-typedef decltype(sizeof(int)) size_t;
+
 namespace std {
   typedef decltype(sizeof(int)) size_t;
+  typedef decltype(nullptr) nullptr_t;
 }
 
 namespace fc {
+  using std::size_t;
+  typedef decltype(nullptr) nullptr_t;
+
   template<typename T> struct remove_reference           { typedef T type;       };
   template<typename T> struct remove_reference<T&>       { typedef T type;       };
   template<typename T> struct remove_reference<T&&>      { typedef T type;       };
@@ -36,14 +45,16 @@ namespace fc {
 
   template<typename T>
   struct is_class { typedef decltype(detail::is_class_helper<T>(0)) type; enum value_enum { value = type::value }; };
-
+#ifdef min 
+#undef min
+#endif
   template<typename T>
   const T& min( const T& a, const T& b ) { return a < b ? a: b; }
 
 }
   // outside of namespace fc becuase of VC++ conflict with std::swap
   template<typename T>
-  void fc_swap( T& a, T& b ) {
+  void fc_swap( T& a, T& b ) {     
     T tmp = fc::move(a);
     a = fc::move(b);
     b = fc::move(tmp);

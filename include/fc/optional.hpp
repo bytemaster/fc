@@ -8,6 +8,12 @@ namespace fc {
    *  Simply including boost::optional adds 35,000 lines to each object file, using
    *  fc::optional adds less than 400.
    */
+
+#ifdef _MSC_VER
+# pragma warning(push)
+# pragma warning(disable:4521)  /* multiple copy ctors */
+#endif
+
   template<typename T>
   class optional {
     public:
@@ -15,6 +21,12 @@ namespace fc {
       ~optional(){ if( _valid ) (**this).~T(); }
 
       optional( const optional& o )
+      :_valid(false) {
+        if( o._valid ) new (&**this) T( *o );
+        _valid = o._valid;
+      }
+
+      optional( optional& o )
       :_valid(false) {
         if( o._valid ) new (&**this) T( *o );
         _valid = o._valid;
@@ -39,23 +51,36 @@ namespace fc {
           new (&**this) T( fc::forward<U>(u) );
           _valid = true;
         } else {
-          **this = fc::forward<U>(u);
+          **this = static_cast<T>(fc::forward<U>(u));
         }
         return *this;
       }
 
       optional& operator=( const optional& o ) {
-        if( _valid && o._valid ) { **this = *o; }
-        else if( !_valid && o._valid ) {
-          *this = *o;
-        } // else !_valid && !o._valid == same!
+        if (this != &o) {
+          if( _valid && o._valid ) { 
+            **this = *o;
+          } else if( !_valid && o._valid ) {
+            *this = *o;
+          } else if (_valid) {
+            (**this).~T();
+            _valid = false;
+          }
+        }
         return *this;
       }
+
       optional& operator=( optional&& o ) {
-        if( _valid && o._valid ) { **this = fc::move(*o); }
-        else if( !_valid && o._valid ) {
-          *this = fc::move(*o);
-        } 
+        if (this != &o) {
+          if( _valid && o._valid ) {
+            **this = fc::move(*o);
+          } else if ( !_valid && o._valid ) {
+            *this = fc::move(*o);
+          } else if (_valid) {
+            (**this).~T();
+            _valid = false;
+          }
+        }
         return *this;
       }
 
@@ -90,6 +115,10 @@ namespace fc {
   bool operator != ( const optional<T>& left, const U& u ) {
     return !left || *left != u;
   }
+
+#ifdef _MSC_VER
+# pragma warning(pop)
+#endif
 
 } // namespace fc
 

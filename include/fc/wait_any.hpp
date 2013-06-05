@@ -1,7 +1,6 @@
-#ifndef _FC_WAIT_ANY_HPP_
-#define _FC_WAIT_ANY_HPP_
+#pragma once
 #include <fc/vector.hpp>
-#include <fc/thread.hpp>
+#include <fc/thread/thread.hpp>
 
 namespace fc {
    template<typename T1, typename T2>
@@ -12,4 +11,3 @@ namespace fc {
      return wait( fc::move(p), timeout_us );   
    }
 }
-#endif // _FC_WAIT_ANY_HPP_

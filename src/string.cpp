@@ -1,6 +1,7 @@
 #include <fc/string.hpp>
 #include <fc/utility.hpp>
 #include <fc/fwd_impl.hpp>
+#include <boost/lexical_cast.hpp>
 
 #include <string>
 
@@ -9,7 +10,6 @@
  */
 
 namespace fc  {
-
   string::string(const char* s, int l) :my(s,l){ }
   string::string(){}
   string::string( const fc::string& c ):my(*c.my) { }
@@ -21,6 +21,7 @@ namespace fc  {
   string::~string() { }
   string::operator std::string&() { return *my; }
   string::operator const std::string&()const { return *my; }
+  char* string::data() { return &my->front(); }
 
   string::iterator string::begin()            { return &(*this)[0]; }
   string::iterator string::end()              { return &(*this)[size()]; }
@@ -33,9 +34,17 @@ namespace fc  {
   void       string::reserve(size_t r)           { my->reserve(r); }
   size_t   string::size()const                   { return my->size(); }
   size_t   string::find(char c, size_t p)const { return my->find(c,p); }
+  size_t   string::find(const fc::string& str, size_t pos /* = 0 */) const { return my->find(str, pos); }
+  size_t   string::find(const char* s, size_t pos /* = 0 */) const { return my->find(s,pos); }
   size_t   string::rfind(char c, size_t p)const { return my->rfind(c,p); }
   size_t   string::rfind(const char* c, size_t p)const { return my->rfind(c,p); }
   size_t   string::rfind(const fc::string& c, size_t p)const { return my->rfind(c,p); }
+  size_t   string::find_first_of(const fc::string& str, size_t pos /* = 0 */) const { return my->find_first_of(str, pos); }
+  size_t   string::find_first_of(const char* s, size_t pos /* = 0 */) const { return my->find_first_of(s, pos); }
+
+  fc::string& string::replace(size_t pos,  size_t len,  const string& str) { my->replace(pos, len, str); return *this; }
+  fc::string& string::replace(size_t pos,  size_t len,  const char* s) { my->replace(pos, len, s); return *this; }
+
   void       string::clear()                       { my->clear(); }
   void       string::resize( size_t s )          { my->resize(s); }
                                             
@@ -55,6 +64,38 @@ namespace fc  {
   bool operator < ( const string& a, const string& b )   { return *a.my < *b.my; } 
   string operator + ( const string& s, const string& c ) { return string(s) += c; }
   string operator + ( const string& s, char c ) 	 { return string(s) += c; }
+
+
+  int64_t    to_int64( const fc::string& i )
+  {
+    return boost::lexical_cast<int64_t>(i.c_str());
+  }
+
+  uint64_t   to_uint64( const fc::string& i )
+  {
+    return boost::lexical_cast<uint64_t>(i.c_str());
+  }
+
+  double     to_double( const fc::string& i)
+  {
+    return boost::lexical_cast<double>(i.c_str());
+  }
+
+  fc::string to_string( double d)
+  {
+    return boost::lexical_cast<std::string>(d);
+  }
+
+  fc::string to_string( uint64_t d)
+  {
+    return boost::lexical_cast<std::string>(d);
+  }
+
+  fc::string to_string( int64_t d)
+  {
+    return boost::lexical_cast<std::string>(d);
+  }
+
 
 } // namespace fc
 

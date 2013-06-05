@@ -1,6 +1,6 @@
 #pragma once
 #include <fc/ptr.hpp>
-#include <fc/thread.hpp>
+#include <fc/thread/thread.hpp>
 
 namespace fc {
 

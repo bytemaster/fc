@@ -1,6 +1,5 @@
 #pragma once
 #include <fc/utility.hpp>
-#include <fc/log.hpp>
 
 namespace fc {
 

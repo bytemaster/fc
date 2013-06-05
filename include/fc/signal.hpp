@@ -1,7 +1,10 @@
 #pragma once
 #include <fc/vector.hpp>
 #include <functional>
-
+#include <fc/log/logger.hpp>
+#ifdef emit
+#undef emit
+#endif
 
 namespace fc {
   
@@ -41,6 +44,18 @@ namespace fc {
           (*_handlers[i])( fc::forward<Arg>(arg), fc::forward<Arg2>(arg2) );
         }
       }
+      template<typename Arg, typename Arg2, typename Arg3>
+      void emit( Arg&& arg, Arg2&& arg2, Arg3&& arg3 ) {
+        for( size_t i = 0; i < _handlers.size(); ++i ) {
+          (*_handlers[i])( fc::forward<Arg>(arg), fc::forward<Arg2>(arg2), fc::forward<Arg3>(arg3) );
+        }
+      }
+      template<typename Arg, typename Arg2, typename Arg3>
+      void operator()( Arg&& arg, Arg2&& arg2, Arg3&& arg3 ) {
+        for( size_t i = 0; i < _handlers.size(); ++i ) {
+          (*_handlers[i])( fc::forward<Arg>(arg), fc::forward<Arg2>(arg2), fc::forward<Arg3>(arg3) );
+        }
+      }
 #else
       template<typename... Args>
       void emit( Args&&... args ) {
@@ -65,6 +80,18 @@ namespace fc {
           }
           ++itr;
         }
+      }
+      signal()
+      {
+         _handlers.reserve(4);
+      }
+      ~signal()
+      {
+         for( auto itr = _handlers.begin(); itr != _handlers.end(); ++itr )
+         {
+            delete *itr;
+         }
+         _handlers.clear();
       }
 
     private:

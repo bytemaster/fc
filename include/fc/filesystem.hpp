@@ -1,6 +1,8 @@
 #pragma once
+#include <utility>
 #include <fc/string.hpp>
-#include <fc/typename.hpp>
+#include <fc/reflect/typename.hpp>
+#include <fc/optional.hpp>
 #include <fc/fwd.hpp>
 
 namespace boost {
@@ -60,6 +62,9 @@ namespace fc {
 
       bool       is_relative()const;
       bool       is_absolute()const;
+
+      static char    separator_char;
+
     private:
       fwd<boost::filesystem::path,32> _p; 
   };
@@ -104,20 +109,64 @@ namespace fc {
   void     create_directories( const path& p );
   void     remove_all( const path& p );
   path     absolute( const path& p );
+  path     make_relative(const path& from, const path& to);
   path     canonical( const path& p );
   uint64_t file_size( const path& p );
   bool     remove( const path& p );
   void     copy( const path& from, const path& to );
   void     rename( const path& from, const path& to );
+
   void     create_hard_link( const path& from, const path& to );
 
   path     unique_path();
   path     temp_directory_path();
 
-  class value;
-  void pack( fc::value& , const fc::path&  );
-  void unpack( const fc::value& , fc::path&  );
+  class variant;
+  void to_variant( const fc::path&,  fc::variant&  );
+  void from_variant( const fc::variant& , fc::path& );
 
   template<> struct get_typename<path> { static const char* name()   { return "path";   } };
+
+  /**
+   * Class which creates a temporary directory inside an existing temporary directory.
+   */
+  class temp_file_base
+  {
+  public:
+     inline ~temp_file_base() { remove(); }
+     inline operator bool() const { return _path; }
+     inline bool operator!() const { return !_path; }
+     const fc::path& path() const;
+     void remove();
+     void release();
+  protected:
+     typedef fc::optional<fc::path> path_t;
+     inline temp_file_base(const path_t& path) : _path(path) {}
+     inline temp_file_base(path_t&& path) : _path(std::move(path)) {}
+     path_t _path;
+  };
+
+  /**
+   * Class which creates a temporary directory inside an existing temporary directory.
+   */
+  class temp_file : public temp_file_base
+  {
+  public:
+     temp_file(temp_file&& other);
+     temp_file& operator=(temp_file&& other);
+     temp_file(const fc::path& tempFolder = fc::temp_directory_path(), bool create = false);
+  };
+
+  /**
+   * Class which creates a temporary directory inside an existing temporary directory.
+   */
+  class temp_directory : public temp_file_base
+  {
+  public:
+     temp_directory(temp_directory&& other);
+     temp_directory& operator=(temp_directory&& other);
+     temp_directory(const fc::path& tempFolder = fc::temp_directory_path());
+  };
+
 }
 

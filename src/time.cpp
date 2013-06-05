@@ -1,5 +1,5 @@
 #include <fc/time.hpp>
-#include <fc/value_cast.hpp>
+#include <fc/variant.hpp>
 #include <boost/chrono/system_clocks.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <sstream>
@@ -18,13 +18,13 @@ namespace fc {
   }
   time_point time_point::from_iso_string( const fc::string& s ) {
      auto pt = boost::posix_time::from_iso_string(s);
-     return fc::time_point(fc::seconds( (pt - boost::posix_time::from_time_t(0)).total_seconds() ));
+     //return fc::time_point(fc::seconds( (pt - boost::posix_time::from_time_t(0)).total_seconds() ));
+     return fc::time_point(fc::microseconds( (pt - boost::posix_time::from_time_t(0)).total_microseconds() ));
   }
-  class value;
-  void pack( fc::value&  v, const fc::time_point& t ) {
+  void to_variant( const fc::time_point& t, variant& v ) {
     v = fc::string(t);
   }
-  void unpack( const fc::value& v, fc::time_point& t ) {
-    t = fc::time_point::from_iso_string(v.cast<fc::string>());
+  void from_variant( const fc::variant& v, fc::time_point& t ) {
+    t = fc::time_point::from_iso_string(v.as_string());
   }
 }

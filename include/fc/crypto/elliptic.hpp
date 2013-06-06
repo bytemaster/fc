@@ -4,6 +4,7 @@
 #include <fc/crypto/sha512.hpp>
 #include <fc/fwd.hpp>
 #include <fc/array.hpp>
+#include <vector>
 
 namespace fc { namespace ecc {
     
@@ -23,7 +24,7 @@ namespace fc { namespace ecc {
            ~public_key();
            bool verify( const fc::sha256& digest, const signature& sig );
 
-           std::vector<char> serialize();
+           std::vector<char> serialize()const;
            public_key( const std::vector<char>& v );
            public_key( const compact_signature& c, const fc::sha256& digest );
         private:

@@ -272,7 +272,7 @@ namespace fc { namespace ecc {
       return 1 == ECDSA_verify( 0, (unsigned char*)&digest, sizeof(digest), (unsigned char*)&sig, sizeof(sig), my->_key ); 
     }
 
-    std::vector<char> public_key::serialize()
+    std::vector<char> public_key::serialize()const
     {
       EC_KEY_set_conv_form( my->_key, POINT_CONVERSION_COMPRESSED );
       size_t nbytes = i2o_ECPublicKey( my->_key, nullptr );

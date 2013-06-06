@@ -106,13 +106,13 @@ namespace fc {
       if( b ) { v = T(); unpack( s, *v ); }
     }
 
-    // fc::vector
-    template<typename Stream> inline void pack( Stream& s, const fc::vector<char>& value ) { 
+    // std::vector
+    template<typename Stream> inline void pack( Stream& s, const std::vector<char>& value ) { 
       pack( s, unsigned_int(value.size()) );
       if( value.size() )
         s.write( &value.front(), value.size() );
     }
-    template<typename Stream> inline void unpack( Stream& s, fc::vector<char>& value ) { 
+    template<typename Stream> inline void unpack( Stream& s, std::vector<char>& value ) { 
       unsigned_int size; unpack( s, size );
       value.resize(size.value);
       if( value.size() )
@@ -126,7 +126,7 @@ namespace fc {
     }
 
     template<typename Stream> inline void unpack( Stream& s, fc::string& v )  {
-      fc::vector<char> tmp; unpack(s,tmp);
+      std::vector<char> tmp; unpack(s,tmp);
       v = fc::string(tmp.begin(),tmp.end());
     }
 
@@ -211,7 +211,7 @@ namespace fc {
 
 
     template<typename Stream, typename T>
-    inline void pack( Stream& s, const fc::vector<T>& value ) {
+    inline void pack( Stream& s, const std::vector<T>& value ) {
       pack( s, unsigned_int(value.size()) );
       auto itr = value.begin();
       auto end = value.end();
@@ -222,7 +222,7 @@ namespace fc {
     }
 
     template<typename Stream, typename T>
-    inline void unpack( Stream& s, fc::vector<T>& value ) {
+    inline void unpack( Stream& s, std::vector<T>& value ) {
       unsigned_int size; unpack( s, size );
       value.resize(size.value);
       auto itr = value.begin();
@@ -383,10 +383,10 @@ namespace fc {
     }
 
     template<typename T>
-    inline fc::vector<char> pack(  const T& v ) {
+    inline std::vector<char> pack(  const T& v ) {
       datastream<size_t> ps; 
       raw::pack(ps,v );
-      fc::vector<char> vec(ps.tellp());
+      std::vector<char> vec(ps.tellp());
 
       if( vec.size() ) {
         datastream<char*>  ds( vec.data(), size_t(vec.size()) ); 
@@ -396,7 +396,7 @@ namespace fc {
     }
 
     template<typename T>
-    inline T unpack( const fc::vector<char>& s ) {
+    inline T unpack( const std::vector<char>& s ) {
       T tmp;
       if( s.size() ) {
         datastream<const char*>  ds( s.data(), size_t(s.size()) ); 

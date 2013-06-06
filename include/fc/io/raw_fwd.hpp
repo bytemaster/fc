@@ -1,13 +1,23 @@
 #pragma once
 #include <fc/io/varint.hpp>
 #include <fc/array.hpp>
+#include <vector>
+#include <string>
 
-namespace fc { namespace raw {
+namespace fc { 
+   namespace ecc { class public_key; class private_key; }
+   namespace raw {
     template<typename Stream, typename T> void unpack( Stream& s, fc::optional<T>& v ); 
     template<typename Stream, typename T> void pack( Stream& s, const fc::optional<T>& v );
 
     template<typename Stream> void unpack( Stream& s, fc::string& ); 
     template<typename Stream> void pack( Stream& s, const fc::string& );
+    template<typename Stream> void unpack( Stream& s, std::string& ); 
+    template<typename Stream> void pack( Stream& s, const std::string& );
+    template<typename Stream> void unpack( Stream& s, fc::ecc::public_key& ); 
+    template<typename Stream> void pack( Stream& s, const fc::ecc::public_key& );
+    template<typename Stream> void unpack( Stream& s, fc::ecc::private_key& ); 
+    template<typename Stream> void pack( Stream& s, const fc::ecc::private_key& );
 
     template<typename Stream, typename T> inline void pack( Stream& s, const T& v ); 
     template<typename Stream, typename T> inline void unpack( Stream& s, T& v );

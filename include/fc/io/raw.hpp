@@ -127,7 +127,9 @@ namespace fc {
 
     template<typename Stream> inline void unpack( Stream& s, fc::string& v )  {
       std::vector<char> tmp; unpack(s,tmp);
-      v = fc::string(tmp.begin(),tmp.end());
+      if( tmp.size() )
+         v = fc::string(tmp.data(),tmp.data()+tmp.size());
+      else v = fc::string();
     }
 
     // bool

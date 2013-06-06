@@ -5,58 +5,95 @@
 #include <fc/fwd.hpp>
 #include <fc/array.hpp>
 #include <vector>
+#include <fc/io/raw_fwd.hpp>
 
-namespace fc { namespace ecc {
+namespace fc 
+{ 
+  namespace ecc 
+  {
     
-    namespace detail 
-    { 
-      class public_key_impl; 
-      class private_key_impl; 
+      namespace detail 
+      { 
+        class public_key_impl; 
+        class private_key_impl; 
+      }
+      
+      typedef fc::array<char,72> signature;
+      typedef fc::array<unsigned char,65> compact_signature;
+      
+      class public_key
+      {
+          public:
+             public_key();
+             ~public_key();
+             bool verify( const fc::sha256& digest, const signature& sig );
+      
+             std::vector<char> serialize()const;
+             public_key( const std::vector<char>& v );
+             public_key( const compact_signature& c, const fc::sha256& digest );
+          private:
+            friend class private_key;
+            fc::fwd<detail::public_key_impl,8> my;
+      };
+      
+      
+      class private_key 
+      {
+          public:
+             private_key();
+             private_key( std::vector<char> k );
+             ~private_key();
+      
+             static private_key generate();
+             static private_key regenerate( const fc::sha256& secret );
+      
+             fc::sha256 get_secret()const; // get the private key secret
+      
+             /**
+              *  Given a public key, calculatse a 512 bit shared secret between that
+              *  key and this private key.  
+              */
+             fc::sha512 get_shared_secret( const public_key& pub );
+      
+             signature         sign( const fc::sha256& digest );
+             compact_signature sign_compact( const fc::sha256& digest );
+             bool      verify( const fc::sha256& digest, const signature& sig );
+      
+             public_key get_public_key()const;
+          private:
+             fc::fwd<detail::private_key_impl,8> my;
+      };
+  }  // namespace ecc
+
+  namespace raw
+  {
+    template<typename Stream> 
+    inline void pack( Stream& s, const fc::ecc::public_key& v )
+    {
+       pack( s, v.serialize() );
+    }
+    template<typename Stream> 
+    inline void unpack( Stream& s, fc::ecc::public_key& v )
+    {
+       std::vector<char> d;  
+       unpack( s, d );
+       v = fc::ecc::public_key( fc::move(d) );
     }
 
-    typedef fc::array<char,72> signature;
-    typedef fc::array<unsigned char,65> compact_signature;
-
-    class public_key
+    template<typename Stream> 
+    inline void pack( Stream& s, const fc::ecc::private_key& v )
     {
-        public:
-           public_key();
-           ~public_key();
-           bool verify( const fc::sha256& digest, const signature& sig );
+       pack( s, v.get_secret() );
+    }
 
-           std::vector<char> serialize()const;
-           public_key( const std::vector<char>& v );
-           public_key( const compact_signature& c, const fc::sha256& digest );
-        private:
-          friend class private_key;
-          fc::fwd<detail::public_key_impl,8> my;
-    };
-
-
-    class private_key 
+    template<typename Stream> 
+    inline void unpack( Stream& s, fc::ecc::private_key& v )
     {
-        public:
-           private_key();
-           private_key( std::vector<char> k );
-           ~private_key();
+       fc::sha256 secret;
+       unpack( s, secret );
+       v = fc::ecc::private_key::regenerate( secret );
+    }
 
-           static private_key generate();
-           static private_key regenerate( const fc::sha256& secret );
+  } // namespace raw
 
-           fc::sha256 get_secret()const; // get the private key secret
-
-           /**
-            *  Given a public key, calculatse a 512 bit shared secret between that
-            *  key and this private key.  
-            */
-           fc::sha512 get_shared_secret( const public_key& pub );
-
-           signature         sign( const fc::sha256& digest );
-           compact_signature sign_compact( const fc::sha256& digest );
-           bool      verify( const fc::sha256& digest, const signature& sig );
-
-           public_key get_public_key()const;
-        private:
-           fc::fwd<detail::private_key_impl,8> my;
-    };
-} } // fc::ecc
+} // fc

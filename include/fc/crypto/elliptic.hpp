@@ -4,96 +4,109 @@
 #include <fc/crypto/sha512.hpp>
 #include <fc/fwd.hpp>
 #include <fc/array.hpp>
-#include <vector>
 #include <fc/io/raw_fwd.hpp>
 
-namespace fc 
-{ 
-  namespace ecc 
-  {
-    
-      namespace detail 
-      { 
-        class public_key_impl; 
-        class private_key_impl; 
-      }
-      
-      typedef fc::array<char,72> signature;
-      typedef fc::array<unsigned char,65> compact_signature;
-      
-      class public_key
-      {
-          public:
-             public_key();
-             ~public_key();
-             bool verify( const fc::sha256& digest, const signature& sig );
-      
-             std::vector<char> serialize()const;
-             public_key( const std::vector<char>& v );
-             public_key( const compact_signature& c, const fc::sha256& digest );
-          private:
-            friend class private_key;
-            fc::fwd<detail::public_key_impl,8> my;
-      };
-      
-      
-      class private_key 
-      {
-          public:
-             private_key();
-             private_key( std::vector<char> k );
-             ~private_key();
-      
-             static private_key generate();
-             static private_key regenerate( const fc::sha256& secret );
-      
-             fc::sha256 get_secret()const; // get the private key secret
-      
-             /**
-              *  Given a public key, calculatse a 512 bit shared secret between that
-              *  key and this private key.  
-              */
-             fc::sha512 get_shared_secret( const public_key& pub );
-      
-             signature         sign( const fc::sha256& digest );
-             compact_signature sign_compact( const fc::sha256& digest );
-             bool      verify( const fc::sha256& digest, const signature& sig );
-      
-             public_key get_public_key()const;
-          private:
-             fc::fwd<detail::private_key_impl,8> my;
-      };
-  }  // namespace ecc
+namespace fc { 
+
+  namespace ecc {
+    namespace detail 
+    { 
+      class public_key_impl; 
+      class private_key_impl; 
+    }
+
+    typedef fc::array<char,33>          public_key_data;
+    typedef fc::array<char,72>          signature;
+    typedef fc::array<unsigned char,65> compact_signature;
+
+    class public_key
+    {
+        public:
+           public_key();
+           public_key(const public_key& k);
+           ~public_key();
+           bool verify( const fc::sha256& digest, const signature& sig );
+           public_key_data serialize()const;
+           public_key( const public_key_data& v );
+           public_key( const compact_signature& c, const fc::sha256& digest );
+
+           bool valid()const;
+
+           public_key( public_key&& pk );
+           public_key& operator=( public_key&& pk );
+           public_key& operator=( const public_key& pk );
+        private:
+          friend class private_key;
+          fc::fwd<detail::public_key_impl,8> my;
+    };
+
+
+    class private_key 
+    {
+        public:
+           private_key();
+           private_key( std::vector<char> k );
+           private_key( private_key&& pk );
+           private_key( const private_key& pk );
+           ~private_key();
+
+           private_key& operator=( private_key&& pk );
+           private_key& operator=( const private_key& pk );
+
+           static private_key generate();
+           static private_key regenerate( const fc::sha256& secret );
+
+           fc::sha256 get_secret()const; // get the private key secret
+
+           /**
+            *  Given a public key, calculatse a 512 bit shared secret between that
+            *  key and this private key.  
+            */
+           fc::sha512 get_shared_secret( const public_key& pub );
+
+           signature         sign( const fc::sha256& digest );
+           compact_signature sign_compact( const fc::sha256& digest );
+           bool              verify( const fc::sha256& digest, const signature& sig );
+
+           public_key get_public_key()const;
+        private:
+           fc::fwd<detail::private_key_impl,8> my;
+    };
+  } // namespace ecc
+  void to_variant( const ecc::private_key& var,  variant& vo );
+  void from_variant( const variant& var,  ecc::private_key& vo );
+  void to_variant( const ecc::public_key& var,  variant& vo );
+  void from_variant( const variant& var,  ecc::public_key& vo );
 
   namespace raw
   {
-    template<typename Stream> 
-    inline void pack( Stream& s, const fc::ecc::public_key& v )
-    {
-       pack( s, v.serialize() );
-    }
-    template<typename Stream> 
-    inline void unpack( Stream& s, fc::ecc::public_key& v )
-    {
-       std::vector<char> d;  
-       unpack( s, d );
-       v = fc::ecc::public_key( fc::move(d) );
-    }
+      template<typename Stream>
+      void unpack( Stream& s, fc::ecc::public_key& pk)
+      {
+          ecc::public_key_data ser;
+          fc::raw::unpack(s,ser);
+          pk = fc::ecc::public_key( ser );
+      }
 
-    template<typename Stream> 
-    inline void pack( Stream& s, const fc::ecc::private_key& v )
-    {
-       pack( s, v.get_secret() );
-    }
+      template<typename Stream>
+      void pack( Stream& s, const fc::ecc::public_key& pk)
+      {
+          fc::raw::pack( s, pk.serialize() );
+      }
 
-    template<typename Stream> 
-    inline void unpack( Stream& s, fc::ecc::private_key& v )
-    {
-       fc::sha256 secret;
-       unpack( s, secret );
-       v = fc::ecc::private_key::regenerate( secret );
-    }
+      template<typename Stream>
+      void unpack( Stream& s, fc::ecc::private_key& pk)
+      {
+          fc::sha256 sec;
+          unpack( s, sec );
+          pk = ecc::private_key::regenerate(sec);
+      }
 
+      template<typename Stream>
+      void pack( Stream& s, const fc::ecc::private_key& pk)
+      {
+          fc::raw::pack( s, pk.get_secret() );
+      }
   } // namespace raw
 
-} // fc
+} // namespace fc 

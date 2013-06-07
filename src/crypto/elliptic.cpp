@@ -272,14 +272,14 @@ namespace fc { namespace ecc {
       return 1 == ECDSA_verify( 0, (unsigned char*)&digest, sizeof(digest), (unsigned char*)&sig, sizeof(sig), my->_key ); 
     }
 
-    std::vector<char> public_key::serialize()const
+    public_key_data public_key::serialize()const
     {
       EC_KEY_set_conv_form( my->_key, POINT_CONVERSION_COMPRESSED );
       size_t nbytes = i2o_ECPublicKey( my->_key, nullptr );
-      std::vector<char> dat(nbytes);
-      char* front = &dat[0];
+      assert( nbytes == 33 );
+      public_key_data dat;
+      char* front = &dat.data[0];
       i2o_ECPublicKey( my->_key, (unsigned char**)&front  );
-      fprintf( stderr, "public key size: %lu\n", nbytes );
       return dat;
       /*
        EC_POINT* pub   = EC_KEY_get0_public_key( my->_key );
@@ -293,11 +293,11 @@ namespace fc { namespace ecc {
     public_key::~public_key()
     {
     }
-    public_key::public_key( const std::vector<char>& v )
+    public_key::public_key( const public_key_data& dat )
     {
-      const char* front = &v[0];
+      const char* front = &dat.data[0];
       my->_key = EC_KEY_new_by_curve_name( NID_secp256k1 );
-      my->_key = o2i_ECPublicKey( &my->_key, (const unsigned char**)&front, v.size() );
+      my->_key = o2i_ECPublicKey( &my->_key, (const unsigned char**)&front, sizeof(public_key_data) );
       if( !my->_key ) 
       {
         fprintf( stderr, "decode error occurred??" );
@@ -426,4 +426,84 @@ namespace fc { namespace ecc {
         return csig;
     }
 
-} }
+   private_key& private_key::operator=( private_key&& pk )
+   {
+     if( my->_key )
+     {
+       EC_KEY_free(my->_key);
+     }
+     my->_key = pk.my->_key;
+     pk.my->_key = nullptr;
+     return *this;
+   }
+   public_key::public_key( const public_key& pk )
+   :my(pk.my)
+   {
+   }
+   public_key::public_key( public_key&& pk )
+   :my( fc::move( pk.my) )
+   {
+   }
+   private_key::private_key( const private_key& pk )
+   :my(pk.my)
+   {
+   }
+   private_key::private_key( private_key&& pk )
+   :my( fc::move( pk.my) )
+   {
+   }
+
+   public_key& public_key::operator=( public_key&& pk )
+   {
+     if( my->_key )
+     {
+       EC_KEY_free(my->_key);
+     }
+     my->_key = pk.my->_key;
+     pk.my->_key = nullptr;
+     return *this;
+   }
+   public_key& public_key::operator=( const public_key& pk )
+   {
+     if( my->_key )
+     {
+       EC_KEY_free(my->_key);
+     }
+     my->_key = EC_KEY_dup(pk.my->_key);
+     return *this;
+   }
+   private_key& private_key::operator=( const private_key& pk )
+   {
+     if( my->_key )
+     {
+       EC_KEY_free(my->_key);
+     }
+     my->_key = EC_KEY_dup(pk.my->_key);
+     return *this;
+   }
+
+}
+  void to_variant( const ecc::private_key& var,  variant& vo )
+  {
+    vo = var.get_secret();
+  }
+  void from_variant( const variant& var,  ecc::private_key& vo )
+  {
+    fc::sha256 sec;
+    from_variant( var, sec );
+    vo = ecc::private_key::regenerate(sec);
+  }
+
+  void to_variant( const ecc::public_key& var,  variant& vo )
+  {
+    vo = var.serialize();
+  }
+  void from_variant( const variant& var,  ecc::public_key& vo )
+  {
+    ecc::public_key_data dat; 
+    from_variant( var, dat );
+    vo = ecc::public_key(dat);
+  }
+
+
+}

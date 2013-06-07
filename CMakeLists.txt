@@ -108,6 +108,7 @@ set( fc_sources
      src/crypto/sha512.cpp
      src/crypto/dh.cpp
      src/crypto/blowfish.cpp
+     src/crypto/elliptic.cpp
      src/network/tcp_socket.cpp
      src/network/udp_socket.cpp
      src/network/http/http_connection.cpp

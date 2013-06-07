@@ -43,7 +43,7 @@ namespace fc
          variant _value;
       };
 
-      typedef vector< entry >::const_iterator iterator;
+      typedef std::vector< entry >::const_iterator iterator;
 
       /**
          * @name Immutable Interface
@@ -69,7 +69,7 @@ namespace fc
        
       template<typename T>
       variant_object( string key, T&& val )
-      :_key_value( std::make_shared<vector<entry> >() )
+      :_key_value( std::make_shared<std::vector<entry> >() )
       {
          *this = variant_object( move(key), variant(forward<T>(val)) );
       }
@@ -86,7 +86,7 @@ namespace fc
       variant_object& operator=( const mutable_variant_object& );
 
    private:
-      std::shared_ptr< vector< entry > > _key_value;
+      std::shared_ptr< std::vector< entry > > _key_value;
       friend class mutable_variant_object;
    };
    /** @ingroup Serializable */
@@ -112,8 +112,8 @@ namespace fc
       /** @brief a key/value pair */
       typedef variant_object::entry  entry;
 
-      typedef vector< entry >::iterator       iterator;
-      typedef vector< entry >::const_iterator const_iterator;
+      typedef std::vector< entry >::iterator       iterator;
+      typedef std::vector< entry >::const_iterator const_iterator;
 
       /**
          * @name Immutable Interface
@@ -181,7 +181,7 @@ namespace fc
 
       template<typename T>
       explicit mutable_variant_object( T&& v )
-      :_key_value( new vector<entry>() )
+      :_key_value( new std::vector<entry>() )
       {
           *this = variant(fc::forward<T>(v)).get_object();
       }
@@ -192,7 +192,7 @@ namespace fc
       mutable_variant_object( string key, variant val );
       template<typename T>
       mutable_variant_object( string key, T&& val )
-      :_key_value( new vector<entry>() )
+      :_key_value( new std::vector<entry>() )
       {
          set( move(key), variant(forward<T>(val)) );
       }
@@ -205,7 +205,7 @@ namespace fc
       mutable_variant_object& operator=( const mutable_variant_object& );
       mutable_variant_object& operator=( const variant_object& );
    private:
-      std::unique_ptr< vector< entry > > _key_value;
+      std::unique_ptr< std::vector< entry > > _key_value;
       friend class variant_object;
    };
    /** @ingroup Serializable */

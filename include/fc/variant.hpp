@@ -1,8 +1,9 @@
 #pragma once 
-#include <fc/vector.hpp>
+#include <vector>
 #include <fc/optional.hpp>
 #include <fc/string.hpp>
 #include <memory>
+#include <string.h> // memset
 
 namespace fc
 {
@@ -35,8 +36,8 @@ namespace fc
    void from_variant( const variant& var,  variant_object& vo );
    void to_variant( const mutable_variant_object& var,  variant& vo );
    void from_variant( const variant& var,  mutable_variant_object& vo );
-   void to_variant( const vector<char>& var,  variant& vo );
-   void from_variant( const variant& var,  vector<char>& vo );
+   void to_variant( const std::vector<char>& var,  variant& vo );
+   void from_variant( const variant& var,  std::vector<char>& vo );
    void to_variant( const time_point& var,  variant& vo );
    void from_variant( const variant& var,  time_point& vo );
    #ifdef __APPLE__
@@ -50,7 +51,7 @@ namespace fc
    template<typename T>
    void from_variant( const variant& var,  std::shared_ptr<T>& vo );
 
-   typedef vector<variant>   variants;
+   typedef std::vector<variant>   variants;
 
    /**
     * @brief stores null, int64, uint64, double, bool, string, vector<variant>,
@@ -246,7 +247,7 @@ namespace fc
 
    /** @ingroup Serializable */
    template<typename T>
-   void from_variant( const variant& var, vector<T>& tmp )
+   void from_variant( const variant& var, std::vector<T>& tmp )
    {
       const variants& vars = var.get_array();
       tmp.clear();
@@ -257,9 +258,9 @@ namespace fc
 
    /** @ingroup Serializable */
    template<typename T>
-   void to_variant( const vector<T>& t, variant& v )
+   void to_variant( const std::vector<T>& t, variant& v )
    {
-       vector<variant> vars(t.size());
+      std::vector<variant> vars(t.size());
        for( size_t i = 0; i < t.size(); ++i )
           vars[i] = variant(t[i]);
        v = vars;

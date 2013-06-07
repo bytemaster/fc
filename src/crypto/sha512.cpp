@@ -89,11 +89,11 @@ namespace fc {
   
   void to_variant( const sha512& bi, variant& v )
   {
-     v = fc::vector<char>( (const char*)&bi, ((const char*)&bi) + sizeof(bi) );
+     v = std::vector<char>( (const char*)&bi, ((const char*)&bi) + sizeof(bi) );
   }
   void from_variant( const variant& v, sha512& bi )
   {
-    fc::vector<char> ve = v.as< vector<char> >();
+    std::vector<char> ve = v.as< std::vector<char> >();
     if( ve.size() )
     {
         memcpy(&bi, ve.data(), fc::min<size_t>(ve.size(),sizeof(bi)) );

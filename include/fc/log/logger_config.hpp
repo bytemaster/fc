@@ -21,16 +21,16 @@ namespace fc {
       bool                             enabled;
       /// if any appenders are sepecified, then parent's appenders are not set.
       bool                             additivity;
-      fc::vector<string>               appenders;
+      std::vector<string>               appenders;
 
       logger_config& add_appender( const string& s );
    };
 
    struct logging_config {
       static logging_config default_config();
-      fc::vector<string>          includes;
-      fc::vector<appender_config> appenders;
-      fc::vector<logger_config>   loggers;
+      std::vector<string>          includes;
+      std::vector<appender_config> appenders;
+      std::vector<logger_config>   loggers;
    };
 
    void configure_logging( const fc::path& log_config );

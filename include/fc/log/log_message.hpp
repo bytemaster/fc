@@ -127,7 +127,7 @@ namespace fc
    void    to_variant( const log_message& l, variant& v );
    void    from_variant( const variant& l, log_message& c );
 
-   typedef fc::vector<log_message> log_messages;
+   typedef std::vector<log_message> log_messages;
 
 
 } // namespace fc

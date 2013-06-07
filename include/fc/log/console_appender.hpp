@@ -1,6 +1,7 @@
 #pragma once
 #include <fc/log/appender.hpp>
 #include <fc/log/logger.hpp>
+#include <vector>
 
 namespace fc 
 {
@@ -41,7 +42,7 @@ namespace fc
 
                fc::string                         format;
                console_appender::stream::type     stream;
-               fc::vector<level_color>            level_colors;
+               std::vector<level_color>           level_colors;
                bool                               flush;
             };
 

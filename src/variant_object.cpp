@@ -96,12 +96,12 @@ namespace fc
    }
 
    variant_object::variant_object() 
-      :_key_value(std::make_shared<fc::vector<entry>>() )
+      :_key_value(std::make_shared<std::vector<entry>>() )
    {
    }
 
    variant_object::variant_object( string key, variant val )
-      : _key_value(std::make_shared<fc::vector<entry>>())
+      : _key_value(std::make_shared<std::vector<entry>>())
    {
        //_key_value->push_back(entry(fc::move(key), fc::move(val)));
        _key_value->emplace_back(entry(fc::move(key), fc::move(val)));
@@ -116,12 +116,12 @@ namespace fc
    variant_object::variant_object( variant_object&& obj)
    : _key_value( fc::move(obj._key_value) )
    {
-      obj._key_value = std::make_shared<fc::vector<entry>>();
+      obj._key_value = std::make_shared<std::vector<entry>>();
       assert( _key_value != nullptr );
    }
 
    variant_object::variant_object( const mutable_variant_object& obj )
-      : _key_value(std::make_shared<fc::vector<entry>>(*obj._key_value))
+      : _key_value(std::make_shared<std::vector<entry>>(*obj._key_value))
    {
    }
 
@@ -153,7 +153,7 @@ namespace fc
    variant_object& variant_object::operator=( mutable_variant_object&& obj )
    {
       _key_value = fc::move(obj._key_value);
-      obj._key_value.reset( new fc::vector<entry>() );
+      obj._key_value.reset( new std::vector<entry>() );
       return *this;
    }
 
@@ -260,23 +260,23 @@ namespace fc
    }
 
    mutable_variant_object::mutable_variant_object() 
-      :_key_value(new fc::vector<entry>)
+      :_key_value(new std::vector<entry>)
    {
    }
 
    mutable_variant_object::mutable_variant_object( string key, variant val )
-      : _key_value(new fc::vector<entry>())
+      : _key_value(new std::vector<entry>())
    {
        _key_value->push_back(entry(fc::move(key), fc::move(val)));
    }
 
    mutable_variant_object::mutable_variant_object( const variant_object& obj )
-      : _key_value( new fc::vector<entry>(*obj._key_value) )
+      : _key_value( new std::vector<entry>(*obj._key_value) )
    {
    }
 
    mutable_variant_object::mutable_variant_object( const mutable_variant_object& obj )
-      : _key_value( new fc::vector<entry>(*obj._key_value) )
+      : _key_value( new std::vector<entry>(*obj._key_value) )
    {
    }
 

@@ -3,7 +3,15 @@
 #include <stdlib.h>
 #include <string.h>
 #include <fc/utility.hpp>
+#include <vector>
 
+namespace fc
+{
+    template<typename T>
+    using vector = std::vector<T>;
+}
+
+#if 0
 
 namespace fc {
   namespace detail {
@@ -400,3 +408,4 @@ namespace fc {
 
 };
 
+#endif

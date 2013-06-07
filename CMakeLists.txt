@@ -105,6 +105,7 @@ set( fc_sources
      src/crypto/hex.cpp
      src/crypto/sha1.cpp
      src/crypto/sha256.cpp
+     src/crypto/sha224.cpp
      src/crypto/sha512.cpp
      src/crypto/dh.cpp
      src/crypto/blowfish.cpp

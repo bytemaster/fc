@@ -4,6 +4,7 @@
 #include <fc/string.hpp>
 #include <memory>
 #include <string.h> // memset
+#include <unordered_set>
 
 namespace fc
 {
@@ -38,6 +39,12 @@ namespace fc
    void from_variant( const variant& var,  mutable_variant_object& vo );
    void to_variant( const std::vector<char>& var,  variant& vo );
    void from_variant( const variant& var,  std::vector<char>& vo );
+
+   template<typename T>
+   void to_variant( const std::unordered_set<T>& var,  variant& vo );
+   template<typename T>
+   void from_variant( const variant& var,  std::unordered_set<T>& vo );
+
    void to_variant( const time_point& var,  variant& vo );
    void from_variant( const variant& var,  time_point& vo );
    #ifdef __APPLE__
@@ -243,6 +250,24 @@ namespace fc
           vo = T();
           from_variant( var, *vo );
       }
+   }
+   template<typename T>
+   void to_variant( const std::unordered_set<T>& var,  variant& vo )
+   {
+       std::vector<variant> vars(var.size());
+       size_t i = 0;
+       for( auto itr = var.begin(); itr != var.end(); ++itr )
+          vars[i] = variant(*itr);
+       vo = vars;
+   }
+   template<typename T>
+   void from_variant( const variant& var,  std::unordered_set<T>& vo )
+   {
+      const variants& vars = var.get_array();
+      vo.clear();
+      vo.reserve( vars.size() );
+      for( auto itr = vars.begin(); itr != vars.end(); ++itr )
+         vo.insert( itr->as<T>() );
    }
 
    /** @ingroup Serializable */

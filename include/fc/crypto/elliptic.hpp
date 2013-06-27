@@ -31,6 +31,7 @@ namespace fc {
            public_key( const compact_signature& c, const fc::sha256& digest );
 
            bool valid()const;
+           public_key mult( const fc::sha256& digest );
 
            public_key( public_key&& pk );
            public_key& operator=( public_key&& pk );
@@ -65,7 +66,7 @@ namespace fc {
            fc::sha512 get_shared_secret( const public_key& pub );
 
            signature         sign( const fc::sha256& digest );
-           compact_signature sign_compact( const fc::sha256& digest );
+           compact_signature sign_compact( const fc::sha256& digest )const;
            bool              verify( const fc::sha256& digest, const signature& sig );
 
            public_key get_public_key()const;

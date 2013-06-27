@@ -11,6 +11,50 @@
 #include <assert.h>
 
 namespace fc { namespace ecc {
+
+template <typename ssl_type>
+struct ssl_wrapper
+{
+    ssl_wrapper(ssl_type* obj)
+      : obj(obj) {}
+    virtual ~ssl_wrapper()
+    {
+    }
+    operator ssl_type*()
+    {
+        return obj;
+    }
+
+    ssl_type* obj;
+};
+
+struct ssl_bignum
+  : public ssl_wrapper<BIGNUM>
+{
+    ssl_bignum()
+      : ssl_wrapper(BN_new()) {}
+    ~ssl_bignum()
+    {
+        BN_free(obj);
+    }
+};
+
+    #define SSL_TYPE(name, ssl_type, free_func) \
+        struct name \
+          : public ssl_wrapper<ssl_type> \
+        { \
+            name(ssl_type* obj) \
+              : ssl_wrapper(obj) {} \
+            ~name() \
+            { \
+                free_func(obj); \
+            } \
+        };
+
+    SSL_TYPE(ec_group, EC_GROUP, EC_GROUP_free)
+    SSL_TYPE(ec_point, EC_POINT, EC_POINT_free)
+    SSL_TYPE(bn_ctx, BN_CTX, BN_CTX_free)
+
     namespace detail 
     { 
       class public_key_impl
@@ -188,6 +232,30 @@ namespace fc { namespace ecc {
     }
     */
 
+    public_key public_key::mult( const fc::sha256& digest )
+    {
+        // get point from this public key
+        const EC_POINT* master_pub   = EC_KEY_get0_public_key( my->_key );
+        ec_group group(EC_GROUP_new_by_curve_name(NID_secp256k1));
+
+        ssl_bignum z;
+        BN_bin2bn((unsigned char*)&digest, sizeof(digest), z);
+
+        // multiply by digest
+        ssl_bignum one;
+        bn_ctx ctx(BN_CTX_new());
+        BN_one(one);
+
+        ec_point result(EC_POINT_new(group));
+        EC_POINT_mul(group, result, z, master_pub, one, ctx);
+
+        public_key rtn;
+        rtn.my->_key = EC_KEY_new_by_curve_name( NID_secp256k1 );
+        EC_KEY_set_public_key(rtn.my->_key,result);
+
+        return rtn;
+    }
+
     private_key::private_key()
     {}
 
@@ -272,14 +340,14 @@ namespace fc { namespace ecc {
       return 1 == ECDSA_verify( 0, (unsigned char*)&digest, sizeof(digest), (unsigned char*)&sig, sizeof(sig), my->_key ); 
     }
 
-    std::vector<char> public_key::serialize()
+    public_key_data public_key::serialize()const
     {
       EC_KEY_set_conv_form( my->_key, POINT_CONVERSION_COMPRESSED );
-      size_t nbytes = i2o_ECPublicKey( my->_key, nullptr );
-      std::vector<char> dat(nbytes);
-      char* front = &dat[0];
+      /*size_t nbytes = */i2o_ECPublicKey( my->_key, nullptr );
+      /*assert( nbytes == 33 )*/
+      public_key_data dat;
+      char* front = &dat.data[0];
       i2o_ECPublicKey( my->_key, (unsigned char**)&front  );
-      fprintf( stderr, "public key size: %lu\n", nbytes );
       return dat;
       /*
        EC_POINT* pub   = EC_KEY_get0_public_key( my->_key );
@@ -293,11 +361,11 @@ namespace fc { namespace ecc {
     public_key::~public_key()
     {
     }
-    public_key::public_key( const std::vector<char>& v )
+    public_key::public_key( const public_key_data& dat )
     {
-      const char* front = &v[0];
+      const char* front = &dat.data[0];
       my->_key = EC_KEY_new_by_curve_name( NID_secp256k1 );
-      my->_key = o2i_ECPublicKey( &my->_key, (const unsigned char**)&front, v.size() );
+      my->_key = o2i_ECPublicKey( &my->_key, (const unsigned char**)&front, sizeof(public_key_data) );
       if( !my->_key ) 
       {
         fprintf( stderr, "decode error occurred??" );
@@ -384,7 +452,7 @@ namespace fc { namespace ecc {
         FC_THROW_EXCEPTION( exception, "unable to reconstruct public key from signature" );
     }
 
-    compact_signature private_key::sign_compact( const fc::sha256& digest )
+    compact_signature private_key::sign_compact( const fc::sha256& digest )const
     {
         ECDSA_SIG *sig = ECDSA_do_sign((unsigned char*)&digest, sizeof(digest), my->_key);
 
@@ -426,4 +494,84 @@ namespace fc { namespace ecc {
         return csig;
     }
 
-} }
+   private_key& private_key::operator=( private_key&& pk )
+   {
+     if( my->_key )
+     {
+       EC_KEY_free(my->_key);
+     }
+     my->_key = pk.my->_key;
+     pk.my->_key = nullptr;
+     return *this;
+   }
+   public_key::public_key( const public_key& pk )
+   :my(pk.my)
+   {
+   }
+   public_key::public_key( public_key&& pk )
+   :my( fc::move( pk.my) )
+   {
+   }
+   private_key::private_key( const private_key& pk )
+   :my(pk.my)
+   {
+   }
+   private_key::private_key( private_key&& pk )
+   :my( fc::move( pk.my) )
+   {
+   }
+
+   public_key& public_key::operator=( public_key&& pk )
+   {
+     if( my->_key )
+     {
+       EC_KEY_free(my->_key);
+     }
+     my->_key = pk.my->_key;
+     pk.my->_key = nullptr;
+     return *this;
+   }
+   public_key& public_key::operator=( const public_key& pk )
+   {
+     if( my->_key )
+     {
+       EC_KEY_free(my->_key);
+     }
+     my->_key = EC_KEY_dup(pk.my->_key);
+     return *this;
+   }
+   private_key& private_key::operator=( const private_key& pk )
+   {
+     if( my->_key )
+     {
+       EC_KEY_free(my->_key);
+     }
+     my->_key = EC_KEY_dup(pk.my->_key);
+     return *this;
+   }
+
+}
+  void to_variant( const ecc::private_key& var,  variant& vo )
+  {
+    vo = var.get_secret();
+  }
+  void from_variant( const variant& var,  ecc::private_key& vo )
+  {
+    fc::sha256 sec;
+    from_variant( var, sec );
+    vo = ecc::private_key::regenerate(sec);
+  }
+
+  void to_variant( const ecc::public_key& var,  variant& vo )
+  {
+    vo = var.serialize();
+  }
+  void from_variant( const variant& var,  ecc::public_key& vo )
+  {
+    ecc::public_key_data dat; 
+    from_variant( var, dat );
+    vo = ecc::public_key(dat);
+  }
+
+
+}

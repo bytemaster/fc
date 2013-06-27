@@ -9,7 +9,8 @@ INCLUDE( VersionMacros )
 INCLUDE( SetupTargetMacros )
 INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR} )
 INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR}/include )
-INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR}/vendor/boost_1_51/include )
+INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_SOURCE_DIR}/vendor/cyoencode-1.0.2/src )
+INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_SOURCE_DIR}/vendor/boost_1.51/include )
 
 SET( DEFAULT_HEADER_INSTALL_DIR include/\${target} )
 SET( DEFAULT_LIBRARY_INSTALL_DIR lib/ )
@@ -57,7 +58,6 @@ option( UNITY_BUILD OFF )
 
 FIND_PACKAGE( OpenSSL )
 
-include_directories( vendor/boost_1.51/include )
 include_directories( ${Boost_INCLUDE_DIR} )
 include_directories( ${OPENSSL_INCLUDE_DIR} )
 
@@ -106,6 +106,7 @@ set( fc_sources
      src/crypto/sha512.cpp
      src/crypto/dh.cpp
      src/crypto/blowfish.cpp
+     src/crypto/elliptic.cpp
      src/network/tcp_socket.cpp
      src/network/udp_socket.cpp
      src/network/http/http_connection.cpp
@@ -113,6 +114,8 @@ set( fc_sources
      src/network/ip.cpp
      src/network/resolve.cpp
      src/network/url.cpp
+     vendor/cyoencode-1.0.2/src/CyoDecode.c
+     vendor/cyoencode-1.0.2/src/CyoEncode.c
 #     src/ssh/client.cpp
 #     src/ssh/process.cpp
      )

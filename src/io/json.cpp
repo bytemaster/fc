@@ -443,9 +443,94 @@ namespace fc
       return ss.str();
    }
 
+
+    fc::string pretty_print( const fc::string& v, uint8_t indent ) {
+      int level = 0;
+      fc::stringstream ss;
+      bool first = false;
+      bool quote = false;
+      bool escape = false;
+      for( uint32_t i = 0; i < v.size(); ++i ) {
+         switch( v[i] ) {
+            case '\\':
+              if( !escape ) {
+                if( quote ) 
+                  escape = true;
+              } else { escape = false; }
+              ss<<v[i];
+              break;
+            case ':':
+              if( !quote ) {
+                ss<<": ";
+              } else {
+                ss<<':';
+              }
+              break;
+            case '"':
+              if( first ) {
+                 ss<<'\n';
+                 for( int i = 0; i < level*indent; ++i ) ss<<' ';
+                 first = false;
+              }
+              if( !escape ) {
+                quote = !quote;
+              } 
+              escape = false;
+              ss<<'"';
+              break;
+            case '{':
+            case '[':
+              ss<<v[i];
+              if( !quote ) {
+                ++level;
+                first = true;
+              }else {
+                escape = false;
+              }
+              break;
+            case '}':
+            case ']':
+              if( !quote ) {
+                if( v[i-1] != '[' && v[i-1] != '{' ) {
+                  ss<<'\n';
+                }
+                --level;
+                if( !first ) {
+                  for( int i = 0; i < level*indent; ++i ) ss<<' ';
+                }
+                ss<<v[i];
+                break;
+              } else {
+                escape = false;
+                ss<<v[i];
+              }
+              break;
+            case ',':
+              if( !quote ) {
+                ss<<',';
+                first = true;
+              } else {
+                escape = false;
+                ss<<',';
+              }
+              break;
+            default:
+              if( first ) {
+                 ss<<'\n';
+                 for( int i = 0; i < level*indent; ++i ) ss<<' ';
+                 first = false;
+              }
+              ss << v[i];
+         }
+      }
+      return ss.str();
+    }
+
+
+
    fc::string   json::to_pretty_string( const variant& v )
    {
-	   return to_string(v);
+	   return pretty_print(to_string(v), 2);
    }
 
    void          json::save_to_file( const variant& v, const string& fi, bool pretty )

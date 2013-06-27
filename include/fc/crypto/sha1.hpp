@@ -64,4 +64,22 @@ class sha1
     uint32_t _hash[5]; 
 };
 
+  class variant;
+  void to_variant( const sha1& bi, variant& v );
+  void from_variant( const variant& v, sha1& bi );
+
 } // namespace fc
+
+namespace std
+{
+    template<typename T> struct hash;
+
+    template<>
+    struct hash<fc::sha1>
+    {
+       size_t operator()( const fc::sha1& s )const
+       {
+           return  *((size_t*)&s);
+       }
+    };
+}

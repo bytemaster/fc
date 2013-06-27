@@ -3,6 +3,8 @@
 #include <openssl/sha.h>
 #include <string.h>
 #include <fc/crypto/sha1.hpp>
+#include <fc/variant.hpp>
+#include <vector>
 
 namespace fc 
 {
@@ -83,5 +85,20 @@ bool operator != ( const sha1& h1, const sha1& h2 ) {
 bool operator == ( const sha1& h1, const sha1& h2 ) {
   return memcmp( h1._hash, h2._hash, sizeof(h1._hash) ) == 0;
 }
+  
+  void to_variant( const sha1& bi, variant& v )
+  {
+     v = std::vector<char>( (const char*)&bi, ((const char*)&bi) + sizeof(bi) );
+  }
+  void from_variant( const variant& v, sha1& bi )
+  {
+    std::vector<char> ve = v.as< std::vector<char> >();
+    if( ve.size() )
+    {
+        memcpy(&bi, ve.data(), fc::min<size_t>(ve.size(),sizeof(bi)) );
+    }
+    else
+        memset( &bi, char(0), sizeof(bi) );
+  }
   
 } // fc

@@ -14,16 +14,16 @@ namespace fc
    void to_variant( const uint16_t& var,  variant& vo )  { vo = uint64_t(var); }
    // TODO: warn on overflow?
    void from_variant( const variant& var,  uint16_t& vo ){ vo = static_cast<uint16_t>(var.as_uint64()); }
-void to_variant( const vector<char>& var,  variant& vo )
+void to_variant( const std::vector<char>& var,  variant& vo )
 {
   if( var.size() )
       vo = variant(base64_encode((unsigned char*)var.data(),var.size()));
   else vo = "";
 }
-void from_variant( const variant& var,  vector<char>& vo )
+void from_variant( const variant& var,  std::vector<char>& vo )
 {
    std::string b64 = base64_decode( var.as_string() );
-   vo = fc::vector<char>( b64.c_str(), b64.c_str() + b64.size() );
+   vo = std::vector<char>( b64.c_str(), b64.c_str() + b64.size() );
 }
 /**
  *  The TypeID is stored in the 'last byte' of the variant.

@@ -15,9 +15,11 @@ namespace fc
   class wait_condition
   {
      public:
+        wait_condition(const char* name) : _name(name) {}
+
         void wait( const microseconds& timeout = microseconds::maximum() )
         {
-          typename fc::promise<T>::ptr p = new fc::promise<T>();
+          typename fc::promise<T>::ptr p = new fc::promise<T>(_name);
           { synchronized( _prom_lock ) 
             _promises.push_back( p );
           }
@@ -27,11 +29,16 @@ namespace fc
         template<typename LockType>
         T wait( LockType& l, const microseconds& timeout = microseconds::maximum() )
         {
-          typename fc::promise<T>::ptr p( new fc::promise<T>());
+          typename fc::promise<T>::ptr p( new fc::promise<T>(_name));
           { synchronized( _prom_lock ) 
             _promises.push_back( p );
           }
           l.unlock();
+          struct relocker {
+             LockType& _lock;
+             relocker(LockType& l) : _lock(l) {}
+             ~relocker() { _lock.lock(); }
+          } lock_on_exit(l);
           return p->wait(timeout);
         }
 
@@ -53,7 +60,7 @@ namespace fc
         {
             std::deque<typename fc::promise<T>::ptr> all;
             { synchronized( _prom_lock ) 
-              all = fc::move(_promises);
+              std::swap(all, _promises);
             }
             for( auto itr = all.begin(); itr != all.end(); ++itr )
             {
@@ -64,5 +71,6 @@ namespace fc
      private:
         fc::spin_yield_lock                      _prom_lock;
         std::deque<typename fc::promise<T>::ptr> _promises;
+        const char *const                        _name;
   };
 }

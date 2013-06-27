@@ -37,7 +37,7 @@ class fc::http::connection::impl
    fc::http::reply parse_reply() {
       fc::http::reply rep;
       try {
-        fc::vector<char> line(1024*8);
+        std::vector<char> line(1024*8);
         int s = read_until( line.data(), line.data()+line.size(), ' ' ); // HTTP/1.1
         s = read_until( line.data(), line.data()+line.size(), ' ' ); // CODE
         rep.status = static_cast<int>(to_int64(fc::string(line.data())));
@@ -131,7 +131,7 @@ fc::tcp_socket& connection::get_socket()const {
 
 http::request    connection::read_request()const {
   http::request req;
-  fc::vector<char> line(1024*8);
+  std::vector<char> line(1024*8);
   int s = my->read_until( line.data(), line.data()+line.size(), ' ' ); // METHOD
   req.method = line.data();
   s = my->read_until( line.data(), line.data()+line.size(), ' ' ); // PATH
@@ -171,12 +171,12 @@ fc::string request::get_header( const fc::string& key )const {
   }
   return fc::string();
 }
-fc::vector<header> parse_urlencoded_params( const fc::string& f ) {
+std::vector<header> parse_urlencoded_params( const fc::string& f ) {
   int num_args = 0;
   for( size_t i = 0; i < f.size(); ++i ) {
     if( f[i] == '=' ) ++num_args;
   }
-  fc::vector<header> h(num_args);
+  std::vector<header> h(num_args);
   int arg = 0;
   for( size_t i = 0; i < f.size(); ++i ) {
     while( f[i] != '=' && i < f.size() ) {

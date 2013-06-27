@@ -3,7 +3,6 @@
 #include <fc/io/buffered_iostream.hpp>
 #include <fc/asio.hpp>
 #include <fc/filesystem.hpp>
-#include <fc/vector.hpp>
 #include <fc/log/logger.hpp>
 #include <boost/process/all.hpp>
 #include <boost/iostreams/stream.hpp>
@@ -74,11 +73,12 @@ process::process()
 process::~process(){}
 
 iprocess& process::exec( const fc::path& exe, 
-                         fc::vector<fc::string> args, 
+                         std::vector<std::string> args, 
                          const fc::path& work_dir, exec_opts opt  ) 
 {
 
   my->pctx.work_dir = work_dir.string();
+  my->pctx.suppress_console = (opt & suppress_console) != 0;
     
   if( opt&open_stdout)
       my->pctx.streams[boost::process::stdout_id] = bp::behavior::async_pipe();
@@ -96,12 +96,14 @@ iprocess& process::exec( const fc::path& exe,
   else
       my->pctx.streams[boost::process::stdin_id]  = bp::behavior::close();
 
+  /*
   std::vector<std::string> a;
   a.reserve(size_t(args.size()));
   for( uint32_t i = 0; i < args.size(); ++i ) {
     a.push_back( fc::move(args[i]) ); 
   }
-  my->child.reset( new bp::child( bp::create_child( exe.string(), fc::move(a), my->pctx ) ) );
+  */
+  my->child.reset( new bp::child( bp::create_child( exe.string(), fc::move(args), my->pctx ) ) );
 
   if( opt & open_stdout ) {
      bp::handle outh = my->child->get_handle( bp::stdout_id );

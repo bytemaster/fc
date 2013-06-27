@@ -61,11 +61,7 @@ include_directories( vendor/boost_1.51/include )
 include_directories( ${Boost_INCLUDE_DIR} )
 include_directories( ${OPENSSL_INCLUDE_DIR} )
 
-SET( ALL_OPENSSL_LIBRARIES
-       ${OPENSSL_LIBRARIES}
-       ${SSL_EAY_RELEASE}
-       ${LIB_EAY_RELEASE}
-   )
+SET( ALL_OPENSSL_LIBRARIES ${OPENSSL_LIBRARIES} ${SSL_EAY_RELEASE} ${LIB_EAY_RELEASE})
 
 set( fc_sources
      src/variant.cpp
@@ -99,12 +95,15 @@ set( fc_sources
      src/log/file_appender.cpp
      src/log/logger_config.cpp
      src/crypto/base36.cpp
-     src/crypto/bigint.cpp
+     src/crypto/base32.cpp
      src/crypto/base64.cpp
      src/crypto/base58.cpp
+     src/crypto/bigint.cpp
      src/crypto/hex.cpp
      src/crypto/sha1.cpp
      src/crypto/sha256.cpp
+     src/crypto/sha224.cpp
+     src/crypto/sha512.cpp
      src/crypto/dh.cpp
      src/crypto/blowfish.cpp
      src/network/tcp_socket.cpp

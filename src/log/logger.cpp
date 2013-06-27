@@ -20,7 +20,7 @@ namespace fc {
          bool             _additivity;
          log_level        _level;
 
-         fc::vector<appender::ptr> _appenders;
+         std::vector<appender::ptr> _appenders;
     };
 
 

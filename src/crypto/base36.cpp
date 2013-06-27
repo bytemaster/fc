@@ -9,7 +9,7 @@ namespace fc
        if( len == 0 ) return fc::string();
        fc::bigint value( data, len );
        auto base36 = "0123456789abcdefghijklmnopqrstuvwxyz";
-       fc::vector<char> out( static_cast<size_t>(len * 1.6) + 1 );
+       std::vector<char> out( static_cast<size_t>(len * 1.6) + 1 );
        int pos = out.size() - 1;
        out[pos] = '\0';
        fc::bigint _36(36);
@@ -23,12 +23,12 @@ namespace fc
        return &out[pos]; //fc::string( &out[pos], out.size() - pos);
     }
 
-    fc::string to_base36( const fc::vector<char>& vec )
+    fc::string to_base36( const std::vector<char>& vec )
     {
       return to_base36( (const char*)vec.data(), vec.size() );
     }
 
-    fc::vector<char> from_base36( const fc::string& b36 )
+    std::vector<char> from_base36( const fc::string& b36 )
     {
        fc::bigint value;
 

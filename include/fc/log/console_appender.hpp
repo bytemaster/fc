@@ -41,7 +41,7 @@ namespace fc
 
                fc::string                         format;
                console_appender::stream::type     stream;
-               fc::vector<level_color>            level_colors;
+               std::vector<level_color>            level_colors;
                bool                               flush;
             };
 

@@ -9,7 +9,7 @@ typedef bignum_st BIGNUM;
 namespace fc {
   class bigint {
     public:
-      bigint( const fc::vector<char>& bige );
+      bigint( const std::vector<char>& bige );
       bigint( const char* bige, uint32_t l );
       bigint( unsigned long i = 0 );
       bigint( const bigint& c );
@@ -52,7 +52,7 @@ namespace fc {
       operator fc::string()const;
 
       // returns bignum as bigendian bytes
-      operator fc::vector<char>()const;
+      operator std::vector<char>()const;
 
       BIGNUM* dup()const;
 

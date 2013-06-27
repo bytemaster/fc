@@ -196,12 +196,13 @@ namespace fc {
      o.write( v.c_str(), v.size() );
      return o;
   }
-
+#ifdef USE_FC_STRING
   ostream& operator<<( ostream& o, const fc::string& v )
   {
      o.write( v.c_str(), v.size() );
      return o;
   }
+#endif
 
   ostream& operator<<( ostream& o, const double& v )
   {
@@ -266,10 +267,12 @@ namespace fc {
      return o;
   }
 
+#ifdef USE_FC_STRING
   istream& operator>>( istream& o, fc::string& v )
   {
      return o;
   }
+#endif
 
   istream& operator>>( istream& o, char& v )
   {

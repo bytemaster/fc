@@ -1,10 +1,10 @@
 #pragma once
 #include <fc/shared_ptr.hpp>
+#include <fc/string.hpp>
 
 namespace fc {
    class appender;
    class log_message;
-   class string;
    class variant;
 
    class appender_factory : public fc::retainable {

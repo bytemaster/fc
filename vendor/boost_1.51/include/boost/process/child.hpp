@@ -79,6 +79,14 @@ public:
         return (it != handles_.end()) ? it->second : handle();
     }
 
+#if defined(BOOST_WINDOWS_API)
+    handle::native_type get_os_handle() const
+    {
+        return handle_.native();
+    }
+#endif
+
+
 private:
     /**
      * Handles providing access to streams attached to the child process.

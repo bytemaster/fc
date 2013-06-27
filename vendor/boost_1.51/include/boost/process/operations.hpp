@@ -346,7 +346,11 @@ inline child create_child(const std::string &executable, Arguments args,
     boost::shared_array<char> envstrs =
         detail::environment_to_windows_strings(ctx.env);
 
-    if (CreateProcessA(exe.get(), cmdline.get(), NULL, NULL, TRUE, 0,
+    DWORD creation_flags = 0;
+    if (ctx.suppress_console)
+        creation_flags |= CREATE_NO_WINDOW;
+
+    if (CreateProcessA(exe.get(), cmdline.get(), NULL, NULL, TRUE, creation_flags,
         envstrs.get(), workdir.get(), &startup_info, &pi) == 0)
         BOOST_PROCESS_THROW_LAST_SYSTEM_ERROR("CreateProcess() failed");
 

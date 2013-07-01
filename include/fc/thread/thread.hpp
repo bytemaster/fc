@@ -109,7 +109,7 @@ namespace fc {
 
        template<typename T1, typename T2>
        int wait_any( const fc::future<T1>& f1, const fc::future<T2>& f2, const microseconds& timeout_us = microseconds::maximum()) {
-          fc::vector<fc::promise_base::ptr> proms(2);
+          std::vector<fc::promise_base::ptr> proms(2);
           proms[0] = fc::static_pointer_cast<fc::promise_base>(f1.m_prom);
           proms[1] = fc::static_pointer_cast<fc::promise_base>(f2.m_prom);
           return wait_any_until(fc::move(proms), fc::time_point::now()+timeout_us );
@@ -123,15 +123,15 @@ namespace fc {
       friend void usleep(const microseconds&);
       friend void sleep_until(const time_point&);
       friend void exec();
-      friend int wait_any( fc::vector<promise_base::ptr>&& v, const microseconds& );
-      friend int wait_any_until( fc::vector<promise_base::ptr>&& v, const time_point& tp );
+      friend int wait_any( std::vector<promise_base::ptr>&& v, const microseconds& );
+      friend int wait_any_until( std::vector<promise_base::ptr>&& v, const time_point& tp );
       void wait_until( promise_base::ptr && v, const time_point& tp );
       void notify( const promise_base::ptr& v );
 
       void yield(bool reschedule=true);
       void sleep_until( const time_point& t );
       void  exec();
-      int  wait_any_until( fc::vector<promise_base::ptr>&& v, const time_point& );
+      int  wait_any_until( std::vector<promise_base::ptr>&& v, const time_point& );
 
       void async_task( task_base* t, const priority& p, const char* desc );
       void async_task( task_base* t, const priority& p, const time_point& tp, const char* desc );
@@ -168,8 +168,8 @@ namespace fc {
    int wait_any( const fc::future<T1>& f1, const fc::future<T2>& f2, const microseconds timeout_us = microseconds::maximum()) {
       return fc::thread::current().wait_any(f1,f2,timeout_us);
    }
-   int wait_any( fc::vector<promise_base::ptr>&& v, const microseconds& timeout_us = microseconds::maximum() );
-   int wait_any_until( fc::vector<promise_base::ptr>&& v, const time_point& tp );
+   int wait_any( std::vector<promise_base::ptr>&& v, const microseconds& timeout_us = microseconds::maximum() );
+   int wait_any_until( std::vector<promise_base::ptr>&& v, const time_point& tp );
 
    template<typename Functor>
    auto async( Functor&& f, const char* desc ="", priority prio = priority()) -> fc::future<decltype(f())> {

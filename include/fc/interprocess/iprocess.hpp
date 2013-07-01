@@ -1,7 +1,7 @@
 #pragma once
 #include <fc/thread/future.hpp>
 #include <fc/io/buffered_iostream.hpp>
-#include <fc/vector.hpp>
+#include <vector>
 #include <fc/string.hpp>
 #include <fc/filesystem.hpp>
 
@@ -22,6 +22,7 @@ namespace fc
            open_stdout = 0x02, 
            open_stderr = 0x04,
            open_all    = open_stdin|open_stdout|open_stderr,
+           suppress_console = 0x08
          };
 
           virtual ~iprocess(){}
@@ -30,7 +31,7 @@ namespace fc
            *  
            *  @return *this
            */
-          virtual iprocess& exec( const fc::path& exe, vector<string> args, 
+          virtual iprocess& exec( const fc::path& exe, std::vector<std::string> args, 
                              const fc::path& work_dir = fc::path(), exec_opts opts = open_all ) = 0;
 
           /**

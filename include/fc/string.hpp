@@ -3,6 +3,25 @@
 #include <fc/fwd.hpp>
 #include <fc/optional.hpp>
 
+#ifndef USE_FC_STRING
+#include <string>
+namespace fc
+{
+    typedef std::string string;
+
+  int64_t  to_int64( const fc::string& );
+  uint64_t to_uint64( const fc::string& );
+  double   to_double( const fc::string& );
+  fc::string to_string( double );
+  fc::string to_string( uint64_t );
+  fc::string to_string( int64_t );
+
+  typedef fc::optional<fc::string> ostring;
+  class variant_object;
+  fc::string format_string( const fc::string&, const variant_object& );
+}
+
+#else
 
 /**
  *  There is debate about whether doing this is 'standard conforming', but 
@@ -120,3 +139,4 @@ namespace fc {
 
 } // namespace fc
 
+#endif

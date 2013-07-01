@@ -84,7 +84,7 @@ namespace fc {
         DH_free(dh);
         return valid = true;
    }
-   bool diffie_hellman::compute_shared_key( const vector<char>& pubk ) {
+   bool diffie_hellman::compute_shared_key( const std::vector<char>& pubk ) {
       return compute_shared_key( &pubk.front(), pubk.size() );
    }
 

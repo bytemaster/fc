@@ -69,3 +69,17 @@ class sha1
   void from_variant( const variant& v, sha1& bi );
 
 } // namespace fc
+
+namespace std
+{
+    template<typename T> struct hash;
+
+    template<>
+    struct hash<fc::sha1>
+    {
+       size_t operator()( const fc::sha1& s )const
+       {
+           return  *((size_t*)&s);
+       }
+    };
+}

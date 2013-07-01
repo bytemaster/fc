@@ -4,7 +4,7 @@
 
 namespace fc
 {
-    fc::vector<char> from_base32( const fc::string& b32 );
-    fc::string to_base32( const fc::vector<char>& vec );
+    std::vector<char> from_base32( const fc::string& b32 );
+    fc::string to_base32( const std::vector<char>& vec );
     fc::string to_base32( const char* data, size_t len );
 }

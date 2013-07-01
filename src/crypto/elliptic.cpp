@@ -11,6 +11,50 @@
 #include <assert.h>
 
 namespace fc { namespace ecc {
+
+template <typename ssl_type>
+struct ssl_wrapper
+{
+    ssl_wrapper(ssl_type* obj)
+      : obj(obj) {}
+    virtual ~ssl_wrapper()
+    {
+    }
+    operator ssl_type*()
+    {
+        return obj;
+    }
+
+    ssl_type* obj;
+};
+
+struct ssl_bignum
+  : public ssl_wrapper<BIGNUM>
+{
+    ssl_bignum()
+      : ssl_wrapper(BN_new()) {}
+    ~ssl_bignum()
+    {
+        BN_free(obj);
+    }
+};
+
+    #define SSL_TYPE(name, ssl_type, free_func) \
+        struct name \
+          : public ssl_wrapper<ssl_type> \
+        { \
+            name(ssl_type* obj) \
+              : ssl_wrapper(obj) {} \
+            ~name() \
+            { \
+                free_func(obj); \
+            } \
+        };
+
+    SSL_TYPE(ec_group, EC_GROUP, EC_GROUP_free)
+    SSL_TYPE(ec_point, EC_POINT, EC_POINT_free)
+    SSL_TYPE(bn_ctx, BN_CTX, BN_CTX_free)
+
     namespace detail 
     { 
       class public_key_impl
@@ -188,6 +232,30 @@ namespace fc { namespace ecc {
     }
     */
 
+    public_key public_key::mult( const fc::sha256& digest )
+    {
+        // get point from this public key
+        const EC_POINT* master_pub   = EC_KEY_get0_public_key( my->_key );
+        ec_group group(EC_GROUP_new_by_curve_name(NID_secp256k1));
+
+        ssl_bignum z;
+        BN_bin2bn((unsigned char*)&digest, sizeof(digest), z);
+
+        // multiply by digest
+        ssl_bignum one;
+        bn_ctx ctx(BN_CTX_new());
+        BN_one(one);
+
+        ec_point result(EC_POINT_new(group));
+        EC_POINT_mul(group, result, z, master_pub, one, ctx);
+
+        public_key rtn;
+        rtn.my->_key = EC_KEY_new_by_curve_name( NID_secp256k1 );
+        EC_KEY_set_public_key(rtn.my->_key,result);
+
+        return rtn;
+    }
+
     private_key::private_key()
     {}
 
@@ -275,8 +343,8 @@ namespace fc { namespace ecc {
     public_key_data public_key::serialize()const
     {
       EC_KEY_set_conv_form( my->_key, POINT_CONVERSION_COMPRESSED );
-      size_t nbytes = i2o_ECPublicKey( my->_key, nullptr );
-      assert( nbytes == 33 );
+      /*size_t nbytes = */i2o_ECPublicKey( my->_key, nullptr );
+      /*assert( nbytes == 33 )*/
       public_key_data dat;
       char* front = &dat.data[0];
       i2o_ECPublicKey( my->_key, (unsigned char**)&front  );
@@ -384,7 +452,7 @@ namespace fc { namespace ecc {
         FC_THROW_EXCEPTION( exception, "unable to reconstruct public key from signature" );
     }
 
-    compact_signature private_key::sign_compact( const fc::sha256& digest )
+    compact_signature private_key::sign_compact( const fc::sha256& digest )const
     {
         ECDSA_SIG *sig = ECDSA_do_sign((unsigned char*)&digest, sizeof(digest), my->_key);
 

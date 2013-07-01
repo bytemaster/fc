@@ -13,6 +13,7 @@
 #include <boost/preprocessor/seq/seq.hpp>
 #include <boost/preprocessor/stringize.hpp>
 #include <stdint.h>
+#include <string.h>
 
 #include <fc/reflect/typename.hpp>
 

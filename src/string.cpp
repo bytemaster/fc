@@ -10,6 +10,7 @@
  */
 
 namespace fc  {
+#ifdef USE_FC_STRING
   string::string(const char* s, int l) :my(s,l){ }
   string::string(){}
   string::string( const fc::string& c ):my(*c.my) { }
@@ -64,6 +65,7 @@ namespace fc  {
   bool operator < ( const string& a, const string& b )   { return *a.my < *b.my; } 
   string operator + ( const string& s, const string& c ) { return string(s) += c; }
   string operator + ( const string& s, char c ) 	 { return string(s) += c; }
+#endif // USE_FC_STRING
 
 
   int64_t    to_int64( const fc::string& i )

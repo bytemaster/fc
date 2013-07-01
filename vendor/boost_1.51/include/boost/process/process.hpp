@@ -198,11 +198,12 @@ private:
             BOOST_PROCESS_THROW_LAST_SYSTEM_ERROR("OpenProcess() failed");
         return h;
     }
-
+protected:
     /**
      * The process handle.
      */
     handle handle_;
+private:
 #endif
 };
 

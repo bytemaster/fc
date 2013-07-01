@@ -196,7 +196,7 @@ namespace fc {
 
       my->check_fiber_exceptions();
    }
-   int  thread::wait_any_until( fc::vector<promise_base::ptr>&& p, const time_point& timeout) {
+   int  thread::wait_any_until( std::vector<promise_base::ptr>&& p, const time_point& timeout) {
        for( size_t i = 0; i < p.size(); ++i ) {
          if( p[i]->ready() ) return i;
        }
@@ -282,10 +282,10 @@ namespace fc {
       return thread::current().exec();
    }
 
-   int wait_any( fc::vector<promise_base::ptr>&& v, const microseconds& timeout_us  ) {
+   int wait_any( std::vector<promise_base::ptr>&& v, const microseconds& timeout_us  ) {
       return thread::current().wait_any_until( fc::move(v), time_point::now() + timeout_us );
    }
-   int wait_any_until( fc::vector<promise_base::ptr>&& v, const time_point& tp ) {
+   int wait_any_until( std::vector<promise_base::ptr>&& v, const time_point& tp ) {
       return thread::current().wait_any_until( fc::move(v), tp );
    }
    void thread::wait_until( promise_base::ptr&& p, const time_point& timeout ) {

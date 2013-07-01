@@ -1,5 +1,5 @@
 #pragma once
-#include <fc/vector.hpp>
+#include <vector>
 #include <stdint.h>
 
 namespace fc {
@@ -9,13 +9,13 @@ namespace fc {
         bool generate_params( int s, uint8_t g );
         bool generate_pub_key();
         bool compute_shared_key( const char* buf, uint32_t s );
-        bool compute_shared_key( const vector<char>& pubk);
+        bool compute_shared_key( const std::vector<char>& pubk);
         bool validate();
 
-        vector<char> p;
-        vector<char> pub_key;
-        vector<char> priv_key;
-        vector<char> shared_key;
+        std::vector<char> p;
+        std::vector<char> pub_key;
+        std::vector<char> priv_key;
+        std::vector<char> shared_key;
         bool             valid;
         uint8_t          g; 
     };

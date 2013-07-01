@@ -8,7 +8,7 @@ namespace fc {
       bigint::bigint( const char* bige, uint32_t l ) {
         n = BN_bin2bn( (const unsigned char*)bige, l, NULL );
       }
-      bigint::bigint( const fc::vector<char>& bige ) {
+      bigint::bigint( const std::vector<char>& bige ) {
         n = BN_bin2bn( (const unsigned char*)bige.data(), bige.size(), NULL );
       }
       bigint::bigint( BIGNUM* in )
@@ -149,8 +149,8 @@ namespace fc {
         return BN_bn2dec(n);
       }
 
-      bigint::operator fc::vector<char>()const {
-        fc::vector<char> to(BN_num_bytes(n)); 
+      bigint::operator std::vector<char>()const {
+        std::vector<char> to(BN_num_bytes(n)); 
         BN_bn2bin(n,(unsigned char*)to.data());
         return to;
       }
@@ -158,7 +158,7 @@ namespace fc {
   /** encodes the big int as base64 string, or a number */
   void to_variant( const bigint& bi, variant& v )
   {
-    fc::vector<char> ve = bi;
+    std::vector<char> ve = bi;
     v = fc::variant(base64_encode((unsigned char*)ve.data(),ve.size()));
   }
 

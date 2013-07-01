@@ -18,7 +18,7 @@ namespace fc {
        fc::string val;
      };
 
-     typedef fc::vector<header> headers;
+     typedef std::vector<header> headers;
      
      struct reply 
      {
@@ -31,8 +31,8 @@ namespace fc {
         };
         reply( status_code c = OK):status(c){}
         int                     status;
-        fc::vector<header>      headers;
-        fc::vector<char>        body;
+        std::vector<header>      headers;
+        std::vector<char>        body;
      };
      
      struct request 
@@ -41,11 +41,11 @@ namespace fc {
         fc::string              method;
         fc::string              domain;
         fc::string              path;
-        fc::vector<header>      headers;
-        fc::vector<char>        body;
+        std::vector<header>      headers;
+        std::vector<char>        body;
      };
      
-     fc::vector<header> parse_urlencoded_params( const fc::string& f );
+     std::vector<header> parse_urlencoded_params( const fc::string& f );
      
      /**
       *  Connections have reference semantics, all copies refer to the same

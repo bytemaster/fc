@@ -83,6 +83,11 @@ struct context
     environment env;
 
     /**
+     * Suppress creation of a console window on win32 (nop on other platforms)
+     */
+    bool suppress_console;
+
+    /**
      * Constructs a process context.
      *
      * The default behavior of standard streams is to inherit them. The current
@@ -91,7 +96,8 @@ struct context
      */
     context()
         : work_dir(self::get_work_dir()),
-        env(self::get_environment())
+        env(self::get_environment()),
+        suppress_console(false)
     {
 #if 0 // this default behavior will throw in non-console apps
 #if defined(BOOST_POSIX_API)

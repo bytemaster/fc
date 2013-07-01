@@ -16,7 +16,7 @@ namespace fc {
       ~process();
 
       virtual iprocess& exec( const fc::path&  exe, 
-                              vector<string>   args, 
+                              std::vector<std::string>   args, 
                               const fc::path&  work_dir = fc::path(), 
                               exec_opts        opts     = open_all    );
 

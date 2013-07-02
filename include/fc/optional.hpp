@@ -1,84 +1,88 @@
 #pragma once
 #include <fc/utility.hpp>
+#include <assert.h>
 
 namespace fc {
+#ifdef _MSC_VER
+# pragma warning(push)
+# pragma warning(disable:4521)  /* multiple copy ctors */
+#endif
+
   /**
    *  @brief provides stack-based nullable value similar to boost::optional
    *
    *  Simply including boost::optional adds 35,000 lines to each object file, using
    *  fc::optional adds less than 400.
    */
-
-#ifdef _MSC_VER
-# pragma warning(push)
-# pragma warning(disable:4521)  /* multiple copy ctors */
-#endif
-
   template<typename T>
-  class optional {
+  class optional 
+  {
     public:
-      optional():_valid(0){}
-      ~optional(){ if( _valid ) (**this).~T(); }
+      optional():_valid(false){}
+      ~optional(){ reset(); }
 
       optional( const optional& o )
-      :_valid(false) {
-        if( o._valid ) new (&**this) T( *o );
+      :_valid(false) 
+      {
+        if( o._valid ) new (ptr()) T( *o );
         _valid = o._valid;
       }
 
       optional( optional& o )
-      :_valid(false) {
-        if( o._valid ) new (&**this) T( *o );
+      :_valid(false) 
+      {
+        if( o._valid ) new (ptr()) T( *o );
         _valid = o._valid;
       }
 
       optional( optional&& o )
-      :_valid(false) {
-        if( o._valid ) new (&**this) T( fc::move(*o) );
+      :_valid(false) 
+      {
+        if( o._valid ) new (ptr()) T( fc::move(*o) );
         _valid = o._valid;
+        o.reset();
       }
 
       template<typename U>
       optional( U&& u )
-      :_valid(false) {
-        new (&**this) T( fc::forward<U>(u) );
+      :_valid(false) 
+      {
+        new (ptr()) T( fc::forward<U>(u) );
         _valid = true;
       }
 
       template<typename U>
-      optional& operator=( U&& u ) {
-        if( !_valid ) {
-          new (&**this) T( fc::forward<U>(u) );
-          _valid = true;
-        } else {
-          **this = static_cast<T>(fc::forward<U>(u));
-        }
+      optional& operator=( U&& u ) 
+      {
+        reset();
+        new (ptr()) T( fc::forward<U>(u) );
         return *this;
       }
 
       optional& operator=( const optional& o ) {
         if (this != &o) {
           if( _valid && o._valid ) { 
-            **this = *o;
+            ref() = *o;
           } else if( !_valid && o._valid ) {
-            *this = *o;
+             new (ptr()) T( *o );
+             _valid = true;
           } else if (_valid) {
-            (**this).~T();
-            _valid = false;
+            reset();
           }
         }
         return *this;
       }
 
-      optional& operator=( optional&& o ) {
-        if (this != &o) {
+      optional& operator=( optional&& o ) 
+      {
+        if (this != &o) 
+        {
           if( _valid && o._valid ) {
-            **this = fc::move(*o);
+            ref() = fc::move(*o);
           } else if ( !_valid && o._valid ) {
             *this = fc::move(*o);
           } else if (_valid) {
-            (**this).~T();
-            _valid = false;
+            reset();
           }
         }
         return *this;
@@ -87,13 +91,33 @@ namespace fc {
       bool operator!()const { return !_valid; }
       operator bool()const  { return _valid;  }
 
-      T&       operator*()      { void* v = &_value[0]; return *static_cast<T*>(v); }
-      const T& operator*()const { const void* v = &_value[0]; return *static_cast<const T*>(v); }
+      T&       operator*()      { assert(_valid); return ref(); }
+      const T& operator*()const { assert(_valid); return ref(); }
 
-      T*       operator->()      { void* v = &_value[0]; return static_cast<T*>(v); }
-      const T* operator->()const { const void* v = &_value[0]; return static_cast<const T*>(v); }
+      T*       operator->()      
+      { 
+         assert( _valid );
+         return ptr(); 
+      }
+      const T* operator->()const 
+      { 
+         assert( _valid );
+         return ptr(); 
+      }
 
     private:
+      void     reset()    
+      { 
+          if( _valid ) 
+          {
+              ref().~T(); // cal destructor
+          }
+      }
+      T&       ref()      { return *ptr(); }
+      const T& ref()const { return *ptr(); }
+      T*       ptr()      { void* v = &_value[0]; return static_cast<T*>(v); }
+      const T* ptr()const { const void* v = &_value[0]; return static_cast<const T*>(v); }
+
       // force alignment... to 8 byte boundaries 
       double _value[8 * ((sizeof(T)+7)/8)];
       bool   _valid;

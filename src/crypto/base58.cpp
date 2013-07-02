@@ -605,11 +605,11 @@ inline bool DecodeBase58(const std::string& str, std::vector<unsigned char>& vch
 
 namespace fc {
 
-fc::string to_base58( const char* d, size_t s ) {
+std::string to_base58( const char* d, size_t s ) {
   return EncodeBase58( (const unsigned char*)d, (const unsigned char*)d+s ).c_str();
 }
 
-std::vector<char> from_base58( const fc::string& base58_str ) {
+std::vector<char> from_base58( const std::string& base58_str ) {
    std::vector<unsigned char> out;
    if( !DecodeBase58( base58_str.c_str(), out ) ) {
      FC_THROW_EXCEPTION( exception, "Unable to decode base58 string ${base58_str}", ("base58_str",base58_str) );
@@ -619,7 +619,7 @@ std::vector<char> from_base58( const fc::string& base58_str ) {
 /**
  *  @return the number of bytes decoded
  */
-size_t from_base58( const fc::string& base58_str, char* out_data, size_t out_data_len ) {
+size_t from_base58( const std::string& base58_str, char* out_data, size_t out_data_len ) {
   //slog( "%s", base58_str.c_str() );
   std::vector<unsigned char> out;
   if( !DecodeBase58( base58_str.c_str(), out ) ) {

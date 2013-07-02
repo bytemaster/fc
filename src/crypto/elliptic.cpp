@@ -243,8 +243,8 @@ struct ssl_bignum
 
         // multiply by digest
         ssl_bignum one;
-        bn_ctx ctx(BN_CTX_new());
         BN_one(one);
+        bn_ctx ctx(BN_CTX_new());
 
         ec_point result(EC_POINT_new(group));
         EC_POINT_mul(group, result, z, master_pub, one, ctx);
@@ -259,25 +259,41 @@ struct ssl_bignum
     private_key::private_key()
     {}
 
+    private_key private_key::generate_from_seed( const fc::sha256& seed, const fc::sha256& offset )
+    {
+        ssl_bignum z;
+        BN_bin2bn((unsigned char*)&offset, sizeof(offset), z);
+
+        ec_group group(EC_GROUP_new_by_curve_name(NID_secp256k1));
+        ssl_bignum order;
+        bn_ctx ctx(BN_CTX_new());
+        EC_GROUP_get_order(group, order, ctx);
+
+        // secexp = (seed + z) % order
+        ssl_bignum secexp;
+        BN_bin2bn((unsigned char*)&seed, sizeof(seed), secexp);
+        BN_add(secexp, secexp, z);
+        BN_mod(secexp, secexp, order, ctx);
+
+        fc::sha256 secret;
+        assert(BN_num_bytes(secexp) == sizeof(secret));
+        BN_bn2bin(secexp, (unsigned char*)&secret);
+        return regenerate( secret );
+    }
+
     private_key private_key::regenerate( const fc::sha256& secret )
     {
        private_key self;
        self.my->_key = EC_KEY_new_by_curve_name( NID_secp256k1 );
        if( !self.my->_key ) FC_THROW_EXCEPTION( exception, "Unable to generate EC key" );
       
-       BIGNUM* bn = BN_bin2bn( (const unsigned char*)&secret, 32, BN_new() );
-       if( bn == NULL ) 
-       {
-         FC_THROW_EXCEPTION( exception, "unable to create bignum from secret" );
-       }
+       ssl_bignum bn;
+       BN_bin2bn( (const unsigned char*)&secret, 32, bn );
 
        if( !EC_KEY_regenerate_key(self.my->_key,bn) )
        {
-          BN_clear_free(bn);
           FC_THROW_EXCEPTION( exception, "unable to regenerate key" );
        }
-
-       BN_clear_free(bn);
        return self;
     }
 

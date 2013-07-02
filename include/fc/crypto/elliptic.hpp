@@ -19,6 +19,10 @@ namespace fc {
     typedef fc::array<char,72>          signature;
     typedef fc::array<unsigned char,65> compact_signature;
 
+    /**
+     *  @class public_key
+     *  @brief contains only the public point of an elliptic curve key.
+     */
     class public_key
     {
         public:
@@ -31,7 +35,7 @@ namespace fc {
            public_key( const compact_signature& c, const fc::sha256& digest );
 
            bool valid()const;
-           public_key mult( const fc::sha256& digest );
+           public_key mult( const fc::sha256& offset );
 
            public_key( public_key&& pk );
            public_key& operator=( public_key&& pk );
@@ -41,7 +45,10 @@ namespace fc {
           fc::fwd<detail::public_key_impl,8> my;
     };
 
-
+    /**
+     *  @class private_key
+     *  @brief an elliptic curve private key.
+     */
     class private_key 
     {
         public:
@@ -56,6 +63,13 @@ namespace fc {
 
            static private_key generate();
            static private_key regenerate( const fc::sha256& secret );
+
+           /**
+            *  This method of generation enables creating a new private key in a deterministic manner relative to
+            *  an initial seed.   A public_key created from the seed can be multiplied by the offset to calculate 
+            *  the new public key without having to know the private key.
+            */
+           static private_key generate_from_seed( const fc::sha256& seed, const fc::sha256& offset = fc::sha256() );
 
            fc::sha256 get_secret()const; // get the private key secret
 

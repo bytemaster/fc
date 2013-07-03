@@ -22,11 +22,6 @@ FIND_PACKAGE(Boost 1.51 COMPONENTS thread date_time system filesystem program_op
 
 if( WIN32 )
    set( RPCRT4 Rpcrt4 )
-   set( OPENSSL_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/vendor/openssl" )
-   if ( NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/vendor/openssl/lib" )
-     file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/vendor/openssl/out32dll" DESTINATION "${CMAKE_CURRENT_SOURCE_DIR}/vendor/openssl/cmakefun")
-     file(RENAME "${CMAKE_CURRENT_SOURCE_DIR}/vendor/openssl/cmakefun/out32dll" "${CMAKE_CURRENT_SOURCE_DIR}/vendor/openssl/lib")
-   endif( NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/vendor/openssl/lib" )
 endif( WIN32 )
 
 LINK_DIRECTORIES( ${Boost_LIBRARY_DIRS} )
@@ -57,7 +52,6 @@ endif()
 option( UNITY_BUILD OFF )
 
 FIND_PACKAGE( OpenSSL )
-
 include_directories( ${Boost_INCLUDE_DIR} )
 include_directories( ${OPENSSL_INCLUDE_DIR} )
 

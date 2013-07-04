@@ -23,6 +23,7 @@ namespace fc {
       friend class mapped_region;
       fc::fwd<boost::interprocess::file_mapping,0x24> my;
   };
+
   class mapped_region {
     public:
       mapped_region( const file_mapping& fm, mode_t m, uint64_t start, size_t size );

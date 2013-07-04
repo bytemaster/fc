@@ -4,15 +4,35 @@
 
 namespace fc {
 
+  /**
+   *  Provides a fixed size array that is easier for templates to specialize 
+   *  against or overload than T[N].  
+   */
   template<typename T, size_t N>
   class array {
     public:
+    /**
+     *  Checked indexing (when in debug build) that also simplifies dereferencing
+     *  when you have an array<T,N>*.    
+     */
+    ///@{
+    T&       at( size_t pos )      { assert( pos < N); return data[pos]; }
+    const T& at( size_t pos )const { assert( pos < N); return data[pos]; }
+    ///@}
+    
+    T*           begin()       {  return &data[0]; }
+    const T*     begin()const  {  return &data[0]; }
+    const T*     end()const    {  return &data[N]; }
+
+    size_t       size()const { return N; }
+    
     T data[N];
   };
 
   template<typename T, size_t N>
   bool operator == ( const array<T,N>& a, const array<T,N>& b )
   { return 0 == memcmp( a.data, b.data, N ); }
+
   template<typename T, size_t N>
   bool operator != ( const array<T,N>& a, const array<T,N>& b )
   { return 0 != memcmp( a.data, b.data, N ); }

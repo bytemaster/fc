@@ -81,6 +81,7 @@ set( fc_sources
      src/filesystem.cpp
      src/interprocess/process.cpp
      src/interprocess/file_mapping.cpp
+     src/interprocess/mmap_struct.cpp
      src/rpc/json_connection.cpp
      src/log/log_message.cpp 
      src/log/logger.cpp

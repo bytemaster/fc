@@ -40,7 +40,7 @@ namespace fc {
             lgr.set_parent( logger::get( *cfg.loggers[i].parent ) );
          }
          lgr.set_name(cfg.loggers[i].name);
-         lgr.set_log_level( *cfg.loggers[i].level );
+         if( cfg.loggers[i].level ) lgr.set_log_level( *cfg.loggers[i].level );
          
 
          for( auto a = cfg.loggers[i].appenders.begin(); a != cfg.loggers[i].appenders.end(); ++a ){

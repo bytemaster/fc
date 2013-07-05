@@ -2,6 +2,8 @@
 #include <fc/utility.hpp>
 #include <assert.h>
 
+#include <stdio.h>
+
 namespace fc {
 #ifdef _MSC_VER
 # pragma warning(push)
@@ -45,17 +47,18 @@ namespace fc {
 
       template<typename U>
       optional( U&& u )
-      :_valid(false) 
+      :_valid(true) 
       {
-        new (ptr()) T( fc::forward<U>(u) );
-        _valid = true;
+        new ((char*)ptr()) T( fc::forward<U>(u) );
       }
 
       template<typename U>
       optional& operator=( U&& u ) 
       {
         reset();
+        fprintf( stderr, "optional==(U&&)...\n" );
         new (ptr()) T( fc::forward<U>(u) );
+        _valid = true;
         return *this;
       }
 
@@ -77,8 +80,10 @@ namespace fc {
       {
         if (this != &o) 
         {
-          if( _valid && o._valid ) {
+          if( _valid && o._valid ) 
+          {
             ref() = fc::move(*o);
+            o.reset();
           } else if ( !_valid && o._valid ) {
             *this = fc::move(*o);
           } else if (_valid) {
@@ -110,8 +115,10 @@ namespace fc {
       { 
           if( _valid ) 
           {
+              fprintf( stderr, "optiona::reset %p\n", this );
               ref().~T(); // cal destructor
           }
+          _valid = false;
       }
       T&       ref()      { return *ptr(); }
       const T& ref()const { return *ptr(); }

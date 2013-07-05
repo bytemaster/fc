@@ -2,7 +2,6 @@
 #include <fc/utility.hpp>
 #include <assert.h>
 
-#include <stdio.h>
 
 namespace fc {
 #ifdef _MSC_VER
@@ -56,7 +55,6 @@ namespace fc {
       optional& operator=( U&& u ) 
       {
         reset();
-        fprintf( stderr, "optional==(U&&)...\n" );
         new (ptr()) T( fc::forward<U>(u) );
         _valid = true;
         return *this;
@@ -115,7 +113,6 @@ namespace fc {
       { 
           if( _valid ) 
           {
-              fprintf( stderr, "optiona::reset %p\n", this );
               ref().~T(); // cal destructor
           }
           _valid = false;

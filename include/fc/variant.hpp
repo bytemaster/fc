@@ -5,6 +5,7 @@
 #include <memory>
 #include <string.h> // memset
 #include <unordered_set>
+#include <set>
 
 namespace fc
 {
@@ -44,6 +45,10 @@ namespace fc
    void to_variant( const std::unordered_set<T>& var,  variant& vo );
    template<typename T>
    void from_variant( const variant& var,  std::unordered_set<T>& vo );
+   template<typename T>
+   void to_variant( const std::set<T>& var,  variant& vo );
+   template<typename T>
+   void from_variant( const variant& var,  std::set<T>& vo );
 
    void to_variant( const time_point& var,  variant& vo );
    void from_variant( const variant& var,  time_point& vo );
@@ -262,6 +267,24 @@ namespace fc
    }
    template<typename T>
    void from_variant( const variant& var,  std::unordered_set<T>& vo )
+   {
+      const variants& vars = var.get_array();
+      vo.clear();
+      vo.reserve( vars.size() );
+      for( auto itr = vars.begin(); itr != vars.end(); ++itr )
+         vo.insert( itr->as<T>() );
+   }
+   template<typename T>
+   void to_variant( const std::set<T>& var,  variant& vo )
+   {
+       std::vector<variant> vars(var.size());
+       size_t i = 0;
+       for( auto itr = var.begin(); itr != var.end(); ++itr )
+          vars[i] = variant(*itr);
+       vo = vars;
+   }
+   template<typename T>
+   void from_variant( const variant& var,  std::set<T>& vo )
    {
       const variants& vars = var.get_array();
       vo.clear();

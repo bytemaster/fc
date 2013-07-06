@@ -12,9 +12,16 @@
 #include <fc/variant.hpp>
 #include <fc/exception/exception.hpp>
 #include <fc/log/logger.hpp>
+#include <set>
 
 namespace fc { 
     namespace raw {
+
+    template<typename Stream, typename T>
+    inline void pack( Stream& s, const std::set<T>& value );
+    template<typename Stream, typename T>
+    inline void unpack( Stream& s, std::set<T>& value );
+
     template<typename Stream> 
     inline void pack( Stream& s, const variant_object& v );
     template<typename Stream> 
@@ -106,7 +113,7 @@ namespace fc {
       if( b ) { v = T(); unpack( s, *v ); }
     }
 
-    // std::vector
+    // std::vector<char>
     template<typename Stream> inline void pack( Stream& s, const std::vector<char>& value ) { 
       pack( s, unsigned_int(value.size()) );
       if( value.size() )
@@ -234,6 +241,30 @@ namespace fc {
         ++itr;
       }
     }
+
+    template<typename Stream, typename T>
+    inline void pack( Stream& s, const std::set<T>& value ) {
+      pack( s, unsigned_int(value.size()) );
+      auto itr = value.begin();
+      auto end = value.end();
+      while( itr != end ) {
+        fc::raw::pack( s, *itr );
+        ++itr;
+      }
+    }
+
+    template<typename Stream, typename T>
+    inline void unpack( Stream& s, std::set<T>& value ) {
+      unsigned_int size; unpack( s, size );
+      for( uint64_t i = 0; i < size.value; ++i )
+      {
+        T tmp;
+        unpack( s, tmp );
+        value.insert( std::move(tmp) );
+      }
+    }
+
+
 
     template<typename Stream, typename T> 
     inline void pack( Stream& s, const T& v ) {

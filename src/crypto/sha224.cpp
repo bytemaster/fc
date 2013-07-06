@@ -61,10 +61,8 @@ namespace fc {
     }
     sha224 operator ^ ( const sha224& h1, const sha224& h2 ) {
       sha224 result;
-      result._hash[0] = h1._hash[0] ^ h2._hash[0];
-      result._hash[1] = h1._hash[1] ^ h2._hash[1];
-      result._hash[2] = h1._hash[2] ^ h2._hash[2];
-      result._hash4 = h1._hash4 ^ h2._hash4;
+      for( uint32_t i = 0; i < 7; ++i )
+      result._hash[i] = h1._hash[i] ^ h2._hash[i];
       return result;
     }
     bool operator >= ( const sha224& h1, const sha224& h2 ) {

@@ -45,6 +45,7 @@ class sha224
 
     template<typename T>
     inline friend T& operator<<( T& ds, const sha224& ep ) {
+      static_assert( sizeof(ep) == (8*3+4), "sha224 size mismatch" );
       ds.write( ep.data(), sizeof(ep) );
       return ds;
     }
@@ -62,8 +63,7 @@ class sha224
     friend bool   operator >  ( const sha224& h1, const sha224& h2 ); 
     friend bool   operator <  ( const sha224& h1, const sha224& h2 ); 
                              
-    uint64_t _hash[3]; 
-    uint32_t _hash4; 
+    uint32_t _hash[7]; 
 };
 
   class variant;

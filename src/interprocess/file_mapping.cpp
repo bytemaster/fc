@@ -4,6 +4,8 @@
 #include <fc/fwd_impl.hpp>
 
 namespace fc {
+
+
   file_mapping::file_mapping( const char* file, mode_t m )
   :my(file, m == read_only ? boost::interprocess::read_only : boost::interprocess::read_write ){}
   file_mapping::~file_mapping(){}

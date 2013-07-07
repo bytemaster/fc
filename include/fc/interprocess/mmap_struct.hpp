@@ -13,8 +13,8 @@ namespace fc
        class mmap_struct_base
        {
           public:
-            size_t size()const { return _mapped_region->get_size(); }
-            void flush() { _mapped_region->flush();  }
+            size_t size()const;
+            void flush();
 
           protected:
             void open( const fc::path& file, size_t s, bool create );

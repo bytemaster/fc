@@ -261,7 +261,7 @@ namespace fc
    {
        std::vector<variant> vars(var.size());
        size_t i = 0;
-       for( auto itr = var.begin(); itr != var.end(); ++itr )
+       for( auto itr = var.begin(); itr != var.end(); ++itr, ++i )
           vars[i] = variant(*itr);
        vo = vars;
    }
@@ -279,7 +279,7 @@ namespace fc
    {
        std::vector<variant> vars(var.size());
        size_t i = 0;
-       for( auto itr = var.begin(); itr != var.end(); ++itr )
+       for( auto itr = var.begin(); itr != var.end(); ++itr, ++i )
           vars[i] = variant(*itr);
        vo = vars;
    }

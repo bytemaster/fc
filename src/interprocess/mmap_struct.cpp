@@ -7,6 +7,12 @@ namespace fc
 {
    namespace detail
    {
+      size_t mmap_struct_base::size()const { return _mapped_region->get_size(); }
+      void mmap_struct_base::flush() 
+      { 
+        _mapped_region->flush();  
+      }
+
       void mmap_struct_base::open( const fc::path& file, size_t s, bool create )
       {
          if( !fc::exists( file ) || fc::file_size(file) != s )

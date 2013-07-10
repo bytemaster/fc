@@ -108,7 +108,12 @@ namespace fc {
          return ptr(); 
       }
 
-    private:
+      optional& operator=(std::nullptr_t)
+      {
+        reset();
+        return *this;
+      }
+
       void     reset()    
       { 
           if( _valid ) 
@@ -117,6 +122,7 @@ namespace fc {
           }
           _valid = false;
       }
+    private:
       T&       ref()      { return *ptr(); }
       const T& ref()const { return *ptr(); }
       T*       ptr()      { void* v = &_value[0]; return static_cast<T*>(v); }

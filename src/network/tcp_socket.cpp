@@ -37,6 +37,11 @@ namespace fc {
     return fc::asio::write_some( my->_sock, boost::asio::buffer( buf, len ) );
   }
 
+ fc::ip::endpoint tcp_socket::remote_endpoint()const
+ {
+   auto rep = my->_sock.remote_endpoint();
+   return  fc::ip::endpoint(rep.address().to_v4().to_ulong(), rep.port() );
+ }
 
   size_t tcp_socket::readsome( char* buf, size_t len ) {
     auto r =  fc::asio::read_some( my->_sock, boost::asio::buffer( buf, len ) );

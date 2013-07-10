@@ -12,6 +12,7 @@ namespace fc {
       ~tcp_socket();
 
       void     connect_to( const fc::ip::endpoint& e );
+      fc::ip::endpoint remote_endpoint()const;
 
       /// istream interface
       /// @{

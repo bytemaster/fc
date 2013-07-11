@@ -4,5 +4,5 @@
 
 namespace fc
 {
-  fc::vector<fc::ip::endpoint> resolve( const fc::string& host, uint16_t port );
+  std::vector<fc::ip::endpoint> resolve( const std::string& host, uint16_t port );
 }

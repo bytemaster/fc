@@ -429,7 +429,7 @@ struct ssl_bignum
 #endif
     }
 
-    fc::sha512 private_key::get_shared_secret( const public_key& other )
+    fc::sha512 private_key::get_shared_secret( const public_key& other )const
     {
       fc::sha512 buf;
       ECDH_compute_key( (unsigned char*)&buf, sizeof(buf), EC_KEY_get0_public_key(other.my->_key), my->_key, ecies_key_derivation );

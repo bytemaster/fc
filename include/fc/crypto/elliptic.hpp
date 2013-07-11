@@ -77,7 +77,7 @@ namespace fc {
             *  Given a public key, calculatse a 512 bit shared secret between that
             *  key and this private key.  
             */
-           fc::sha512 get_shared_secret( const public_key& pub );
+           fc::sha512 get_shared_secret( const public_key& pub )const;
 
            signature         sign( const fc::sha256& digest );
            compact_signature sign_compact( const fc::sha256& digest )const;

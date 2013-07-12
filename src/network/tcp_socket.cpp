@@ -33,7 +33,6 @@ namespace fc {
   }
 
   size_t   tcp_socket::writesome( const char* buf, size_t len ) {
-    fc::cerr.write( buf, len );
     return fc::asio::write_some( my->_sock, boost::asio::buffer( buf, len ) );
   }
 
@@ -45,7 +44,6 @@ namespace fc {
 
   size_t tcp_socket::readsome( char* buf, size_t len ) {
     auto r =  fc::asio::read_some( my->_sock, boost::asio::buffer( buf, len ) );
-    //fc::cerr.write( buf, r );
     return r;
   }
 

@@ -1,5 +1,6 @@
 #pragma once
 #include <fc/string.hpp>
+#include <fc/crypto/sha1.hpp>
 
 namespace fc {
 
@@ -52,4 +53,14 @@ namespace fc {
 
   void to_variant( const ip::address& var,  variant& vo );
   void from_variant( const variant& var,  ip::address& vo );
+}
+namespace std
+{
+    template<typename T> struct hash;
+
+    template<>
+    struct hash<fc::ip::endpoint>
+    {
+       size_t operator()( const fc::ip::endpoint& e )const;
+    };
 }

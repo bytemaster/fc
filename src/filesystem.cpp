@@ -162,6 +162,22 @@ namespace fc {
 	         ("srcfile",f)("dstfile",t)("inner", fc::except_str() ) );
      }
   }
+  void resize_file( const path& f, size_t t ) 
+  { 
+    try {
+      boost::filesystem::resize_file( f, t );
+    } 
+    catch ( boost::system::system_error& e )
+    {
+      FC_THROW( "Resize file '${f}' to size ${s} failed: ${reason}",
+                ("f",f)("s",t)( "reason", e.what() ) );
+    } 
+    catch ( ... ) 
+    {
+      FC_THROW( "Resize file '${f}' to size ${s} failed: ${reason}",
+                ("f",f)("s",t)( "reason", fc::except_str() ) );
+    }
+  }
   void rename( const path& f, const path& t ) { 
      try {
   	    boost::filesystem::rename( boost::filesystem::path(f), boost::filesystem::path(t) ); 

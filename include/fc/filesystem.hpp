@@ -115,6 +115,7 @@ namespace fc {
   bool     remove( const path& p );
   void     copy( const path& from, const path& to );
   void     rename( const path& from, const path& to );
+  void     resize_file( const path& file, size_t s );
 
   void     create_hard_link( const path& from, const path& to );
 

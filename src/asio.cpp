@@ -11,7 +11,12 @@ namespace fc {
             else {
             //   elog( "%s", boost::system::system_error(ec).what() );
             //   p->set_exception( fc::copy_exception( boost::system::system_error(ec) ) );
-                if( ec == boost::asio::error::eof )
+                if( ec == boost::asio::error::operation_aborted )
+                {
+                  p->set_exception( fc::exception_ptr( new fc::canceled_exception( 
+                          FC_LOG_MESSAGE( error, "${message} ", ("message", boost::system::system_error(ec).what())) ) ) );
+                }
+                else if( ec == boost::asio::error::eof  )
                 {
                   p->set_exception( fc::exception_ptr( new fc::eof_exception( 
                           FC_LOG_MESSAGE( error, "${message} ", ("message", boost::system::system_error(ec).what())) ) ) );
@@ -28,9 +33,28 @@ namespace fc {
             p->set_value(bytes_transferred);
             *oec = ec;
         }
-        void error_handler( const promise<boost::system::error_code>::ptr& p, 
+        void error_handler( const promise<void>::ptr& p, 
                               const boost::system::error_code& ec ) {
-            p->set_value(ec);
+            if( !ec ) p->set_value();
+            else
+            {
+                if( ec == boost::asio::error::operation_aborted )
+                {
+                  p->set_exception( fc::exception_ptr( new fc::canceled_exception( 
+                          FC_LOG_MESSAGE( error, "${message} ", ("message", boost::system::system_error(ec).what())) ) ) );
+                }
+                else if( ec == boost::asio::error::eof  )
+                {
+                  p->set_exception( fc::exception_ptr( new fc::eof_exception( 
+                          FC_LOG_MESSAGE( error, "${message} ", ("message", boost::system::system_error(ec).what())) ) ) );
+                }
+                else
+                {
+                 // elog( "${message} ", ("message", boost::system::system_error(ec).what()));
+                  p->set_exception( fc::exception_ptr( new fc::exception( 
+                          FC_LOG_MESSAGE( error, "${message} ", ("message", boost::system::system_error(ec).what())) ) ) );
+                }
+            }
         }
 
         void error_handler_ec( promise<boost::system::error_code>* p, 
@@ -63,27 +87,18 @@ namespace fc {
     boost::asio::io_service& default_io_service(bool cleanup) {
         static boost::asio::io_service       io;
         static boost::asio::io_service::work the_work(io);
-        static fc::thread fc1("asio1");
-        static fc::thread fc2("asio2");
-        static fc::thread fc3("asio3");
-        static fc::future<void> future1( fc1.async([=]() { io.run(); }) );
-        static fc::future<void> future2( fc2.async([=]() { io.run(); }) );
-        static fc::future<void> future3( fc3.async([=]() { io.run(); }) );
-        /*
-        static boost::thread                 io_t([=] { fc1 = &fc::thread::current(); fc1->set_name("asio1");  io.run(); });
-        static boost::thread                 io_t2([=]{ fc2 = &fc::thread::current(); fc2->set_name("asio2");  io.run(); });
-        static boost::thread                 io_t3([=]{ fc3 = &fc::thread::current(); fc3->set_name("asio3");  io.run(); });
-        */
-        if (cleanup)
-        {
-          io.stop();
-          fc1.quit();
-          fc2.quit();
-          fc3.quit();
-          future1.wait();
-          future2.wait();
-          future3.wait();
-        }
+        static boost::thread                 io_t([=] 
+               { 
+                 try { 
+                   fc::thread::current().set_name("asio");  
+                   io.run(); 
+                 }
+                 catch(...)
+                 {
+                   elog( "unexpected asio exception" );
+                 }
+               } 
+               );
 
         return io;
     }

@@ -26,7 +26,7 @@ namespace asio {
                                     boost::system::error_code* oec, 
                                     const boost::system::error_code& ec, 
                                     size_t bytes_transferred );
-        void error_handler( const promise<boost::system::error_code>::ptr& p, 
+        void error_handler( const promise<void>::ptr& p, 
                               const boost::system::error_code& ec );
         void error_handler_ec( promise<boost::system::error_code>* p, 
                               const boost::system::error_code& ec ); 
@@ -130,10 +130,11 @@ namespace asio {
           */
         template<typename SocketType, typename AcceptorType>
         void accept( AcceptorType& acc, SocketType& sock ) {
-            promise<boost::system::error_code>::ptr p( new promise<boost::system::error_code>("fc::asio::tcp::accept") );
+            //promise<boost::system::error_code>::ptr p( new promise<boost::system::error_code>("fc::asio::tcp::accept") );
+            promise<void>::ptr p( new promise<void>("fc::asio::tcp::accept") );
             acc.async_accept( sock, boost::bind( fc::asio::detail::error_handler, p, _1 ) );
-            auto ec = p->wait();
-            if( ec ) BOOST_THROW_EXCEPTION( boost::system::system_error(ec) );
+            p->wait();
+            //if( ec ) BOOST_THROW_EXCEPTION( boost::system::system_error(ec) );
         }
 
         /** @brief wraps boost::asio::socket::async_connect
@@ -142,10 +143,10 @@ namespace asio {
           */
         template<typename AsyncSocket, typename EndpointType>
         void connect( AsyncSocket& sock, const EndpointType& ep ) {
-            promise<boost::system::error_code>::ptr p(new promise<boost::system::error_code>("fc::asio::tcp::connect"));
+            promise<void>::ptr p(new promise<void>("fc::asio::tcp::connect"));
             sock.async_connect( ep, boost::bind( fc::asio::detail::error_handler, p, _1 ) );
-            auto ec = p->wait();
-            if( ec ) BOOST_THROW_EXCEPTION( boost::system::system_error(ec) );
+            p->wait();
+            //if( ec ) BOOST_THROW_EXCEPTION( boost::system::system_error(ec) );
         }
     }
     namespace udp {

@@ -12,6 +12,11 @@ struct unsigned_int {
     unsigned_int& operator=( const T& v ) { value = v; return *this; }
     
     uint32_t value;
+
+    template<typename T>
+    friend bool operator==( const unsigned_int& i, const T& v ) { return v == i.value; }
+    template<typename T>
+    friend bool operator!=( const unsigned_int& i, const T& v ) { return v != i.value; }
 };
 
 struct signed_int {

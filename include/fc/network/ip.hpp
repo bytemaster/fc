@@ -34,6 +34,12 @@ namespace fc {
         const address& get_address()const;
 
         friend bool operator==( const endpoint& a, const endpoint& b );
+        friend bool operator< ( const endpoint& a, const endpoint& b )
+        {
+           return  uint32_t(a.get_address()) < uint32_t(b.get_address()) ||
+                   (uint32_t(a.get_address()) == uint32_t(b.get_address()) &&
+                    uint32_t(a.port()) < uint32_t(b.port()));
+        }
     
       private:
         /**

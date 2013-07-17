@@ -118,7 +118,17 @@ namespace fc {
         BN_CTX_free(ctx);
         return tmp;
       }
+      bigint bigint::operator *= ( const bigint& a ) {
+        auto tmp = *this * a;
+        *this = std::move(tmp);
+        return *this;
+      }
 
+      bigint& bigint::operator <<= ( uint32_t i )
+      {
+         BN_lshift( n, n, i );
+         return *this;
+      }
 
       bigint bigint::operator - ( const bigint& a )const {
         bigint tmp;

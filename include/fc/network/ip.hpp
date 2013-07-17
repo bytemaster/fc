@@ -1,6 +1,7 @@
 #pragma once
 #include <fc/string.hpp>
 #include <fc/crypto/sha1.hpp>
+#include <fc/io/raw_fwd.hpp>
 
 namespace fc {
 
@@ -15,6 +16,7 @@ namespace fc {
         operator uint32_t()const;
 
         friend bool operator==( const address& a, const address& b );
+        friend bool operator!=( const address& a, const address& b );
       private:
         uint32_t _ip;
     };
@@ -34,12 +36,8 @@ namespace fc {
         const address& get_address()const;
 
         friend bool operator==( const endpoint& a, const endpoint& b );
-        friend bool operator< ( const endpoint& a, const endpoint& b )
-        {
-           return  uint32_t(a.get_address()) < uint32_t(b.get_address()) ||
-                   (uint32_t(a.get_address()) == uint32_t(b.get_address()) &&
-                    uint32_t(a.port()) < uint32_t(b.port()));
-        }
+        friend bool operator!=( const endpoint& a, const endpoint& b );
+        friend bool operator< ( const endpoint& a, const endpoint& b );
     
       private:
         /**
@@ -59,6 +57,39 @@ namespace fc {
 
   void to_variant( const ip::address& var,  variant& vo );
   void from_variant( const variant& var,  ip::address& vo );
+
+  namespace raw 
+  {
+    template<typename Stream> 
+    inline void pack( Stream& s, const ip::address& v )
+    {
+       fc::raw::pack( s, uint32_t(v) );
+    }
+    template<typename Stream> 
+    inline void unpack( Stream& s, ip::address& v )
+    {
+       uint32_t _ip;
+       fc::raw::unpack( s, _ip );
+       v = ip::address(_ip);
+    }
+
+    template<typename Stream> 
+    inline void pack( Stream& s, const ip::endpoint& v )
+    {
+       fc::raw::pack( s, v.get_address() );
+       fc::raw::pack( s, v.port() );
+    }
+    template<typename Stream> 
+    inline void unpack( Stream& s, ip::endpoint& v )
+    {
+       ip::address a;
+       uint16_t p;
+       fc::raw::unpack( s, a );
+       fc::raw::unpack( s, p );
+       v = ip::endpoint(a,p);
+    }
+
+  }
 }
 namespace std
 {

@@ -13,6 +13,9 @@
 #include <fc/exception/exception.hpp>
 #include <fc/log/logger.hpp>
 #include <set>
+#include <unordered_set>
+
+#define MAX_ARRAY_ALLOC_SIZE (1024*1024*10) 
 
 namespace fc { 
     namespace raw {
@@ -21,6 +24,10 @@ namespace fc {
     inline void pack( Stream& s, const std::set<T>& value );
     template<typename Stream, typename T>
     inline void unpack( Stream& s, std::set<T>& value );
+    template<typename Stream, typename T>
+    inline void pack( Stream& s, const std::unordered_set<T>& value );
+    template<typename Stream, typename T>
+    inline void unpack( Stream& s, std::unordered_set<T>& value );
 
     template<typename Stream> 
     inline void pack( Stream& s, const variant_object& v );
@@ -121,6 +128,7 @@ namespace fc {
     }
     template<typename Stream> inline void unpack( Stream& s, std::vector<char>& value ) { 
       unsigned_int size; unpack( s, size );
+      FC_ASSERT( size.value < MAX_ARRAY_ALLOC_SIZE );
       value.resize(size.value);
       if( value.size() )
         s.read( value.data(), value.size() );
@@ -218,6 +226,29 @@ namespace fc {
 
     } // namesapce detail
 
+    template<typename Stream, typename T>
+    inline void pack( Stream& s, const std::unordered_set<T>& value ) {
+      pack( s, unsigned_int(value.size()) );
+      auto itr = value.begin();
+      auto end = value.end();
+      while( itr != end ) {
+        fc::raw::pack( s, *itr );
+        ++itr;
+      }
+    }
+    template<typename Stream, typename T>
+    inline void unpack( Stream& s, std::unordered_set<T>& value ) {
+      unsigned_int size; unpack( s, size );
+      value.clear();
+      FC_ASSERT( size.value*sizeof(T) < MAX_ARRAY_ALLOC_SIZE );
+      value.reserve(size.value);
+      for( uint32_t i = 0; i < size.value; ++i )
+      {
+          T tmp;
+          fc::raw::unpack( s, tmp );
+          value.insert( std::move(tmp) );
+      }
+    }
 
     template<typename Stream, typename T>
     inline void pack( Stream& s, const std::vector<T>& value ) {
@@ -233,6 +264,7 @@ namespace fc {
     template<typename Stream, typename T>
     inline void unpack( Stream& s, std::vector<T>& value ) {
       unsigned_int size; unpack( s, size );
+      FC_ASSERT( size.value*sizeof(T) < MAX_ARRAY_ALLOC_SIZE );
       value.resize(size.value);
       auto itr = value.begin();
       auto end = value.end();

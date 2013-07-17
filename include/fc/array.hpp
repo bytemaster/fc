@@ -53,4 +53,21 @@ namespace fc {
     else
         memset( &bi, char(0), sizeof(bi) );
   }
+
+
+}
+
+#include <fc/crypto/city.hpp>
+namespace std
+{
+    template<typename T> struct hash;
+
+    template<typename T, size_t N>
+    struct hash<fc::array<T,N> >
+    {
+       size_t operator()( const fc::array<T,N>& e )const
+       {
+          return fc::city_hash64( (char*)&e, sizeof(e) );
+       }
+    };
 }

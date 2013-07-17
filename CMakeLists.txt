@@ -89,7 +89,8 @@ set( fc_sources
      src/log/console_appender.cpp
      src/log/file_appender.cpp
      src/log/logger_config.cpp
-     src/crypto/base36.cpp
+     src/crypto/crc.cpp
+     src/crypto/city.cpp
      src/crypto/base32.cpp
      src/crypto/base64.cpp
      src/crypto/base58.cpp

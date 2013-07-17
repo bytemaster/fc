@@ -299,6 +299,11 @@ struct ssl_bignum
 
     fc::sha256 private_key::get_secret()const
     {
+       if( !my->_key )
+       { 
+          return fc::sha256();
+       }
+
        fc::sha256 sec;
        const BIGNUM* bn = EC_KEY_get0_private_key(my->_key);
        if( bn == NULL )

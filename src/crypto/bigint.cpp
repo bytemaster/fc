@@ -15,6 +15,9 @@ namespace fc {
       {
         n = BN_dup(in);
       }
+      bigint::bigint( )
+      :n(BN_new()) 
+      { }
 
       BIGNUM* bigint::dup()const
       {
@@ -126,7 +129,9 @@ namespace fc {
 
       bigint& bigint::operator <<= ( uint32_t i )
       {
-         BN_lshift( n, n, i );
+         bigint tmp;
+         BN_lshift( tmp.n, n, i );
+         std::swap(*this,tmp);
          return *this;
       }
 

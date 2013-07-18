@@ -9,6 +9,8 @@ namespace fc {
         explicit microseconds( int64_t c = 0) :_count(c){}
         static microseconds maximum() { return microseconds(0x7fffffffffffffffll); }
         friend microseconds operator + (const  microseconds& l, const microseconds& r ) { return microseconds(l._count+r._count); }
+        friend microseconds operator - (const  microseconds& l, const microseconds& r ) { return microseconds(l._count-r._count); }
+
 
         bool operator==(const microseconds& c)const { return _count == c._count; }
         friend bool operator>(const microseconds& a, const microseconds& b){ return a._count > b._count; }
@@ -43,6 +45,7 @@ namespace fc {
         bool   operator !=( const time_point& t )const                              { return elapsed._count !=t.elapsed._count; }
         time_point&  operator += ( const microseconds& m )                          { elapsed+=m; return *this;               }
         friend time_point   operator + ( const time_point& t, const microseconds& m ) { return time_point(t.elapsed+m);         }
+        friend time_point   operator - ( const time_point& t, const microseconds& m ) { return time_point(t.elapsed-m);         }
         friend microseconds operator - ( const time_point& t, const time_point& m ) { return microseconds(t.elapsed.count() - m.elapsed.count()); }
     private:
         microseconds elapsed; 

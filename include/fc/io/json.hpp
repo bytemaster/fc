@@ -25,7 +25,14 @@ namespace fc
          static variant  from_string( const string& utf8_str );
          static string   to_string( const variant& v );
          static string   to_pretty_string( const variant& v );
-         static void     save_to_file( const variant& v, const string& fi, bool pretty = true );
+
+         template<typename T>
+         static void     save_to_file( const T& v, const fc::path& fi, bool pretty = true )
+         {
+            save_to_file( variant(v), fi, pretty );
+         }
+
+         static void     save_to_file( const variant& v, const fc::path& fi, bool pretty = true );
          static variant  from_file( const fc::path& p );
 
          template<typename T>

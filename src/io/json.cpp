@@ -533,9 +533,9 @@ namespace fc
 	   return pretty_print(to_string(v), 2);
    }
 
-   void          json::save_to_file( const variant& v, const string& fi, bool pretty )
+   void          json::save_to_file( const variant& v, const fc::path& fi, bool pretty )
    {
-       fc::ofstream o( fi.c_str() );
+       fc::ofstream o( fi.generic_string().c_str() );
        fc::to_stream( o, v );
    }
    variant json::from_file( const fc::path& p )

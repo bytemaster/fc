@@ -53,7 +53,6 @@ namespace fc {
     {
         public:
            private_key();
-           private_key( std::vector<char> k );
            private_key( private_key&& pk );
            private_key( const private_key& pk );
            ~private_key();

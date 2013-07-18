@@ -6,6 +6,7 @@
 #include <openssl/crypto.h>
 #include <openssl/ecdsa.h>
 #include <openssl/ecdh.h>
+#include <openssl/err.h>
 #include <openssl/sha.h>
 #include <openssl/obj_mac.h>
 #include <assert.h>
@@ -323,7 +324,8 @@ struct ssl_bignum
        self.my->_key = k;
        if( !EC_KEY_generate_key( self.my->_key ) )
        {
-          elog( "key generation error" );
+          FC_THROW_EXCEPTION( exception, "ecc key generation error" );
+
        }
 
 #if 0
@@ -361,12 +363,15 @@ struct ssl_bignum
       return 1 == ECDSA_verify( 0, (unsigned char*)&digest, sizeof(digest), (unsigned char*)&sig, sizeof(sig), my->_key ); 
     }
 
+    static int load_ssl_error = [=](){ ERR_load_crypto_strings(); return 1; }();
+
     public_key_data public_key::serialize()const
     {
+      public_key_data dat;
+      if( !my->_key ) return dat;
       EC_KEY_set_conv_form( my->_key, POINT_CONVERSION_COMPRESSED );
       /*size_t nbytes = */i2o_ECPublicKey( my->_key, nullptr );
       /*assert( nbytes == 33 )*/
-      public_key_data dat;
       char* front = &dat.data[0];
       i2o_ECPublicKey( my->_key, (unsigned char**)&front  );
       return dat;
@@ -389,7 +394,7 @@ struct ssl_bignum
       my->_key = o2i_ECPublicKey( &my->_key, (const unsigned char**)&front, sizeof(public_key_data) );
       if( !my->_key ) 
       {
-        fprintf( stderr, "decode error occurred??" );
+        FC_THROW_EXCEPTION( exception, "error decoding public key", ("s", ERR_error_string( ERR_get_error(), nullptr) ) );
       }
     }
 
@@ -407,35 +412,11 @@ struct ssl_bignum
        return pub;
     }
 
-    private_key::private_key( std::vector<char> k )
-    {
-#if 0
-       fc::bigint priv(k); 
-       my->_key = EC_KEY_new_by_curve_name( NID_sect283r1 );
-       auto k = my->_key;
-
-       if( !k ) FC_THROW_EXCEPTION( exception, "Unable to generate EC key" );
-
-       EC_KEY_set_private_key( my->_key, priv.get() );
-
-       EC_GROUP* group = EC_KEY_get0_group( k );
-       EC_POINT* pub   = EC_POINT_new(group);
-
-       fc::bigint x, y;
-       EC_POINT_set_affine_coordinates_GFp( group, pub, x.get(), y.get(), nullptr/*ctx*/ );
-
-       bool fail = false;
-       fail = EC_KEY_set_private_key( k, pub ) == 0;
-       fail = fail | EC_KEY_check_key( k ) == 0;
-
-       EC_POINT_free( pub );
-
-       if( fail ) FC_THROW_EXCEPTION( exception, "Unable to load private key" );
-#endif
-    }
 
     fc::sha512 private_key::get_shared_secret( const public_key& other )const
     {
+      FC_ASSERT( my->_key != nullptr );
+      FC_ASSERT( other.my->_key != nullptr );
       fc::sha512 buf;
       ECDH_compute_key( (unsigned char*)&buf, sizeof(buf), EC_KEY_get0_public_key(other.my->_key), my->_key, ecies_key_derivation );
       return buf;
@@ -475,6 +456,7 @@ struct ssl_bignum
 
     compact_signature private_key::sign_compact( const fc::sha256& digest )const
     {
+        FC_ASSERT( my->_key != nullptr );
         ECDSA_SIG *sig = ECDSA_do_sign((unsigned char*)&digest, sizeof(digest), my->_key);
 
         if (sig==NULL) 

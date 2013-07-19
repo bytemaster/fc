@@ -352,7 +352,7 @@ struct ssl_bignum
                     (const unsigned char*)&digest, sizeof(digest), 
                     (unsigned char*)&sig, &buf_len, my->_key ) )
         {
-            fprintf( stderr, "sign error\n");
+            FC_THROW_EXCEPTION( exception, "signing error" );
         }
 
 
@@ -442,7 +442,7 @@ struct ssl_bignum
         {
             EC_KEY_set_conv_form( my->_key, POINT_CONVERSION_COMPRESSED );
             nV -= 4;
-            fprintf( stderr, "compressed\n" );
+//            fprintf( stderr, "compressed\n" );
         }
 
         if (ECDSA_SIG_recover_key_GFp(my->_key, sig, (unsigned char*)&digest, sizeof(digest), nV - 27, 0) == 1)

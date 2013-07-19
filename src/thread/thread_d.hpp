@@ -55,7 +55,7 @@ namespace fc {
                 pt_head = temp;
               }
               */
-              ilog("");
+              //ilog("");
              if (boost_thread)
              {
                boost_thread->detach();

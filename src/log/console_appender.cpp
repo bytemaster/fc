@@ -73,7 +73,7 @@ namespace fc {
       ///////////////
       std::stringstream line;
       line << (m.get_context().get_timestamp().time_since_epoch().count() % (1000ll*1000ll*60ll*60))/1000 <<"ms ";
-      line << std::setw( 10 ) << m.get_context().get_thread_name().substr(0,9).c_str() <<" "<<std::setw(20)<<file_line.str();
+      line << std::setw( 10 ) << std::left << m.get_context().get_thread_name().substr(0,9).c_str() <<" "<<std::setw(20)<< std::left <<file_line.str();
 
       auto me = m.get_context().get_method();
       // strip all leading scopes...
@@ -86,7 +86,7 @@ namespace fc {
          }
 
          if( me[p] == ':' ) ++p;
-         line << std::setw( 20 ) << m.get_context().get_method().substr(p,20).c_str() <<" ";
+         line << std::setw( 20 ) << std::left << m.get_context().get_method().substr(p,20).c_str() <<" ";
       }
       line << "] ";
       fc::string message = fc::format_string( m.get_format(), m.get_data() );

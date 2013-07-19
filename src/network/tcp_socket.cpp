@@ -4,6 +4,7 @@
 #include <fc/asio.hpp>
 #include <fc/log/logger.hpp>
 #include <fc/io/stdio.hpp>
+#include <fc/exception/exception.hpp>
 
 namespace fc {
 
@@ -25,7 +26,12 @@ namespace fc {
 
   void tcp_socket::flush() {}
   void tcp_socket::close() {
-    if( is_open() ) my->_sock.close();
+    try {
+        if( is_open() )
+        { 
+          my->_sock.close();
+        }
+    } FC_RETHROW_EXCEPTIONS( warn, "error closing tcp socket" );
   }
 
   bool tcp_socket::eof()const {
@@ -57,7 +63,13 @@ namespace fc {
       _accept( fc::asio::default_io_service(), boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), port) ){
       }
       ~impl(){
-        _accept.close();
+        try {
+          _accept.close();
+        } 
+        catch ( boost::system::system_error& e )
+        {
+           wlog( "unexpected exception ${e}", ("e", fc::except_str()) );
+        }
       }
 
       boost::asio::ip::tcp::acceptor _accept;

@@ -91,6 +91,13 @@ namespace fc {
         BN_add( tmp.n, n, a.n );
         return tmp;
       }
+      bigint& bigint::operator += ( const bigint& a ){
+        bigint tmp(*this);
+        BN_add( tmp.n, n, a.n );
+        std::swap(*this,tmp);
+        return *this;
+      }
+
       bigint bigint::operator * ( const bigint& a )const {
         BN_CTX* ctx = BN_CTX_new();
         bigint tmp(*this);

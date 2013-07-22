@@ -26,6 +26,7 @@ namespace fc
    class variant_object;
    class mutable_variant_object;
    class time_point;
+   class time_point_sec;
 
    void to_variant( const uint16_t& var,  variant& vo );
    void from_variant( const variant& var,  uint16_t& vo );
@@ -52,6 +53,9 @@ namespace fc
 
    void to_variant( const time_point& var,  variant& vo );
    void from_variant( const variant& var,  time_point& vo );
+
+   void to_variant( const time_point_sec& var,  variant& vo );
+   void from_variant( const variant& var,  time_point_sec& vo );
    #ifdef __APPLE__
    void to_variant( size_t s, variant& v );
    #endif

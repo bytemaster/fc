@@ -46,9 +46,33 @@ namespace fc {
         time_point&  operator += ( const microseconds& m )                          { elapsed+=m; return *this;               }
         friend time_point   operator + ( const time_point& t, const microseconds& m ) { return time_point(t.elapsed+m);         }
         friend time_point   operator - ( const time_point& t, const microseconds& m ) { return time_point(t.elapsed-m);         }
-        friend microseconds operator - ( const time_point& t, const time_point& m ) { return microseconds(t.elapsed.count() - m.elapsed.count()); }
+        friend microseconds operator - ( const time_point& t, const time_point& m )   { return microseconds(t.elapsed.count() - m.elapsed.count()); }
     private:
         microseconds elapsed; 
+  };
+
+  /**
+   *  A lower resolution time_point accurate only to seconds from 1970
+   */
+  class time_point_sec 
+  {
+    public:
+        time_point_sec()
+        :utc_seconds(0){}
+
+        time_point_sec( const time_point& t = time_point() )
+        :utc_seconds( t.time_since_epoch().count() / 1000000ll ){}
+
+        operator time_point()const { return time_point( fc::seconds( utc_seconds) ); }
+
+        time_point_sec operator = ( const fc::time_point& t )
+        {
+          utc_seconds = t.time_since_epoch().count() / 1000000ll;
+          return *this;
+        }
+
+    private:
+        uint32_t utc_seconds;
   };
 
   typedef fc::optional<time_point> otime_point;

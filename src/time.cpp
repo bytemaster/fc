@@ -27,4 +27,10 @@ namespace fc {
   void from_variant( const fc::variant& v, fc::time_point& t ) {
     t = fc::time_point::from_iso_string(v.as_string());
   }
+  void to_variant( const fc::time_point_sec& t, variant& v ) {
+    v = fc::string(fc::time_point(t));
+  }
+  void from_variant( const fc::variant& v, fc::time_point_sec& t ) {
+    t = fc::time_point::from_iso_string(v.as_string());
+  }
 }

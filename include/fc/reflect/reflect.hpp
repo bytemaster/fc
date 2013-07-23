@@ -90,6 +90,9 @@ void throw_bad_enum_cast( const char* k, const char* e );
 #define FC_REFLECT_BASE_MEMBER_COUNT( r, OP, elem ) \
   OP fc::reflector<elem>::total_member_count
 
+#define FC_REFLECT_MEMBER_COUNT( r, OP, elem ) \
+  OP 1
+
 #define FC_REFLECT_DERIVED_IMPL_INLINE( TYPE, INHERITS, MEMBERS ) \
 template<typename Visitor>\
 static inline void visit( const Visitor& v ) { \
@@ -160,12 +163,13 @@ template<> struct reflector<TYPE> {\
     typedef fc::true_type  is_defined; \
     typedef fc::false_type is_enum; \
     enum  member_count_enum {  \
-      local_member_count = BOOST_PP_SEQ_SIZE(MEMBERS), \
+      local_member_count = 0  BOOST_PP_SEQ_FOR_EACH( FC_REFLECT_MEMBER_COUNT, +, MEMBERS ),\
       total_member_count = local_member_count BOOST_PP_SEQ_FOR_EACH( FC_REFLECT_BASE_MEMBER_COUNT, +, INHERITS )\
     }; \
     FC_REFLECT_DERIVED_IMPL_INLINE( TYPE, INHERITS, MEMBERS ) \
 }; } 
 
+//BOOST_PP_SEQ_SIZE(MEMBERS), 
 
 /**
  *  @def FC_REFLECT(TYPE,MEMBERS)
@@ -177,6 +181,9 @@ template<> struct reflector<TYPE> {\
  */
 #define FC_REFLECT( TYPE, MEMBERS ) \
     FC_REFLECT_DERIVED( TYPE, BOOST_PP_SEQ_NIL, MEMBERS )
+
+#define FC_REFLECT_EMPTY( TYPE ) \
+    FC_REFLECT_DERIVED( TYPE, BOOST_PP_SEQ_NIL, BOOST_PP_SEQ_NIL )
 
 #define FC_REFLECT_TYPENAME( TYPE ) \
 namespace fc { \

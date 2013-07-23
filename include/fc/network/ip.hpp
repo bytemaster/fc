@@ -17,6 +17,24 @@ namespace fc {
 
         friend bool operator==( const address& a, const address& b );
         friend bool operator!=( const address& a, const address& b );
+
+        /**
+         *  @return true if the ip is in the following ranges:
+         *
+         *  10.0.0.0    to 10.255.255.255
+         *  172.16.0.0  to 172.31.255.255
+         *  192.168.0.0 to 192.168.255.255
+         *  169.254.0.0 to 169.254.255.255
+         *
+         */
+        bool is_private_address()const;
+        /**
+         *  224.0.0.0 to 239.255.255.255
+         */
+        bool is_multicast_address()const;
+
+        /** !private & !multicast */
+        bool is_public_address()const;
       private:
         uint32_t _ip;
     };
@@ -50,6 +68,7 @@ namespace fc {
         uint32_t _port; 
         address  _ip;
     };
+
   }
   class variant;
   void to_variant( const ip::endpoint& var,  variant& vo );

@@ -69,6 +69,48 @@ namespace fc { namespace ip {
     return string(_ip) + ':' + fc::string(boost::lexical_cast<std::string>(_port).c_str());
   }
 
+  /**
+   *  @return true if the ip is in the following ranges:
+   *
+   *  10.0.0.0    to 10.255.255.255
+   *  172.16.0.0  to 172.31.255.255
+   *  192.168.0.0 to 192.168.255.255
+   *  169.254.0.0 to 169.254.255.255
+   *
+   */
+  bool address::is_private_address()const
+  {
+    static address min10_ip("10.0.0.0");
+    static address max10_ip("10.255.255.255");
+    static address min172_ip("172.16.0.0");
+    static address max172_ip("172.31.255.255");
+    static address min192_ip("192.168.0.0");
+    static address max192_ip("192.168.255.255");
+    static address min169_ip("169.254.0.0");
+    static address max169_ip("169.254.255.255");
+    if( _ip >= min10_ip._ip && _ip <= max10_ip._ip ) return true;
+    if( _ip >= min172_ip._ip && _ip <= max172_ip._ip ) return true;
+    if( _ip >= min192_ip._ip && _ip <= max192_ip._ip ) return true;
+    if( _ip >= min169_ip._ip && _ip <= max169_ip._ip ) return true;
+    return false;
+  }
+
+  /**
+   *  224.0.0.0 to 239.255.255.255
+   */
+  bool address::is_multicast_address()const
+  {
+    static address min_ip("224.0.0.0");
+    static address max_ip("239.255.255.255");
+    return  _ip >= min_ip._ip  && _ip <= max_ip._ip;
+  }
+
+  /** !private & !multicast */
+  bool address::is_public_address()const
+  {
+    return !( is_private_address() || is_multicast_address() );
+  }
+
 }  // namespace ip
 
   void to_variant( const ip::endpoint& var,  variant& vo )

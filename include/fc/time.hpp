@@ -60,16 +60,18 @@ namespace fc {
         time_point_sec()
         :utc_seconds(0){}
 
-        time_point_sec( const time_point& t = time_point() )
+        time_point_sec( const time_point& t )
         :utc_seconds( t.time_since_epoch().count() / 1000000ll ){}
 
         operator time_point()const { return time_point( fc::seconds( utc_seconds) ); }
+        uint32_t sec_since_epoch()const { return utc_seconds; }
 
         time_point_sec operator = ( const fc::time_point& t )
         {
           utc_seconds = t.time_since_epoch().count() / 1000000ll;
           return *this;
         }
+        friend bool   operator < ( const time_point_sec& a, const time_point_sec& b ) { return a.utc_seconds < b.utc_seconds; }
 
     private:
         uint32_t utc_seconds;

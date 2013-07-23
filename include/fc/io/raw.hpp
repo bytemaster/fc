@@ -25,7 +25,7 @@ namespace fc {
     inline void unpack( Stream& s, fc::time_point_sec& tp )
     {
        uint32_t sec;
-       s.read( (char*)&usec, sizeof(sec) );
+       s.read( (char*)&sec, sizeof(sec) );
        tp = fc::time_point() + fc::seconds(sec);
     }
 

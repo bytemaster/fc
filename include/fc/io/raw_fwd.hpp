@@ -11,9 +11,14 @@ namespace fc {
    class time_point_sec;
    class variant;
    class variant_object;
+   template<typename IntType, typename EnumType> class enum_type;
 
    namespace ecc { class public_key; class private_key; }
    namespace raw {
+    template<typename Stream, typename IntType, typename EnumType>
+    inline void pack( Stream& s, const fc::enum_type<IntType,EnumType>& tp );
+    template<typename Stream, typename IntType, typename EnumType>
+    inline void unpack( Stream& s, fc::enum_type<IntType,EnumType>& tp );
 
     template<typename Stream, typename T> inline void pack( Stream& s, const std::set<T>& value );
     template<typename Stream, typename T> inline void unpack( Stream& s, std::set<T>& value );

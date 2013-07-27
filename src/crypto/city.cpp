@@ -38,8 +38,8 @@ uint64_t _mm_crc32_u64(uint64_t a, uint64_t b );
 
 namespace fc {
 
-inline uint64_t Uint128Low64(const uint128& x) { return x.first; }
-inline uint64_t Uint128High64(const uint128& x) { return x.second; }
+inline uint64_t Uint128Low64(const uint128& x) { return x.low_bits(); }
+inline uint64_t Uint128High64(const uint128& x) { return x.high_bits(); }
 
 // Hash 128 input bits down to 64 bits of output.
 // This is intended to be a reasonably good hash function.

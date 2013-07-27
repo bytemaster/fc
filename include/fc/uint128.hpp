@@ -10,9 +10,6 @@ namespace fc
    */
   class uint128 
   {
-     private:
-      uint128( uint64_t _h, uint64_t _l )
-      :hi(_h),lo(_l){}
 
       uint64_t hi;
       uint64_t lo;
@@ -24,6 +21,8 @@ namespace fc
       uint128( int64_t l ):hi( -(l<0) ),lo(l){}
       uint128( uint64_t l ):hi(0),lo(l){}
       uint128( const std::string& s );
+      uint128( uint64_t _h, uint64_t _l )
+      :hi(_h),lo(_l){}
 
       operator std::string()const;
 
@@ -32,6 +31,7 @@ namespace fc
       bool     operator < ( const uint128& o )const { return (hi == o.hi) ? lo < o.lo : hi < o.hi; }
       bool     operator !()const                    { return !(hi !=0 || lo != 0);                 }
       uint128  operator -()const                    { return ++uint128( ~hi, ~lo );                }
+      uint128  operator ~()const                    { return uint128( ~hi, ~lo );                  }
 
       uint128& operator++()    {  hi += (++lo == 0); return *this; }
       uint128& operator--()    {  hi -= (lo-- == 0); return *this; }
@@ -62,14 +62,13 @@ namespace fc
       friend uint128 operator >> ( const uint128& l, const uint128& r )  { return uint128(l)>>=r;  }
       friend bool    operator >  ( const uint128& l, const uint128& r )  { return r < l;           }
 
-      uint128  operator ~()const               { return uint128( ~hi, ~lo );           }
-  //    uint128& operator ~=( const uint128& u );// { /*hi ~= u.hi; lo ~= u.lo;*/ return *this; }
 
       friend bool    operator >=  ( const uint128& l, const uint128& r ) { return l == r || l > r; }
       friend bool    operator <=  ( const uint128& l, const uint128& r ) { return l == r || l < r; }
 
       uint32_t to_integer()const { return lo; }
-     
+      uint64_t low_bits()const  { return lo; }
+      uint64_t high_bits()const { return hi; }
   };
   static_assert( sizeof(uint128) == 2*sizeof(uint64_t), "validate packing assumptions" );
 

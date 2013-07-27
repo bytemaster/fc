@@ -58,6 +58,7 @@ include_directories( ${OPENSSL_INCLUDE_DIR} )
 SET( ALL_OPENSSL_LIBRARIES ${OPENSSL_LIBRARIES} ${SSL_EAY_RELEASE} ${LIB_EAY_RELEASE})
 
 set( fc_sources
+     src/uint128.cpp
      src/variant.cpp
      src/exception.cpp
      src/variant_object.cpp

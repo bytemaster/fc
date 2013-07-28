@@ -133,6 +133,13 @@ namespace fc {
         *this = std::move(tmp);
         return *this;
       }
+      bigint& bigint::operator >>= ( uint32_t i )
+      {
+         bigint tmp;
+         BN_rshift( tmp.n, n, i );
+         std::swap(*this,tmp);
+         return *this;
+      }
 
       bigint& bigint::operator <<= ( uint32_t i )
       {

@@ -1,5 +1,6 @@
 #include <fc/uint128.hpp>
 #include <fc/variant.hpp>
+#include <fc/crypto/bigint.hpp>
 
 namespace fc 
 {
@@ -110,6 +111,18 @@ namespace fc
       }
     }
 
+
+    #define bswap64(y) (((uint64_t)ntohl(y)) << 32 | ntohl(y>>32))
+    uint128::operator bigint()const
+    {
+       auto tmp  = uint128( bswap64( hi ), bswap64( lo ) );
+       bigint bi( (char*)&tmp, sizeof(tmp) );
+       return bi;
+    }
+    uint128::uint128( const fc::bigint& bi )
+    {
+       *this = uint128( std::string(bi) ); // TODO: optimize this...
+    }
 
     uint128::operator std::string ()const
     {

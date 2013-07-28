@@ -45,6 +45,7 @@ namespace fc {
       bigint operator *= ( const bigint& a ); 
       bigint& operator += ( const bigint& a ); 
       bigint& operator <<= ( uint32_t i ); 
+      bigint& operator >>= ( uint32_t i ); 
       bigint operator -  ( const bigint& a )const;
 
 

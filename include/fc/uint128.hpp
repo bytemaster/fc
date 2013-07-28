@@ -4,6 +4,7 @@
 
 namespace fc 
 {
+  class bigint;
   /**
    *  @brief an implementation of 128 bit unsigned integer
    *
@@ -11,8 +12,6 @@ namespace fc
   class uint128 
   {
 
-      uint64_t hi;
-      uint64_t lo;
 
      public:
       uint128():hi(0),lo(0){};
@@ -23,8 +22,10 @@ namespace fc
       uint128( const std::string& s );
       uint128( uint64_t _h, uint64_t _l )
       :hi(_h),lo(_l){}
+      uint128( const fc::bigint& bi );
 
       operator std::string()const;
+      operator fc::bigint()const;
 
       bool     operator == ( const uint128& o )const{ return hi == o.hi && lo == o.lo;             }
       bool     operator != ( const uint128& o )const{ return hi != o.hi || lo != o.lo;             }
@@ -67,8 +68,14 @@ namespace fc
       friend bool    operator <=  ( const uint128& l, const uint128& r ) { return l == r || l < r; }
 
       uint32_t to_integer()const { return lo; }
+      uint64_t to_uint64()const { return lo; }
       uint64_t low_bits()const  { return lo; }
       uint64_t high_bits()const { return hi; }
+
+      private:
+          uint64_t hi;
+          uint64_t lo;
+      
   };
   static_assert( sizeof(uint128) == 2*sizeof(uint64_t), "validate packing assumptions" );
 

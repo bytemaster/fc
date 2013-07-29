@@ -1,6 +1,7 @@
 #pragma once
 #include <fc/reflect/reflect.hpp>
 #include <fc/io/raw_fwd.hpp>
+#include <fc/variant.hpp>
 
 
 namespace fc
@@ -26,28 +27,18 @@ namespace fc
       EnumType value;
   };
 
-  /** reflects like an enum */
+
   template<typename IntType, typename EnumType>
-  struct reflector< enum_type<IntType,EnumType> >
+  void to_variant( const enum_type<IntType,EnumType>& var,  variant& vo )
   {
-     typedef EnumType type;
-     typedef fc::true_type is_defined;
-     typedef fc::true_type is_enum;
-     
-     template<typename Visitor> 
-     static inline void visit( const Visitor& v ) 
-     { 
-        reflector<EnumType>::visit(v);
-     }
-     static const char* to_string(int64_t i) 
-     { 
-        return reflector<EnumType>::to_string(i);
-     }
-     static EnumType from_string(const char* s)
-     { 
-        return reflector<EnumType>::from_string(s);
-     }
-  };
+    vo = var.value;
+  }
+  template<typename IntType, typename EnumType>
+  void from_variant( const variant& var,  enum_type<IntType,EnumType>& vo )
+  {
+    vo.value = var.as<EnumType>();
+  }
+
 
   /** serializes like an IntType */
   namespace raw 

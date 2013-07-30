@@ -3,7 +3,6 @@
 #include <fc/io/raw_fwd.hpp>
 #include <fc/variant.hpp>
 
-
 namespace fc
 {
   template<typename IntType, typename EnumType>
@@ -18,8 +17,9 @@ namespace fc
       
       enum_type(){}
       
-      operator IntType()const  { return static_cast<IntType>(value); }
-      operator EnumType()const { return value; }
+      operator IntType()const     { return static_cast<IntType>(value);    }
+      operator EnumType()const    { return value;                          }
+      operator std::string()const { return fc::reflector<EnumType>::to_string(value); }
       
       enum_type& operator=( IntType i )  { value = (EnumType)i; return *this;}
       enum_type& operator=( EnumType i ) { value = i; return *this;}

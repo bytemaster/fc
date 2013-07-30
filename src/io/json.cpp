@@ -498,6 +498,7 @@ namespace fc
                 if( !first ) {
                   for( int i = 0; i < level*indent; ++i ) ss<<' ';
                 }
+                first = false;
                 ss<<v[i];
                 break;
               } else {

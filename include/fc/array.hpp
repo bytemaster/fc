@@ -29,6 +29,56 @@ namespace fc {
     T data[N];
   };
 
+  /** provided for default 0 init */
+  template<size_t N>
+  class array<unsigned char,N>
+  {
+    public:
+    typedef unsigned char T;
+    array(){ memset( data, 0, sizeof(data) ); }
+    /**
+     *  Checked indexing (when in debug build) that also simplifies dereferencing
+     *  when you have an array<T,N>*.    
+     */
+    ///@{
+    T&       at( size_t pos )      { assert( pos < N); return data[pos]; }
+    const T& at( size_t pos )const { assert( pos < N); return data[pos]; }
+    ///@}
+    
+    T*           begin()       {  return &data[0]; }
+    const T*     begin()const  {  return &data[0]; }
+    const T*     end()const    {  return &data[N]; }
+
+    size_t       size()const { return N; }
+    
+    T data[N];
+  };
+
+  /** provided for default 0 init */
+  template<size_t N>
+  class array<char,N>
+  {
+    public:
+    typedef char T;
+    array(){ memset( data, 0, sizeof(data) ); }
+    /**
+     *  Checked indexing (when in debug build) that also simplifies dereferencing
+     *  when you have an array<T,N>*.    
+     */
+    ///@{
+    T&       at( size_t pos )      { assert( pos < N); return data[pos]; }
+    const T& at( size_t pos )const { assert( pos < N); return data[pos]; }
+    ///@}
+    
+    T*           begin()       {  return &data[0]; }
+    const T*     begin()const  {  return &data[0]; }
+    const T*     end()const    {  return &data[N]; }
+
+    size_t       size()const { return N; }
+    
+    T data[N];
+  };
+
   template<typename T, size_t N>
   bool operator == ( const array<T,N>& a, const array<T,N>& b )
   { return 0 == memcmp( a.data, b.data, N*sizeof(T) ); }

@@ -121,6 +121,7 @@ namespace fc {
       {
           fc::raw::pack( s, pk.get_secret() );
       }
+
   } // namespace raw
 
 } // namespace fc 

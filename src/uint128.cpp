@@ -71,7 +71,7 @@ namespace fc
           }
 
           while(i != sz.end()) {
-            unsigned int n;
+            unsigned int n = 0;
             const char ch = *i;
 
             if(ch >= 'A' && ch <= 'Z') {

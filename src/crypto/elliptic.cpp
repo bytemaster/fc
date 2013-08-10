@@ -258,6 +258,50 @@ struct ssl_bignum
 
         return rtn;
     }
+    public_key public_key::add( const fc::sha256& digest )const
+    {
+      try {
+        ec_group group(EC_GROUP_new_by_curve_name(NID_secp256k1));
+        bn_ctx ctx(BN_CTX_new());
+
+        fc::bigint digest_bi( (char*)&digest, sizeof(digest) );
+
+        ssl_bignum order;
+        EC_GROUP_get_order(group, order, ctx);
+        if( digest_bi > fc::bigint(order) )
+        {
+          FC_THROW_EXCEPTION( exception, "digest > group order" );
+        }
+
+
+        public_key digest_key = private_key::regenerate(digest).get_public_key();
+        const EC_POINT* digest_point   = EC_KEY_get0_public_key( digest_key.my->_key );
+
+        // get point from this public key
+        const EC_POINT* master_pub   = EC_KEY_get0_public_key( my->_key );
+
+        ssl_bignum z;
+        BN_bin2bn((unsigned char*)&digest, sizeof(digest), z);
+
+        // multiply by digest
+        ssl_bignum one;
+        BN_one(one);
+
+        ec_point result(EC_POINT_new(group));
+        EC_POINT_add(group, result, digest_point, master_pub, ctx);
+
+        if (EC_POINT_is_at_infinity(group, result)) 
+        {
+          FC_THROW_EXCEPTION( exception, "point at  infinity" );
+        }
+
+
+        public_key rtn;
+        rtn.my->_key = EC_KEY_new_by_curve_name( NID_secp256k1 );
+        EC_KEY_set_public_key(rtn.my->_key,result);
+        return rtn;
+      } FC_RETHROW_EXCEPTIONS( debug, "digest: ${digest}", ("digest",digest) );
+    }
 
     private_key::private_key()
     {}
@@ -268,8 +312,8 @@ struct ssl_bignum
         BN_bin2bn((unsigned char*)&offset, sizeof(offset), z);
 
         ec_group group(EC_GROUP_new_by_curve_name(NID_secp256k1));
-        ssl_bignum order;
         bn_ctx ctx(BN_CTX_new());
+        ssl_bignum order;
         EC_GROUP_get_order(group, order, ctx);
 
         // secexp = (seed + z) % order

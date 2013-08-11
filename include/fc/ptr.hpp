@@ -1,5 +1,5 @@
 #pragma once 
-#include <fc/future.hpp>
+//#include <fc/future.hpp>
 #include <functional>
 #include <boost/config.hpp>
 #include <boost/preprocessor/repeat.hpp>

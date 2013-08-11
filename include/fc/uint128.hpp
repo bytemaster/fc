@@ -67,7 +67,7 @@ namespace fc
       friend bool    operator >=  ( const uint128& l, const uint128& r ) { return l == r || l > r; }
       friend bool    operator <=  ( const uint128& l, const uint128& r ) { return l == r || l < r; }
 
-      uint32_t to_integer()const { return lo; }
+      uint32_t to_integer()const { return (uint32_t)lo; }
       uint64_t to_uint64()const { return lo; }
       uint64_t low_bits()const  { return lo; }
       uint64_t high_bits()const { return hi; }

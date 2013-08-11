@@ -10,35 +10,40 @@ INCLUDE( SetupTargetMacros )
 INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR} )
 INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR}/include )
 INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_SOURCE_DIR}/vendor/cyoencode-1.0.2/src )
-INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_SOURCE_DIR}/vendor/boost_1.51/include )
 
 SET( DEFAULT_HEADER_INSTALL_DIR include/\${target} )
 SET( DEFAULT_LIBRARY_INSTALL_DIR lib/ )
 SET( DEFAULT_EXECUTABLE_INSTALL_DIR bin/ )
 SET( CMAKE_DEBUG_POSTFIX _debug )
 SET( BUILD_SHARED_LIBS NO )
-SET(Boost_USE_STATIC_LIBS ON)
-FIND_PACKAGE(Boost 1.51 COMPONENTS thread date_time system filesystem program_options signals serialization chrono unit_test_framework context ) 
 
 if( WIN32 )
    set( RPCRT4 Rpcrt4 )
+  #boost
+  SET( Boost_INCLUDE_DIR $ENV{BOOST_ROOT} )
+else(WIN32)
+     SET(Boost_USE_STATIC_LIBS ON)
+     FIND_PACKAGE(Boost 1.51 COMPONENTS thread date_time system filesystem program_options signals serialization chrono unit_test_framework context )    
 endif( WIN32 )
 
 LINK_DIRECTORIES( ${Boost_LIBRARY_DIRS} )
 
 IF( WIN32 )
     ADD_DEFINITIONS( -DWIN32 )
-	ADD_DEFINITIONS( -DBOOST_CONTEXT_NO_LIB )
+	#ADD_DEFINITIONS( -DBOOST_CONTEXT_NO_LIB )
+    ADD_DEFINITIONS( -DNOMINMAX )	
 	ADD_DEFINITIONS( -D_SCL_SECURE_NO_WARNINGS )
 	ADD_DEFINITIONS( -D_WIN32_WINNT=0x0501 )
 	ADD_DEFINITIONS( -D_CRT_SECURE_NO_WARNINGS )
-	ADD_DEFINITIONS( -DBOOST_ALL_NO_LIB -DBOOST_THREAD_BUILD_LIB)
+	#USE SHARED LIBS FOR BOOST ON WINDOWS
+	#ADD_DEFINITIONS( -DBOOST_ALL_NO_LIB -DBOOST_THREAD_BUILD_LIB)
 	ADD_DEFINITIONS( -DWIN32)
 	# Activate C++ exception handling
 	IF (NOT CMAKE_CXX_FLAGS MATCHES "/EHsc")
 		SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc")    
 	ENDIF()
 ELSE(WIN32)
+   INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_SOURCE_DIR}/vendor/boost_1.51/include )
    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -Wall -Wno-unused-local-typedefs -fmax-errors=3" )
 ENDIF(WIN32)
 
@@ -162,7 +167,7 @@ IF( UNIX )
     ENDIF()
 ENDIF( UNIX )
 
-IF( WIN32 )
+IF( BOOST_1_51 )
   ENABLE_LANGUAGE(ASM_MASM) 
 #  SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHa" )
 
@@ -188,7 +193,7 @@ IF( WIN32 )
     message(STATUS "  item type from 'Does not participate in build' to 'Microsoft Macro Assembler'")
   ENDIF()
 
-ENDIF(WIN32)
+ENDIF(BOOST_1_51)
 
 set( sources
   ${fc_sources}

@@ -1,6 +1,9 @@
 #include <fc/uint128.hpp>
 #include <fc/variant.hpp>
 #include <fc/crypto/bigint.hpp>
+#ifdef WIN32
+#include <WinSock2.h>
+#endif
 
 namespace fc 
 {

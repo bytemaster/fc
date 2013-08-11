@@ -187,11 +187,18 @@ namespace fc
 
 
 } // namespace fc
+
+/**
+ *@brief: Workaround for varying preprocessing behavior between MSVC and gcc
+ */
+#define FC_EXPAND_MACRO( x ) x
 /**
  *  @brief Checks a condition and throws an assert_exception if the test is FALSE
  */
 #define FC_ASSERT( TEST, ... ) \
-do { if( !(TEST) ) { FC_THROW_EXCEPTION( assert_exception, #TEST ": "  __VA_ARGS__ ); } } while(0);
+FC_EXPAND_MACRO( \
+do { if( !(TEST) ) { FC_THROW_EXCEPTION( assert_exception, #TEST ": "  __VA_ARGS__ ); } } while(0); \
+)
 
 #define FC_THROW( FORMAT, ... ) \
    do { \

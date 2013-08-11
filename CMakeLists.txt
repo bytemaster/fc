@@ -21,6 +21,7 @@ if( WIN32 )
    set( RPCRT4 Rpcrt4 )
   #boost
   SET( Boost_INCLUDE_DIR $ENV{BOOST_ROOT} )
+  #Using shared libs for boost on windows  
 else(WIN32)
      SET(Boost_USE_STATIC_LIBS ON)
      FIND_PACKAGE(Boost 1.51 COMPONENTS thread date_time system filesystem program_options signals serialization chrono unit_test_framework context )    
@@ -30,14 +31,11 @@ LINK_DIRECTORIES( ${Boost_LIBRARY_DIRS} )
 
 IF( WIN32 )
     ADD_DEFINITIONS( -DWIN32 )
-	#ADD_DEFINITIONS( -DBOOST_CONTEXT_NO_LIB )
-    ADD_DEFINITIONS( -DNOMINMAX )	
-	ADD_DEFINITIONS( -D_SCL_SECURE_NO_WARNINGS )
+    ADD_DEFINITIONS( -DNOMINMAX )
 	ADD_DEFINITIONS( -D_WIN32_WINNT=0x0501 )
 	ADD_DEFINITIONS( -D_CRT_SECURE_NO_WARNINGS )
-	#USE SHARED LIBS FOR BOOST ON WINDOWS
-	#ADD_DEFINITIONS( -DBOOST_ALL_NO_LIB -DBOOST_THREAD_BUILD_LIB)
-	ADD_DEFINITIONS( -DWIN32)
+	ADD_DEFINITIONS( -D_SCL_SERCURE_NO_WARNINGS )
+
 	# Activate C++ exception handling
 	IF (NOT CMAKE_CXX_FLAGS MATCHES "/EHsc")
 		SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc")    
@@ -120,84 +118,10 @@ set( fc_sources
      src/network/url.cpp
      vendor/cyoencode-1.0.2/src/CyoDecode.c
      vendor/cyoencode-1.0.2/src/CyoEncode.c
-#     src/ssh/client.cpp
-#     src/ssh/process.cpp
      )
-
-IF( UNIX )
-    IF( ENABLE_ARM )
-      SET_PROPERTY( SOURCE 
-             vendor/boost_1.51/libs/context/asm/fcontext_arm_aapcs_elf_gas.S 
-             PROPERTY LANGUAGE C)
-      SET( boost_context_sources vendor/boost_1.51/libs/context/protected_stack_posix.cpp 
-              vendor/boost_1.51/libs/context/stack_helper_posix.cpp 
-              vendor/boost_1.51/libs/context/asm/fcontext_arm_aapcs_elf_gas.S 
-              )
-      ELSE()
-
-      IF( APPLE )
-           SET_PROPERTY( SOURCE 
-                                         vendor/boost_1.51/libs/context/asm/fcontext_x86_64_sysv_macho_gas.S 
-                                                         PROPERTY LANGUAGE C)
-                   SET( boost_context_sources vendor/boost_1.51/libs/context/stack_utils_posix.cpp
-                         vendor/boost_1.51/libs/context/stack_allocator_posix.cpp
-                         vendor/boost_1.51/libs/context/fcontext.cpp
-                         vendor/boost_1.51/libs/context/asm/fcontext_x86_64_sysv_macho_gas.S 
-                         )
-      ELSE (APPLE)
-         IF( CMAKE_SIZEOF_VOID_P EQUAL 4 )
-             SET_PROPERTY( SOURCE 
-                           vendor/boost_1.51/libs/context/asm/fcontext_i386_sysv_elf_gas.S
-                           PROPERTY LANGUAGE C)
-                   SET( fcontext_asm vendor/boost_1.51/libs/context/asm/fcontext_i386_sysv_elf_gas.S )
-         ELSE( )
-          SET( fcontext_asm vendor/boost_1.51/libs/context/asm/fcontext_x86_64_sysv_elf_gas.S )
-          SET_PROPERTY( SOURCE 
-                        vendor/boost_1.51/libs/context/asm/fcontext_x86_64_sysv_elf_gas.S
-                        PROPERTY LANGUAGE C)
-              ENDIF( )
-         
-         SET( boost_context_sources vendor/boost_1.51/libs/context/stack_utils_posix.cpp
-                                  vendor/boost_1.51/libs/context/stack_allocator_posix.cpp
-                                  vendor/boost_1.51/libs/context/fcontext.cpp
-                                  ${fcontext_asm}
-                                  )
-      ENDIF(APPLE)
-
-    ENDIF()
-ENDIF( UNIX )
-
-IF( BOOST_1_51 )
-  ENABLE_LANGUAGE(ASM_MASM) 
-#  SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHa" )
-
-  SET( boost_context_sources vendor/boost_1.51/libs/context/fcontext.cpp
-             vendor/boost_1.51/libs/context/seh.cpp
-             vendor/boost_1.51/libs/context/stack_allocator_windows.cpp
-             vendor/boost_1.51/libs/context/stack_utils_windows.cpp 
-             vendor/boost_1.51/libs/context/seh.cpp 
-     )
-  IF( CMAKE_SIZEOF_VOID_P EQUAL 8 )
-    SET( boost_context_sources ${boost_context_sources} 
-             vendor/boost_1.51/libs/context/asm/fcontext_x86_64_ms_pe_masm.asm )
-  ELSE() # 32bit
-    SET( boost_context_sources ${boost_context_sources} 
-             vendor/boost_1.51/libs/context/asm/fcontext_i386_ms_pe_masm.asm )
-    SET( CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SAFESEH:NO" )
-    message(STATUS "")
-    message(STATUS "Note for Visual Studio 2012 projects:")
-    message(STATUS "  Each time CMake regenerates your projects, you will need to:")
-    message(STATUS "  Right-click on the 'fc' project and select 'Build Customizations', and")
-    message(STATUS "    check the 'masm' customization.")
-    message(STATUS "  then, go to the 'Properties' for the fcontext*.asm file, and change its ")
-    message(STATUS "  item type from 'Does not participate in build' to 'Microsoft Macro Assembler'")
-  ENDIF()
-
-ENDIF(BOOST_1_51)
 
 set( sources
   ${fc_sources}
-  ${boost_context_sources}
 )
 
 setup_library( fc SOURCES ${sources} LIBRARY_TYPE STATIC )

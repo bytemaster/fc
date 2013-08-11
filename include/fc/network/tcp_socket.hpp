@@ -44,7 +44,7 @@ namespace fc {
       ~tcp_server();
 
       void close();
-      bool accept( tcp_socket& s );
+      void accept( tcp_socket& s );
       void listen( uint16_t port );
     
     private:

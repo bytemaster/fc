@@ -6,7 +6,9 @@
 
 #include <boost/version.hpp>
 
-#if BOOST_VERSION >= 105300
+#if BOOST_VERSION >= 105400
+  #include <boost/coroutine/stack_context.hpp>
+#elif BOOST_VERSION >= 105300
   #include <boost/coroutine/stack_allocator.hpp>
   namespace bc  = boost::context;
   namespace bco = boost::coroutines;
@@ -14,7 +16,7 @@
   namespace bc = boost::context;
 #else
   namespace bc  = boost::ctx;
-  namespace bco = boost::ctx;
+  namespace bco = boost::coroutine;
 #endif
 
 namespace fc {
@@ -30,6 +32,10 @@ namespace fc {
   struct context  {
     typedef fc::context* ptr;
 
+    #if BOOST_VERSION >= 105400
+    bco::stack_context stack_ctx;
+    #endif
+
 
     context( void (*sf)(intptr_t), bco::stack_allocator& alloc, fc::thread* t )
     : caller_context(0),
@@ -42,14 +48,19 @@ namespace fc {
       complete(false),
       cur_task(0)
     {
-#if BOOST_VERSION >= 105300
+#if BOOST_VERSION >= 105400
+     bco::stack_context   stack_ctx;
      size_t stack_size =  bco::stack_allocator::default_stacksize();
-     my_context = bc::make_fcontext(alloc.allocate(stack_size), stack_size, sf);
+     alloc.allocate(stack_ctx, stack_size);
+     my_context = bc::make_fcontext( stack_ctx.sp, stack_ctx.size, sf);
+#elif BOOST_VERSION >= 105300
+     size_t stack_size =  bco::stack_allocator::default_stacksize();
+     void*  stackptr = alloc.allocate(stack_size);
+     my_context = bc::make_fcontext( stackptr, stack_size, sf);
 #else
      size_t stack_size = bc::default_stacksize();
      my_context.fc_stack.base = alloc.allocate( stack_size );
-     my_context.fc_stack.limit = 
-        static_cast<char*>( my_context.fc_stack.base) - stack_size;
+     my_context.fc_stack.limit = static_cast<char*>( my_context.fc_stack.base) - stack_size;
      make_fcontext( &my_context, sf );
 #endif
     }
@@ -70,8 +81,18 @@ namespace fc {
     {}
 
     ~context() {
+#if BOOST_VERSION >= 105400
+      if(stack_alloc)
+        stack_alloc->deallocate( stack_ctx );
+      else
+        delete my_context;
+#elif BOOST_VERSION >= 105400
+      if(stack_alloc)
+        stack_alloc->deallocate( my_context->fc_stack.sp, bco::stack_allocator::default_stacksize() );
+      else
+        delete my_context;
 
-#if BOOST_VERSION >= 105300
+#elif BOOST_VERSION >= 105300
       if(stack_alloc)
         stack_alloc->deallocate( my_context->fc_stack.sp, bco::stack_allocator::default_stacksize() );
       else

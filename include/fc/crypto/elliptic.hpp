@@ -36,6 +36,7 @@ namespace fc {
 
            bool valid()const;
            public_key mult( const fc::sha256& offset );
+           public_key add( const fc::sha256& offset )const;
 
            public_key( public_key&& pk );
            public_key& operator=( public_key&& pk );

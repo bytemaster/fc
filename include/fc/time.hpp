@@ -60,6 +60,9 @@ namespace fc {
         time_point_sec()
         :utc_seconds(0){}
 
+        explicit time_point_sec(uint32_t seconds )
+        :utc_seconds(seconds){}
+
         time_point_sec( const time_point& t )
         :utc_seconds( t.time_since_epoch().count() / 1000000ll ){}
 

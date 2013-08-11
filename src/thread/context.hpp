@@ -8,6 +8,9 @@
 
 #if BOOST_VERSION >= 105400
   #include <boost/coroutine/stack_context.hpp>
+  #include <boost/coroutine/stack_allocator.hpp>
+  namespace bc  = boost::context;
+  namespace bco = boost::coroutines;
 #elif BOOST_VERSION >= 105300
   #include <boost/coroutine/stack_allocator.hpp>
   namespace bc  = boost::context;

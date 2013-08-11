@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <stdlib.h>
 //#include <zlib.h>
 /* Tables generated with code like the following:
 

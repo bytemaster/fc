@@ -258,6 +258,10 @@ struct ssl_bignum
 
         return rtn;
     }
+    bool       public_key::valid()const
+    {
+      return my->_key != nullptr;
+    }
     public_key public_key::add( const fc::sha256& digest )const
     {
       try {

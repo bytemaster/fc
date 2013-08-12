@@ -41,6 +41,11 @@ namespace fc {
            public_key( public_key&& pk );
            public_key& operator=( public_key&& pk );
            public_key& operator=( const public_key& pk );
+
+           inline friend bool operator==( const public_key& a, const public_key& b )
+           {
+            return a.serialize() == b.serialize();
+           }
         private:
           friend class private_key;
           fc::fwd<detail::public_key_impl,8> my;

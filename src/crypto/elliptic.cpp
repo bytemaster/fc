@@ -2,61 +2,11 @@
 #include <fc/fwd_impl.hpp>
 #include <fc/exception/exception.hpp>
 #include <fc/log/logger.hpp>
-#include <openssl/ec.h>
-#include <openssl/crypto.h>
-#include <openssl/ecdsa.h>
-#include <openssl/ecdh.h>
-#include <openssl/err.h>
-#include <openssl/sha.h>
-#include <openssl/obj_mac.h>
+#include <fc/crypto/openssl.hpp>
 #include <assert.h>
 
 namespace fc { namespace ecc {
-
-template <typename ssl_type>
-struct ssl_wrapper
-{
-    ssl_wrapper(ssl_type* obj)
-      : obj(obj) {}
-    virtual ~ssl_wrapper()
-    {
-    }
-    operator ssl_type*()
-    {
-        return obj;
-    }
-    ssl_type* operator->() { return obj; }
-
-    ssl_type* obj;
-};
-
-struct ssl_bignum
-  : public ssl_wrapper<BIGNUM>
-{
-    ssl_bignum()
-      : ssl_wrapper(BN_new()) {}
-    ~ssl_bignum()
-    {
-        BN_free(obj);
-    }
-};
-
-    #define SSL_TYPE(name, ssl_type, free_func) \
-        struct name \
-          : public ssl_wrapper<ssl_type> \
-        { \
-            name(ssl_type* obj) \
-              : ssl_wrapper(obj) {} \
-            ~name() \
-            { \
-                free_func(obj); \
-            } \
-        };
-
-    SSL_TYPE(ec_group, EC_GROUP, EC_GROUP_free)
-    SSL_TYPE(ec_point, EC_POINT, EC_POINT_free)
-    SSL_TYPE(ecdsa_sig, ECDSA_SIG, ECDSA_SIG_free)
-    SSL_TYPE(bn_ctx, BN_CTX, BN_CTX_free)
+    static int init = init_openssl();
 
     namespace detail 
     { 
@@ -413,8 +363,6 @@ struct ssl_bignum
     {
       return 1 == ECDSA_verify( 0, (unsigned char*)&digest, sizeof(digest), (unsigned char*)&sig, sizeof(sig), my->_key ); 
     }
-
-    static int load_ssl_error = [=](){ ERR_load_crypto_strings(); return 1; }();
 
     public_key_data public_key::serialize()const
     {

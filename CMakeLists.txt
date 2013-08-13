@@ -93,6 +93,8 @@ set( fc_sources
      src/log/console_appender.cpp
      src/log/file_appender.cpp
      src/log/logger_config.cpp
+     src/crypto/openssl.cpp
+     src/crypto/aes.cpp
      src/crypto/crc.cpp
      src/crypto/city.cpp
      src/crypto/base32.cpp
@@ -116,6 +118,7 @@ set( fc_sources
      src/network/ip.cpp
      src/network/resolve.cpp
      src/network/url.cpp
+     src/compress/smaz.cpp
      vendor/cyoencode-1.0.2/src/CyoDecode.c
      vendor/cyoencode-1.0.2/src/CyoEncode.c
      )
@@ -126,4 +129,8 @@ set( sources
 
 setup_library( fc SOURCES ${sources} LIBRARY_TYPE STATIC )
 
+set( BOOST_LIBRARIES ${Boost_THREAD_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_DATE_TIME_LIBRARY} ${Boost_CHRONO_LIBRARY} ${ALL_OPENSSL_LIBRARIES} ${Boost_COROUTINE_LIBRARY} ${Boost_CONTEXT_LIBRARY} )
+
+#add_executable( test_compress tests/compress.cpp )
+#target_link_libraries( test_compress fc ${BOOST_LIBRARIES} )
 

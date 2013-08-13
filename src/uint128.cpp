@@ -4,6 +4,7 @@
 #ifdef WIN32
 #include <WinSock2.h>
 #endif
+#include <arpa/inet.h>
 
 namespace fc 
 {

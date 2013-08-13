@@ -58,6 +58,9 @@ namespace fc
    void from_variant( const variant& var,  time_point_sec& vo );
    #ifdef __APPLE__
    void to_variant( size_t s, variant& v );
+   #elif !defined(_MSC_VER)
+   void to_variant( long long int s, variant& v );
+   void to_variant( unsigned long long int s, variant& v );
    #endif
    void to_variant( const std::string& s, variant& v );
 

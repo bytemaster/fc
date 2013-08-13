@@ -16,17 +16,17 @@ FILE(GLOB HDRS *.h pavlov/*.h easylzma/*.h)
 FILE(GLOB PUB_HDRS easylzma/*.h)
 
 # set up some paths for outputing the usable binaries
-SET (libDir
-     ${CMAKE_CURRENT_BINARY_DIR}/../${EASYLZMA_DIST_NAME}/lib)
-SET (incDir
-     ${CMAKE_CURRENT_BINARY_DIR}/../${EASYLZMA_DIST_NAME}/include/easylzma)
+#SET (libDir
+#     ${CMAKE_CURRENT_BINARY_DIR}/${EASYLZMA_DIST_NAME}/lib)
+#SET (incDir
+#     ${CMAKE_CURRENT_BINARY_DIR}/${EASYLZMA_DIST_NAME}/include/easylzma)
 
 # an include directory to allow easylzma implementation to find public
 # headers
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
 
 # get the built libs into the correct place
-SET(LIBRARY_OUTPUT_PATH ${libDir})
+#SET(LIBRARY_OUTPUT_PATH ${libDir})
 
 ADD_LIBRARY(easylzma_static STATIC ${SRCS} ${HDRS})
 #ADD_LIBRARY(easylzma   SHARED ${SRCS} ${HDRS})
@@ -47,8 +47,8 @@ ENDIF (APPLE)
 #                      COMPILE_FLAGS ${sharedLibCompileFlags})
 
 # create these output directories
-FILE(MAKE_DIRECTORY ${libDir})
-FILE(MAKE_DIRECTORY ${incDir})
+#FILE(MAKE_DIRECTORY ${libDir})
+#FILE(MAKE_DIRECTORY ${incDir})
 
 ### copy the two required headers into our output dir as a post build step
 # copy public headers to output directory

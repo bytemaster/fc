@@ -1,5 +1,6 @@
 #pragma once
-#include <fc/sha512.hpp>
+#include <fc/crypto/sha512.hpp>
+#include <vector>
 
 namespace fc {
 

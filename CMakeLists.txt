@@ -126,6 +126,7 @@ set( fc_sources
 set( sources
   ${fc_sources}
 )
+add_subdirectory( vendor/easylzma )
 
 setup_library( fc SOURCES ${sources} LIBRARY_TYPE STATIC )
 

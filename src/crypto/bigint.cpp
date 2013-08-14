@@ -59,7 +59,7 @@ namespace fc {
         return BN_cmp( n, c.n ) == 0;
       }
       bool bigint::operator != ( const bigint& c )const {
-        return BN_cmp( n, c.n ) == 0;
+        return BN_cmp( n, c.n ) != 0;
       }
       bigint::operator bool()const
       {
@@ -97,6 +97,13 @@ namespace fc {
         std::swap(*this,tmp);
         return *this;
       }
+      bigint& bigint::operator -= ( const bigint& a ){
+        bigint tmp(*this);
+        BN_sub( tmp.n, n, a.n );
+        std::swap(*this,tmp);
+        return *this;
+      }
+
 
       bigint bigint::operator * ( const bigint& a )const {
         BN_CTX* ctx = BN_CTX_new();

@@ -3,8 +3,9 @@
 #include <fc/crypto/bigint.hpp>
 #ifdef WIN32
 #include <WinSock2.h>
-#endif
+#else
 #include <arpa/inet.h>
+#endif
 
 namespace fc 
 {

@@ -31,8 +31,8 @@ ZERO_CHECK
 *.lastbuildstate
 *.sdf
 *.opensdf
-Debug
-Release
+Debug/
+Release/
 
 CMakeFiles
 Makefile

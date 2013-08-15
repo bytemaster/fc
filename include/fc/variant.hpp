@@ -104,8 +104,8 @@ namespace fc
         /// @param str - UTF8 string
         variant( const char* str );
         variant( char* str );
-	variant( wchar_t* str );
-	variant( const wchar_t* str );
+        variant( wchar_t* str );
+        variant( const wchar_t* str );
         variant( int val );
         variant( float val );
         variant( int64_t val );
@@ -220,6 +220,7 @@ namespace fc
         template<typename T>
         variant( const optional<T>& v )
         {
+           memset( this, 0, sizeof(*this) );
            if( v ) *this = variant(*v);
         }
 
@@ -227,7 +228,9 @@ namespace fc
         explicit variant( const T& val );
 
 
+        void    clear();
       private:
+        void    init();
         double  _data;                ///< Alligned according to double requirements
         char    _type[sizeof(void*)]; ///< pad to void* size
    };

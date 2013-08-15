@@ -4,12 +4,16 @@
 #include <fc/variant.hpp>
 #include <fc/crypto/base64.hpp>
 
+#include <fc/exception/exception.hpp>
+
 namespace fc {
       bigint::bigint( const char* bige, uint32_t l ) {
         n = BN_bin2bn( (const unsigned char*)bige, l, NULL );
+        FC_ASSERT( n != nullptr );
       }
       bigint::bigint( const std::vector<char>& bige ) {
         n = BN_bin2bn( (const unsigned char*)bige.data(), bige.size(), NULL );
+        FC_ASSERT( n != nullptr );
       }
       bigint::bigint( BIGNUM* in )
       {
@@ -151,6 +155,8 @@ namespace fc {
       bigint& bigint::operator <<= ( uint32_t i )
       {
          bigint tmp;
+         FC_ASSERT( tmp.n != nullptr );
+         FC_ASSERT( n != nullptr );
          BN_lshift( tmp.n, n, i );
          std::swap(*this,tmp);
          return *this;

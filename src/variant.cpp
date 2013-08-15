@@ -166,7 +166,7 @@ void variant::clear()
      default:
         break;
    }
-   memset( this, 0, sizeof(*this) );
+   set_variant_type( this, null_type );
 }
 
 variant::variant( const variant& v )
@@ -207,8 +207,9 @@ variant::~variant()
 variant& variant::operator=( variant&& v )
 {
    if( this == &v ) return *this;
+   clear();
    memcpy( (char*)this, (char*)&v, sizeof(v) );
-   v.clear();
+   set_variant_type( &v, null_type ); 
    return *this;
 }
 

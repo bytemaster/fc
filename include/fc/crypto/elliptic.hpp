@@ -31,6 +31,9 @@ namespace fc {
            ~public_key();
            bool verify( const fc::sha256& digest, const signature& sig );
            public_key_data serialize()const;
+
+           operator public_key_data()const { return serialize(); }
+
            public_key( const public_key_data& v );
            public_key( const compact_signature& c, const fc::sha256& digest );
 

@@ -74,8 +74,9 @@ namespace fc {
           utc_seconds = t.time_since_epoch().count() / 1000000ll;
           return *this;
         }
-        friend bool   operator < ( const time_point_sec& a, const time_point_sec& b ) { return a.utc_seconds < b.utc_seconds; }
-        friend bool   operator > ( const time_point_sec& a, const time_point_sec& b ) { return a.utc_seconds > b.utc_seconds; }
+        friend bool   operator < ( const time_point_sec& a, const time_point_sec& b )  { return a.utc_seconds < b.utc_seconds; }
+        friend bool   operator > ( const time_point_sec& a, const time_point_sec& b )  { return a.utc_seconds > b.utc_seconds; }
+        friend bool   operator == ( const time_point_sec& a, const time_point_sec& b ) { return a.utc_seconds == b.utc_seconds; }
 
     private:
         uint32_t utc_seconds;

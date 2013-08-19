@@ -22,13 +22,6 @@ namespace fc {
       optional():_valid(false){}
       ~optional(){ reset(); }
 
-      optional( const optional& o )
-      :_valid(false) 
-      {
-        if( o._valid ) new (ptr()) T( *o );
-        _valid = o._valid;
-      }
-
       optional( optional& o )
       :_valid(false) 
       {
@@ -36,7 +29,42 @@ namespace fc {
         _valid = o._valid;
       }
 
+      optional( const optional& o )
+      :_valid(false) 
+      {
+        if( o._valid ) new (ptr()) T( *o );
+        _valid = o._valid;
+      }
+
       optional( optional&& o )
+      :_valid(false) 
+      {
+        if( o._valid ) new (ptr()) T( fc::move(*o) );
+        _valid = o._valid;
+        o.reset();
+      }
+
+      template<typename U>
+      optional( const optional<U>& o )
+      :_valid(false) 
+      {
+        if( o._valid ) new (ptr()) T( *o );
+        _valid = o._valid;
+      }
+
+      template<typename U>
+      optional( optional<U>& o )
+      :_valid(false) 
+      {
+        if( o._valid )
+        {
+          new (ptr()) T( *o );
+        }
+        _valid = o._valid;
+      }
+
+      template<typename U>
+      optional( optional<U>&& o )
       :_valid(false) 
       {
         if( o._valid ) new (ptr()) T( fc::move(*o) );
@@ -60,6 +88,49 @@ namespace fc {
         return *this;
       }
 
+      template<typename U>
+      optional& operator=( optional<U>& o ) {
+        if (this != &o) {
+          if( _valid && o._valid ) { 
+            ref() = *o;
+          } else if( !_valid && o._valid ) {
+             new (ptr()) T( *o );
+             _valid = true;
+          } else if (_valid) {
+            reset();
+          }
+        }
+        return *this;
+      }
+      template<typename U>
+      optional& operator=( const optional<U>& o ) {
+        if (this != &o) {
+          if( _valid && o._valid ) { 
+            ref() = *o;
+          } else if( !_valid && o._valid ) {
+             new (ptr()) T( *o );
+             _valid = true;
+          } else if (_valid) {
+            reset();
+          }
+        }
+        return *this;
+      }
+
+      optional& operator=( optional& o ) {
+        if (this != &o) {
+          if( _valid && o._valid ) { 
+            ref() = *o;
+          } else if( !_valid && o._valid ) {
+             new (ptr()) T( *o );
+             _valid = true;
+          } else if (_valid) {
+            reset();
+          }
+        }
+        return *this;
+      }
+
       optional& operator=( const optional& o ) {
         if (this != &o) {
           if( _valid && o._valid ) { 
@@ -67,6 +138,24 @@ namespace fc {
           } else if( !_valid && o._valid ) {
              new (ptr()) T( *o );
              _valid = true;
+          } else if (_valid) {
+            reset();
+          }
+        }
+        return *this;
+      }
+
+      template<typename U>
+      optional& operator=( optional<U>&& o ) 
+      {
+        if (this != &o) 
+        {
+          if( _valid && o._valid ) 
+          {
+            ref() = fc::move(*o);
+            o.reset();
+          } else if ( !_valid && o._valid ) {
+            *this = fc::move(*o);
           } else if (_valid) {
             reset();
           }
@@ -91,6 +180,7 @@ namespace fc {
         return *this;
       }
 
+      bool valid()const     { return _valid;  }
       bool operator!()const { return !_valid; }
       operator bool()const  { return _valid;  }
 
@@ -123,6 +213,7 @@ namespace fc {
           _valid = false;
       }
     private:
+      template<typename U> friend class optional;
       T&       ref()      { return *ptr(); }
       const T& ref()const { return *ptr(); }
       T*       ptr()      { void* v = &_value[0]; return static_cast<T*>(v); }

@@ -58,11 +58,12 @@ namespace fc { namespace http {
         }catch(...){}
       }
       void accept_loop() {
-            http::connection_ptr con = std::make_shared<http::connection>();
-            while( tcp_serv.accept( con->get_socket() ) ) {
+            while( !accept_complete.canceled() )
+            {
+              http::connection_ptr con = std::make_shared<http::connection>();
+              tcp_serv.accept( con->get_socket() );
               ilog( "Accept Connection" );
               fc::async( [=](){ handle_connection( con, on_req ); } );
-              con = std::make_shared<http::connection>();
             }
       }
 

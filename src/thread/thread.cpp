@@ -136,7 +136,6 @@ namespace fc {
         cur->canceled = true;
         cur = cur->next;
       }
-
       my->done = true;
 
       // now that we have poked all fibers... switch to the next one and
@@ -177,6 +176,14 @@ namespace fc {
       my->check_fiber_exceptions();
    }
    void thread::sleep_until( const time_point& tp ) {
+      //ilog( "sleep until ${tp}    wait: ${delta}", ("tp",tp)("delta",(tp-fc::time_point::now()).count()) );
+     
+      if( tp <= (time_point::now()+fc::microseconds(500)) ) 
+      {
+         this->yield(true);
+      }
+      my->yield_until( tp, false );
+      /*
       my->check_fiber_exceptions();
       
       BOOST_ASSERT( &current() == this );
@@ -195,6 +202,7 @@ namespace fc {
       my->current->resume_time = time_point::maximum();
 
       my->check_fiber_exceptions();
+      */
    }
    int  thread::wait_any_until( std::vector<promise_base::ptr>&& p, const time_point& timeout) {
        for( size_t i = 0; i < p.size(); ++i ) {

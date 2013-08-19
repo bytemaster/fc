@@ -13,7 +13,7 @@ namespace fc {
     class logger::impl : public fc::retainable {
       public:
          impl()
-         :_parent(nullptr),_enabled(true),_level(log_level::warn){}
+         :_parent(nullptr),_enabled(true),_additivity(false),_level(log_level::warn){}
          fc::string       _name;
          logger           _parent;
          bool             _enabled;

@@ -298,7 +298,9 @@ namespace fc
             case 0x04: // ^D end of transmission
               FC_THROW_EXCEPTION( eof_exception, "unexpected end of file" );
             default:
+              in.get(); // 
               ilog( "unhandled char '${c}' int ${int}", ("c", fc::string( &c, 1 ) )("int", int(c)) );
+              return variant();
          }
       }
 	  return variant();
@@ -498,6 +500,7 @@ namespace fc
                 if( !first ) {
                   for( int i = 0; i < level*indent; ++i ) ss<<' ';
                 }
+                first = false;
                 ss<<v[i];
                 break;
               } else {

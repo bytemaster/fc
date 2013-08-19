@@ -60,6 +60,9 @@ namespace fc {
         time_point_sec()
         :utc_seconds(0){}
 
+        explicit time_point_sec(uint32_t seconds )
+        :utc_seconds(seconds){}
+
         time_point_sec( const time_point& t )
         :utc_seconds( t.time_since_epoch().count() / 1000000ll ){}
 
@@ -71,7 +74,9 @@ namespace fc {
           utc_seconds = t.time_since_epoch().count() / 1000000ll;
           return *this;
         }
-        friend bool   operator < ( const time_point_sec& a, const time_point_sec& b ) { return a.utc_seconds < b.utc_seconds; }
+        friend bool   operator < ( const time_point_sec& a, const time_point_sec& b )  { return a.utc_seconds < b.utc_seconds; }
+        friend bool   operator > ( const time_point_sec& a, const time_point_sec& b )  { return a.utc_seconds > b.utc_seconds; }
+        friend bool   operator == ( const time_point_sec& a, const time_point_sec& b ) { return a.utc_seconds == b.utc_seconds; }
 
     private:
         uint32_t utc_seconds;

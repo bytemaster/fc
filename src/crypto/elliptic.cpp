@@ -2,59 +2,11 @@
 #include <fc/fwd_impl.hpp>
 #include <fc/exception/exception.hpp>
 #include <fc/log/logger.hpp>
-#include <openssl/ec.h>
-#include <openssl/crypto.h>
-#include <openssl/ecdsa.h>
-#include <openssl/ecdh.h>
-#include <openssl/err.h>
-#include <openssl/sha.h>
-#include <openssl/obj_mac.h>
+#include <fc/crypto/openssl.hpp>
 #include <assert.h>
 
 namespace fc { namespace ecc {
-
-template <typename ssl_type>
-struct ssl_wrapper
-{
-    ssl_wrapper(ssl_type* obj)
-      : obj(obj) {}
-    virtual ~ssl_wrapper()
-    {
-    }
-    operator ssl_type*()
-    {
-        return obj;
-    }
-
-    ssl_type* obj;
-};
-
-struct ssl_bignum
-  : public ssl_wrapper<BIGNUM>
-{
-    ssl_bignum()
-      : ssl_wrapper(BN_new()) {}
-    ~ssl_bignum()
-    {
-        BN_free(obj);
-    }
-};
-
-    #define SSL_TYPE(name, ssl_type, free_func) \
-        struct name \
-          : public ssl_wrapper<ssl_type> \
-        { \
-            name(ssl_type* obj) \
-              : ssl_wrapper(obj) {} \
-            ~name() \
-            { \
-                free_func(obj); \
-            } \
-        };
-
-    SSL_TYPE(ec_group, EC_GROUP, EC_GROUP_free)
-    SSL_TYPE(ec_point, EC_POINT, EC_POINT_free)
-    SSL_TYPE(bn_ctx, BN_CTX, BN_CTX_free)
+    static int init = init_openssl();
 
     namespace detail 
     { 
@@ -256,6 +208,54 @@ struct ssl_bignum
 
         return rtn;
     }
+    bool       public_key::valid()const
+    {
+      return my->_key != nullptr;
+    }
+    public_key public_key::add( const fc::sha256& digest )const
+    {
+      try {
+        ec_group group(EC_GROUP_new_by_curve_name(NID_secp256k1));
+        bn_ctx ctx(BN_CTX_new());
+
+        fc::bigint digest_bi( (char*)&digest, sizeof(digest) );
+
+        ssl_bignum order;
+        EC_GROUP_get_order(group, order, ctx);
+        if( digest_bi > fc::bigint(order) )
+        {
+          FC_THROW_EXCEPTION( exception, "digest > group order" );
+        }
+
+
+        public_key digest_key = private_key::regenerate(digest).get_public_key();
+        const EC_POINT* digest_point   = EC_KEY_get0_public_key( digest_key.my->_key );
+
+        // get point from this public key
+        const EC_POINT* master_pub   = EC_KEY_get0_public_key( my->_key );
+
+        ssl_bignum z;
+        BN_bin2bn((unsigned char*)&digest, sizeof(digest), z);
+
+        // multiply by digest
+        ssl_bignum one;
+        BN_one(one);
+
+        ec_point result(EC_POINT_new(group));
+        EC_POINT_add(group, result, digest_point, master_pub, ctx);
+
+        if (EC_POINT_is_at_infinity(group, result)) 
+        {
+          FC_THROW_EXCEPTION( exception, "point at  infinity" );
+        }
+
+
+        public_key rtn;
+        rtn.my->_key = EC_KEY_new_by_curve_name( NID_secp256k1 );
+        EC_KEY_set_public_key(rtn.my->_key,result);
+        return rtn;
+      } FC_RETHROW_EXCEPTIONS( debug, "digest: ${digest}", ("digest",digest) );
+    }
 
     private_key::private_key()
     {}
@@ -266,8 +266,8 @@ struct ssl_bignum
         BN_bin2bn((unsigned char*)&offset, sizeof(offset), z);
 
         ec_group group(EC_GROUP_new_by_curve_name(NID_secp256k1));
-        ssl_bignum order;
         bn_ctx ctx(BN_CTX_new());
+        ssl_bignum order;
         EC_GROUP_get_order(group, order, ctx);
 
         // secexp = (seed + z) % order
@@ -277,8 +277,9 @@ struct ssl_bignum
         BN_mod(secexp, secexp, order, ctx);
 
         fc::sha256 secret;
-        assert(BN_num_bytes(secexp) == sizeof(secret));
-        BN_bn2bin(secexp, (unsigned char*)&secret);
+        assert(BN_num_bytes(secexp) <= int64_t(sizeof(secret)));
+        auto shift = sizeof(secret) - BN_num_bytes(secexp);
+        BN_bn2bin(secexp, ((unsigned char*)&secret)+shift);
         return regenerate( secret );
     }
 
@@ -362,8 +363,6 @@ struct ssl_bignum
     {
       return 1 == ECDSA_verify( 0, (unsigned char*)&digest, sizeof(digest), (unsigned char*)&sig, sizeof(sig), my->_key ); 
     }
-
-    static int load_ssl_error = [=](){ ERR_load_crypto_strings(); return 1; }();
 
     public_key_data public_key::serialize()const
     {
@@ -456,20 +455,23 @@ struct ssl_bignum
 
     compact_signature private_key::sign_compact( const fc::sha256& digest )const
     {
+       try {
         FC_ASSERT( my->_key != nullptr );
-        ECDSA_SIG *sig = ECDSA_do_sign((unsigned char*)&digest, sizeof(digest), my->_key);
+        auto my_pub_key = get_public_key().serialize(); // just for good measure
+        //ECDSA_SIG *sig = ECDSA_do_sign((unsigned char*)&digest, sizeof(digest), my->_key);
+        ecdsa_sig sig = ECDSA_do_sign((unsigned char*)&digest, sizeof(digest), my->_key);
 
-        if (sig==NULL) 
+        if (sig==nullptr) 
           FC_THROW_EXCEPTION( exception, "Unable to sign" );
 
         compact_signature csig;
+       // memset( csig.data, 0, sizeof(csig) );
 
         int nBitsR = BN_num_bits(sig->r);
         int nBitsS = BN_num_bits(sig->s);
         if (nBitsR <= 256 && nBitsS <= 256)
         {
             int nRecId = -1;
-            auto my_pub_key = get_public_key().serialize();
             for (int i=0; i<4; i++)
             {
                 public_key keyRec;
@@ -487,14 +489,30 @@ struct ssl_bignum
             }
 
             if (nRecId == -1)
-            FC_THROW_EXCEPTION( exception, "unable to construct recoverable key");
+            {
+              FC_THROW_EXCEPTION( exception, "unable to construct recoverable key");
+            }
             
             csig.data[0] = nRecId+27+4;//(fCompressedPubKey ? 4 : 0);
             BN_bn2bin(sig->r,&csig.data[33-(nBitsR+7)/8]);
             BN_bn2bin(sig->s,&csig.data[65-(nBitsS+7)/8]);
+
+            /*try {
+            auto pubk = public_key( csig, digest ).serialize();
+            FC_ASSERT( pubk == my_pub_key, "", ("pubk",pubk)("my_pub_key",my_pub_key)("private_key", *this) );
+            } catch ( fc::exception& e)
+            {
+              wlog( "${e}", ("e", e.to_detail_string() ) );
+              csig = sign_compact( digest );
+              elog( "it worked the second time!" );
+              exit(1);
+            }
+            */
         }
-        ECDSA_SIG_free(sig);
+        // TODO: memory leak if exception thrown!
+        //ECDSA_SIG_free(sig);
         return csig;
+      } FC_RETHROW_EXCEPTIONS( warn, "sign ${digest}", ("digest", digest)("private_key",*this) );
     }
 
    private_key& private_key::operator=( private_key&& pk )

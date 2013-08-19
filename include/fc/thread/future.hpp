@@ -52,6 +52,7 @@ namespace fc {
       const char* get_desc()const;
                    
       void cancel();
+      bool canceled()const { return _canceled; }
       bool ready()const;
       bool error()const;
 
@@ -195,6 +196,7 @@ namespace fc {
       bool error()const { return m_prom->error(); }
 
       void cancel()const { m_prom->cancel(); }
+      bool canceled()const { return m_prom->canceled(); }
 
       /**
        * @pre valid()
@@ -233,7 +235,8 @@ namespace fc {
         m_prom->wait_until(tp);
       }
 
-      bool valid()const { return !!m_prom;       }
+      bool valid()const    { return !!m_prom;           }
+      bool canceled()const { return m_prom->canceled(); }
 
       /// @pre valid()
       bool ready()const { return m_prom->ready(); }

@@ -44,10 +44,9 @@
 #include <stdlib.h>  // for size_t.
 #include <stdint.h>
 #include <utility>
+#include <fc/uint128.hpp>
 
 namespace fc {
-
-typedef std::pair<uint64_t, uint64_t> uint128;
 
 // Hash function for a byte array.
 uint64_t city_hash64(const char *buf, size_t len);

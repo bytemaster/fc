@@ -1,5 +1,6 @@
 #include <stdint.h>
-#include <zlib.h>
+#include <stdlib.h>
+//#include <zlib.h>
 /* Tables generated with code like the following:
 
 #define CRCPOLY 0x82f63b78 // reversed 0x1EDC6F41

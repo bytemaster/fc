@@ -86,25 +86,17 @@ namespace fc {
   }
 
 
-  bool tcp_server::accept( tcp_socket& s ) {
+  void tcp_server::accept( tcp_socket& s ) 
+  {
     try
     {
-      if( !my ) return false;
-
+      FC_ASSERT( my != nullptr );
       fc::asio::tcp::accept( my->_accept, s.my->_sock  ); 
-      /*
-      fc::promise<void>::ptr p( new promise<void>("tcp::accept") );
-      my->_accept.async_accept( s.my->_sock, [=]( const boost::system::error_code& e ) {
-                    p->set_value(e);
-                } );
-      auto ec = p->wait();
-      if( ec ) FC_THROW_EXCEPTION( exception, "system error: ${message}", ("message", fc::string(boost::system::system_error(ec).what()) ));
-      return true;
-      */
-      return true;
     } FC_RETHROW_EXCEPTIONS( warn, "Unable to accept connection on socket." );
   }
-  void tcp_server::listen( uint16_t port ) {
+
+  void tcp_server::listen( uint16_t port ) 
+  {
     if( my ) delete my;
     my = new impl(port);
   }

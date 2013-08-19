@@ -4,12 +4,16 @@
 #include <fc/variant.hpp>
 #include <fc/crypto/base64.hpp>
 
+#include <fc/exception/exception.hpp>
+
 namespace fc {
       bigint::bigint( const char* bige, uint32_t l ) {
         n = BN_bin2bn( (const unsigned char*)bige, l, NULL );
+        FC_ASSERT( n != nullptr );
       }
       bigint::bigint( const std::vector<char>& bige ) {
         n = BN_bin2bn( (const unsigned char*)bige.data(), bige.size(), NULL );
+        FC_ASSERT( n != nullptr );
       }
       bigint::bigint( BIGNUM* in )
       {
@@ -59,7 +63,7 @@ namespace fc {
         return BN_cmp( n, c.n ) == 0;
       }
       bool bigint::operator != ( const bigint& c )const {
-        return BN_cmp( n, c.n ) == 0;
+        return BN_cmp( n, c.n ) != 0;
       }
       bigint::operator bool()const
       {
@@ -97,6 +101,13 @@ namespace fc {
         std::swap(*this,tmp);
         return *this;
       }
+      bigint& bigint::operator -= ( const bigint& a ){
+        bigint tmp(*this);
+        BN_sub( tmp.n, n, a.n );
+        std::swap(*this,tmp);
+        return *this;
+      }
+
 
       bigint bigint::operator * ( const bigint& a )const {
         BN_CTX* ctx = BN_CTX_new();
@@ -133,10 +144,19 @@ namespace fc {
         *this = std::move(tmp);
         return *this;
       }
+      bigint& bigint::operator >>= ( uint32_t i )
+      {
+         bigint tmp;
+         BN_rshift( tmp.n, n, i );
+         std::swap(*this,tmp);
+         return *this;
+      }
 
       bigint& bigint::operator <<= ( uint32_t i )
       {
          bigint tmp;
+         FC_ASSERT( tmp.n != nullptr );
+         FC_ASSERT( n != nullptr );
          BN_lshift( tmp.n, n, i );
          std::swap(*this,tmp);
          return *this;

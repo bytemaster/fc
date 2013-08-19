@@ -150,38 +150,7 @@ typedef const variant_object* const_variant_object_ptr;
 typedef const variants* const_variants_ptr; 
 typedef const string* const_string_ptr;
 
-variant::variant( const variant& v )
-{
-   switch( v.get_type() )
-   {
-   case object_type:
-      *reinterpret_cast<variant_object**>(this)  = 
-         new variant_object(**reinterpret_cast<const const_variant_object_ptr*>(&v));
-      set_variant_type( this, object_type );
-      return;
-   case array_type:
-      *reinterpret_cast<variants**>(this)  = 
-         new variants(**reinterpret_cast<const const_variants_ptr*>(&v));
-      set_variant_type( this,  array_type );
-      return;
-   case string_type:
-      *reinterpret_cast<string**>(this)  = 
-         new string(**reinterpret_cast<const const_string_ptr*>(&v) );
-      set_variant_type( this, string_type );
-      return;
-
-   default:
-      memcpy( this, &v, sizeof(v) );
-   }
-}
-
-variant::variant( variant&& v )
-{
-   memcpy( this, &v, sizeof(v) );
-   set_variant_type( &v, null_type );
-}
-
-variant::~variant()
+void variant::clear()
 {
    switch( get_type() )
    {
@@ -197,65 +166,59 @@ variant::~variant()
      default:
         break;
    }
+   set_variant_type( this, null_type );
+}
+
+variant::variant( const variant& v )
+{
+   switch( v.get_type() )
+   {
+       case object_type:
+          *reinterpret_cast<variant_object**>(this)  = 
+             new variant_object(**reinterpret_cast<const const_variant_object_ptr*>(&v));
+          set_variant_type( this, object_type );
+          return;
+       case array_type:
+          *reinterpret_cast<variants**>(this)  = 
+             new variants(**reinterpret_cast<const const_variants_ptr*>(&v));
+          set_variant_type( this,  array_type );
+          return;
+       case string_type:
+          *reinterpret_cast<string**>(this)  = 
+             new string(**reinterpret_cast<const const_string_ptr*>(&v) );
+          set_variant_type( this, string_type );
+          return;
+       default:
+          memcpy( this, &v, sizeof(v) );
+   }
+}
+
+variant::variant( variant&& v )
+{
+   memcpy( this, &v, sizeof(v) );
+   set_variant_type( &v, null_type );
+}
+
+variant::~variant()
+{
+   clear();
 }
 
 variant& variant::operator=( variant&& v )
 {
-   switch( get_type() )
-   {
-      set_variant_type( this, null_type );
-      case object_type:
-         delete *reinterpret_cast<variant_object**>(this);
-         break;
-      case array_type:
-         delete *reinterpret_cast<variants**>(this);
-         break;
-      case string_type:
-         delete *reinterpret_cast<string**>(this);
-         break;
-      default:
-         break;
-   }
-   switch( v.get_type() )
-   {
-     case object_type:
-        *reinterpret_cast<variant_object**>(this)  = new variant_object(fc::move(**reinterpret_cast<variant_object**>(&v)));
-        set_variant_type( this, object_type );
-        return *this;
-     case array_type:
-        *reinterpret_cast<variants**>(this)  = new variants(fc::move(**reinterpret_cast<variants**>(&v)));
-        set_variant_type( this, array_type );
-        return *this;
-     case string_type:
-        *reinterpret_cast<string**>(this)  = new string(fc::move(**reinterpret_cast<string**>(&v)) );
-        set_variant_type( this, string_type );
-        return *this;
-     
-     default:
-        memcpy( this, &v, sizeof(v) );
-   }
-
+   if( this == &v ) return *this;
+   clear();
+   memcpy( (char*)this, (char*)&v, sizeof(v) );
+   set_variant_type( &v, null_type ); 
    return *this;
 }
+
 variant& variant::operator=( const variant& v )
 {
    if( this == &v ) 
       return *this;
-   switch( get_type() )
-   {
-      set_variant_type( this, null_type );
-      case object_type:
-         delete *reinterpret_cast<variant_object**>(this);
-         break;
-      case array_type:
-         delete *reinterpret_cast<variants**>(this);
-         break;
-      case string_type:
-         delete *reinterpret_cast<string**>(this);
-         break;
-      default:
-         break;
-   }
+
+   clear();
    switch( v.get_type() )
    {
       case object_type:
@@ -652,5 +615,10 @@ string      format_string( const string& format, const variant_object& args )
    }
    return ss.str();
 }
+   #ifdef __APPLE__
+   #elif !defined(_MSC_VER)
+   void to_variant( long long int s, variant& v ) { v = variant( int64_t(s) ); }
+   void to_variant( unsigned long long int s, variant& v ) { v = variant( uint16_t(s)); }
+   #endif
 
 } // namespace fc

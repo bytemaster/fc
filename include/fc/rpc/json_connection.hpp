@@ -40,7 +40,7 @@ namespace fc { namespace rpc  {
           */
          ///@{ 
          void add_method( const fc::string& name, method );
-         void add_method( const fc::string& name, named_param_method );
+         void add_named_param_method( const fc::string& name, named_param_method );
          void remove_method( const fc::string& name );
          //@}
 

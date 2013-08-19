@@ -187,14 +187,23 @@ namespace fc
 
 
 } // namespace fc
+
+/**
+ *@brief: Workaround for varying preprocessing behavior between MSVC and gcc
+ */
+#define FC_EXPAND_MACRO( x ) x
 /**
  *  @brief Checks a condition and throws an assert_exception if the test is FALSE
  */
 #define FC_ASSERT( TEST, ... ) \
-if( !(TEST) ) { FC_THROW_EXCEPTION( assert_exception, #TEST __VA_ARGS__ ); }
+FC_EXPAND_MACRO( \
+do { if( !(TEST) ) { FC_THROW_EXCEPTION( assert_exception, #TEST ": "  __VA_ARGS__ ); } } while(0); \
+)
 
 #define FC_THROW( FORMAT, ... ) \
-   throw fc::exception( FC_LOG_MESSAGE( error, FORMAT, __VA_ARGS__ ) )  
+   do { \
+   throw fc::exception( FC_LOG_MESSAGE( error, FORMAT, __VA_ARGS__ ) );  \
+   } while(0)
 
 #define FC_EXCEPTION( EXCEPTION_TYPE, FORMAT, ... ) \
     fc::EXCEPTION_TYPE( FC_LOG_MESSAGE( error, FORMAT, __VA_ARGS__ ) )  
@@ -204,7 +213,9 @@ if( !(TEST) ) { FC_THROW_EXCEPTION( assert_exception, #TEST __VA_ARGS__ ); }
  *  @param format - a const char* string with "${keys}"
  */
 #define FC_THROW_EXCEPTION( EXCEPTION, FORMAT, ... ) \
-   throw fc::EXCEPTION( FC_LOG_MESSAGE( error, FORMAT, __VA_ARGS__ ) )  
+   do { \
+   throw fc::EXCEPTION( FC_LOG_MESSAGE( error, FORMAT, __VA_ARGS__ ) ); \
+   } while(0)
 
 
 /**

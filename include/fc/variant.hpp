@@ -58,6 +58,9 @@ namespace fc
    void from_variant( const variant& var,  time_point_sec& vo );
    #ifdef __APPLE__
    void to_variant( size_t s, variant& v );
+   #elif !defined(_MSC_VER)
+   void to_variant( long long int s, variant& v );
+   void to_variant( unsigned long long int s, variant& v );
    #endif
    void to_variant( const std::string& s, variant& v );
 
@@ -101,8 +104,8 @@ namespace fc
         /// @param str - UTF8 string
         variant( const char* str );
         variant( char* str );
-	variant( wchar_t* str );
-	variant( const wchar_t* str );
+        variant( wchar_t* str );
+        variant( const wchar_t* str );
         variant( int val );
         variant( float val );
         variant( int64_t val );
@@ -210,13 +213,13 @@ namespace fc
         template<typename T>
         variant& operator=( T&& v )
         {
-           *this = variant( fc::forward<T>(v) );
-           return *this;
+           return *this = variant( fc::forward<T>(v) );
         }
 
         template<typename T>
         variant( const optional<T>& v )
         {
+           memset( this, 0, sizeof(*this) );
            if( v ) *this = variant(*v);
         }
 
@@ -224,7 +227,9 @@ namespace fc
         explicit variant( const T& val );
 
 
+        void    clear();
       private:
+        void    init();
         double  _data;                ///< Alligned according to double requirements
         char    _type[sizeof(void*)]; ///< pad to void* size
    };

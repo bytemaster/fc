@@ -272,7 +272,7 @@ namespace fc { namespace rpc {
    {
       my->_methods.emplace(std::pair<std::string,method>(name,fc::move(m)));
    }
-   void json_connection::add_method( const fc::string& name, named_param_method m )
+   void json_connection::add_named_param_method( const fc::string& name, named_param_method m )
    {
       my->_named_param_methods.emplace(std::pair<std::string,named_param_method>(name,fc::move(m)));
    }

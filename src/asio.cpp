@@ -84,23 +84,36 @@ namespace fc {
             }
         }
     }
-    boost::asio::io_service& default_io_service(bool cleanup) {
-        static boost::asio::io_service       io;
-        static boost::asio::io_service::work the_work(io);
-        static boost::thread                 io_t([=] 
-               { 
-                 try { 
-                   fc::thread::current().set_name("asio");  
-                   io.run(); 
-                 }
-                 catch(...)
-                 {
-                   elog( "unexpected asio exception" );
-                 }
-               } 
-               );
 
-        return io;
+    struct default_io_service_scope
+    {
+       boost::asio::io_service*          io;
+       boost::thread*                    asio_thread;
+       boost::asio::io_service::work*    the_work;
+
+       default_io_service_scope()
+       {
+            io           = new boost::asio::io_service();
+            the_work     = new boost::asio::io_service::work(*io);
+            asio_thread  = new boost::thread( [=]()
+            { 
+              fc::thread::current().set_name("asio");
+              io->run(); 
+            });
+       }
+
+       ~default_io_service_scope()
+       {
+          delete the_work;
+          io->stop();
+          asio_thread->join();
+          delete io;
+          delete asio_thread;
+       }
+    };
+    boost::asio::io_service& default_io_service(bool cleanup) {
+        static default_io_service_scope fc_asio_service;
+        return *fc_asio_service.io;
     }
 
     namespace tcp {

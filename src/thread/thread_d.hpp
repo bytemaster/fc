@@ -89,7 +89,7 @@ namespace fc {
 
 #if 0
            void debug( const fc::string& s ) {
-	      return;
+          return;
               //boost::unique_lock<boost::mutex> lock(log_mutex());
 
               fc::cerr<<"--------------------- "<<s.c_str()<<" - "<<current;
@@ -165,7 +165,7 @@ namespace fc {
            void ready_push_front( const fc::context::ptr& c ) {
                 BOOST_ASSERT( c->next == nullptr );
                 BOOST_ASSERT( c != current );
-	        //if( c == current ) wlog( "pushing current to ready??" );
+            //if( c == current ) wlog( "pushing current to ready??" );
                 c->next = ready_head;
                 ready_head = c;
                 if( !ready_tail ) 
@@ -174,7 +174,7 @@ namespace fc {
            void ready_push_back( const fc::context::ptr& c ) {
                 BOOST_ASSERT( c->next == nullptr );
                 BOOST_ASSERT( c != current );
-	        //if( c == current ) wlog( "pushing current to ready??" );
+            //if( c == current ) wlog( "pushing current to ready??" );
                 c->next = 0;
                 if( ready_tail ) { 
                     ready_tail->next = c;
@@ -246,6 +246,7 @@ namespace fc {
               if( current && current->canceled ) {
                 FC_THROW_EXCEPTION( canceled_exception, "" );
               } else if( done )  {
+                ilog( "throwing canceled exception" );
                 FC_THROW_EXCEPTION( canceled_exception, "" ); 
              //   BOOST_THROW_EXCEPTION( thread_quit() );
               }
@@ -398,47 +399,58 @@ namespace fc {
      */
     time_point check_for_timeouts() {
         if( !sleep_pqueue.size() && !task_sch_queue.size() ) {
+            //ilog( "no timeouts ready" );
             return time_point::maximum();
         }
 
-
         time_point next = time_point::maximum();
-        if( task_sch_queue.size() && next > task_sch_queue.front()->_when )
-          next = task_sch_queue.front()->_when;
         if( sleep_pqueue.size() && next > sleep_pqueue.front()->resume_time )
           next = sleep_pqueue.front()->resume_time;
+        if( task_sch_queue.size() && next > task_sch_queue.front()->_when )
+          next = task_sch_queue.front()->_when;
 
         time_point now = time_point::now();
         if( now < next ) { return next; }
 
         // move all expired sleeping tasks to the ready queue
-        while( sleep_pqueue.size() && sleep_pqueue.front()->resume_time < now ) {
+        while( sleep_pqueue.size() && sleep_pqueue.front()->resume_time < now ) 
+        {
             fc::context::ptr c = sleep_pqueue.front();
             std::pop_heap(sleep_pqueue.begin(), sleep_pqueue.end(), sleep_priority_less() );
+            //ilog( "sleep pop back..." );
             sleep_pqueue.pop_back();
 
-            if( c->blocking_prom.size() ) {
+            if( c->blocking_prom.size() ) 
+            {
+             //   ilog( "timeotu blocking prom" );
                 c->timeout_blocking_promises();
             }
-            else { 
-	      if( c != current ) ready_push_front( c ); 
+            else 
+            { 
+                //ilog( "..." );
+                FC_ASSERT( c != current ) 
+                //ilog( "ready_push_front" );
+                ready_push_front( c ); 
             }
         }
         return time_point::min();
     }
 
-    void unblock( fc::context* c ) {
-        if(  fc::thread::current().my != this ) {
-          async( [=](){ unblock(c); } );
-          return;
-        }
-	if( c != current ) ready_push_front(c); 
-    }
+         void unblock( fc::context* c ) {
+             if(  fc::thread::current().my != this ) {
+               async( [=](){ unblock(c); } );
+               return;
+             }
+               if( c != current ) ready_push_front(c); 
+         }
+
         void yield_until( const time_point& tp, bool reschedule ) {
           check_fiber_exceptions();
 
-          if( tp <= time_point::now() ) 
+          if( tp <= (time_point::now()+fc::microseconds(500)) ) 
+          {
             return;
+          }
 
           if( !current )  {
             current = new fc::context(&fc::thread::current());
@@ -450,7 +462,7 @@ namespace fc {
           sleep_pqueue.push_back(current);
           std::push_heap( sleep_pqueue.begin(),
                           sleep_pqueue.end(), sleep_priority_less()   );
-
+          
           start_next_fiber(reschedule);
 
           // clear current context from sleep queue...

@@ -136,4 +136,6 @@ set( BOOST_LIBRARIES ${Boost_THREAD_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${Boost_FIL
 #target_link_libraries( test_compress fc ${BOOST_LIBRARIES} )
 #add_executable( test_aes tests/aes_test.cpp )
 #target_link_libraries( test_aes fc ${BOOST_LIBRARIES} )
+#add_executable( test_sleep tests/sleep.cpp )
+#target_link_libraries( test_sleep fc ${BOOST_LIBRARIES} )
 

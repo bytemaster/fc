@@ -213,6 +213,7 @@ namespace fc {
           _valid = false;
       }
     private:
+      template<typename U> friend class optional;
       T&       ref()      { return *ptr(); }
       const T& ref()const { return *ptr(); }
       T*       ptr()      { void* v = &_value[0]; return static_cast<T*>(v); }

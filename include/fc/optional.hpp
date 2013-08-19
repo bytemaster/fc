@@ -91,6 +91,7 @@ namespace fc {
         return *this;
       }
 
+      bool valid()const     { return _valid;  }
       bool operator!()const { return !_valid; }
       operator bool()const  { return _valid;  }
 

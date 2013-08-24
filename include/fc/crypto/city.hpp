@@ -45,6 +45,7 @@
 #include <stdint.h>
 #include <utility>
 #include <fc/uint128.hpp>
+#include <fc/array.hpp>
 
 namespace fc {
 
@@ -58,6 +59,7 @@ uint128 city_hash128(const char *s, size_t len);
 uint64_t city_hash_crc_64(const char *buf, size_t len);
 
 // Hash function for a byte array.
-uint128 city_hash_crc_128(const char *s, size_t len);
+uint128                city_hash_crc_128(const char *s, size_t len);
+fc::array<uint64_t,4>  city_hash_crc_256(const char *s, size_t len);
 
 } // namespace fc

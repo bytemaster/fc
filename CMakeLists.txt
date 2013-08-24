@@ -57,6 +57,7 @@ option( UNITY_BUILD OFF )
 FIND_PACKAGE( OpenSSL )
 include_directories( ${Boost_INCLUDE_DIR} )
 include_directories( ${OPENSSL_INCLUDE_DIR} )
+include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/vendor/salsa20 )
 
 SET( ALL_OPENSSL_LIBRARIES ${OPENSSL_LIBRARIES} ${SSL_EAY_RELEASE} ${LIB_EAY_RELEASE})
 
@@ -111,6 +112,7 @@ set( fc_sources
      src/crypto/dh.cpp
      src/crypto/blowfish.cpp
      src/crypto/elliptic.cpp
+     src/crypto/salsa20.cpp
      src/network/tcp_socket.cpp
      src/network/udp_socket.cpp
      src/network/http/http_connection.cpp
@@ -121,7 +123,12 @@ set( fc_sources
      src/compress/smaz.cpp
      vendor/cyoencode-1.0.2/src/CyoDecode.c
      vendor/cyoencode-1.0.2/src/CyoEncode.c
+#     vendor/salsa20/ecrypt.c
+     vendor/salsa20/salsa20.s
      )
+     SET_PROPERTY( SOURCE 
+                   vendor/salsa20/salsa20.s
+                   PROPERTY LANGUAGE C)
 
 set( sources
   ${fc_sources}

@@ -33,8 +33,11 @@
 #include <algorithm>
 #include <string.h>  // for memcpy and memset
 #include <fc/crypto/city.hpp>
-
+#ifdef __SSE4_2__
+#include <nmmintrin.h>
+#else
 uint64_t _mm_crc32_u64(uint64_t a, uint64_t b );
+#endif
 
 namespace fc {
 
@@ -469,6 +472,12 @@ void CityHashCrc256(const char *s, size_t len, uint64_t *result) {
   } else {
     CityHashCrc256Short(s, len, result);
   }
+}
+fc::array<uint64_t,4>  city_hash_crc_256(const char *s, size_t len)
+{
+   fc::array<uint64_t,4> buf;
+   CityHashCrc256( s, len, (uint64_t*)&buf );
+   return buf;
 }
 
 uint128 CityHashCrc128WithSeed(const char *s, size_t len, uint128 seed) {

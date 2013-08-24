@@ -224,7 +224,7 @@ do { if( !(TEST) ) { FC_THROW_EXCEPTION( assert_exception, #TEST ": "  __VA_ARGS
  */
 #define FC_RETHROW_EXCEPTION( ER, LOG_LEVEL, FORMAT, ... ) \
   do { \
-     er.append_log( FC_LOG_MESSAGE( LOG_LEVEL, FORMAT, __VA_ARGS__ ) ); \
+     ER.append_log( FC_LOG_MESSAGE( LOG_LEVEL, FORMAT, __VA_ARGS__ ) ); \
      throw;\
   } while(false)
 

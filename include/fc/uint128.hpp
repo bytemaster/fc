@@ -94,4 +94,19 @@ namespace fc
     inline void unpack( Stream& s, uint128& u ) { s.read( (char*)&u, sizeof(u) ); }
   }
 
+  uint64_t city_hash64(const char *buf, size_t len);
 } // namespace fc
+
+namespace std
+{
+    template<typename T> struct hash;
+
+    template<>
+    struct hash<fc::uint128>
+    {
+       size_t operator()( const fc::uint128& s )const
+       {
+           return  fc::city_hash64((char*)&s, sizeof(s));
+       }
+    };
+}

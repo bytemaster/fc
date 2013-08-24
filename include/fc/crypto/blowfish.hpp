@@ -149,12 +149,12 @@ public:
 	void reset_chain() { m_oChain = m_oChain0; }
 
 	// encrypt/decrypt Buffer in Place
-	void encrypt(unsigned char* buf, uint64_t n, int iMode=CBC);
-	void decrypt(unsigned char* buf, uint64_t n, int iMode=CBC);
+	void encrypt(unsigned char* buf, uint64_t n, int iMode=CFB);
+	void decrypt(unsigned char* buf, uint64_t n, int iMode=CFB);
 
 	// encrypt/decrypt from Input Buffer to Output Buffer
-	void encrypt(const unsigned char* in, unsigned char* out, uint64_t n, int iMode=CBC);
-	void decrypt(const unsigned char* in, unsigned char* out, uint64_t n, int iMode=CBC);
+	void encrypt(const unsigned char* in, unsigned char* out, uint64_t n, int iMode=CFB);
+	void decrypt(const unsigned char* in, unsigned char* out, uint64_t n, int iMode=CFB);
 
 //Private Functions
 private:

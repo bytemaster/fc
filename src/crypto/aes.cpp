@@ -1,10 +1,71 @@
-#include <fc/crypto/sha512.hpp>
+#include <fc/crypto/aes.hpp>
 #include <fc/crypto/openssl.hpp>
 #include <fc/exception/exception.hpp>
+#include <fc/fwd_impl.hpp>
 
 namespace fc {
 
 static int init = init_openssl();
+
+struct aes_encoder::impl 
+{
+   evp_cipher_ctx ctx;
+};
+
+aes_encoder::aes_encoder( const fc::sha256& key, const fc::uint128& init_value )
+{
+    my->ctx.obj = EVP_CIPHER_CTX_new();
+    /* Create and initialise the context */
+    if(!my->ctx)
+    {
+        FC_THROW_EXCEPTION( exception, "error allocating evp cipher context", 
+                           ("s", ERR_error_string( ERR_get_error(), nullptr) ) );
+    }
+
+    /* Initialise the encryption operation. IMPORTANT - ensure you use a key
+    *    and IV size appropriate for your cipher
+    *    In this example we are using 256 bit AES (i.e. a 256 bit key). The
+    *    IV size for *most* modes is the same as the block size. For AES this
+    *    is 128 bits */
+    if(1 != EVP_EncryptInit_ex(my->ctx, EVP_aes_256_cbc(), NULL, (unsigned char*)&key, (unsigned char*)&init_value))
+    {
+        FC_THROW_EXCEPTION( exception, "error durring aes 256 cbc encryption init", 
+                           ("s", ERR_error_string( ERR_get_error(), nullptr) ) );
+    }
+}
+aes_encoder::~aes_encoder()
+{
+}
+
+uint32_t aes_encoder::encode( const char* plaintxt, uint32_t plaintext_len, const char* ciphertxt )
+{
+    int ciphertext_len = 0;
+    /* Provide the message to be encrypted, and obtain the encrypted output.
+    *    * EVP_EncryptUpdate can be called multiple times if necessary
+    *       */
+    if(1 != EVP_EncryptUpdate(my->ctx, (unsigned char*)ciphertxt, &ciphertext_len, (const unsigned char*)plaintxt, plaintext_len))
+    {
+        FC_THROW_EXCEPTION( exception, "error durring aes 256 cbc encryption update", 
+                           ("s", ERR_error_string( ERR_get_error(), nullptr) ) );
+    }
+    return ciphertext_len;
+}
+uint32_t aes_encoder::final_encode( const char* ciphertxt )
+{
+    int ciphertext_len = 0;
+    /* Finalise the encryption. Further ciphertext bytes may be written at
+    *    * this stage.
+    *       */
+    if(1 != EVP_EncryptFinal_ex(my->ctx, (unsigned char*)ciphertxt, &ciphertext_len)) 
+    {
+        FC_THROW_EXCEPTION( exception, "error durring aes 256 cbc encryption final", 
+                           ("s", ERR_error_string( ERR_get_error(), nullptr) ) );
+    }
+    return ciphertext_len;
+}
+
+
+
 
 /** example method from wiki.opensslfoundation.com */
 int aes_encrypt(unsigned char *plaintext, int plaintext_len, unsigned char *key,
@@ -23,10 +84,10 @@ int aes_encrypt(unsigned char *plaintext, int plaintext_len, unsigned char *key,
     }
 
     /* Initialise the encryption operation. IMPORTANT - ensure you use a key
-    *    * and IV size appropriate for your cipher
-    *       * In this example we are using 256 bit AES (i.e. a 256 bit key). The
-    *          * IV size for *most* modes is the same as the block size. For AES this
-    *             * is 128 bits */
+    *    and IV size appropriate for your cipher
+    *    In this example we are using 256 bit AES (i.e. a 256 bit key). The
+    *    IV size for *most* modes is the same as the block size. For AES this
+    *    is 128 bits */
     if(1 != EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, key, iv))
     {
         FC_THROW_EXCEPTION( exception, "error durring aes 256 cbc encryption init", 

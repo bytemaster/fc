@@ -3,6 +3,9 @@
 #include <fc/exception/exception.hpp>
 #include <fc/fwd_impl.hpp>
 
+#include <fc/io/fstream.hpp>
+#include <fc/io/raw.hpp>
+
 namespace fc {
 
 static int init = init_openssl();
@@ -187,5 +190,45 @@ std::vector<char> aes_decrypt( const fc::sha512& key, const std::vector<char>& c
     plain_text.resize(plain_len);
     return plain_text;
 }
+
+
+/** encrypts plain_text and then includes a checksum that enables us to verify the integrety of
+ * the file / key prior to decryption. 
+ */
+void              aes_save( const fc::path& file, const fc::sha512& key, std::vector<char> plain_text )
+{ try {
+   auto cipher = aes_encrypt( key, plain_text );
+   fc::sha512::encoder check_enc;
+   fc::raw::pack( check_enc, key );
+   fc::raw::pack( check_enc, cipher );
+   auto check = check_enc.result();
+
+   fc::ofstream out(file);
+   fc::raw::pack( out, check );
+   fc::raw::pack( out, cipher );
+} FC_RETHROW_EXCEPTIONS( warn, "", ("file",file) ) }
+
+/**
+ *  recovers the plain_text saved via aes_save()
+ */
+std::vector<char> aes_load( const fc::path& file, const fc::sha512& key )
+{ try {
+   FC_ASSERT( fc::exists( file ) );
+
+   fc::ifstream in( file, fc::ifstream::binary );
+   fc::sha512 check;
+   std::vector<char> cipher;
+
+   fc::raw::unpack( in, check );
+   fc::raw::unpack( in, cipher );
+
+   fc::sha512::encoder check_enc;
+   fc::raw::pack( check_enc, key );
+   fc::raw::pack( check_enc, cipher );
+
+   FC_ASSERT( check_enc.result() == check );
+
+   return aes_decrypt( key, cipher );
+} FC_RETHROW_EXCEPTIONS( warn, "", ("file",file) ) }
 
 }  // namespace fc

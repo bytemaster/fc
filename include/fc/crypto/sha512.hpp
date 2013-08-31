@@ -65,6 +65,8 @@ class sha512
     uint64_t _hash[8]; 
 };
 
+  typedef fc::sha512 uint512;
+
   class variant;
   void to_variant( const sha512& bi, variant& v );
   void from_variant( const variant& v, sha512& bi );

@@ -195,7 +195,7 @@ namespace fc {
       /// @pre valid()
       bool error()const { return m_prom->error(); }
 
-      void cancel()const { m_prom->cancel(); }
+      void cancel()const { if( m_prom ) m_prom->cancel(); }
       bool canceled()const { return m_prom->canceled(); }
 
       /**
@@ -244,7 +244,7 @@ namespace fc {
       /// @pre valid()
       bool error()const { return m_prom->error(); }
 
-      void cancel()const { m_prom->cancel(); }
+      void cancel()const { if( m_prom ) m_prom->cancel(); }
 
       template<typename CompletionHandler>
       void on_complete( CompletionHandler&& c ) {

@@ -15,7 +15,11 @@ struct aes_encoder::impl
    evp_cipher_ctx ctx;
 };
 
-aes_encoder::aes_encoder( const fc::sha256& key, const fc::uint128& init_value )
+aes_encoder::aes_encoder(){}
+aes_encoder::~aes_encoder()
+{
+}
+void aes_encoder::init( const fc::sha256& key, const fc::uint128& init_value )
 {
     my->ctx.obj = EVP_CIPHER_CTX_new();
     /* Create and initialise the context */
@@ -35,9 +39,6 @@ aes_encoder::aes_encoder( const fc::sha256& key, const fc::uint128& init_value )
         FC_THROW_EXCEPTION( exception, "error durring aes 256 cbc encryption init", 
                            ("s", ERR_error_string( ERR_get_error(), nullptr) ) );
     }
-}
-aes_encoder::~aes_encoder()
-{
 }
 
 uint32_t aes_encoder::encode( const char* plaintxt, uint32_t plaintext_len, const char* ciphertxt )
@@ -73,7 +74,8 @@ struct aes_decoder::impl
    evp_cipher_ctx ctx;
 };
 
-aes_decoder::aes_decoder( const fc::sha256& key, const fc::uint128& init_value )
+aes_decoder::aes_decoder(){}
+void aes_decoder::init( const fc::sha256& key, const fc::uint128& init_value )
 {
     my->ctx.obj = EVP_CIPHER_CTX_new();
     /* Create and initialise the context */

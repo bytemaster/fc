@@ -21,6 +21,19 @@ namespace fc {
          struct      impl;
          fc::fwd<impl,96> my;
     };
+    class aes_decoder
+    {
+       public:
+         aes_decoder( const fc::sha256& key, const fc::uint128& init_value );
+         ~aes_decoder();
+     
+         uint32_t encode( const char* plaintxt, uint32_t len, const char* ciphertxt );
+         uint32_t final_encode( const char* ciphertxt );
+
+       private:
+         struct      impl;
+         fc::fwd<impl,96> my;
+    };
 
     int aes_encrypt(unsigned char *plaintext, int plaintext_len, unsigned char *key,
                     unsigned char *iv, unsigned char *ciphertext);

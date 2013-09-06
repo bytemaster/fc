@@ -11,9 +11,24 @@ namespace fc {
     class aes_encoder
     {
        public:
-         aes_encoder( const fc::sha256& key, const fc::uint128& init_value );
+         aes_encoder();
          ~aes_encoder();
      
+         void init( const fc::sha256& key, const fc::uint128& init_value );
+         uint32_t encode( const char* plaintxt, uint32_t len, const char* ciphertxt );
+         uint32_t final_encode( const char* ciphertxt );
+
+       private:
+         struct      impl;
+         fc::fwd<impl,96> my;
+    };
+    class aes_decoder
+    {
+       public:
+         aes_decoder();
+         ~aes_decoder();
+     
+         void     init( const fc::sha256& key, const fc::uint128& init_value );
          uint32_t encode( const char* plaintxt, uint32_t len, const char* ciphertxt );
          uint32_t final_encode( const char* ciphertxt );
 

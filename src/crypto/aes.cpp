@@ -15,7 +15,11 @@ struct aes_encoder::impl
    evp_cipher_ctx ctx;
 };
 
-aes_encoder::aes_encoder( const fc::sha256& key, const fc::uint128& init_value )
+aes_encoder::aes_encoder(){}
+aes_encoder::~aes_encoder()
+{
+}
+void aes_encoder::init( const fc::sha256& key, const fc::uint128& init_value )
 {
     my->ctx.obj = EVP_CIPHER_CTX_new();
     /* Create and initialise the context */
@@ -35,9 +39,6 @@ aes_encoder::aes_encoder( const fc::sha256& key, const fc::uint128& init_value )
         FC_THROW_EXCEPTION( exception, "error durring aes 256 cbc encryption init", 
                            ("s", ERR_error_string( ERR_get_error(), nullptr) ) );
     }
-}
-aes_encoder::~aes_encoder()
-{
 }
 
 uint32_t aes_encoder::encode( const char* plaintxt, uint32_t plaintext_len, const char* ciphertxt )
@@ -66,6 +67,73 @@ uint32_t aes_encoder::final_encode( const char* ciphertxt )
     }
     return ciphertext_len;
 }
+
+
+struct aes_decoder::impl 
+{
+   evp_cipher_ctx ctx;
+};
+
+aes_decoder::aes_decoder(){}
+void aes_decoder::init( const fc::sha256& key, const fc::uint128& init_value )
+{
+    my->ctx.obj = EVP_CIPHER_CTX_new();
+    /* Create and initialise the context */
+    if(!my->ctx)
+    {
+        FC_THROW_EXCEPTION( exception, "error allocating evp cipher context", 
+                           ("s", ERR_error_string( ERR_get_error(), nullptr) ) );
+    }
+
+    /* Initialise the encryption operation. IMPORTANT - ensure you use a key
+    *    and IV size appropriate for your cipher
+    *    In this example we are using 256 bit AES (i.e. a 256 bit key). The
+    *    IV size for *most* modes is the same as the block size. For AES this
+    *    is 128 bits */
+    if(1 != EVP_DecryptInit_ex(my->ctx, EVP_aes_256_cbc(), NULL, (unsigned char*)&key, (unsigned char*)&init_value))
+    {
+        FC_THROW_EXCEPTION( exception, "error durring aes 256 cbc encryption init", 
+                           ("s", ERR_error_string( ERR_get_error(), nullptr) ) );
+    }
+}
+aes_decoder::~aes_decoder()
+{
+}
+
+uint32_t aes_decoder::encode( const char* plaintxt, uint32_t plaintext_len, const char* ciphertxt )
+{
+    int ciphertext_len = 0;
+    /* Provide the message to be encrypted, and obtain the encrypted output.
+    *    * EVP_DecryptUpdate can be called multiple times if necessary
+    *       */
+    if(1 != EVP_DecryptUpdate(my->ctx, (unsigned char*)ciphertxt, &ciphertext_len, (const unsigned char*)plaintxt, plaintext_len))
+    {
+        FC_THROW_EXCEPTION( exception, "error durring aes 256 cbc encryption update", 
+                           ("s", ERR_error_string( ERR_get_error(), nullptr) ) );
+    }
+    return ciphertext_len;
+}
+uint32_t aes_decoder::final_encode( const char* ciphertxt )
+{
+    int ciphertext_len = 0;
+    /* Finalise the encryption. Further ciphertext bytes may be written at
+    *    * this stage.
+    *       */
+    if(1 != EVP_DecryptFinal_ex(my->ctx, (unsigned char*)ciphertxt, &ciphertext_len)) 
+    {
+        FC_THROW_EXCEPTION( exception, "error durring aes 256 cbc encryption final", 
+                           ("s", ERR_error_string( ERR_get_error(), nullptr) ) );
+    }
+    return ciphertext_len;
+}
+
+
+
+
+
+
+
+
 
 
 

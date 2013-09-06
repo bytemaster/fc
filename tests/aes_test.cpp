@@ -29,7 +29,7 @@ int main( int argc, char** )
       fc::aes_encoder enc;
       enc.init( fc::sha256::hash((char*)&key,sizeof(key) ), fc::city_hash_crc_128( (char*)&key, sizeof(key) ) ); 
       auto len = enc.encode( dcrypt.data(), dcrypt.size(), crypt.data() );
-      enc.final_encode( crypt.data() + len );
+    //  enc.final_encode( crypt.data() + len );
       std::cout<<"crypt: "<<fc::variant(crypt).as_string()<<"\n";
       
 

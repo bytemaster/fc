@@ -1,7 +1,9 @@
 #include <iostream>
 #include <fc/crypto/aes.hpp>
+#include <fc/crypto/city.hpp>
 #include <fc/exception/exception.hpp>
 
+#include <fc/variant.hpp>
 int main( int argc, char** )
 {
   std::string line;
@@ -20,6 +22,19 @@ int main( int argc, char** )
       std::cout<<"dcrypt.size:   '"<<dcrypt.size()<<"'\n";
       std::cout<<"line:          '"<<line<<"'\n";
       std::cout<<"dcrypt:        '"<<dcrypt.data()<<"'\n";
+      std::cout<<"dcrypt: "<<fc::variant(dcrypt).as_string()<<"\n";
+      std::cout<<"crypt: "<<fc::variant(crypt).as_string()<<"\n";
+      memset( crypt.data(), 0, crypt.size() );
+
+      fc::aes_encoder enc;
+      enc.init( fc::sha256::hash((char*)&key,sizeof(key) ), fc::city_hash_crc_128( (char*)&key, sizeof(key) ) ); 
+      auto len = enc.encode( dcrypt.data(), dcrypt.size(), crypt.data() );
+      enc.final_encode( crypt.data() + len );
+      std::cout<<"crypt: "<<fc::variant(crypt).as_string()<<"\n";
+      
+
+      fc::aes_decoder dec;
+      dec.init( fc::sha256::hash((char*)&key,sizeof(key) ), fc::city_hash_crc_128( (char*)&key, sizeof(key) ) ); 
     } 
     catch ( fc::exception& e ) 
     {

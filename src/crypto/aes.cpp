@@ -39,9 +39,10 @@ void aes_encoder::init( const fc::sha256& key, const fc::uint128& init_value )
         FC_THROW_EXCEPTION( exception, "error durring aes 256 cbc encryption init", 
                            ("s", ERR_error_string( ERR_get_error(), nullptr) ) );
     }
+    EVP_CIPHER_CTX_set_padding( my->ctx, 0 );
 }
 
-uint32_t aes_encoder::encode( const char* plaintxt, uint32_t plaintext_len, const char* ciphertxt )
+uint32_t aes_encoder::encode( const char* plaintxt, uint32_t plaintext_len, char* ciphertxt )
 {
     int ciphertext_len = 0;
     /* Provide the message to be encrypted, and obtain the encrypted output.
@@ -52,9 +53,11 @@ uint32_t aes_encoder::encode( const char* plaintxt, uint32_t plaintext_len, cons
         FC_THROW_EXCEPTION( exception, "error durring aes 256 cbc encryption update", 
                            ("s", ERR_error_string( ERR_get_error(), nullptr) ) );
     }
+    FC_ASSERT( ciphertext_len == plaintext_len );
     return ciphertext_len;
 }
-uint32_t aes_encoder::final_encode( const char* ciphertxt )
+#if 0
+uint32_t aes_encoder::final_encode( char* ciphertxt )
 {
     int ciphertext_len = 0;
     /* Finalise the encryption. Further ciphertext bytes may be written at
@@ -67,6 +70,7 @@ uint32_t aes_encoder::final_encode( const char* ciphertxt )
     }
     return ciphertext_len;
 }
+#endif
 
 
 struct aes_decoder::impl 
@@ -95,37 +99,42 @@ void aes_decoder::init( const fc::sha256& key, const fc::uint128& init_value )
         FC_THROW_EXCEPTION( exception, "error durring aes 256 cbc encryption init", 
                            ("s", ERR_error_string( ERR_get_error(), nullptr) ) );
     }
+    EVP_CIPHER_CTX_set_padding( my->ctx, 0 );
 }
 aes_decoder::~aes_decoder()
 {
 }
 
-uint32_t aes_decoder::encode( const char* plaintxt, uint32_t plaintext_len, const char* ciphertxt )
+uint32_t aes_decoder::decode( const char* ciphertxt, uint32_t plaintext_len, char* plaintext )
 {
     int ciphertext_len = 0;
     /* Provide the message to be encrypted, and obtain the encrypted output.
     *    * EVP_DecryptUpdate can be called multiple times if necessary
     *       */
-    if(1 != EVP_DecryptUpdate(my->ctx, (unsigned char*)ciphertxt, &ciphertext_len, (const unsigned char*)plaintxt, plaintext_len))
+    if(1 != EVP_DecryptUpdate(my->ctx, (unsigned char*)plaintext, &ciphertext_len, (const unsigned char*)ciphertxt, plaintext_len))
     {
         FC_THROW_EXCEPTION( exception, "error durring aes 256 cbc encryption update", 
                            ("s", ERR_error_string( ERR_get_error(), nullptr) ) );
     }
+    FC_ASSERT( ciphertext_len == plaintext_len );
     return ciphertext_len;
 }
-uint32_t aes_decoder::final_encode( const char* ciphertxt )
+#if 0
+uint32_t aes_decoder::final_decode( char* plaintext )
 {
+    return 0;
     int ciphertext_len = 0;
     /* Finalise the encryption. Further ciphertext bytes may be written at
     *    * this stage.
     *       */
-    if(1 != EVP_DecryptFinal_ex(my->ctx, (unsigned char*)ciphertxt, &ciphertext_len)) 
+    if(1 != EVP_DecryptFinal_ex(my->ctx, (unsigned char*)plaintext, &ciphertext_len)) 
     {
         FC_THROW_EXCEPTION( exception, "error durring aes 256 cbc encryption final", 
                            ("s", ERR_error_string( ERR_get_error(), nullptr) ) );
     }
     return ciphertext_len;
 }
+#endif
 
 
 

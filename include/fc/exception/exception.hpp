@@ -48,12 +48,12 @@ namespace fc
           *   and other information that is generally only useful for
           *   developers.
           */
-         string to_detail_string( log_level ll = log_level::all )const;
+         std::string to_detail_string( log_level ll = log_level::all )const;
 
          /**
           *   Generates a user-friendly error report.
           */
-         string to_string( log_level ll = log_level::info  )const;
+         std::string to_string( log_level ll = log_level::info  )const;
 
          /**
           *  Throw this exception as its most derived type. 
@@ -183,7 +183,7 @@ namespace fc
   FC_DECLARE_EXCEPTION( assert_exception, "Assert Exception" );
   FC_DECLARE_EXCEPTION( eof_exception, "End Of File" );
 
-  fc::string except_str();
+  std::string except_str();
 
 
 } // namespace fc

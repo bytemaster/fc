@@ -73,6 +73,7 @@ class ripemd160
   void from_variant( const variant& v, ripemd160& bi );
 
   typedef ripemd160 uint160_t;
+  typedef ripemd160 uint160;
 
 } // namespace fc
 

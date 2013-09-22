@@ -7,12 +7,26 @@
 #include <fc/array.hpp>
 #include <fc/time.hpp>
 #include <fc/io/raw_fwd.hpp>
+#include <fc/filesystem.hpp>
 #include <fc/exception/exception.hpp>
 
 #define MAX_ARRAY_ALLOC_SIZE (1024*1024*10) 
 
 namespace fc { 
     namespace raw {
+    template<typename Stream>
+    inline void pack( Stream& s, const fc::path& tp )
+    {
+       fc::raw::pack( s, tp.generic_string() );
+    }
+
+    template<typename Stream>
+    inline void unpack( Stream& s, fc::path& tp )
+    {
+       std::string p;
+       fc::raw::unpack( s, p );
+       tp = p;
+    }
 
     template<typename Stream>
     inline void pack( Stream& s, const fc::time_point_sec& tp )

@@ -61,6 +61,14 @@ class sha256
     friend bool   operator >= ( const sha256& h1, const sha256& h2 );
     friend bool   operator >  ( const sha256& h1, const sha256& h2 ); 
     friend bool   operator <  ( const sha256& h1, const sha256& h2 ); 
+
+    uint32_t pop_count()
+    {
+       return __builtin_popcountll(_hash[0]) +
+              __builtin_popcountll(_hash[1]) +
+              __builtin_popcountll(_hash[2]) +
+              __builtin_popcountll(_hash[3]); 
+    }
                              
     uint64_t _hash[4]; 
 };

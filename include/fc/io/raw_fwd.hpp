@@ -11,6 +11,7 @@ namespace fc {
    class time_point_sec;
    class variant;
    class variant_object;
+   class path;
    template<typename IntType, typename EnumType> class enum_type;
 
    namespace ecc { class public_key; class private_key; }
@@ -28,6 +29,9 @@ namespace fc {
     template<typename Stream> inline void unpack( Stream& s, variant_object& v );
     template<typename Stream> inline void pack( Stream& s, const variant& v );
     template<typename Stream> inline void unpack( Stream& s, variant& v );
+
+    template<typename Stream> inline void pack( Stream& s, const path& v );
+    template<typename Stream> inline void unpack( Stream& s, path& v );
 
 
     template<typename Stream, typename T> void unpack( Stream& s, fc::optional<T>& v ); 

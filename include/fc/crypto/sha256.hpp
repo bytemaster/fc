@@ -1,6 +1,7 @@
 #pragma once
 #include <fc/fwd.hpp>
 #include <fc/string.hpp>
+#include <fc/platform_independence.hpp>
 
 namespace fc
 {

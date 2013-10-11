@@ -54,12 +54,18 @@ endif()
 
 option( UNITY_BUILD OFF )
 
-FIND_PACKAGE( OpenSSL )
 include_directories( ${Boost_INCLUDE_DIR} )
-include_directories( ${OPENSSL_INCLUDE_DIR} )
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/vendor/salsa20 )
 
+FIND_PACKAGE( OpenSSL )
+include_directories( ${OPENSSL_INCLUDE_DIR} )
 SET( ALL_OPENSSL_LIBRARIES ${OPENSSL_LIBRARIES} ${SSL_EAY_RELEASE} ${LIB_EAY_RELEASE})
+
+if( UNIX )
+   SET(SALSA_SRC vendor/salsa20/salsa20.s)
+endif()
+
+
 
 set( fc_sources
      src/uint128.cpp
@@ -124,7 +130,7 @@ set( fc_sources
      vendor/cyoencode-1.0.2/src/CyoDecode.c
      vendor/cyoencode-1.0.2/src/CyoEncode.c
 #     vendor/salsa20/ecrypt.c
-     vendor/salsa20/salsa20.s
+     ${SALSA_SRC}
      )
      SET_PROPERTY( SOURCE 
                    vendor/salsa20/salsa20.s
@@ -138,6 +144,7 @@ add_subdirectory( vendor/easylzma )
 setup_library( fc SOURCES ${sources} LIBRARY_TYPE STATIC )
 
 set( BOOST_LIBRARIES ${Boost_THREAD_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_DATE_TIME_LIBRARY} ${Boost_CHRONO_LIBRARY} ${ALL_OPENSSL_LIBRARIES} ${Boost_COROUTINE_LIBRARY} ${Boost_CONTEXT_LIBRARY} )
+set( BOOST_LIBRARIES ${BOOST_LIBRARIES} PARENT_SCOPE )
 
 #add_executable( test_compress tests/compress.cpp )
 #target_link_libraries( test_compress fc ${BOOST_LIBRARIES} )

@@ -26,6 +26,10 @@ char* ripemd160::data()const { return (char*)&_hash[0]; }
 
 
 struct ripemd160::encoder::impl {
+   impl()
+   {
+        memset( (char*)&ctx, 0, sizeof(ctx) );
+   }
    RIPEMD160_CTX ctx;
 };
 

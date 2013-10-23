@@ -322,6 +322,15 @@ namespace fc
           vars[i] = variant(t[i]);
        v = vars;
    }
+   /** @ingroup Serializable */
+   template<typename A, typename B>
+   void to_variant( const std::pair<A,B>& t, variant& v )
+   {
+      std::vector<variant> vars(2);
+      vars[0] = variant(t.first);
+      vars[1] = variant(t.second);
+       v = vars;
+   }
 
 
    template<typename T>

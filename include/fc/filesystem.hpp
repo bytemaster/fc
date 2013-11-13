@@ -66,7 +66,11 @@ namespace fc {
       static char    separator_char;
 
     private:
+    #ifdef _WIN64
+      fwd<boost::filesystem::path,40> _p; 
+    #else
       fwd<boost::filesystem::path,32> _p; 
+    #endif
   };
 
   class directory_iterator {

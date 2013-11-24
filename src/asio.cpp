@@ -106,7 +106,7 @@ namespace fc {
        {
           delete the_work;
           io->stop();
-          asio_thread->join();
+        // TODO: this hangs sometimes..  asio_thread->join();
           delete io;
           delete asio_thread;
        }

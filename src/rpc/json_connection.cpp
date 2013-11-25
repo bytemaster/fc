@@ -35,6 +35,7 @@ namespace fc { namespace rpc {
 
             void send_result( variant id, variant result )
             {
+               ilog( "send ${i} ${r}", ("i",id)("r",result) );
                {
                  fc::scoped_lock<fc::mutex> lock(_write_mutex);
                  *_out << "{\"id\":";
@@ -57,13 +58,13 @@ namespace fc { namespace rpc {
                  json::to_stream( *_out, variant(e));
                  *_out << "}}\n";
                }
-               wlog(  "exception: ${except}", ("except", variant(e)) );
+               //wlog(  "exception: ${except}", ("except", variant(e)) );
                _out->flush();
             }
 
             void handle_message( const variant_object& obj )
             {
-              wlog(  "recv: ${msg}", ("msg", obj) );
+            //  wlog(  "recv: ${msg}", ("msg", obj) );
                try 
                {
                   auto m = obj.find("method");
@@ -160,7 +161,7 @@ namespace fc { namespace rpc {
                              auto data = err.find( "data" );
                              if( data != err.end() )
                              {
-                                wlog(  "exception: ${except}", ("except", data->value() ) );
+                                //wlog(  "exception: ${except}", ("except", data->value() ) );
                                 await->second->set_exception( data->value().as<exception>().dynamic_copy_exception() );  
                              }
                              else
@@ -196,31 +197,27 @@ namespace fc { namespace rpc {
                try 
                {
                   fc::string line;
-                  while( true )
+                  while( !_done.canceled() )
                   {
                       variant v = json::from_stream(*_in);
                       ///ilog( "input: ${in}", ("in", v ) );
-                      wlog(  "recv: ${line}", ("line", line) );
+                      //wlog(  "recv: ${line}", ("line", line) );
                       fc::async([=](){ handle_message(v.get_object()); });
                   } 
                } 
                catch ( eof_exception& eof ) 
                { 
                   _eof = true; 
-               wlog( "close" );
                   close( eof.dynamic_copy_exception() );
                }
                catch ( exception& e )
                {
-               wlog( "close" );
                   close( e.dynamic_copy_exception() );
                }
                catch ( ... )
                {
-               wlog( "close" );
                   close( fc::exception_ptr(new FC_EXCEPTION( unhandled_exception, "json connection read error" )) );
                }
-               wlog( "close" );
             }
 
             void close( fc::exception_ptr e )
@@ -245,6 +242,7 @@ namespace fc { namespace rpc {
          if( my->_done.valid() && !my->_done.ready() )
          {
             my->_done.cancel();
+            my->_out->close();
             my->_done.wait();
          }
       } 
@@ -263,17 +261,17 @@ namespace fc { namespace rpc {
       {
          FC_THROW_EXCEPTION( assert_exception, "start should only be called once" );
       }
-
-      wlog(  "EXEC!!!\n" );
       return my->_done = fc::async( [=](){ my->read_loop(); } );
    }
 
    void json_connection::add_method( const fc::string& name, method m )
    {
+      ilog( "add method ${name}", ("name",name) );
       my->_methods.emplace(std::pair<std::string,method>(name,fc::move(m)));
    }
    void json_connection::add_named_param_method( const fc::string& name, named_param_method m )
    {
+      ilog( "add named param method ${name}", ("name",name) );
       my->_named_param_methods.emplace(std::pair<std::string,named_param_method>(name,fc::move(m)));
    }
    void json_connection::remove_method( const fc::string& name )
@@ -349,7 +347,6 @@ namespace fc { namespace rpc {
 
    future<variant> json_connection::async_call( const fc::string& method, const variant& a1 )
    {
-      ilog( "");
       auto id = my->_next_id++;
       my->_awaiting[id] = fc::promise<variant>::ptr( new fc::promise<variant>() );
 
@@ -368,7 +365,6 @@ namespace fc { namespace rpc {
    }
    future<variant> json_connection::async_call( const fc::string& method, const variant& a1, const variant& a2 )
    {
-      ilog( "");
       auto id = my->_next_id++;
       my->_awaiting[id] = fc::promise<variant>::ptr( new fc::promise<variant>() );
 
@@ -389,7 +385,6 @@ namespace fc { namespace rpc {
    }
    future<variant> json_connection::async_call( const fc::string& method, const variant& a1, const variant& a2, const variant& a3 )
    {
-      ilog( "");
       auto id = my->_next_id++;
       my->_awaiting[id] = fc::promise<variant>::ptr( new fc::promise<variant>() );
 
@@ -419,7 +414,6 @@ namespace fc { namespace rpc {
    }
    future<variant> json_connection::async_call( const fc::string& method, const variant_object& named_args )
    {
-      wlog( "${method}  ${args}", ("method",method)("args",named_args) );
       auto id = my->_next_id++;
       my->_awaiting[id] = fc::promise<variant>::ptr( new fc::promise<variant>() );
       fc::scoped_lock<fc::mutex> lock(my->_write_mutex);

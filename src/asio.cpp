@@ -50,7 +50,7 @@ namespace fc {
                 }
                 else
                 {
-                 // elog( "${message} ", ("message", boost::system::system_error(ec).what()));
+                  elog( "${message} ", ("message", boost::system::system_error(ec).what()));
                   p->set_exception( fc::exception_ptr( new fc::exception( 
                           FC_LOG_MESSAGE( error, "${message} ", ("message", boost::system::system_error(ec).what())) ) ) );
                 }
@@ -106,7 +106,7 @@ namespace fc {
        {
           delete the_work;
           io->stop();
-        // TODO: this hangs sometimes..  asio_thread->join();
+          asio_thread->join();
           delete io;
           delete asio_thread;
        }

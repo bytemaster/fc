@@ -94,6 +94,45 @@ namespace fc
        } FC_RETHROW_EXCEPTIONS( warn, "while parsing token '${token}'", 
                                           ("token", token.str() ) );
    }
+   template<typename T>
+   fc::string stringFromToken( T& in )
+   {
+      fc::stringstream token;
+      try 
+      {
+         char c = in.peek();
+
+    //     if( c != ' ' )
+    //        FC_THROW_EXCEPTION( parse_error_exception, 
+    //                                        "Expected '\"' but read '${char}'", 
+    //                                        ("char", string(&c, (&c) + 1) ) );
+    //     in.get();
+         while( true )
+         {
+            switch( c = in.peek() )
+            {
+               case '\\':
+                  token << parseEscape( in );
+                  break;
+               case '\t':
+               case ' ':
+                  in.get();
+                  return token.str();
+               default:
+                  token << c;
+                  in.get();
+            }
+         }
+        // FC_THROW_EXCEPTION( parse_error_exception, "EOF before closing '\"' in string '${token}'",
+        //                                  ("token", token.str() ) );
+      } 
+      catch( const fc::eof_exception& eof )
+      {
+         return token.str();
+      }
+      FC_RETHROW_EXCEPTIONS( warn, "while parsing token '${token}'", 
+                                          ("token", token.str() ) );
+   }
 
    template<typename T>
    variant_object objectFromStream( T& in )
@@ -246,8 +285,9 @@ namespace fc
                if( str == "false" ) return false;
                else 
                {
-                  FC_THROW_EXCEPTION( parse_error_exception, "Invalid token '${token}'",
-                                           ("token",str) );
+                  return str;
+                 // FC_THROW_EXCEPTION( parse_error_exception, "Invalid token '${token}'",
+                 //                          ("token",str) );
                }
             }
          }
@@ -298,6 +338,8 @@ namespace fc
             case 0x04: // ^D end of transmission
               FC_THROW_EXCEPTION( eof_exception, "unexpected end of file" );
             default:
+            //  ilog( "unhandled char '${c}' int ${int}", ("c", fc::string( &c, 1 ) )("int", int(c)) );
+              return stringFromToken(in);
               in.get(); // 
               ilog( "unhandled char '${c}' int ${int}", ("c", fc::string( &c, 1 ) )("int", int(c)) );
               return variant();

@@ -178,7 +178,7 @@ namespace fc {
    void thread::sleep_until( const time_point& tp ) {
       //ilog( "sleep until ${tp}    wait: ${delta}", ("tp",tp)("delta",(tp-fc::time_point::now()).count()) );
      
-      if( tp <= (time_point::now()+fc::microseconds(500)) ) 
+      if( tp <= (time_point::now()+fc::microseconds(10000)) ) 
       {
          this->yield(true);
       }

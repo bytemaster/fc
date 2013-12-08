@@ -18,10 +18,7 @@ SET( CMAKE_DEBUG_POSTFIX _debug )
 SET( BUILD_SHARED_LIBS NO )
 
 if( WIN32 )
-   set( RPCRT4 Rpcrt4 )
-  #boost
-  SET( Boost_INCLUDE_DIR $ENV{BOOST_ROOT} )
-  #Using shared libs for boost on windows  
+  set( RPCRT4 Rpcrt4 )
 else(WIN32)
      SET(Boost_USE_STATIC_LIBS ON)
      FIND_PACKAGE(Boost 1.51 COMPONENTS thread date_time system filesystem program_options signals serialization chrono unit_test_framework context )    

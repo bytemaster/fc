@@ -14,6 +14,11 @@ namespace fc {
       void     connect_to( const fc::ip::endpoint& e );
       fc::ip::endpoint remote_endpoint()const;
 
+      void get( char& c )
+      {
+          read( &c, 1 );
+      }
+
       /// istream interface
       /// @{
       virtual size_t   readsome( char* buffer, size_t max );

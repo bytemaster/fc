@@ -7,6 +7,7 @@
 #include <fc/crypto/hex.hpp>
 #include <fc/log/logger.hpp>
 #include <fc/io/stdio.hpp>
+#include <fc/network/url.hpp>
 
 
 class fc::http::connection::impl 
@@ -90,14 +91,15 @@ http::reply connection::request( const fc::string& method,
                                 const fc::string& url, 
                                 const fc::string& body, const headers& he ) {
 	
+  fc::url parsed_url(url);
   if( !my->sock.is_open() ) {
     wlog( "Re-open socket!" );
     my->sock.connect_to( my->ep );
   }
   try {
       fc::stringstream req;
-      req << method <<" "<<url<<" HTTP/1.1\r\n";
-      req << "Host: localhost\r\n";
+      req << method <<" "<<parsed_url.path()->generic_string()<<" HTTP/1.1\r\n";
+      req << "Host: "<<*parsed_url.host()<<"\r\n";
       req << "Content-Type: application/json\r\n";
       for( auto i = he.begin(); i != he.end(); ++i )
       {

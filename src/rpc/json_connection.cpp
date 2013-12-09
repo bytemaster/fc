@@ -64,7 +64,7 @@ namespace fc { namespace rpc {
 
             void handle_message( const variant_object& obj )
             {
-            //  wlog(  "recv: ${msg}", ("msg", obj) );
+              wlog(  "recv: ${msg}", ("msg", obj) );
                try 
                {
                   auto m = obj.find("method");

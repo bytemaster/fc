@@ -369,7 +369,7 @@ namespace fc { namespace ecc {
       public_key_data dat;
       if( !my->_key ) return dat;
       EC_KEY_set_conv_form( my->_key, POINT_CONVERSION_COMPRESSED );
-      /*size_t nbytes = */i2o_ECPublicKey( my->_key, nullptr );
+      /*size_t nbytes = i2o_ECPublicKey( my->_key, nullptr ); */
       /*assert( nbytes == 33 )*/
       char* front = &dat.data[0];
       i2o_ECPublicKey( my->_key, (unsigned char**)&front  );
@@ -380,6 +380,23 @@ namespace fc { namespace ecc {
        EC_POINT_get_affine_coordinates_GFp( group, pub, self.my->_pub_x.get(), self.my->_pub_y.get(), nullptr );
        */
     }
+    public_key_point_data public_key::serialize_ecc_point()const
+    {
+      public_key_point_data dat;
+      if( !my->_key ) return dat;
+     // EC_KEY_set_conv_form( my->_key, POINT_CONVERSION_COMPRESSED );
+     // size_t nbytes = i2o_ECPublicKey( my->_key, nullptr );
+     // assert( nbytes == 65 )
+      char* front = &dat.data[0];
+      i2o_ECPublicKey( my->_key, (unsigned char**)&front  );
+      return dat;
+      /*
+       EC_POINT* pub   = EC_KEY_get0_public_key( my->_key );
+       EC_GROUP* group = EC_KEY_get0_group( my->_key );
+       EC_POINT_get_affine_coordinates_GFp( group, pub, self.my->_pub_x.get(), self.my->_pub_y.get(), nullptr );
+       */
+    }
+
     public_key::public_key()
     {
     }

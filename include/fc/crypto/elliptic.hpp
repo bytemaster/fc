@@ -16,6 +16,7 @@ namespace fc {
     }
 
     typedef fc::array<char,33>          public_key_data;
+    typedef fc::array<char,65>          public_key_point_data; ///< the full non-compressed version of the ECC point
     typedef fc::array<char,72>          signature;
     typedef fc::array<unsigned char,65> compact_signature;
 
@@ -31,8 +32,10 @@ namespace fc {
            ~public_key();
            bool verify( const fc::sha256& digest, const signature& sig );
            public_key_data serialize()const;
+           public_key_point_data serialize_ecc_point()const;
 
            operator public_key_data()const { return serialize(); }
+
 
            public_key( const public_key_data& v );
            public_key( const compact_signature& c, const fc::sha256& digest );

@@ -171,6 +171,12 @@ namespace fc {
       future( fc::shared_ptr<promise<T>>&& p ):m_prom(fc::move(p)){}
       future(){}
 
+      future& operator=(future<T>&& f ) {
+        fc_swap(m_prom,f.m_prom); 
+        return *this;
+      }
+
+
       operator const T&()const { return wait(); }
       
       /// @pre valid()
@@ -220,6 +226,12 @@ namespace fc {
       future( const fc::shared_ptr<promise<void>>& p ):m_prom(p){}
       future( fc::shared_ptr<promise<void>>&& p ):m_prom(fc::move(p)){}
       future(){}
+
+      future& operator=(future<void>&& f ) {
+        fc_swap(m_prom,f.m_prom); 
+        return *this;
+      }
+
       
       /// @pre valid()
       /// @post ready()

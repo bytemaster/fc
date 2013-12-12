@@ -217,8 +217,10 @@ namespace fc {
                 BOOST_ASSERT( this == thread::current().my );
                 
                 task_base* pending = 0; 
-
-                pending = task_in_queue.exchange(0,boost::memory_order_consume);
+                //DLN: changed from memory_order_consume for boost 1.55.
+                //This appears to be safest replacement for now, maybe
+                //can be changed to relaxed later, but needs analysis.
+                pending = task_in_queue.exchange(0,boost::memory_order_seq_cst);
                 if( pending ) { enqueue( pending ); }
 
                 task_base* p(0);

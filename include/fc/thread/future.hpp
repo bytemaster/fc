@@ -169,6 +169,7 @@ namespace fc {
     public:
       future( const fc::shared_ptr<promise<T>>& p ):m_prom(p){}
       future( fc::shared_ptr<promise<T>>&& p ):m_prom(fc::move(p)){}
+      future(const future<T>& f ) : m_prom(f.m_prom){}
       future(){}
 
       future& operator=(future<T>&& f ) {

@@ -226,6 +226,7 @@ namespace fc {
     public:
       future( const fc::shared_ptr<promise<void>>& p ):m_prom(p){}
       future( fc::shared_ptr<promise<void>>&& p ):m_prom(fc::move(p)){}
+      future(const future<void>& f ) : m_prom(f.m_prom){}
       future(){}
 
       future& operator=(future<void>&& f ) {

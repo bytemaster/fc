@@ -116,7 +116,7 @@ uint32_t aes_decoder::decode( const char* ciphertxt, uint32_t plaintext_len, cha
         FC_THROW_EXCEPTION( exception, "error durring aes 256 cbc encryption update", 
                            ("s", ERR_error_string( ERR_get_error(), nullptr) ) );
     }
-    FC_ASSERT( ciphertext_len == plaintext_len );
+    FC_ASSERT( ciphertext_len == plaintext_len, "", ("ciphertext_len",ciphertext_len)("plaintext_len",plaintext_len) );
     return ciphertext_len;
 }
 #if 0

@@ -55,6 +55,7 @@ namespace fc {
       void close();
       void accept( tcp_socket& s );
       void listen( uint16_t port );
+      uint16_t get_port()const;
     
     private:
       // non copyable

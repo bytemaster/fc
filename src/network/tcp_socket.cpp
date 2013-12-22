@@ -101,6 +101,11 @@ namespace fc {
     my = new impl(port);
   }
 
+  uint16_t tcp_server::get_port()const
+  {
+     return my->_accept.local_endpoint().port();
+  }
+
 
 
 } // namespace fc 

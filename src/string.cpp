@@ -2,6 +2,7 @@
 #include <fc/utility.hpp>
 #include <fc/fwd_impl.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/algorithm/string.hpp>
 
 #include <string>
 
@@ -97,7 +98,12 @@ namespace fc  {
   {
     return boost::lexical_cast<std::string>(d);
   }
-
+  std::string trim( const std::string& s )
+  {
+      std::string cpy(s);
+      boost::algorithm::trim(cpy);
+      return cpy;
+  }
 
 } // namespace fc
 

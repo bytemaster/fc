@@ -19,6 +19,7 @@ namespace fc
   typedef fc::optional<fc::string> ostring;
   class variant_object;
   fc::string format_string( const fc::string&, const variant_object& );
+  fc::string trim( const fc::string& );
 }
 
 #else

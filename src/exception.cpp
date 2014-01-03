@@ -22,7 +22,8 @@ namespace fc
           canceled_exception_code      = 9,
           assert_exception_code        = 10,
           eof_exception_code           = 11,
-          std_exception_code           = 12,
+          db_in_use_exception_code     = 12,
+          std_exception_code           = 14,
       };
 
      void  to_variant( detail::exception_code e, variant& v )
@@ -65,6 +66,9 @@ namespace fc
           case eof_exception_code:
              v = "eof";
              break;
+          case db_in_use_exception_code:
+            v = "db_in_use";
+            break;
           case unspecified_exception_code:
           default:
              v = "unspecified";
@@ -88,6 +92,7 @@ namespace fc
         else if( v == "assert" )         ll = assert_exception_code;
         else if( v == "std" )            ll = std_exception_code;
         else if( v == "eof" )            ll = eof_exception_code;
+        else if( v == "db_in_use")       ll = db_in_use_exception_code;
         else  FC_THROW_EXCEPTION( bad_cast_exception, 
                                        "Invalid Error Report _code  '${code}'",
                                        ("code", v) );
@@ -176,7 +181,7 @@ namespace fc
   FC_EXCEPTION_IMPL(canceled_exception)
   FC_EXCEPTION_IMPL(assert_exception)
   FC_EXCEPTION_IMPL(eof_exception)
-
+  FC_EXCEPTION_IMPL(db_in_use_exception)
 
 
 
@@ -288,6 +293,8 @@ namespace fc
            throw out_of_range_exception( my->_elog );
         case detail::eof_exception_code:
            throw eof_exception( my->_elog );
+        case detail::db_in_use_exception_code:
+          throw db_in_use_exception( my->_elog );
         case detail::std_exception_code:
            throw std_exception( *this );
         case detail::unspecified_exception_code:
@@ -321,6 +328,8 @@ namespace fc
            return std::make_shared<out_of_range_exception>( my->_elog );
         case detail::eof_exception_code:
            return std::make_shared<eof_exception>( my->_elog );
+        case detail::db_in_use_exception_code:
+           return std::make_shared<db_in_use_exception>( my->_elog );
         case detail::std_exception_code:
            return std::make_shared<std_exception>( *this );
         case detail::unspecified_exception_code:

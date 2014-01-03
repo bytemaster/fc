@@ -183,6 +183,8 @@ namespace fc
   FC_DECLARE_EXCEPTION( assert_exception, "Assert Exception" );
   FC_DECLARE_EXCEPTION( eof_exception, "End Of File" );
 
+  FC_DECLARE_EXCEPTION( db_in_use_exception, "Database already in use" );
+
   std::string except_str();
 
 

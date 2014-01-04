@@ -6,6 +6,8 @@
 #include <fc/io/fstream.hpp>
 #include <fc/io/raw.hpp>
 
+#include <fc/log/logger.hpp>
+
 namespace fc {
 
 static int init = init_openssl();
@@ -53,7 +55,7 @@ uint32_t aes_encoder::encode( const char* plaintxt, uint32_t plaintext_len, char
         FC_THROW_EXCEPTION( exception, "error durring aes 256 cbc encryption update", 
                            ("s", ERR_error_string( ERR_get_error(), nullptr) ) );
     }
-    FC_ASSERT( ciphertext_len == plaintext_len );
+    FC_ASSERT( ciphertext_len == plaintext_len, "", ("ciphertext_len",ciphertext_len)("plaintext_len",plaintext_len) );
     return ciphertext_len;
 }
 #if 0

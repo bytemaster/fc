@@ -13,6 +13,7 @@ namespace fc {
    class variant_object;
    class path;
    template<typename IntType, typename EnumType> class enum_type;
+   namespace ip { class endpoint; }
 
    namespace ecc { class public_key; class private_key; }
    namespace raw {
@@ -32,6 +33,8 @@ namespace fc {
 
     template<typename Stream> inline void pack( Stream& s, const path& v );
     template<typename Stream> inline void unpack( Stream& s, path& v );
+    template<typename Stream> inline void pack( Stream& s, const ip::endpoint& v );
+    template<typename Stream> inline void unpack( Stream& s, ip::endpoint& v );
 
 
     template<typename Stream, typename T> void unpack( Stream& s, fc::optional<T>& v ); 

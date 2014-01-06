@@ -440,7 +440,7 @@ namespace fc {
 
          void unblock( fc::context* c ) {
              if(  fc::thread::current().my != this ) {
-               async( [=](){ unblock(c); } );
+               self.async( [=](){ unblock(c); } );
                return;
              }
                if( c != current ) ready_push_front(c); 

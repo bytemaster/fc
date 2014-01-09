@@ -77,8 +77,9 @@ set( fc_sources
      src/thread/mutex.cpp
      src/asio.cpp
      src/string.cpp
-     src/shared_ptr.cpp 
-     src/time.cpp 
+     src/shared_ptr.cpp
+     src/time.cpp
+     src/utf8.cpp
      src/io/iostream.cpp
      src/io/datastream.cpp
      src/io/buffered_iostream.cpp

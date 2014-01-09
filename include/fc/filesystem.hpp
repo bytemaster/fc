@@ -58,6 +58,13 @@ namespace fc {
       std::wstring wstring() const;
       std::wstring generic_wstring() const;
 
+      /** Retrieves native string path representation and next converts it into
+          ANSI UTF-8 representation.
+          It is needed since not all parts of fc library accept unicode paths
+          (fc::file_mapping).
+      */
+      std::string  toNativeAnsiPath() const;
+
       /**
        * @brief replaces '/' with '\' in the result of generic_string()
        *

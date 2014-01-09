@@ -29,6 +29,9 @@ namespace fc {
    path::path( const fc::string& p )
    :_p(p.c_str()){}
 
+   path::path(const std::wstring& p)
+   :_p(p) {}
+
    path::path( const path& p )
    :_p(p){}
 
@@ -67,6 +70,17 @@ namespace fc {
    fc::string path::generic_string()const {
     return _p->generic_string();
    }
+
+  std::wstring path::wstring() const
+    {
+    return _p->wstring();
+    }
+
+  std::wstring path::generic_wstring() const
+    {
+    return _p->generic_wstring();
+    }
+
    /**
     *  @todo use iterators instead of indexes for 
     *  faster performance

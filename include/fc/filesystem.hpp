@@ -30,6 +30,8 @@ namespace fc {
       ~path();
       path( const boost::filesystem::path& );
       path( const fc::string& p );
+      /// Constructor to build path using unicode native characters.
+      path(const std::wstring& p);
       path( const char* );
       path( const path& p );
       path( path&& p );
@@ -45,13 +47,16 @@ namespace fc {
       operator boost::filesystem::path& ();
       operator const boost::filesystem::path& ()const;
 
-      void       replace_extension( const fc::path& e );
-      fc::path   stem()const;
-      fc::path   extension()const;
-      fc::path   filename()const;
-      fc::path   parent_path()const;
-      fc::string string()const;
-      fc::string generic_string()const;
+      void         replace_extension( const fc::path& e );
+      fc::path     stem()const;
+      fc::path     extension()const;
+      fc::path     filename()const;
+      fc::path     parent_path()const;
+      fc::string   string()const;
+      fc::string   generic_string()const;
+
+      std::wstring wstring() const;
+      std::wstring generic_wstring() const;
 
       /**
        * @brief replaces '/' with '\' in the result of generic_string()

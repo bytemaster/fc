@@ -4,6 +4,7 @@
 #include <fc/exception/exception.hpp>
 #include <fc/log/logger.hpp>
 
+#include <boost/filesystem/path.hpp>
 
 namespace fc {
    class ofstream::impl : public fc::retainable {
@@ -23,7 +24,8 @@ namespace fc {
    ofstream::~ofstream(){}
 
    void ofstream::open( const fc::path& file, int m ) {
-      my->ofs.open( file.string().c_str(), std::ios::binary );
+     const boost::filesystem::path& bfp = file; 
+     my->ofs.open( bfp.native(), std::ios::binary );
    }
    size_t ofstream::writesome( const char* buf, size_t len ) {
         my->ofs.write(buf,len);
@@ -49,7 +51,8 @@ namespace fc {
    ifstream::~ifstream(){}
 
    void ifstream::open( const fc::path& file, int m ) {
-      my->ifs.open( file.string().c_str(), std::ios::binary );
+     const boost::filesystem::path& bfp = file; 
+      my->ifs.open( bfp.native(), std::ios::binary );
    }
    size_t ifstream::readsome( char* buf, size_t len ) {
       auto s = size_t(my->ifs.readsome( buf, len ));

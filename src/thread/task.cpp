@@ -9,7 +9,12 @@
 
 namespace fc {
   task_base::task_base(void* func)
-  :_functor(func){
+  :
+  _posted_num(0),
+  _active_context(nullptr),
+  _next(nullptr),
+  _promise_impl(nullptr),
+  _functor(func){
   }
 
   void task_base::run() {

@@ -11,6 +11,10 @@ INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR} )
 INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR}/include )
 INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_SOURCE_DIR}/vendor/cyoencode-1.0.2/src )
 
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/GitVersionGen/")
+include(GetGitRevisionDescription)
+get_git_head_revision(GIT_REFSPEC GIT_SHA3)
+
 SET( DEFAULT_HEADER_INSTALL_DIR include/\${target} )
 SET( DEFAULT_LIBRARY_INSTALL_DIR lib/ )
 SET( DEFAULT_EXECUTABLE_INSTALL_DIR bin/ )
@@ -77,8 +81,9 @@ set( fc_sources
      src/thread/mutex.cpp
      src/asio.cpp
      src/string.cpp
-     src/shared_ptr.cpp 
-     src/time.cpp 
+     src/shared_ptr.cpp
+     src/time.cpp
+     src/utf8.cpp
      src/io/iostream.cpp
      src/io/datastream.cpp
      src/io/buffered_iostream.cpp
@@ -130,6 +135,7 @@ set( fc_sources
 #     vendor/salsa20/ecrypt.c
      ${SALSA_SRC}
      )
+
      SET_PROPERTY( SOURCE 
                    vendor/salsa20/salsa20.s
                    PROPERTY LANGUAGE C)
@@ -137,6 +143,10 @@ set( fc_sources
 set( sources
   ${fc_sources}
 )
+
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/GitSHA3.cpp.in" "${CMAKE_CURRENT_BINARY_DIR}/GitSHA3.cpp" @ONLY)
+list(APPEND sources "${CMAKE_CURRENT_BINARY_DIR}/GitSHA3.cpp" GitSHA3.h)
+
 add_subdirectory( vendor/easylzma )
 
 setup_library( fc SOURCES ${sources} LIBRARY_TYPE STATIC )

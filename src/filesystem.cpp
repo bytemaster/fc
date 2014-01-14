@@ -4,14 +4,29 @@
 #include <fc/fwd_impl.hpp>
 #include <fc/utility.hpp>
 #include <fc/io/fstream.hpp>
+
+#include <fc/utf8.hpp>
+#include <fc/variant.hpp>
+
 #include <boost/config.hpp>
 #include <boost/filesystem.hpp>
-#include <fc/variant.hpp>
+
+#ifdef WIN32
+  #include <windows.h>
+#endif
 
 namespace fc {
   void to_variant( const fc::path& t, variant& v ) {
-    v = t.generic_string();
+    std::string path = t.toNativeAnsiPath();
+    for(auto& c : path)
+      {
+      if(c == '\\')
+        c = '/';
+      }
+
+    v = path;
   }
+
   void from_variant( const fc::variant& v, fc::path& t ) {
     t = fc::path(v.as_string());
   }
@@ -28,6 +43,9 @@ namespace fc {
    :_p(p){}
    path::path( const fc::string& p )
    :_p(p.c_str()){}
+
+   path::path(const std::wstring& p)
+   :_p(p) {}
 
    path::path( const path& p )
    :_p(p){}
@@ -67,6 +85,36 @@ namespace fc {
    fc::string path::generic_string()const {
     return _p->generic_string();
    }
+
+  std::wstring path::wstring() const
+    {
+    return _p->wstring();
+    }
+
+  std::wstring path::generic_wstring() const
+    {
+    return _p->generic_wstring();
+    }
+
+  std::string path::toNativeAnsiPath() const
+    {
+    std::wstring path = generic_wstring();
+
+#ifdef WIN32
+    const size_t maxPath = 32*1024;
+    std::vector<wchar_t> shortPath;
+    shortPath.resize(maxPath + 1);
+          
+    wchar_t* buffer = shortPath.data();
+    DWORD res = GetShortPathNameW(path.c_str(), buffer, maxPath);
+    if(res != 0)
+      path = buffer;
+#endif
+    std::string filePath;
+    fc::encodeUtf8(path, &filePath);
+    return filePath;
+    }
+
    /**
     *  @todo use iterators instead of indexes for 
     *  faster performance

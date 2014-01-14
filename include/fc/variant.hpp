@@ -5,6 +5,7 @@
 #include <memory>
 #include <string.h> // memset
 #include <unordered_set>
+#include <unordered_map>
 #include <set>
 
 namespace fc
@@ -42,6 +43,11 @@ namespace fc
    void to_variant( const std::vector<char>& var,  variant& vo );
    void from_variant( const variant& var,  std::vector<char>& vo );
 
+   template<typename K, typename T>
+   void to_variant( const std::unordered_map<K,T>& var,  variant& vo );
+   template<typename K, typename T>
+   void from_variant( const variant& var,  std::unordered_map<K,T>& vo );
+
    template<typename T>
    void to_variant( const std::unordered_set<T>& var,  variant& vo );
    template<typename T>
@@ -71,6 +77,11 @@ namespace fc
    void from_variant( const variant& var,  std::shared_ptr<T>& vo );
 
    typedef std::vector<variant>   variants;
+   template<typename A, typename B>
+   void to_variant( const std::pair<A,B>& t, variant& v );
+   template<typename A, typename B>
+   void from_variant( const variant& v, std::pair<A,B>& p );
+
 
    /**
     * @brief stores null, int64, uint64, double, bool, string, std::vector<variant>,
@@ -283,6 +294,28 @@ namespace fc
       for( auto itr = vars.begin(); itr != vars.end(); ++itr )
          vo.insert( itr->as<T>() );
    }
+
+
+   template<typename K, typename T>
+   void to_variant( const std::unordered_map<K, T>& var,  variant& vo )
+   {
+       std::vector< variant > vars(var.size());
+       size_t i = 0;
+       for( auto itr = var.begin(); itr != var.end(); ++itr, ++i )
+          vars[i] = fc::variant(*itr);
+       vo = vars;
+   }
+   template<typename K, typename T>
+   void from_variant( const variant& var,  std::unordered_map<K, T>& vo )
+   {
+      const variants& vars = var.get_array();
+      vo.clear();
+      for( auto itr = vars.begin(); itr != vars.end(); ++itr )
+         vo.insert( itr->as< std::pair<K,T> >() );
+
+   }
+
+
    template<typename T>
    void to_variant( const std::set<T>& var,  variant& vo )
    {
@@ -297,7 +330,7 @@ namespace fc
    {
       const variants& vars = var.get_array();
       vo.clear();
-      vo.reserve( vars.size() );
+      //vo.reserve( vars.size() );
       for( auto itr = vars.begin(); itr != vars.end(); ++itr )
          vo.insert( itr->as<T>() );
    }
@@ -330,6 +363,15 @@ namespace fc
       vars[0] = variant(t.first);
       vars[1] = variant(t.second);
        v = vars;
+   }
+   template<typename A, typename B>
+   void from_variant( const variant& v, std::pair<A,B>& p )
+   {
+      const variants& vars = v.get_array();
+      if( vars.size() > 0 )
+      p.first  = vars[0].as<A>();
+      if( vars.size() > 1 )
+      p.second = vars[1].as<B>();
    }
 
 

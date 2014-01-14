@@ -44,6 +44,8 @@ namespace fc
          const fc::string& name()const;
 
          void add_appender( const fc::shared_ptr<appender>& a );
+         std::vector<fc::shared_ptr<appender> > get_appenders()const;
+         void remove_appender( const fc::shared_ptr<appender>& a );
 
          bool is_enabled( log_level e )const;
          void log( log_message m );

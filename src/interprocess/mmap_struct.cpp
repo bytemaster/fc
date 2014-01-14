@@ -33,7 +33,7 @@ namespace fc
             }
          }
 
-         std::string filePath = file.toNativeAnsiPath();
+         std::string filePath = file.to_native_ansi_path(); 
 
          _file_mapping.reset( new fc::file_mapping( filePath.c_str(), fc::read_write ) );
          _mapped_region.reset( new fc::mapped_region( *_file_mapping, fc::read_write, 0, s ) );

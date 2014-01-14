@@ -17,12 +17,12 @@
 
 namespace fc {
   void to_variant( const fc::path& t, variant& v ) {
-    std::string path = t.toNativeAnsiPath();
+    std::string path = t.to_native_ansi_path();
     for(auto& c : path)
-      {
+    {
       if(c == '\\')
         c = '/';
-      }
+    }
 
     v = path;
   }
@@ -96,16 +96,16 @@ namespace fc {
     return _p->generic_wstring();
     }
 
-  std::string path::toNativeAnsiPath() const
+  std::string path::to_native_ansi_path() const
     {
     std::wstring path = generic_wstring();
 
 #ifdef WIN32
     const size_t maxPath = 32*1024;
-    std::vector<wchar_t> shortPath;
-    shortPath.resize(maxPath + 1);
+    std::vector<wchar_t> short_path;
+    short_path.resize(maxPath + 1);
           
-    wchar_t* buffer = shortPath.data();
+    wchar_t* buffer = short_path.data();
     DWORD res = GetShortPathNameW(path.c_str(), buffer, maxPath);
     if(res != 0)
       path = buffer;

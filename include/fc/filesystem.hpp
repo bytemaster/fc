@@ -63,7 +63,7 @@ namespace fc {
           It is needed since not all parts of fc library accept unicode paths
           (fc::file_mapping).
       */
-      std::string  toNativeAnsiPath() const;
+      std::string  to_native_ansi_path() const;
 
       /**
        * @brief replaces '/' with '\' in the result of generic_string()

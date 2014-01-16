@@ -33,7 +33,7 @@
 #include <algorithm>
 #include <string.h>  // for memcpy and memset
 #include <fc/crypto/city.hpp>
-#ifdef __SSE4_2__
+#if defined(__SSE4_2__) && defined(__x86_64__)
 #include <nmmintrin.h>
 #else
 uint64_t _mm_crc32_u64(uint64_t a, uint64_t b );

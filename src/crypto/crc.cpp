@@ -601,7 +601,7 @@ static const uint32_t crc_c[256] = {
          0x79B737BA, 0x8BDCB4B9, 0x988C474D, 0x6AE7C44E,
          0xBE2DA0A5, 0x4C4623A6, 0x5F16D052, 0xAD7D5351,
  };
-#ifndef __SSE4_2__
+#if !defined __SSE4_2__ || (defined __SSE4_2__ && !defined __x86_64__)
 
 
 uint64_t _mm_crc32_u64(uint64_t a, uint64_t b )

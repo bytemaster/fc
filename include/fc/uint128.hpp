@@ -99,8 +99,6 @@ namespace fc
 
 namespace std
 {
-    template<typename T> struct hash;
-
     template<>
     struct hash<fc::uint128>
     {

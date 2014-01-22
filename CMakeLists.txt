@@ -58,6 +58,8 @@ option( UNITY_BUILD OFF )
 include_directories( ${Boost_INCLUDE_DIR} )
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/vendor/salsa20 )
 
+include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/vendor/easylzma/src )
+
 FIND_PACKAGE( OpenSSL )
 include_directories( ${OPENSSL_INCLUDE_DIR} )
 SET( ALL_OPENSSL_LIBRARIES ${OPENSSL_LIBRARIES} ${SSL_EAY_RELEASE} ${LIB_EAY_RELEASE})
@@ -130,6 +132,7 @@ set( fc_sources
      src/network/resolve.cpp
      src/network/url.cpp
      src/compress/smaz.cpp
+     src/compress/lzma.cpp
      vendor/cyoencode-1.0.2/src/CyoDecode.c
      vendor/cyoencode-1.0.2/src/CyoEncode.c
 #     vendor/salsa20/ecrypt.c
@@ -150,6 +153,8 @@ list(APPEND sources "${CMAKE_CURRENT_BINARY_DIR}/GitSHA3.cpp" GitSHA3.h)
 add_subdirectory( vendor/easylzma )
 
 setup_library( fc SOURCES ${sources} LIBRARY_TYPE STATIC )
+
+target_link_libraries( fc easylzma_static )
 
 set( BOOST_LIBRARIES ${Boost_THREAD_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_DATE_TIME_LIBRARY} ${Boost_CHRONO_LIBRARY} ${ALL_OPENSSL_LIBRARIES} ${Boost_COROUTINE_LIBRARY} ${Boost_CONTEXT_LIBRARY} )
 set( BOOST_LIBRARIES ${BOOST_LIBRARIES} PARENT_SCOPE )

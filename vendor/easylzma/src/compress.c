@@ -39,7 +39,7 @@ elzma_compress_alloc()
     hand->props.lc = 3;
     hand->props.lp = 0;    
     hand->props.pb = 2;    
-    hand->props.level = 5;
+    hand->props.level = 9;
     hand->props.algo = 1;
     hand->props.fb = 32;
     hand->props.dictSize = 1 << 24;

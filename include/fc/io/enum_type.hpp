@@ -23,6 +23,8 @@ namespace fc
       
       enum_type& operator=( IntType i )  { value = (EnumType)i; return *this;}
       enum_type& operator=( EnumType i ) { value = i; return *this;}
+      bool       operator<( EnumType i ) { return value < i; }
+      bool       operator>( EnumType i ) { return value < i; }
 
       friend bool operator==( enum_type e, IntType i )  { return e.value == (EnumType)i; }
       friend bool operator==( enum_type e, EnumType i ) { return e.value == i;           }

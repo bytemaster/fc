@@ -2,6 +2,9 @@
 #include <stdint.h>
 #include <string>
 
+#pragma warning (push)
+#pragma warning (disable : 4244)
+
 namespace fc 
 {
   class bigint;
@@ -110,3 +113,6 @@ namespace std
        }
     };
 }
+
+#pragma warning (pop)
+

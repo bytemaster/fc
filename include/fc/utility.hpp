@@ -59,3 +59,7 @@ namespace fc {
     a = fc::move(b);
     b = fc::move(tmp);
   }
+
+#define LLCONST(constant)   static_cast<int64_t>(constant##ll)
+#define ULLCONST(constant)  static_cast<uint64_t>(constant##ull)
+

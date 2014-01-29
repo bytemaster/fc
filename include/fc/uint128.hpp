@@ -2,8 +2,10 @@
 #include <stdint.h>
 #include <string>
 
-#pragma warning (push)
-#pragma warning (disable : 4244)
+#ifdef _MSC_VER
+  #pragma warning (push)
+  #pragma warning (disable : 4244)
+#endif //// _MSC_VER
 
 namespace fc 
 {
@@ -114,5 +116,6 @@ namespace std
     };
 }
 
-#pragma warning (pop)
-
+#ifdef _MSC_VER
+  #pragma warning (pop)
+#endif ///_MSC_VER

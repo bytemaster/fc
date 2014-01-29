@@ -106,7 +106,7 @@ namespace fc {
           v |= uint32_t(uint8_t(b) & 0x7f) << by;
           by += 7;
       } while( uint8_t(b) & 0x80 );
-      vi.value = v;
+      vi.value = static_cast<uint32_t>(v);
     }
 
     template<typename Stream> inline void pack( Stream& s, const char* v ) { pack( s, fc::string(v) ); }
@@ -153,7 +153,7 @@ namespace fc {
 
     // bool
     template<typename Stream> inline void pack( Stream& s, const bool& v ) { pack( s, uint8_t(v) );             }
-    template<typename Stream> inline void unpack( Stream& s, bool& v )     { uint8_t b; unpack( s, b ); v=b;    }
+    template<typename Stream> inline void unpack( Stream& s, bool& v )     { uint8_t b; unpack( s, b ); v=(b!=0);    }
 
     namespace detail {
     

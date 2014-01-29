@@ -3,6 +3,11 @@
 #include <fc/string.hpp>
 #include <fc/optional.hpp>
 
+#ifdef _MSC_VER
+  #pragma warning (push)
+  #pragma warning (disable : 4244)
+#endif //// _MSC_VER
+
 namespace fc {
   class microseconds { 
     public:
@@ -87,3 +92,7 @@ namespace fc {
 
   typedef fc::optional<time_point> otime_point;
 }
+
+#ifdef _MSC_VER
+  #pragma warning (pop)
+#endif /// #ifdef _MSC_VER

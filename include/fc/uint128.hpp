@@ -2,6 +2,11 @@
 #include <stdint.h>
 #include <string>
 
+#ifdef _MSC_VER
+  #pragma warning (push)
+  #pragma warning (disable : 4244)
+#endif //// _MSC_VER
+
 namespace fc 
 {
   class bigint;
@@ -110,3 +115,7 @@ namespace std
        }
     };
 }
+
+#ifdef _MSC_VER
+  #pragma warning (pop)
+#endif ///_MSC_VER

@@ -81,3 +81,16 @@ class sha256
   void from_variant( const variant& v, sha256& bi );
 
 } // fc
+namespace std
+{
+    template<typename T> struct hash;
+
+    template<>
+    struct hash<fc::sha256>
+    {
+       size_t operator()( const fc::sha256& s )const
+       {
+           return  *((size_t*)&s);
+       }
+    };
+}

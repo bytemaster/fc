@@ -73,8 +73,6 @@ class sha224
 } // fc
 namespace std
 {
-    template<typename T> struct hash;
-
     template<>
     struct hash<fc::sha224>
     {

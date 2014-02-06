@@ -79,8 +79,6 @@ class ripemd160
 
 namespace std
 {
-    template<typename T> struct hash;
-
     template<>
     struct hash<fc::ripemd160>
     {

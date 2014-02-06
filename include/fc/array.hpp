@@ -117,8 +117,6 @@ namespace fc {
 #include <fc/crypto/city.hpp>
 namespace std
 {
-    template<typename T> struct hash;
-
     template<typename T, size_t N>
     struct hash<fc::array<T,N> >
     {

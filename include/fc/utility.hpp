@@ -10,10 +10,10 @@
 #endif
 
 
-namespace std {
-  typedef decltype(sizeof(int)) size_t;
-  typedef decltype(nullptr) nullptr_t;
-}
+//namespace std {
+//  typedef decltype(sizeof(int)) size_t;
+//  typedef decltype(nullptr) nullptr_t;
+//}
 
 namespace fc {
   using std::size_t;

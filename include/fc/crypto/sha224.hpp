@@ -1,4 +1,5 @@
 #pragma once
+#include <unordered_map>
 #include <fc/fwd.hpp>
 #include <fc/string.hpp>
 

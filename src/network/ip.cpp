@@ -1,5 +1,4 @@
 #include <fc/network/ip.hpp>
-#include <fc/crypto/city.hpp>
 #include <fc/variant.hpp>
 #include <boost/asio.hpp>
 #include <boost/lexical_cast.hpp>
@@ -132,10 +131,3 @@ namespace fc { namespace ip {
   }
 
 } 
-namespace std
-{
-    size_t hash<fc::ip::endpoint>::operator()( const fc::ip::endpoint& e )const
-    {
-        return fc::city_hash64( (char*)&e, sizeof(e) );
-    }
-}

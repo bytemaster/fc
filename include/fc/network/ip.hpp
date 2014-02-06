@@ -2,6 +2,7 @@
 #include <fc/string.hpp>
 #include <fc/crypto/sha1.hpp>
 #include <fc/io/raw_fwd.hpp>
+#include <fc/crypto/city.hpp>
 
 namespace fc {
 
@@ -115,6 +116,9 @@ namespace std
     template<>
     struct hash<fc::ip::endpoint>
     {
-       size_t operator()( const fc::ip::endpoint& e )const;
+       size_t operator()( const fc::ip::endpoint& e )const
+       {
+           return fc::city_hash64( (char*)&e, sizeof(e) );
+       }
     };
 }

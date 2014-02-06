@@ -114,6 +114,7 @@ namespace fc {
 
 }
 
+#include <unordered_map>
 #include <fc/crypto/city.hpp>
 namespace std
 {

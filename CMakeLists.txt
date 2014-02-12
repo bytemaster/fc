@@ -1,18 +1,20 @@
+#
+# Defines fc library target.
+
 PROJECT( fc )
+CMAKE_MINIMUM_REQUIRED( VERSION 2.8.12 )
 
-CMAKE_MINIMUM_REQUIRED( VERSION 2.8.0 )
+MESSAGE(STATUS "Configuring project fc located in: ${CMAKE_CURRENT_SOURCE_DIR}")
+SET( CMAKE_AUTOMOC OFF )
 
-SET( CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules;${CMAKE_MODULE_PATH}" )
-SET( CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/CMakeModules;${CMAKE_MODULE_PATH}" )
+# Setup module path to make visible used CMake extensions
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/GitVersionGen")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules")
 
 INCLUDE( VersionMacros )
 INCLUDE( SetupTargetMacros )
-INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR} )
-INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR}/include )
-INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_SOURCE_DIR}/vendor/cyoencode-1.0.2/src )
+INCLUDE(GetGitRevisionDescription)
 
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/GitVersionGen/")
-include(GetGitRevisionDescription)
 get_git_head_revision(GIT_REFSPEC GIT_SHA3)
 
 SET( DEFAULT_HEADER_INSTALL_DIR include/\${target} )
@@ -21,58 +23,51 @@ SET( DEFAULT_EXECUTABLE_INSTALL_DIR bin/ )
 SET( CMAKE_DEBUG_POSTFIX _debug )
 SET( BUILD_SHARED_LIBS NO )
 
-if( WIN32 )
-  set( RPCRT4 Rpcrt4 )
-else(WIN32)
-     SET(Boost_USE_STATIC_LIBS ON)
-     FIND_PACKAGE(Boost 1.51 COMPONENTS thread date_time system filesystem program_options signals serialization chrono unit_test_framework context )    
-endif( WIN32 )
-
-LINK_DIRECTORIES( ${Boost_LIBRARY_DIRS} )
+SET (ORIGINAL_LIB_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES})
 
 IF( WIN32 )
-    ADD_DEFINITIONS( -DWIN32 )
-    ADD_DEFINITIONS( -DNOMINMAX )
-	ADD_DEFINITIONS( -D_WIN32_WINNT=0x0501 )
-	ADD_DEFINITIONS( -D_CRT_SECURE_NO_WARNINGS )
-	ADD_DEFINITIONS( -D_SCL_SERCURE_NO_WARNINGS )
+  MESSAGE(STATUS "Configuring fc to build on Win32")
 
-	# Activate C++ exception handling
-	IF (NOT CMAKE_CXX_FLAGS MATCHES "/EHsc")
-		SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc")    
-	ENDIF()
+  #You need to set OPENSSL_ROOT environment variable for your system on WIN32
+  message(STATUS "Setting up OpenSSL root and include vars on Win32 platform")
+  set( OPENSSL_ROOT_DIR $ENV{OPENSSL_ROOT} )
+
+  set( RPCRT4 Rpcrt4 )
+
+  #boost
+  SET(BOOST_ROOT $ENV{BOOST_ROOT})
+  set(Boost_USE_DEBUG_PYTHON ON)
+  set(Boost_USE_MULTITHREADED ON)
+  set(Boost_USE_STATIC_LIBS OFF)
+  set(BOOST_ALL_DYN_LINK ON) # force dynamic linking for all libraries
+  
+  FIND_PACKAGE(Boost 1.53 REQUIRED COMPONENTS thread date_time system filesystem program_options signals serialization chrono unit_test_framework context)
+  # For Boost 1.53 on windows, coroutine was not in BOOST_LIBRARYDIR and do not need it to build,  but if boost versin >= 1.54, find coroutine otherwise will cause link errors
+  IF(NOT "${Boost_VERSION}" MATCHES "1.53(.*)")
+    FIND_PACKAGE(Boost 1.54 REQUIRED COMPONENTS coroutine)
+  ENDIF()
+
 ELSE(WIN32)
-   INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_SOURCE_DIR}/vendor/boost_1.51/include )
-   IF( APPLE )
-      SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -stdlib=libc++ -Wall" )
-   ELSE( NOT APPLE )
-      SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -Wall -Wno-unused-local-typedefs -fmax-errors=3" )
-   ENDIF(APPLE)
+  MESSAGE(STATUS "Configuring fc to build on Unix/Apple")
+
+  SET(Boost_USE_STATIC_LIBS ON)
+  FIND_PACKAGE(Boost 1.53 REQUIRED COMPONENTS thread date_time system filesystem program_options signals serialization chrono unit_test_framework context coroutine) 
+
+  SET(CMAKE_FIND_LIBRARY_SUFFIXES ".a;.so")
+
+  IF(NOT APPLE )
+    # Unix build:
+    SET(SALSA_SRC vendor/salsa20/salsa20.s)
+    SET(rt_library rt )
+    SET(pthread_library pthread)
+  ENDIF(NOT APPLE)
 ENDIF(WIN32)
 
-if( UNIX ) 
-  if( NOT APPLE )  
-    set(rt_library rt )
-	set(pthread_library pthread) 
-  endif() 
-endif()
+FIND_PACKAGE( OpenSSL )
+
+SET (CMAKE_FIND_LIBRARY_SUFFIXES ${ORIGINAL_LIB_SUFFIXES})
 
 option( UNITY_BUILD OFF )
-
-include_directories( ${Boost_INCLUDE_DIR} )
-include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/vendor/salsa20 )
-
-include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/vendor/easylzma/src )
-
-FIND_PACKAGE( OpenSSL )
-include_directories( ${OPENSSL_INCLUDE_DIR} )
-SET( ALL_OPENSSL_LIBRARIES ${OPENSSL_LIBRARIES} ${SSL_EAY_RELEASE} ${LIB_EAY_RELEASE})
-
-if( UNIX )
-   SET(SALSA_SRC vendor/salsa20/salsa20.s)
-endif()
-
-
 
 set( fc_sources
      src/uint128.cpp
@@ -147,26 +142,59 @@ set( fc_sources
                    vendor/salsa20/salsa20.s
                    PROPERTY LANGUAGE C)
 
+file(GLOB_RECURSE fc_headers ${CMAKE_CURRENT_SOURCE_DIR} 
+  *.hpp *.h)
+
 set( sources
   ${fc_sources}
 )
 
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/GitSHA3.cpp.in" "${CMAKE_CURRENT_BINARY_DIR}/GitSHA3.cpp" @ONLY)
 list(APPEND sources "${CMAKE_CURRENT_BINARY_DIR}/GitSHA3.cpp" GitSHA3.h)
+list(APPEND sources ${fc_headers})
 
 add_subdirectory( vendor/easylzma )
 
 setup_library( fc SOURCES ${sources} LIBRARY_TYPE STATIC )
 
-target_link_libraries( fc easylzma_static )
+IF(WIN32)
+  target_compile_definitions(fc PUBLIC WIN32 NOMINMAX _WIN32_WINNT=0x0501 _CRT_SECURE_NO_WARNINGS
+    _SCL_SERCURE_NO_WARNINGS 
+    # Needed to disable MSVC autolinking feature (#pragma comment)
+    BOOST_ALL_NO_LIB
+  )
+  # Activate C++ exception handling inc. SEH to catch GPFs
+  target_compile_options(fc PUBLIC /EHa)
+ELSE()
+  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99 -Wall" )
+  IF(APPLE)
+    target_compile_options(fc PUBLIC -std=c++11 -stdlib=libc++ -Wall)
+  ELSE()
+    target_compile_options(fc PUBLIC -std=c++11 -Wall -fnon-call-exceptions -Wno-unused-local-typedefs -fmax-errors=3)
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused-local-typedefs -fmax-errors=3 ")
+  ENDIF()
+ENDIF()
+ 
+target_include_directories(fc
+  PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${Boost_INCLUDE_DIR}
+    ${OPENSSL_INCLUDE_DIR}
 
-set( BOOST_LIBRARIES ${Boost_THREAD_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_DATE_TIME_LIBRARY} ${Boost_CHRONO_LIBRARY} ${ALL_OPENSSL_LIBRARIES} ${Boost_COROUTINE_LIBRARY} ${Boost_CONTEXT_LIBRARY} )
-set( BOOST_LIBRARIES ${BOOST_LIBRARIES} PARENT_SCOPE )
+  PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/vendor/cyoencode-1.0.2/src
+    ${CMAKE_CURRENT_SOURCE_DIR}/vendor/boost_1.51/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/vendor/salsa20
+    ${CMAKE_CURRENT_SOURCE_DIR}/vendor/easylzma/src
+  )
+
+target_link_libraries( fc easylzma_static ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} )
 
 #add_executable( test_compress tests/compress.cpp )
-#target_link_libraries( test_compress fc ${BOOST_LIBRARIES} )
+#target_link_libraries( test_compress fc )
 #add_executable( test_aes tests/aes_test.cpp )
-#target_link_libraries( test_aes ${pthread_library} ${rt_library} fc ${BOOST_LIBRARIES} ${rt_library} ${pthread_library} ${BOOST_LIBRARIES} )
+#target_link_libraries( test_aes fc ${rt_library} ${pthread_library} )
 #add_executable( test_sleep tests/sleep.cpp )
-#target_link_libraries( test_sleep fc ${BOOST_LIBRARIES} )
+#target_link_libraries( test_sleep fc )
+
+MESSAGE(STATUS "Finished fc module configuration...")
 

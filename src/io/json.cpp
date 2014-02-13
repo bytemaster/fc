@@ -6,6 +6,8 @@
 #include <fc/io/sstream.hpp>
 #include <fc/log/logger.hpp>
 //#include <utfcpp/utf8.h>
+#include <iostream>
+#include <fstream>
 
 namespace fc
 {
@@ -585,8 +587,10 @@ namespace fc
    }
    variant json::from_file( const fc::path& p )
    {
-      auto tmp = std::make_shared<fc::ifstream>( p, ifstream::binary );
-      buffered_istream bi( tmp ); 
+      //auto tmp = std::make_shared<fc::ifstream>( p, ifstream::binary );
+      //auto tmp = std::make_shared<std::ifstream>( p.generic_string().c_str(), std::ios::binary );
+      //buffered_istream bi( tmp ); 
+      std::ifstream bi( p.generic_string().c_str(), std::ios::binary );
       return variant_from_stream( bi  );
    }
    variant json::from_stream( buffered_istream& in )

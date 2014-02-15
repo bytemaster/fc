@@ -175,7 +175,7 @@ ELSE()
   SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99 -Wall" )
 
   IF(APPLE)
-    target_compile_options(fc PUBLIC -std=c++11 -stdlib=libc++ -Wall)
+    SET(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -std=c++11 -stdlib=libc++  -Wall" )
   ELSE()
     target_compile_options(fc PUBLIC -std=c++11 -Wall -fnon-call-exceptions -Wno-unused-local-typedefs -fmax-errors=3)
     SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused-local-typedefs -fmax-errors=3 ")

@@ -52,9 +52,10 @@ namespace fc {
       tcp_server();
       ~tcp_server();
 
-      void close();
-      void accept( tcp_socket& s );
-      void listen( uint16_t port );
+      void     close();
+      void     accept( tcp_socket& s );
+      void     listen( uint16_t port );
+      void     listen( const fc::ip::endpoint& ep );
       uint16_t get_port()const;
     
     private:

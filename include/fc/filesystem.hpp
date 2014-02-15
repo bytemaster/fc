@@ -135,8 +135,16 @@ namespace fc {
 
   void     create_hard_link( const path& from, const path& to );
 
-  path     unique_path();
-  path     temp_directory_path();
+  path        unique_path();
+  path        temp_directory_path();
+
+  /** @return the home directory on Linux and OS X and the Profile directory on Windows */
+  const path& home_path();
+
+  /** @return the home_path() on Linux, home_path()/Library/Application Support/ on OS X, 
+   *  and APPDATA on windows
+   */
+  const path& app_path();
 
   class variant;
   void to_variant( const fc::path&,  fc::variant&  );

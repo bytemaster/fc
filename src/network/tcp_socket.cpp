@@ -59,9 +59,12 @@ namespace fc {
 
   class tcp_server::impl {
     public:
-      impl(uint16_t port):
-      _accept( fc::asio::default_io_service(), boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), port) ){
-      }
+      impl(uint16_t port)
+      :_accept( fc::asio::default_io_service(), boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), port) ){}
+
+      impl(const fc::ip::endpoint& ep  )
+      :_accept( fc::asio::default_io_service(), boost::asio::ip::tcp::endpoint(boost::asio::ip::address_v4( ep.get_address()), ep.port()) ){}
+
       ~impl(){
         try {
           _accept.close();
@@ -99,6 +102,11 @@ namespace fc {
   {
     if( my ) delete my;
     my = new impl(port);
+  }
+  void tcp_server::listen( const fc::ip::endpoint& ep ) 
+  {
+    if( my ) delete my;
+    my = new impl(ep);
   }
 
   uint16_t tcp_server::get_port()const

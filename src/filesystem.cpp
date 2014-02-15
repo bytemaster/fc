@@ -13,6 +13,10 @@
 
 #ifdef WIN32
   #include <windows.h>
+#else
+  #include <sys/types.h>
+  #include <pwd.h>
+  #include <uuid/uuid.h>
 #endif
 
 namespace fc {
@@ -364,5 +368,52 @@ namespace fc {
    void temp_file_base::release()
    {
       _path = fc::optional<fc::path>();
+   }
+
+   const fc::path& home_path()
+   {
+      static fc::path p = []()
+      {
+        #ifdef WIN32
+          char* home = getenv( "USERPROFILE" );
+          if( nullptr == home )
+          {
+             FC_ASSERT( home != nullptr, "The USERPROFILE environment variable is not set" );
+          }
+          return fc::path( home );
+        #else
+          char* home = getenv( "HOME" );
+          if( nullptr == home )
+          {
+             struct passwd* pwd = getpwuid(getuid());
+             if( pwd )
+             {
+                 return fc::path( std::string( pwd->pw_dir ) );
+             }
+             FC_ASSERT( home != nullptr, "The HOME environment variable is not set" );
+          }
+          return fc::path( std::string(home) );
+        #endif
+      }();
+      return p;
+   }
+
+   const fc::path& app_dir()
+   {
+      #ifdef __APPLE__
+         static fc::path appdir = [](){  return home_path() / "Library" / "Application Support"; }();  
+      #elif defined( WIN32 )
+         static fc::path appdir = [](){  
+          char* appdata = getenv( "APPDATA" );
+          if( nullptr == appdata )
+          {
+             FC_ASSERT( appdata != nullptr, "The APPDATA environment variable is not set" );
+          }
+          return fc::path( std::string(appdata) );
+         }();
+      #else
+         static fc::path appdir = home_dir();
+      #endif
+      return appdir;
    }
 }

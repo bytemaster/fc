@@ -398,7 +398,7 @@ namespace fc {
       return p;
    }
 
-   const fc::path& app_dir()
+   const fc::path& app_path()
    {
       #ifdef __APPLE__
          static fc::path appdir = [](){  return home_path() / "Library" / "Application Support"; }();  

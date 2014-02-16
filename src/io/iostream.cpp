@@ -354,4 +354,4 @@ namespace fc {
       return *this;
   }
 
-}
+} // namespace fc

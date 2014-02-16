@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include <unordered_set>
+#include <unordered_map>
 #include <set>
 
 namespace fc { 
@@ -26,6 +27,13 @@ namespace fc {
     template<typename Stream, typename T> inline void unpack( Stream& s, std::set<T>& value );
     template<typename Stream, typename T> inline void pack( Stream& s, const std::unordered_set<T>& value );
     template<typename Stream, typename T> inline void unpack( Stream& s, std::unordered_set<T>& value );
+
+    template<typename Stream, typename K, typename V> inline void pack( Stream& s, const std::unordered_map<K,V>& value );
+    template<typename Stream, typename K, typename V> inline void unpack( Stream& s, std::unordered_map<K,V>& value );
+
+    template<typename Stream, typename K, typename V> inline void pack( Stream& s, const std::pair<K,V>& value );
+    template<typename Stream, typename K, typename V> inline void unpack( Stream& s, std::pair<K,V>& value );
+
     template<typename Stream> inline void pack( Stream& s, const variant_object& v );
     template<typename Stream> inline void unpack( Stream& s, variant_object& v );
     template<typename Stream> inline void pack( Stream& s, const variant& v );

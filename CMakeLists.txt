@@ -98,6 +98,7 @@ set( fc_sources
      src/io/sstream.cpp
      src/io/json.cpp
      src/io/varint.cpp
+     src/io/console.cpp
      src/filesystem.cpp
      src/interprocess/process.cpp
      src/interprocess/signals.cpp

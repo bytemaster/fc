@@ -254,6 +254,45 @@ namespace fc {
       }
     }
 
+
+    template<typename Stream, typename K, typename V>
+    inline void pack( Stream& s, const std::pair<K,V>& value ) {
+       pack( s, value.first );
+       pack( s, value.second );
+    }
+    template<typename Stream, typename K, typename V>
+    inline void unpack( Stream& s, std::pair<K,V>& value ) 
+    {
+       unpack( s, value.first );
+       unpack( s, value.second );
+    }
+
+    template<typename Stream, typename K, typename V>
+    inline void pack( Stream& s, const std::unordered_map<K,V>& value ) {
+      pack( s, unsigned_int(value.size()) );
+      auto itr = value.begin();
+      auto end = value.end();
+      while( itr != end ) {
+        fc::raw::pack( s, *itr );
+        ++itr;
+      }
+    }
+    template<typename Stream, typename K, typename V>
+    inline void unpack( Stream& s, std::unordered_map<K,V>& value ) 
+    {
+      unsigned_int size; unpack( s, size );
+      value.clear();
+      FC_ASSERT( size.value*(sizeof(K)+sizeof(V)) < MAX_ARRAY_ALLOC_SIZE );
+      value.reserve(size.value);
+      for( uint32_t i = 0; i < size.value; ++i )
+      {
+          std::pair<K,V> tmp;
+          fc::raw::unpack( s, tmp );
+          value.insert( std::move(tmp) );
+      }
+    }
+
+
     template<typename Stream, typename T>
     inline void pack( Stream& s, const std::vector<T>& value ) {
       pack( s, unsigned_int(value.size()) );

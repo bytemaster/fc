@@ -412,7 +412,7 @@ namespace fc {
           return fc::path( std::string(appdata) );
          }();
       #else
-         static fc::path appdir = home_dir();
+        static fc::path appdir = home_path();
       #endif
       return appdir;
    }

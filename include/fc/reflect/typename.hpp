@@ -1,5 +1,6 @@
 #pragma once
 #include <fc/string.hpp>
+#include <vector>
 namespace fc {
   class value;
   template<typename T> class get_typename{};
@@ -18,4 +19,6 @@ namespace fc {
   template<> struct get_typename<void>     { static const char* name()  { return "char";     } };
   template<> struct get_typename<string>   { static const char* name()  { return "string";   } };
   template<> struct get_typename<value>   { static const char* name()   { return "value";   } };
+  template<> struct get_typename<std::vector<char>>   { static const char* name()   { return "std::vector<char>";   } };
+
 }

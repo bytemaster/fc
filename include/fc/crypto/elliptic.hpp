@@ -99,6 +99,12 @@ namespace fc {
            bool              verify( const fc::sha256& digest, const signature& sig );
 
            public_key get_public_key()const;
+
+
+           inline friend bool operator==( const private_key& a, const private_key& b )
+           {
+            return a.get_secret() == b.get_secret();
+           }
         private:
            fc::fwd<detail::private_key_impl,8> my;
     };

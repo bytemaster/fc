@@ -256,6 +256,7 @@ std::vector<char> aes_encrypt( const fc::sha512& key, const std::vector<char>& p
     auto cipher_len = aes_encrypt( (unsigned char*)plain_text.data(), plain_text.size(),  
                                  (unsigned char*)&key, ((unsigned char*)&key)+32,
                                  (unsigned char*)cipher_text.data() );
+    FC_ASSERT( cipher_len <= cipher_text.size() );
     cipher_text.resize(cipher_len);
     return cipher_text;
 

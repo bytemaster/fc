@@ -41,7 +41,7 @@ IF( WIN32 )
   set(Boost_USE_STATIC_LIBS OFF)
   set(BOOST_ALL_DYN_LINK ON) # force dynamic linking for all libraries
   
-  FIND_PACKAGE(Boost 1.53 REQUIRED COMPONENTS thread date_time system filesystem program_options signals serialization chrono unit_test_framework context)
+  FIND_PACKAGE(Boost 1.53 REQUIRED COMPONENTS thread date_time system filesystem program_options signals serialization chrono unit_test_framework context locale)
   # For Boost 1.53 on windows, coroutine was not in BOOST_LIBRARYDIR and do not need it to build,  but if boost versin >= 1.54, find coroutine otherwise will cause link errors
   IF(NOT "${Boost_VERSION}" MATCHES "1.53(.*)")
     SET(BOOST_LIBRARIES_TEMP ${Boost_LIBRARIES})
@@ -53,12 +53,13 @@ ELSE(WIN32)
   MESSAGE(STATUS "Configuring fc to build on Unix/Apple")
 
   SET(Boost_USE_STATIC_LIBS ON)
-  FIND_PACKAGE(Boost 1.53 REQUIRED COMPONENTS thread date_time system filesystem program_options signals serialization chrono unit_test_framework context coroutine) 
+  FIND_PACKAGE(Boost 1.53 REQUIRED COMPONENTS thread date_time system filesystem program_options signals serialization chrono unit_test_framework context coroutine locale) 
 
   SET(CMAKE_FIND_LIBRARY_SUFFIXES ".a;.so")
 
   include_directories( ${Boost_INCLUDE_DIR} )
   include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/vendor/salsa20 )
+  include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/vendor/scrypt-jane )
   include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/include )
   include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/vendor/easylzma/src )
   IF(NOT APPLE ) # then unix
@@ -130,6 +131,7 @@ set( fc_sources
      src/crypto/blowfish.cpp
      src/crypto/elliptic.cpp
      src/crypto/salsa20.cpp
+     src/crypto/scrypt.cpp
      src/network/tcp_socket.cpp
      src/network/udp_socket.cpp
      src/network/http/http_connection.cpp

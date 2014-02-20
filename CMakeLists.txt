@@ -59,7 +59,6 @@ ELSE(WIN32)
 
   include_directories( ${Boost_INCLUDE_DIR} )
   include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/vendor/salsa20 )
-  include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/vendor/scrypt-jane )
   include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/include )
   include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/vendor/easylzma/src )
   IF(NOT APPLE ) # then unix
@@ -69,6 +68,7 @@ ELSE(WIN32)
     SET(pthread_library pthread)
   ENDIF(NOT APPLE)
 ENDIF(WIN32)
+
 
 FIND_PACKAGE( OpenSSL )
 
@@ -191,6 +191,7 @@ target_include_directories(fc
     ${OPENSSL_INCLUDE_DIR}
 
   PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/vendor/scrypt-jane
     ${CMAKE_CURRENT_SOURCE_DIR}/vendor/cyoencode-1.0.2/src
     ${CMAKE_CURRENT_SOURCE_DIR}/vendor/boost_1.51/include
     ${CMAKE_CURRENT_SOURCE_DIR}/vendor/salsa20

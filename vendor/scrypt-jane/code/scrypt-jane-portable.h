@@ -136,12 +136,7 @@
 	#define CDECL __attribute__((cdecl))
 	#undef STDCALL
 	#define STDCALL __attribute__((stdcall))
-#if defined(MACOS_X) || (defined(__APPLE__) & defined(__MACH__))
-        #undef ALIGN
-        #define ALIGN(n)
-#else
         #define ALIGN(n) __attribute__((aligned(n)))
-#endif
 	#include <stdint.h>
 #endif
 #if defined(__MINGW32__) || defined(__MINGW64__)
@@ -305,7 +300,14 @@ scrypt_ensure_zero(void *p, size_t len) {
 #endif
 }
 
+#if defined(MACOS_X) || (defined(__APPLE__) & defined(__MACH__))
+static size_t
+detect_cpu(void) {
+  return 0;
+}
+#else
 #include "scrypt-jane-portable-x86.h"
+#endif
 
 #if !defined(asm_calling_convention)
 #define asm_calling_convention

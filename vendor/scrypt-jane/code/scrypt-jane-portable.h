@@ -136,7 +136,12 @@
 	#define CDECL __attribute__((cdecl))
 	#undef STDCALL
 	#define STDCALL __attribute__((stdcall))
-	#define ALIGN(n) __attribute__((aligned(n)))
+#if defined(MACOS_X) || (defined(__APPLE__) & defined(__MACH__))
+        #undef ALIGN
+        #define ALIGN(n)
+#else
+        #define ALIGN(n) __attribute__((aligned(n)))
+#endif
 	#include <stdint.h>
 #endif
 #if defined(__MINGW32__) || defined(__MINGW64__)

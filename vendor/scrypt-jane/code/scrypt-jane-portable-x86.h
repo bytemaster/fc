@@ -179,8 +179,11 @@
 	#define GNU_AS3(x, y, z) #x ", " #y ", " #z ";\n"
 	#define GNU_AS4(x, y, z, w) #x ", " #y ", " #z ", " #w ";\n"
 	#define GNU_ASFN(x) "\n_" #x ":\n" #x ":\n"
+#if defined(MACOS_X) || (defined(__APPLE__) & defined(__MACH__))
+        #define GNU_ASJ(x) #x "\n"
+#else
 	#define GNU_ASJ(x) ".att_syntax prefix\n" #x "\n.intel_syntax noprefix\n"
-
+#endif
 	#define a1(x) GNU_AS1(x)
 	#define a2(x, y) GNU_AS2(x, y)
 	#define a3(x, y, z) GNU_AS3(x, y, z)
@@ -236,10 +239,17 @@
 	#endif
 
 	#define asm_naked_fn_proto(type, fn) extern type asm_calling_convention fn
+#if defined(MACOS_X) || (defined(__APPLE__) & defined(__MACH__))
+	#define asm_naked_fn_end(fn) );
+
+	#define asm_gcc() __asm__ __volatile__(
+	#define asm_gcc_parms()
+#else
 	#define asm_naked_fn_end(fn) ".att_syntax prefix;\n" );
 
 	#define asm_gcc() __asm__ __volatile__(".intel_syntax noprefix;\n"
 	#define asm_gcc_parms() ".att_syntax prefix;"
+#endif
 	#define asm_gcc_trashed() __asm__ __volatile__("" :::
 	#define asm_gcc_end() );
 #else

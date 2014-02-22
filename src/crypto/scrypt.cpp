@@ -5,10 +5,10 @@
 
 #include <openssl/evp.h>
 
-/*
 #define SCRYPT_SALSA 1
 #define SCRYPT_SHA256 1
 
+/*
 #include "code/scrypt-jane-portable.h"
 #include "code/scrypt-jane-romix.h"
 */
@@ -18,7 +18,6 @@ namespace fc {
    void scrypt_derive_key( const std::vector<unsigned char> &passphrase, const std::vector<unsigned char> &salt,
                            unsigned int n, unsigned int r, unsigned int p, std::vector<unsigned char> &key )
    {
-      FC_ASSERT( !"Does not compile on OS X" );
       /*
       unsigned int chunk_bytes = SCRYPT_BLOCK_BYTES * r * 2;
       std::vector<unsigned char> yx((p+1) * chunk_bytes);

@@ -4,11 +4,16 @@
 #include <string.h>
 #include <fc/crypto/sha256.hpp>
 #include <fc/variant.hpp>
+#include <fc/exception/exception.hpp>
   
 namespace fc {
 
     sha256::sha256() { memset( _hash, 0, sizeof(_hash) ); }
-    sha256::sha256( const char *data ) { memcpy(_hash, data, sizeof(_hash) ); }
+    sha256::sha256( const char *data, size_t size ) { 
+       if (size != sizeof(_hash))	 
+	  FC_THROW_EXCEPTION( exception, "sha256: size mismatch" );
+       memcpy(_hash, data, size );
+    }
     sha256::sha256( const string& hex_str ) {
       fc::from_hex( hex_str, (char*)_hash, sizeof(_hash) );  
     }

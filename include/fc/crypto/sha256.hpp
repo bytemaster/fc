@@ -11,7 +11,7 @@ class sha256
   public:
     sha256();
     explicit sha256( const string& hex_str );
-    explicit sha256( const char *data );
+    explicit sha256( const char *data, size_t size );
 
     string str()const;
     operator string()const;

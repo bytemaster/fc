@@ -132,7 +132,8 @@ set( fc_sources
      src/crypto/elliptic.cpp
      src/crypto/salsa20.cpp
      src/crypto/scrypt.cpp
-     src/crypto/romix.cpp
+# commented out until committed
+#     src/crypto/romix.cpp
      src/network/tcp_socket.cpp
      src/network/udp_socket.cpp
      src/network/http/http_connection.cpp

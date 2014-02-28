@@ -338,6 +338,7 @@ namespace fc
             case 'f':
               return token_from_stream( in );
             case 0x04: // ^D end of transmission
+            case EOF:
               FC_THROW_EXCEPTION( eof_exception, "unexpected end of file" );
             default:
             //  ilog( "unhandled char '${c}' int ${int}", ("c", fc::string( &c, 1 ) )("int", int(c)) );

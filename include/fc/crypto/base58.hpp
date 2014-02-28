@@ -1,5 +1,6 @@
 #pragma once
 #include <fc/string.hpp>
+#include <vector>
 
 namespace fc {
     std::string to_base58( const char* d, size_t s );

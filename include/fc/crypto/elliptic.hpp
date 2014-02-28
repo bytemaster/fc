@@ -38,6 +38,7 @@ namespace fc {
 
 
            public_key( const public_key_data& v );
+           public_key( const public_key_point_data& v );
            public_key( const compact_signature& c, const fc::sha256& digest );
 
            bool valid()const;

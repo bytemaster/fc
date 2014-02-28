@@ -384,17 +384,10 @@ namespace fc { namespace ecc {
     {
       public_key_point_data dat;
       if( !my->_key ) return dat;
-     // EC_KEY_set_conv_form( my->_key, POINT_CONVERSION_COMPRESSED );
-     // size_t nbytes = i2o_ECPublicKey( my->_key, nullptr );
-     // assert( nbytes == 65 )
+      EC_KEY_set_conv_form( my->_key, POINT_CONVERSION_UNCOMPRESSED );
       char* front = &dat.data[0];
       i2o_ECPublicKey( my->_key, (unsigned char**)&front  );
       return dat;
-      /*
-       EC_POINT* pub   = EC_KEY_get0_public_key( my->_key );
-       EC_GROUP* group = EC_KEY_get0_group( my->_key );
-       EC_POINT_get_affine_coordinates_GFp( group, pub, self.my->_pub_x.get(), self.my->_pub_y.get(), nullptr );
-       */
     }
 
     public_key::public_key()
@@ -402,6 +395,20 @@ namespace fc { namespace ecc {
     }
     public_key::~public_key()
     {
+    }
+    public_key::public_key( const public_key_point_data& dat )
+    {
+      const char* front = &dat.data[0];
+      if( *front == 0 ){}
+      else
+      {
+         /*my->_key = EC_KEY_new_by_curve_name( NID_secp256k1 ); */
+         my->_key = o2i_ECPublicKey( &my->_key, (const unsigned char**)&front, sizeof(dat)  );
+         if( !my->_key ) 
+         {
+           FC_THROW_EXCEPTION( exception, "error decoding public key", ("s", ERR_error_string( ERR_get_error(), nullptr) ) );
+         }
+      }
     }
     public_key::public_key( const public_key_data& dat )
     {
@@ -425,7 +432,6 @@ namespace fc { namespace ecc {
 
     public_key private_key::get_public_key()const
     {
-
        public_key pub;  
        pub.my->_key = EC_KEY_new_by_curve_name( NID_secp256k1 );
        EC_KEY_set_public_key( pub.my->_key, EC_KEY_get0_public_key( my->_key ) );

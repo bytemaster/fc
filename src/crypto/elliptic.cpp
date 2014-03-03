@@ -1,8 +1,12 @@
 #include <fc/crypto/elliptic.hpp>
+
+#include <fc/crypto/base58.hpp>
+#include <fc/crypto/openssl.hpp>
+
 #include <fc/fwd_impl.hpp>
 #include <fc/exception/exception.hpp>
 #include <fc/log/logger.hpp>
-#include <fc/crypto/openssl.hpp>
+
 #include <assert.h>
 
 namespace fc { namespace ecc {
@@ -256,6 +260,17 @@ namespace fc { namespace ecc {
         return rtn;
       } FC_RETHROW_EXCEPTIONS( debug, "digest: ${digest}", ("digest",digest) );
     }
+
+    std::string public_key::to_base58() const
+      {
+      public_key_data key = serialize();
+      uint32_t check = uint32_t(city_hash64(key.data, sizeof(key)));
+      assert(key.size() + sizeof(check) == 37);
+      array<char, 37> data;
+      memcpy(data.data, key.begin(), key.size());
+      memcpy(data.begin() + key.size(), (const char*)&check, sizeof(check));
+      return fc::to_base58(data.begin(), data.size());
+      }
 
     private_key::private_key()
     {}

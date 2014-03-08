@@ -57,10 +57,6 @@ ELSE(WIN32)
 
   SET(CMAKE_FIND_LIBRARY_SUFFIXES ".a;.so")
 
-  include_directories( ${Boost_INCLUDE_DIR} )
-  include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/vendor/salsa20 )
-  include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/include )
-  include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/vendor/easylzma/src )
   IF(NOT APPLE ) # then unix
     # Unix build:
     SET(SALSA_SRC vendor/salsa20/salsa20.s)

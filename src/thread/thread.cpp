@@ -381,5 +381,19 @@ namespace fc {
       return this == &current();
     }
 
-
-}
+#ifdef _MSC_VER
+    /* support for providing a structured exception handler for async tasks */
+    namespace detail
+    {
+      unhandled_exception_filter_type unhandled_structured_exception_filter = nullptr;
+    }
+    void set_unhandled_structured_exception_filter(unhandled_exception_filter_type new_filter)
+    {
+       detail::unhandled_structured_exception_filter = new_filter;
+    }
+    unhandled_exception_filter_type get_unhandled_structured_exception_filter()
+    {
+       return detail::unhandled_structured_exception_filter;
+    }
+#endif // _MSC_VER
+} // end namespace fc

@@ -174,8 +174,8 @@ IF(WIN32)
     # Needed to disable MSVC autolinking feature (#pragma comment)
     BOOST_ALL_NO_LIB
   )
-  # Activate C++ exception handling inc. SEH to catch GPFs
-  target_compile_options(fc PUBLIC /EHa)
+  # Activate C++ exception handling, assume extern C calls don't throw
+  target_compile_options(fc PUBLIC /EHsc)
 ELSE()
   SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99 -Wall" )
 

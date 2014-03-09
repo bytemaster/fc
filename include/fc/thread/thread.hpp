@@ -198,6 +198,6 @@ namespace fc {
    typedef int (*unhandled_exception_filter_type)(unsigned, _EXCEPTION_POINTERS*);
    void set_unhandled_structured_exception_filter(unhandled_exception_filter_type new_filter);
    unhandled_exception_filter_type get_unhandled_structured_exception_filter();
-#endif
 }
+#endif
 

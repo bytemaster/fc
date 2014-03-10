@@ -42,3 +42,4 @@ libfc_debug.a
 
 fc_automoc.cpp
 *.swp
+GitSHA3.cpp

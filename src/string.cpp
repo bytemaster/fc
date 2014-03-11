@@ -98,6 +98,10 @@ namespace fc  {
   {
     return boost::lexical_cast<std::string>(d);
   }
+  fc::string to_string( uint16_t d)
+  {
+    return boost::lexical_cast<std::string>(d);
+  }
   std::string trim( const std::string& s )
   {
       std::string cpy(s);

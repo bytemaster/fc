@@ -57,10 +57,6 @@ ELSE(WIN32)
 
   SET(CMAKE_FIND_LIBRARY_SUFFIXES ".a;.so")
 
-  include_directories( ${Boost_INCLUDE_DIR} )
-  include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/vendor/salsa20 )
-  include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/include )
-  include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/vendor/easylzma/src )
   IF(NOT APPLE ) # then unix
     # Unix build:
     SET(SALSA_SRC vendor/salsa20/salsa20.s)
@@ -174,8 +170,8 @@ IF(WIN32)
     # Needed to disable MSVC autolinking feature (#pragma comment)
     BOOST_ALL_NO_LIB
   )
-  # Activate C++ exception handling inc. SEH to catch GPFs
-  target_compile_options(fc PUBLIC /EHa)
+  # Activate C++ exception handling, assume extern C calls don't throw
+  target_compile_options(fc PUBLIC /EHsc)
 ELSE()
   SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99 -Wall" )
 

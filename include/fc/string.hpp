@@ -15,6 +15,7 @@ namespace fc
   fc::string to_string( double );
   fc::string to_string( uint64_t );
   fc::string to_string( int64_t );
+  fc::string to_string( uint16_t );
 
   typedef fc::optional<fc::string> ostring;
   class variant_object;

@@ -48,7 +48,6 @@ IF( WIN32 )
     FIND_PACKAGE(Boost 1.54 REQUIRED COMPONENTS coroutine)
     SET(Boost_LIBRARIES ${BOOST_LIBRARIES_TEMP} ${Boost_LIBRARIES})
   ENDIF()
-
 ELSE(WIN32)
   MESSAGE(STATUS "Configuring fc to build on Unix/Apple")
 
@@ -64,7 +63,6 @@ ELSE(WIN32)
     SET(pthread_library pthread)
   ENDIF(NOT APPLE)
 ENDIF(WIN32)
-
 
 find_package( OpenSSL )
 
@@ -162,7 +160,7 @@ list(APPEND sources ${fc_headers})
 
 add_subdirectory( vendor/easylzma )
 
-setup_library( fc SOURCES ${sources} LIBRARY_TYPE STATIC )
+setup_library( fc SOURCES ${sources} LIBRARY_TYPE STATIC DONT_INSTALL_LIBRARY )
 
 IF(WIN32)
   target_compile_definitions(fc PUBLIC WIN32 NOMINMAX _WIN32_WINNT=0x0501 _CRT_SECURE_NO_WARNINGS
@@ -204,6 +202,46 @@ target_link_libraries( fc easylzma_static ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES
 #target_link_libraries( test_aes fc ${rt_library} ${pthread_library} )
 #add_executable( test_sleep tests/sleep.cpp )
 #target_link_libraries( test_sleep fc )
+
+if(WIN32)
+   # now generate a list of the DLLs we're using to use during the install process
+   include (ParseLibraryList)
+   PARSE_LIBRARY_LIST(${Boost_LIBRARIES}
+                        FOUND parseOk
+                        DEBUG Boost_LIBRARIES_DEBUG
+                        OPT   Boost_LIBRARIES_RELEASE
+                        GENERAL Boost_LIBRARIES_GENERAL)
+
+   set(SHARED_LIBRARIES_RELEASE)
+   foreach(boost_import_lib ${Boost_LIBRARIES_RELEASE})
+      get_filename_component(import_lib_name_root ${boost_import_lib} NAME_WE)
+      get_filename_component(import_lib_path ${boost_import_lib} PATH)
+      set(boost_dll "${import_lib_path}/${import_lib_name_root}${CMAKE_SHARED_LIBRARY_SUFFIX}")
+      set(SHARED_LIBRARIES_RELEASE ${SHARED_LIBRARIES_RELEASE} ${boost_dll})
+   endforeach()
+   
+
+   set(SHARED_LIBRARIES_DEBUG)
+   foreach(boost_import_lib ${Boost_LIBRARIES_DEBUG})
+      get_filename_component(import_lib_name_root ${boost_import_lib} NAME_WE)
+      get_filename_component(import_lib_path ${boost_import_lib} PATH)
+      set(boost_dll "${import_lib_path}/${import_lib_name_root}${CMAKE_SHARED_LIBRARY_SUFFIX}")
+      set(SHARED_LIBRARIES_DEBUG ${SHARED_LIBRARIES_DEBUG} ${boost_dll})
+   endforeach()
+
+   foreach(lib ${OPENSSL_LIBRARIES})
+      get_filename_component(lib_name ${lib} NAME_WE)
+      if (${lib_name} STREQUAL "libeay32")
+         get_filename_component(lib_dir ${lib} DIRECTORY)
+         get_filename_component(lib_bin_dir "${lib_dir}/../bin" REALPATH)
+         set(SHARED_LIBRARIES_DEBUG ${SHARED_LIBRARIES_DEBUG} "${lib_bin_dir}/${lib_name}${CMAKE_SHARED_LIBRARY_SUFFIX}")
+         set(SHARED_LIBRARIES_RELEASE ${SHARED_LIBRARIES_RELEASE} "${lib_bin_dir}/${lib_name}${CMAKE_SHARED_LIBRARY_SUFFIX}")
+      endif()
+   endforeach()
+
+   set_property(TARGET fc PROPERTY SHARED_LIBRARIES_DEBUG ${SHARED_LIBRARIES_DEBUG})
+   set_property(TARGET fc PROPERTY SHARED_LIBRARIES_RELEASE ${SHARED_LIBRARIES_RELEASE})
+endif(WIN32)
 
 MESSAGE(STATUS "Finished fc module configuration...")
 

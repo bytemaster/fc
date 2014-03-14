@@ -21,6 +21,10 @@ struct unsigned_int {
 
     friend bool operator==( const unsigned_int& i, const uint32_t& v ) { return v == i.value; }
     friend bool operator!=( const unsigned_int& i, const uint32_t& v ) { return v != i.value; }
+    friend bool operator<( const unsigned_int& i, const uint32_t& v ) { return v < i.value; }
+    friend bool operator>=( const unsigned_int& i, const uint32_t& v ) { return v >= i.value; }
+    friend bool operator<( const unsigned_int& i, const unsigned_int& v ) { return v < i.value; }
+    friend bool operator>=( const unsigned_int& i, const unsigned_int& v ) { return v >= i.value; }
 };
 
 struct signed_int {

@@ -234,8 +234,13 @@ namespace fc {
      try {
   	    boost::filesystem::rename( boost::filesystem::path(f), boost::filesystem::path(t) ); 
      } catch ( boost::system::system_error& e ) {
-     	FC_THROW( "Rename from ${srcfile} to ${dstfile} failed because ${reason}",
-	         ("srcfile",f)("dstfile",t)("reason",e.what() ) );
+         try{
+             boost::filesystem::copy( boost::filesystem::path(f), boost::filesystem::path(t) ); 
+             boost::filesystem::remove( boost::filesystem::path(f)); 
+         } catch ( boost::system::system_error& e ) {
+             FC_THROW( "Rename from ${srcfile} to ${dstfile} failed because ${reason}",
+                     ("srcfile",f)("dstfile",t)("reason",e.what() ) );
+         }
      } catch ( ... ) {
      	FC_THROW( "Rename from ${srcfile} to ${dstfile} failed",
 	         ("srcfile",f)("dstfile",t)("inner", fc::except_str() ) );

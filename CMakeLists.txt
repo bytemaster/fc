@@ -194,7 +194,7 @@ target_include_directories(fc
     ${CMAKE_CURRENT_SOURCE_DIR}/vendor/easylzma/src
   )
 
-target_link_libraries( fc easylzma_static ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} )
+target_link_libraries( fc easylzma_static ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} ${ZLIB_LIBRARIES} ${CMAKE_DL_LIBS})
 
 #add_executable( test_compress tests/compress.cpp )
 #target_link_libraries( test_compress fc )

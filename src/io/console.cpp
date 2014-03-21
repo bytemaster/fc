@@ -32,7 +32,7 @@ void set_console_echo( bool enable_echo )
    termios newt = oldt;
    if( enable_echo )
    {
-      newt.c_lflag |= ~ECHO;
+      newt.c_lflag |= ECHO;
    }
    else
    {

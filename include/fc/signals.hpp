@@ -8,6 +8,17 @@ namespace fc {
    template<typename T>
    using signal = boost::signals2::signal<T>;
 #else
+  /** Workaround for missing Template Aliases feature in the VS 2012.
+      \warning Class defined below cannot have defined constructor (even base class has it)
+      since it is impossible to reference directly template class arguments outside this class.
+      This code will work until someone will use non-default constructor as it is defined in
+      boost::signals2::signal.
+  */
+  template <class T>
+  class signal : public boost::signals2::signal<T>
+    {
+    public:
+    };
 #endif
 
    template<typename T>

@@ -430,9 +430,9 @@ namespace fc {
             else 
             { 
                 //ilog( "..." );
-                FC_ASSERT( c != current ) 
                 //ilog( "ready_push_front" );
-                ready_push_front( c ); 
+                if (c != current)
+                  ready_push_front( c ); 
             }
         }
         return time_point::min();

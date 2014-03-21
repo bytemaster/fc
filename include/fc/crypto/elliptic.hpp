@@ -57,6 +57,10 @@ namespace fc {
            {
             return a.serialize() != b.serialize();
            }
+
+           /// Allows to convert current public key object into base58 number.
+           std::string to_base58() const;
+
         private:
           friend class private_key;
           fc::fwd<detail::public_key_impl,8> my;

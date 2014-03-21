@@ -33,6 +33,8 @@ namespace fc {
       void*         _functor;
       void          (*_destroy_functor)(void*);
       void          (*_run_functor)(void*, void* );
+
+      void          run_impl(); 
   };
 
   namespace detail {

@@ -175,5 +175,29 @@ namespace fc {
    auto async( Functor&& f, const char* desc ="", priority prio = priority()) -> fc::future<decltype(f())> {
       return fc::thread::current().async( fc::forward<Functor>(f), desc, prio );
    }
+
+} // end namespace fc
+
+#ifdef _MSC_VER
+struct _EXCEPTION_POINTERS;
+
+namespace fc {
+   /* There's something about the setup of the stacks created for fc::async tasks
+    * that screws up the global structured exception filters installed by
+    * SetUnhandledExceptionFilter().  The only way I've found to catch an 
+    * unhaldned structured exception thrown in an async task is to put a 
+    * __try/__except block inside the async task.
+    * We do just that, and if a SEH escapes outside the function running 
+    * in the async task, fc will call an exception filter privided by 
+    * set_unhandled_structured_exception_filter(), passing as arguments
+    * the result of GetExceptionCode() and GetExceptionInformation().
+    *
+    * Right now there is only one global exception filter, used for any 
+    * async task.
+    */
+   typedef int (*unhandled_exception_filter_type)(unsigned, _EXCEPTION_POINTERS*);
+   void set_unhandled_structured_exception_filter(unhandled_exception_filter_type new_filter);
+   unhandled_exception_filter_type get_unhandled_structured_exception_filter();
 }
+#endif
 

@@ -45,7 +45,7 @@ namespace fc { namespace http {
           fc::shared_ptr<impl> my;
       };
 
-      void listen( uint16_t p );
+      void listen( const fc::ip::endpoint& p );
 
       /**
        *  Set the callback to be called for every http request made.

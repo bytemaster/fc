@@ -2,6 +2,7 @@
 #include <fc/thread/thread.hpp>
 #include <fc/network/tcp_socket.hpp>
 #include <fc/io/sstream.hpp>
+#include <fc/network/ip.hpp>
 #include <fc/io/stdio.hpp>
 #include <fc/log/logger.hpp>
 
@@ -46,7 +47,7 @@ namespace fc { namespace http {
   {
     public:
       impl(){}
-      impl(uint16_t p ) {
+      impl(const fc::ip::endpoint& p ) {
         tcp_serv.listen(p);
         accept_complete = fc::async([this](){ this->accept_loop(); });
       }
@@ -86,14 +87,14 @@ namespace fc { namespace http {
 
 
   server::server(){}
-  server::server( uint16_t port ) :my( new impl(port) ){}
+  server::server( uint16_t port ) :my( new impl(fc::ip::endpoint( fc::ip::address(),port)) ){}
   server::server( server&& s ):my(fc::move(s.my)){}
 
   server& server::operator=(server&& s)      { fc_swap(my,s.my); return *this; }
 
   server::~server(){}
 
-  void server::listen( uint16_t p ) {
+  void server::listen( const fc::ip::endpoint& p ) {
     my.reset( new impl(p) );
   }
 

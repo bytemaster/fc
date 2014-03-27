@@ -10,7 +10,7 @@ namespace fc {
 
   class tcp_socket::impl {
     public:
-      impl():_sock( fc::asio::default_io_service() ){  }
+      impl():_sock( fc::asio::default_io_service() ){}
       ~impl(){
         if( _sock.is_open() ) _sock.close();
       }
@@ -53,8 +53,15 @@ namespace fc {
     return r;
   }
 
-  void tcp_socket::connect_to( const fc::ip::endpoint& e ) {
-    fc::asio::tcp::connect(my->_sock, fc::asio::tcp::endpoint( boost::asio::ip::address_v4(e.get_address()), e.port() ) ); 
+  void tcp_socket::connect_to( const fc::ip::endpoint& remote_endpoint ) {
+    fc::asio::tcp::connect(my->_sock, fc::asio::tcp::endpoint( boost::asio::ip::address_v4(remote_endpoint.get_address()), remote_endpoint.port() ) ); 
+  }
+
+  void tcp_socket::connect_to( const fc::ip::endpoint& remote_endpoint, const fc::ip::endpoint& local_endpoint ) {
+    my->_sock = boost::asio::ip::tcp::socket(fc::asio::default_io_service(), 
+                                             boost::asio::ip::tcp::endpoint(boost::asio::ip::address_v4(local_endpoint.get_address()), 
+                                                                                                        local_endpoint.port()));
+    fc::asio::tcp::connect(my->_sock, fc::asio::tcp::endpoint( boost::asio::ip::address_v4(remote_endpoint.get_address()), remote_endpoint.port() ) ); 
   }
 
   class tcp_server::impl {
@@ -69,7 +76,7 @@ namespace fc {
         try {
           _accept.close();
         } 
-        catch ( boost::system::system_error& e )
+        catch ( boost::system::system_error& )
         {
            wlog( "unexpected exception ${e}", ("e", fc::except_str()) );
         }

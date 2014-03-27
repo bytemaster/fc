@@ -11,7 +11,8 @@ namespace fc {
       tcp_socket();
       ~tcp_socket();
 
-      void     connect_to( const fc::ip::endpoint& e );
+      void     connect_to( const fc::ip::endpoint& remote_endpoint );
+      void     connect_to( const fc::ip::endpoint& remote_endpoint, const fc::ip::endpoint& local_endpoint );
       fc::ip::endpoint remote_endpoint()const;
 
       void get( char& c )

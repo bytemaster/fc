@@ -35,7 +35,8 @@ namespace fc {
         }
         void error_handler( const promise<void>::ptr& p, 
                               const boost::system::error_code& ec ) {
-            if( !ec ) p->set_value();
+            if( !ec )
+              p->set_value();
             else
             {
                 if( ec == boost::asio::error::operation_aborted )

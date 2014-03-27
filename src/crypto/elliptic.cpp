@@ -357,7 +357,7 @@ namespace fc { namespace ecc {
        return self;
     }
 
-    signature private_key::sign( const fc::sha256& digest )
+    signature private_key::sign( const fc::sha256& digest )const
     {
         unsigned int buf_len = ECDSA_size(my->_key);
 //        fprintf( stderr, "%d  %d\n", buf_len, sizeof(sha256) );

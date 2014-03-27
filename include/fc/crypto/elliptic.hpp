@@ -99,7 +99,7 @@ namespace fc {
             */
            fc::sha512 get_shared_secret( const public_key& pub )const;
 
-           signature         sign( const fc::sha256& digest );
+           signature         sign( const fc::sha256& digest )const;
            compact_signature sign_compact( const fc::sha256& digest )const;
            bool              verify( const fc::sha256& digest, const signature& sig );
 

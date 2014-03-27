@@ -124,10 +124,6 @@ namespace fc { \
 template<> struct reflector<ENUM> { \
     typedef fc::true_type is_defined; \
     typedef fc::true_type is_enum; \
-    template<typename Visitor> \
-    static inline void visit( const Visitor& v ) { \
-        BOOST_PP_SEQ_FOR_EACH( FC_REFLECT_VISIT_ENUM, ENUM, FIELDS ) \
-    }\
     static const char* to_string(int64_t i) { \
       switch( ENUM(i) ) { \
         BOOST_PP_SEQ_FOR_EACH( FC_REFLECT_ENUM_TO_STRING, ENUM, FIELDS ) \
@@ -144,7 +140,14 @@ template<> struct reflector<ENUM> { \
 };  \
 } 
 
-
+/*  Note: FC_REFLECT_ENUM previously defined this function, but I don't think it ever 
+ *        did what we expected it to do.  I've disabled it for now.
+ *
+ *  template<typename Visitor> \
+ *  static inline void visit( const Visitor& v ) { \
+ *      BOOST_PP_SEQ_FOR_EACH( FC_REFLECT_VISIT_ENUM, ENUM, FIELDS ) \
+ *  }\
+ */
 
 /**
  *  @def FC_REFLECT_DERIVED(TYPE,INHERITS,MEMBERS)

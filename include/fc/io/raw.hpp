@@ -205,6 +205,31 @@ namespace fc {
         }
       };
 
+      template<typename IsEnum=fc::false_type>
+      struct if_enum {
+        template<typename Stream, typename T>
+        static inline void pack( Stream& s, const T& v ) { 
+          fc::reflector<T>::visit( pack_object_visitor<Stream,T>( v, s ) );
+        }
+        template<typename Stream, typename T>
+        static inline void unpack( Stream& s, T& v ) { 
+          fc::reflector<T>::visit( unpack_object_visitor<Stream,T>( v, s ) );
+        }
+      };
+      template<>
+      struct if_enum<fc::true_type> {
+        template<typename Stream, typename T>
+        static inline void pack( Stream& s, const T& v ) {
+          fc::raw::pack(s, (int64_t)v);
+        }
+        template<typename Stream, typename T>
+        static inline void unpack( Stream& s, T& v ) { 
+          int64_t temp;
+          fc::raw::unpack(s, temp);
+          v = (T)temp;
+        }
+      };      
+
       template<typename IsReflected=fc::false_type>
       struct if_reflected {
         template<typename Stream, typename T>
@@ -220,11 +245,11 @@ namespace fc {
       struct if_reflected<fc::true_type> {
         template<typename Stream, typename T>
         static inline void pack( Stream& s, const T& v ) { 
-          fc::reflector<T>::visit( pack_object_visitor<Stream,T>( v, s ) );
+          if_enum< typename fc::reflector<T>::is_enum >::pack(s,v);
         }
         template<typename Stream, typename T>
         static inline void unpack( Stream& s, T& v ) { 
-          fc::reflector<T>::visit( unpack_object_visitor<Stream,T>( v, s ) );
+          if_enum< typename fc::reflector<T>::is_enum >::unpack(s,v);
         }
       };
 

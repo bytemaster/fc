@@ -60,6 +60,7 @@ namespace fc {
 
            /// Allows to convert current public key object into base58 number.
            std::string to_base58() const;
+           static public_key from_base58( const std::string& b58 );
 
         private:
           friend class private_key;

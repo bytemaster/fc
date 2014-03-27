@@ -152,6 +152,8 @@ http::request    connection::read_request()const {
     h.val = fc::string(skey,end);
     req.headers.push_back(h);
     if( h.key == "Content-Length" ) {
+       auto s = static_cast<size_t>(to_uint64( fc::string(h.val) ) );
+       FC_ASSERT( s < 1024*1024 );
        req.body.resize( static_cast<size_t>(to_uint64( fc::string(h.val) ) ));
     }
     if( h.key == "Host" ) {

@@ -81,6 +81,8 @@ class sha256
   void to_variant( const sha256& bi, variant& v );
   void from_variant( const variant& v, sha256& bi );
 
+  uint64_t hash64(const char* buf, size_t len);    
+
 } // fc
 namespace std
 {

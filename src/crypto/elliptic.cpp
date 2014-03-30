@@ -264,7 +264,7 @@ namespace fc { namespace ecc {
     std::string public_key::to_base58() const
       {
       public_key_data key = serialize();
-      uint32_t check = uint32_t(city_hash64(key.data, sizeof(key)));
+      uint32_t check = uint32_t(fc::hash64(key.data, sizeof(key)));
       assert(key.size() + sizeof(check) == 37);
       array<char, 37> data;
       memcpy(data.data, key.begin(), key.size());

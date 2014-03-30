@@ -103,4 +103,11 @@ namespace fc {
     else
         memset( &bi, char(0), sizeof(bi) );
   }
-}
+
+  uint64_t hash64(const char* buf, size_t len)
+  {
+    sha256 sha_value = sha256::hash(buf,len);
+    return sha_value._hash[0];
+  }
+
+} //end namespace fc

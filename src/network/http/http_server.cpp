@@ -2,6 +2,7 @@
 #include <fc/thread/thread.hpp>
 #include <fc/network/tcp_socket.hpp>
 #include <fc/io/sstream.hpp>
+#include <fc/network/ip.hpp>
 #include <fc/io/stdio.hpp>
 #include <fc/log/logger.hpp>
 
@@ -16,6 +17,7 @@ namespace fc { namespace http {
       {}
 
       void send_header() {
+         //ilog( "sending header..." );
          fc::stringstream ss;
          ss << "HTTP/1.1 " << rep.status << " ";
          switch( rep.status ) {
@@ -46,7 +48,7 @@ namespace fc { namespace http {
   {
     public:
       impl(){}
-      impl(uint16_t p ) {
+      impl(const fc::ip::endpoint& p ) {
         tcp_serv.listen(p);
         accept_complete = fc::async([this](){ this->accept_loop(); });
       }
@@ -54,7 +56,8 @@ namespace fc { namespace http {
       ~impl() {
         try {
           tcp_serv.close();
-          accept_complete.wait();
+          if( accept_complete.valid() )
+             accept_complete.wait();
         }catch(...){}
       }
       void accept_loop() {
@@ -62,7 +65,7 @@ namespace fc { namespace http {
             {
               http::connection_ptr con = std::make_shared<http::connection>();
               tcp_serv.accept( con->get_socket() );
-              ilog( "Accept Connection" );
+              //ilog( "Accept Connection" );
               fc::async( [=](){ handle_connection( con, on_req ); } );
             }
       }
@@ -70,14 +73,14 @@ namespace fc { namespace http {
       void handle_connection( const http::connection_ptr& c,  
                               std::function<void(const http::request&, const server::response& s )> do_on_req ) {
          try {
-             http::server::response rep( fc::shared_ptr<response::impl>( new response::impl(c, [=](){ this->handle_connection(c,do_on_req); } ) ) );
+             http::server::response rep( fc::shared_ptr<response::impl>( new response::impl(c) ) );
              auto req = c->read_request();
              if( do_on_req ) do_on_req( req, rep );
-             c->get_socket().close();
+              c->get_socket().close();
           } catch ( fc::exception& e ) {
              wlog( "unable to read request ${1}", ("1", e.to_detail_string() ) );//fc::except_str().c_str());
           }
-          wlog( "done handle connection" );
+          //wlog( "done handle connection" );
       }
       std::function<void(const http::request&, const server::response& s )> on_req;
       fc::tcp_server                                                        tcp_serv;
@@ -85,15 +88,15 @@ namespace fc { namespace http {
 
 
 
-  server::server(){}
-  server::server( uint16_t port ) :my( new impl(port) ){}
+  server::server():my( new impl() ){}
+  server::server( uint16_t port ) :my( new impl(fc::ip::endpoint( fc::ip::address(),port)) ){}
   server::server( server&& s ):my(fc::move(s.my)){}
 
   server& server::operator=(server&& s)      { fc_swap(my,s.my); return *this; }
 
   server::~server(){}
 
-  void server::listen( uint16_t p ) {
+  void server::listen( const fc::ip::endpoint& p ) {
     my.reset( new impl(p) );
   }
 
@@ -108,7 +111,6 @@ namespace fc { namespace http {
   server::response& server::response::operator=(server::response&& s)      { fc_swap(my,s.my); return *this; }
 
   void server::response::add_header( const fc::string& key, const fc::string& val )const {
-     wlog( "Attempt to add header after sending headers" );
      my->rep.headers.push_back( fc::http::header( key, val ) );
   }
   void server::response::set_status( const http::reply::status_code& s )const {
@@ -134,7 +136,7 @@ namespace fc { namespace http {
     my->body_bytes_sent += len;
     my->con->get_socket().write( data, static_cast<size_t>(len) ); 
     if( my->body_bytes_sent == int64_t(my->body_length) ) {
-      if( my->handle_next_req ) {
+      if( false || my->handle_next_req ) {
         ilog( "handle next request..." );
         //fc::async( std::function<void()>(my->handle_next_req) );
         fc::async( my->handle_next_req );
@@ -143,8 +145,11 @@ namespace fc { namespace http {
   }
 
   server::response::~response(){}
+
   void server::on_request( const std::function<void(const http::request&, const server::response& s )>& cb )
-  { my->on_req = cb; }
+  { 
+     my->on_req = cb; 
+  }
 
 
 

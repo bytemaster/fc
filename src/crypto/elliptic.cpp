@@ -262,15 +262,28 @@ namespace fc { namespace ecc {
     }
 
     std::string public_key::to_base58() const
-      {
+    {
       public_key_data key = serialize();
-      uint32_t check = uint32_t(fc::hash64(key.data, sizeof(key)));
+      uint32_t check = sha256::hash(key.data, sizeof(key))._hash[0];
       assert(key.size() + sizeof(check) == 37);
       array<char, 37> data;
       memcpy(data.data, key.begin(), key.size());
       memcpy(data.begin() + key.size(), (const char*)&check, sizeof(check));
       return fc::to_base58(data.begin(), data.size());
-      }
+    }
+
+    public_key public_key::from_base58( const std::string& b58 )
+    {
+        array<char, 37> data;
+        size_t s = fc::from_base58(b58, (char*)&data, sizeof(data) );
+        FC_ASSERT( s == sizeof(data) );
+
+        public_key_data key;
+        uint32_t check = sha256::hash(data.data, sizeof(key))._hash[0];
+        FC_ASSERT( memcmp( (char*)&check, data.data + sizeof(key), sizeof(check) ) == 0 );
+        memcpy( (char*)key.data, data.data, sizeof(key) );
+        return public_key(key);
+    }
 
     private_key::private_key()
     {}
@@ -357,7 +370,7 @@ namespace fc { namespace ecc {
        return self;
     }
 
-    signature private_key::sign( const fc::sha256& digest )
+    signature private_key::sign( const fc::sha256& digest )const
     {
         unsigned int buf_len = ECDSA_size(my->_key);
 //        fprintf( stderr, "%d  %d\n", buf_len, sizeof(sha256) );

@@ -60,6 +60,7 @@ namespace fc {
 
            /// Allows to convert current public key object into base58 number.
            std::string to_base58() const;
+           static public_key from_base58( const std::string& b58 );
 
         private:
           friend class private_key;
@@ -99,7 +100,7 @@ namespace fc {
             */
            fc::sha512 get_shared_secret( const public_key& pub )const;
 
-           signature         sign( const fc::sha256& digest );
+           signature         sign( const fc::sha256& digest )const;
            compact_signature sign_compact( const fc::sha256& digest )const;
            bool              verify( const fc::sha256& digest, const signature& sig );
 

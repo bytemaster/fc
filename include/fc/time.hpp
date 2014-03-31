@@ -30,6 +30,9 @@ namespace fc {
   };
   inline microseconds seconds( int64_t s ) { return microseconds( s * 1000000 ); }
   inline microseconds milliseconds( int64_t s ) { return microseconds( s * 1000 ); }
+  inline microseconds minutes(int64_t m) { return seconds(60*m); }
+  inline microseconds hours(int64_t h) { return minutes(60*h); }
+  inline microseconds days(int64_t d) { return hours(24*d); }
 
   class time_point { 
     public:

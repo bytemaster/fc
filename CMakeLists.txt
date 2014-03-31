@@ -16,6 +16,7 @@ INCLUDE( SetupTargetMacros )
 INCLUDE(GetGitRevisionDescription)
 
 get_git_head_revision(GIT_REFSPEC GIT_SHA3)
+get_git_unix_timestamp(GIT_UNIX_TIMESTAMP3)
 
 SET( DEFAULT_HEADER_INSTALL_DIR include/\${target} )
 SET( DEFAULT_LIBRARY_INSTALL_DIR lib/ )

@@ -4,6 +4,55 @@
 #include <fc/log/logger.hpp>
 #include "thread_d.hpp"
 
+#if defined(_MSC_VER) && !defined(NDEBUG)
+# include <Windows.h>
+const DWORD MS_VC_EXCEPTION=0x406D1388;
+
+#pragma pack(push,8)
+typedef struct tagTHREADNAME_INFO
+{
+   DWORD dwType; // Must be 0x1000.
+   LPCSTR szName; // Pointer to name (in user addr space).
+   DWORD dwThreadID; // Thread ID (-1=caller thread).
+   DWORD dwFlags; // Reserved for future use, must be zero.
+} THREADNAME_INFO;
+#pragma pack(pop)
+
+static void set_thread_name(const char* threadName)
+{
+   THREADNAME_INFO info;
+   info.dwType = 0x1000;
+   info.szName = threadName;
+   info.dwThreadID = -1;
+   info.dwFlags = 0;
+
+   __try
+   {
+      RaiseException(MS_VC_EXCEPTION, 0, sizeof(info)/sizeof(ULONG_PTR), (ULONG_PTR*)&info);
+   }
+   __except(EXCEPTION_EXECUTE_HANDLER)
+   {
+   }
+}
+#elif defined(__linux__) && !defined(NDEBUG)
+# include <pthread.h>
+static void set_thread_name(const char* threadName)
+{
+	pthread_setname_np(pthread_self(), threadName);
+}
+#elif defined(__APPLE__) && !defined(NDEBUG)
+# include <pthread.h>
+static void set_thread_name(const char* threadName)
+{
+	pthread_setname_np(threadName);
+}
+#else
+static void set_thread_name(const char* threadName)
+{
+	// do nothing in release mode
+}
+#endif
+
 namespace fc {
   const char* thread_name() {
     return thread::current().name().c_str();
@@ -25,6 +74,7 @@ namespace fc {
       promise<void>::ptr p(new promise<void>());
       boost::thread* t = new boost::thread( [this,p,name]() {
           try {
+		    set_thread_name(name); // set thread's name for the debugger to display
             this->my = new thread_d(*this);
             current_thread() = this;
             p->set_value();

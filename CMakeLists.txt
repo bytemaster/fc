@@ -11,6 +11,7 @@ SET( CMAKE_AUTOMOC OFF )
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/GitVersionGen")
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules")
 
+INCLUDE(GetPrerequisites)
 INCLUDE( VersionMacros )
 INCLUDE( SetupTargetMacros )
 INCLUDE(GetGitRevisionDescription)
@@ -24,7 +25,15 @@ SET( DEFAULT_EXECUTABLE_INSTALL_DIR bin/ )
 SET( CMAKE_DEBUG_POSTFIX _debug )
 SET( BUILD_SHARED_LIBS NO )
 
+set(platformBitness 32)
+if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+  set(platformBitness 64)
+endif()
+
 SET (ORIGINAL_LIB_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES})
+
+SET(BOOST_COMPONENTS)
+LIST(APPEND BOOST_COMPONENTS thread date_time system filesystem program_options signals serialization chrono unit_test_framework context locale)
 
 IF( WIN32 )
   MESSAGE(STATUS "Configuring fc to build on Win32")
@@ -41,19 +50,22 @@ IF( WIN32 )
   set(Boost_USE_MULTITHREADED ON)
   set(Boost_USE_STATIC_LIBS OFF)
   set(BOOST_ALL_DYN_LINK ON) # force dynamic linking for all libraries
-  
-  FIND_PACKAGE(Boost 1.53 REQUIRED COMPONENTS thread date_time system filesystem program_options signals serialization chrono unit_test_framework context locale)
+
+  FIND_PACKAGE(Boost 1.53 REQUIRED COMPONENTS ${BOOST_COMPONENTS})
   # For Boost 1.53 on windows, coroutine was not in BOOST_LIBRARYDIR and do not need it to build,  but if boost versin >= 1.54, find coroutine otherwise will cause link errors
   IF(NOT "${Boost_VERSION}" MATCHES "1.53(.*)")
     SET(BOOST_LIBRARIES_TEMP ${Boost_LIBRARIES})
     FIND_PACKAGE(Boost 1.54 REQUIRED COMPONENTS coroutine)
+    LIST(APPEND BOOST_COMPONENTS coroutine)
     SET(Boost_LIBRARIES ${BOOST_LIBRARIES_TEMP} ${Boost_LIBRARIES})
   ENDIF()
 ELSE(WIN32)
   MESSAGE(STATUS "Configuring fc to build on Unix/Apple")
 
   SET(Boost_USE_STATIC_LIBS ON)
-  FIND_PACKAGE(Boost 1.53 REQUIRED COMPONENTS thread date_time system filesystem program_options signals serialization chrono unit_test_framework context coroutine locale) 
+  LIST(APPEND BOOST_COMPONENTS coroutine)
+
+  FIND_PACKAGE(Boost 1.53 REQUIRED COMPONENTS ${BOOST_COMPONENTS}) 
 
   SET(CMAKE_FIND_LIBRARY_SUFFIXES ".a;.so")
 
@@ -195,7 +207,7 @@ target_include_directories(fc
     ${CMAKE_CURRENT_SOURCE_DIR}/vendor/easylzma/src
   )
 
-target_link_libraries( fc easylzma_static ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} ${ZLIB_LIBRARIES} ${CMAKE_DL_LIBS})
+target_link_libraries( fc PUBLIC easylzma_static ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} ${ZLIB_LIBRARIES} ${CMAKE_DL_LIBS})
 
 #add_executable( test_compress tests/compress.cpp )
 #target_link_libraries( test_compress fc )
@@ -213,20 +225,43 @@ if(WIN32)
                         OPT   Boost_LIBRARIES_RELEASE
                         GENERAL Boost_LIBRARIES_GENERAL)
 
+   #Variable will hold list of .pdb files generated for libraries the 'fc' module is linked to
+   set(INTERFACE_LINK_PDB_RELEASE)
+
    set(SHARED_LIBRARIES_RELEASE)
    foreach(boost_import_lib ${Boost_LIBRARIES_RELEASE})
       get_filename_component(import_lib_name_root ${boost_import_lib} NAME_WE)
       get_filename_component(import_lib_path ${boost_import_lib} PATH)
       set(boost_dll "${import_lib_path}/${import_lib_name_root}${CMAKE_SHARED_LIBRARY_SUFFIX}")
+      set(boost_lib_pdb "${import_lib_name_root}.pdb")
+
+      FILE(GLOB_RECURSE boost_pdb_paths "${import_lib_path}/../../bin.v2/*/${boost_lib_pdb}")
+
+      foreach(p ${boost_pdb_paths})
+        if(p MATCHES ".*/address-model-${platformBitness}/")
+          GP_APPEND_UNIQUE(INTERFACE_LINK_PDB_RELEASE ${p})
+        endif()
+      endforeach()
+
       set(SHARED_LIBRARIES_RELEASE ${SHARED_LIBRARIES_RELEASE} ${boost_dll})
    endforeach()
    
-
+   set(INTERFACE_LINK_PDB_DEBUG)
    set(SHARED_LIBRARIES_DEBUG)
    foreach(boost_import_lib ${Boost_LIBRARIES_DEBUG})
       get_filename_component(import_lib_name_root ${boost_import_lib} NAME_WE)
       get_filename_component(import_lib_path ${boost_import_lib} PATH)
       set(boost_dll "${import_lib_path}/${import_lib_name_root}${CMAKE_SHARED_LIBRARY_SUFFIX}")
+      set(boost_lib_pdb "${import_lib_name_root}.pdb")
+
+      FILE(GLOB_RECURSE boost_pdb_paths "${import_lib_path}/../../bin.v2/*/${boost_lib_pdb}")
+
+      foreach(p ${boost_pdb_paths})
+        if(p MATCHES ".*/address-model-${platformBitness}/")
+          GP_APPEND_UNIQUE(INTERFACE_LINK_PDB_DEBUG ${p})
+        endif()
+      endforeach()
+
       set(SHARED_LIBRARIES_DEBUG ${SHARED_LIBRARIES_DEBUG} ${boost_dll})
    endforeach()
 
@@ -237,14 +272,23 @@ if(WIN32)
          get_filename_component(lib_dir ${lib} DIRECTORY)
          get_filename_component(openssl_dir "${lib_dir}/.." REALPATH)
          set( eaydll "${openssl_dir}/bin/${lib_name}${CMAKE_SHARED_LIBRARY_SUFFIX}")
-         message( "eay=${eaydll}")
+         set(eay_pdb "${openssl_dir}/bin/${lib_name}.pdb")
+         message(STATUS "eay=${eaydll}")
+         if(EXISTS ${eay_pdb})
+           GP_APPEND_UNIQUE(INTERFACE_LINK_PDB_RELEASE ${eay_pdb})
+           GP_APPEND_UNIQUE(INTERFACE_LINK_PDB_DEBUG ${eay_pdb})
+         endif()
+
          set(SHARED_LIBRARIES_DEBUG   ${SHARED_LIBRARIES_DEBUG}   "${eaydll}")
          set(SHARED_LIBRARIES_RELEASE ${SHARED_LIBRARIES_RELEASE} "${eaydll}")
       endif()
    endforeach()
 
+   set_property(TARGET fc PROPERTY INTERFACE_LINK_PDB_RELEASE ${INTERFACE_LINK_PDB_RELEASE})
+   set_property(TARGET fc PROPERTY INTERFACE_LINK_PDB_DEBUG ${INTERFACE_LINK_PDB_DEBUG})
    set_property(TARGET fc PROPERTY SHARED_LIBRARIES_DEBUG ${SHARED_LIBRARIES_DEBUG})
    set_property(TARGET fc PROPERTY SHARED_LIBRARIES_RELEASE ${SHARED_LIBRARIES_RELEASE})
+
 endif(WIN32)
 
 MESSAGE(STATUS "Finished fc module configuration...")

@@ -388,8 +388,24 @@ namespace fc {
                   if( timeout_time == time_point::maximum() ) {
                     task_ready.wait( lock );
                   } else if( timeout_time != time_point::min() ) {
-                    task_ready.wait_until( lock, boost::chrono::system_clock::time_point() + 
-                                                 boost::chrono::microseconds(timeout_time.time_since_epoch().count()) );
+                    /* This bit is kind of sloppy -- this wait was originally implemented as a wait
+                     * with respect to boost::chrono::system_clock.  This behaved rather comically
+                     * if you were to do a:
+                     *   fc::usleep(fc::seconds(60));
+                     * and then set your system's clock back a month, it would sleep for a month
+                     * plus a minute before waking back up (this happened on Linux, it seems 
+                     * Windows' behavior in this case was less unexpected).
+                     *
+                     * Boost Chrono's steady_clock will always increase monotonically so it will 
+                     * avoid this behavior.
+                     *
+                     * Right now we don't really have a way to distinguish when a timeout_time is coming
+                     * from a function that takes a relative time like fc::usleep() vs something
+                     * that takes an absolute time like fc::promise::wait_until(), so we can't always
+                     * do the right thing here.
+                     */ 
+                    task_ready.wait_until( lock, boost::chrono::steady_clock::now() + 
+                                                 boost::chrono::microseconds(timeout_time.time_since_epoch().count() - time_point::now().time_since_epoch().count()) );
                   }
                 }
               }

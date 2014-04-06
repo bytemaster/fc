@@ -17,15 +17,37 @@
 
 
 namespace fc {
-   console_appender::console_appender( const variant& args ) 
+
+   class console_appender::impl {
+   public:
+     config                      cfg;
+     color::type                 lc[log_level::off+1];
+#ifdef WIN32
+     HANDLE                      console_handle;
+#endif
+   };
+
+   console_appender::console_appender( const variant& args ) : 
+     my(new impl)
    {
+#ifdef WIN32
+      my->console_handle = INVALID_HANDLE_VALUE;
+#endif
       try
       {
-         cfg = args.as<config>();//fc::variant_cast<config>(args);
+         my->cfg = args.as<config>();//fc::variant_cast<config>(args);
+
+#ifdef WIN32
+         if (my->cfg.stream = stream::std_error)
+           my->console_handle = GetStdHandle(STD_ERROR_HANDLE);
+         else if (my->cfg.stream = stream::std_out)
+           my->console_handle = GetStdHandle(STD_OUTPUT_HANDLE);
+#endif
+
          for( int i = 0; i < log_level::off+1; ++i )
-            lc[i] = color::console_default;
-         for( auto itr = cfg.level_colors.begin(); itr != cfg.level_colors.end(); ++itr )
-            lc[itr->level] = itr->color;
+            my->lc[i] = color::console_default;
+         for( auto itr = my->cfg.level_colors.begin(); itr != my->cfg.level_colors.end(); ++itr )
+            my->lc[itr->level] = itr->color;
       } 
       catch ( exception& e )
       {
@@ -34,8 +56,14 @@ namespace fc {
       }
    }
 
-   const char* get_console_color(console_appender::color::type t ) {
-   #ifndef _MSC_VER
+   console_appender::~console_appender() {}
+
+   #ifdef WIN32
+   static WORD
+   #else
+   static const char* 
+   #endif
+   get_console_color(console_appender::color::type t ) {
       switch( t ) {
          case console_appender::color::red: return CONSOLE_RED;
          case console_appender::color::green: return CONSOLE_GREEN;
@@ -48,18 +76,12 @@ namespace fc {
          default:
             return CONSOLE_DEFAULT;
       }
-   #else 
-      return "";
-   #endif 
    }
-
 
    boost::mutex& log_mutex() {
     static boost::mutex m; return m;
    }
-   const char* console_appender::get_color( log_level l )const {
-      return get_console_color( lc[l] ); 
-   }
+
    void console_appender::log( const log_message& m ) {
       //fc::string message = fc::format_string( m.get_format(), m.get_data() );
       //fc::variant lmsg(m);
@@ -96,17 +118,23 @@ namespace fc {
 
 
       fc::unique_lock<boost::mutex> lock(log_mutex());
-      #ifndef WIN32
-      if(isatty(fileno(out))) fprintf( out, "\r%s", get_color( m.get_context().get_log_level() ) );
+      #ifdef WIN32
+      if (my->console_handle != INVALID_HANDLE_VALUE)
+        SetConsoleTextAttribute(my->console_handle, get_console_color( my->lc[m.get_context().get_log_level()] ));
+      #else
+      if(isatty(fileno(out))) fprintf( out, "\r%s", get_console_color( my->lc[m.get_context().get_log_level()] ) );
       #endif
 
       fprintf( out, "%s", line.str().c_str()); //fmt_str.c_str() ); 
 
-      #ifndef WIN32
+      #ifdef WIN32
+      if (my->console_handle != INVALID_HANDLE_VALUE)
+        SetConsoleTextAttribute(my->console_handle, CONSOLE_DEFAULT);
+      #else
       if(isatty(fileno(out))) fprintf( out, "\r%s", CONSOLE_DEFAULT );
       #endif
       fprintf( out, "\n" );
-      if( cfg.flush ) fflush( out );
+      if( my->cfg.flush ) fflush( out );
    }
 
 }

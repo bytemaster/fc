@@ -48,12 +48,12 @@ namespace fc
 
 
             console_appender( const variant& args );
-            const char* get_color( log_level l )const;
+            ~console_appender();
             virtual void log( const log_message& m );
 
        private:
-            config                      cfg;
-            color::type                 lc[log_level::off+1];
+            class impl;
+            std::unique_ptr<impl> my;
    };
 } // namespace fc
 

@@ -137,6 +137,7 @@ set( fc_sources
      src/crypto/dh.cpp
      src/crypto/blowfish.cpp
      src/crypto/elliptic.cpp
+     src/crypto/rand.cpp
      src/crypto/salsa20.cpp
      src/crypto/scrypt.cpp
 # commented out until committed

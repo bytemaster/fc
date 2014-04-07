@@ -5,6 +5,7 @@
 #include <fc/io/fstream.hpp>
 
 #include <string.h>
+#include <algorithm>
 
 namespace fc
 {

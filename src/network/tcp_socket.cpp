@@ -6,6 +6,10 @@
 #include <fc/io/stdio.hpp>
 #include <fc/exception/exception.hpp>
 
+#if defined _WIN32 || defined WIN32 || defined OS_WIN64 || defined _WIN64 || defined WIN64 || defined WINNT
+# include <MSTcpIP.h>
+#endif
+
 namespace fc {
 
   class tcp_socket::impl {
@@ -62,6 +66,40 @@ namespace fc {
                                              boost::asio::ip::tcp::endpoint(boost::asio::ip::address_v4(local_endpoint.get_address()), 
                                                                                                         local_endpoint.port()));
     fc::asio::tcp::connect(my->_sock, fc::asio::tcp::endpoint( boost::asio::ip::address_v4(remote_endpoint.get_address()), remote_endpoint.port() ) ); 
+  }
+
+  void tcp_socket::enable_keep_alives(const fc::microseconds& interval)
+  {
+    if (interval.count())
+    {
+      boost::asio::socket_base::keep_alive option(true);
+      my->_sock.set_option(option);
+#if defined _WIN32 || defined WIN32 || defined OS_WIN64 || defined _WIN64 || defined WIN64 || defined WINNT
+      struct tcp_keepalive keepalive_settings;
+      keepalive_settings.onoff = 1;
+      keepalive_settings.keepalivetime = interval.count() / fc::milliseconds(1).count();
+      keepalive_settings.keepaliveinterval = interval.count() / fc::milliseconds(1).count();
+
+      DWORD dwBytesRet = 0;
+      if (WSAIoctl(my->_sock.native(), SIO_KEEPALIVE_VALS, &keepalive_settings, sizeof(keepalive_settings),
+                   NULL, 0, &dwBytesRet, NULL, NULL) == SOCKET_ERROR)
+        wlog("Error setting TCP keepalive values");
+#else
+      // This should work for modern Linuxes and for OSX >= Mountain Lion
+      int timeout_sec = interval.count() / fc::seconds(1).count();
+      if (setsockopt(my->_sock.native(), SOL_TCP, TCP_KEEPIDLE, 
+                     (char*)&timeout_sec, sizeof(timeout_sec)) < 0)
+        wlog("Error setting TCP keepalive idle time");
+      if (setsockopt(my->_sock.native(), SOL_TCP, TCP_KEEPINTVL, 
+                     (char*)&timeout_sec, sizeof(timeout_sec)) < 0)
+        wlog("Error setting TCP keepalive interval");
+#endif
+    }
+    else
+    {
+      boost::asio::socket_base::keep_alive option(false);
+      my->_sock.set_option(option);
+    }
   }
 
   class tcp_server::impl {

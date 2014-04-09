@@ -46,10 +46,10 @@ IF( WIN32 )
 
   #boost
   SET(BOOST_ROOT $ENV{BOOST_ROOT})
-  set(Boost_USE_DEBUG_PYTHON ON)
+#  set(Boost_USE_DEBUG_PYTHON ON)
   set(Boost_USE_MULTITHREADED ON)
-  set(Boost_USE_STATIC_LIBS OFF)
-  set(BOOST_ALL_DYN_LINK ON) # force dynamic linking for all libraries
+  set(Boost_USE_STATIC_LIBS ON)
+#  set(BOOST_ALL_DYN_LINK ON) # force dynamic linking for all libraries
 
   FIND_PACKAGE(Boost 1.53 REQUIRED COMPONENTS ${BOOST_COMPONENTS})
   # For Boost 1.53 on windows, coroutine was not in BOOST_LIBRARYDIR and do not need it to build,  but if boost versin >= 1.54, find coroutine otherwise will cause link errors

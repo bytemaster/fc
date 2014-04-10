@@ -49,7 +49,7 @@ IF( WIN32 )
 #  set(Boost_USE_DEBUG_PYTHON ON)
   set(Boost_USE_MULTITHREADED ON)
   set(Boost_USE_STATIC_LIBS ON)
-#  set(BOOST_ALL_DYN_LINK ON) # force dynamic linking for all libraries
+  set(BOOST_ALL_DYN_LINK OFF) # force dynamic linking for all libraries
 
   FIND_PACKAGE(Boost 1.53 REQUIRED COMPONENTS ${BOOST_COMPONENTS})
   # For Boost 1.53 on windows, coroutine was not in BOOST_LIBRARYDIR and do not need it to build,  but if boost versin >= 1.54, find coroutine otherwise will cause link errors
@@ -183,7 +183,8 @@ IF(WIN32)
     BOOST_ALL_NO_LIB
   )
   # Activate C++ exception handling, assume extern C calls don't throw
-  target_compile_options(fc PUBLIC /EHsc)
+  # Add /U options to be sure settings specific to dynamic boost link are ineffective 
+  target_compile_options(fc PUBLIC /EHsc /UBOOST_ALL_DYN_LINK /UBOOST_LINKING_PYTHON /UBOOST_DEBUG_PYTHON)
 ELSE()
   SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99 -Wall" )
 
@@ -244,7 +245,10 @@ if(WIN32)
         endif()
       endforeach()
 
-      set(SHARED_LIBRARIES_RELEASE ${SHARED_LIBRARIES_RELEASE} ${boost_dll})
+      if(EXISTS "${boost_dll}")
+        set(SHARED_LIBRARIES_RELEASE ${SHARED_LIBRARIES_RELEASE} "${boost_dll}")
+      endif()
+
    endforeach()
    
    set(INTERFACE_LINK_PDB_DEBUG)
@@ -262,8 +266,9 @@ if(WIN32)
           GP_APPEND_UNIQUE(INTERFACE_LINK_PDB_DEBUG ${p})
         endif()
       endforeach()
-
-      set(SHARED_LIBRARIES_DEBUG ${SHARED_LIBRARIES_DEBUG} ${boost_dll})
+      if(EXISTS "${boost_dll}")
+        set(SHARED_LIBRARIES_DEBUG ${SHARED_LIBRARIES_DEBUG} "${boost_dll}")
+      endif()
    endforeach()
 
    message("openssl_libraries=${OPENSSL_LIBRARIES}")

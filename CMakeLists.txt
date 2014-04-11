@@ -219,6 +219,9 @@ target_link_libraries( fc PUBLIC easylzma_static ${Boost_LIBRARIES} ${OPENSSL_LI
 #target_link_libraries( test_sleep fc )
 
 if(WIN32)
+   # add addtional import library on windows platform
+   target_link_libraries( fc PUBLIC crypt32.lib)
+
    # now generate a list of the DLLs we're using to use during the install process
    include (ParseLibraryList)
    PARSE_LIBRARY_LIST(${Boost_LIBRARIES}

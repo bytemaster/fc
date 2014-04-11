@@ -84,7 +84,7 @@ namespace fc {
       if (WSAIoctl(my->_sock.native(), SIO_KEEPALIVE_VALS, &keepalive_settings, sizeof(keepalive_settings),
                    NULL, 0, &dwBytesRet, NULL, NULL) == SOCKET_ERROR)
         wlog("Error setting TCP keepalive values");
-#else
+#elif !defined( __APPLE__ ) // TODO: add proper support for OS X Mavericks... SOL_TCP and TCP_KEEPIDLE are not defined
       // This should work for modern Linuxes and for OSX >= Mountain Lion
       int timeout_sec = interval.count() / fc::seconds(1).count();
       if (setsockopt(my->_sock.native(), SOL_TCP, TCP_KEEPIDLE, 

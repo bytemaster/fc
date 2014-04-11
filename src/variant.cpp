@@ -15,6 +15,11 @@ namespace fc
    void to_variant( const uint16_t& var,  variant& vo )  { vo = uint64_t(var); }
    // TODO: warn on overflow?
    void from_variant( const variant& var,  uint16_t& vo ){ vo = static_cast<uint16_t>(var.as_uint64()); }
+
+   void to_variant( const int16_t& var,  variant& vo )  { vo = int64_t(var); }
+   // TODO: warn on overflow?
+   void from_variant( const variant& var,  int16_t& vo ){ vo = static_cast<int16_t>(var.as_int64()); }
+
 void to_variant( const std::vector<char>& var,  variant& vo )
 {
   if( var.size() )

@@ -30,6 +30,8 @@ namespace fc
    class time_point;
    class time_point_sec;
 
+   void to_variant( const int16_t& var,  variant& vo );
+   void from_variant( const variant& var,  int16_t& vo );
    void to_variant( const uint16_t& var,  variant& vo );
    void from_variant( const variant& var,  uint16_t& vo );
    void to_variant( const uint32_t& var,  variant& vo );

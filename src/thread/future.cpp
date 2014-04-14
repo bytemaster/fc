@@ -79,8 +79,15 @@ namespace fc {
 #endif
   }
   void promise_base::_notify(){
-    if( _blocked_thread != nullptr ) 
-      _blocked_thread->notify(ptr(this,true));
+    // copy _blocked_thread into a local so that if the thread unblocks (e.g., 
+    // because of a timeout) before we get a chance to notify it, we won't be
+    // calling notify on a null pointer
+    thread* blocked_thread;
+    { synchronized(_spin_yield)
+      blocked_thread = _blocked_thread;
+    }
+    if( blocked_thread ) 
+      blocked_thread->notify(ptr(this,true));
   }
   promise_base::~promise_base() { }
   void promise_base::_set_timeout(){

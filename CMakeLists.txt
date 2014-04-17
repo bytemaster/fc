@@ -218,6 +218,8 @@ target_link_libraries( fc PUBLIC easylzma_static ${Boost_LIBRARIES} ${OPENSSL_LI
 #target_link_libraries( test_aes fc ${rt_library} ${pthread_library} )
 #add_executable( test_sleep tests/sleep.cpp )
 #target_link_libraries( test_sleep fc )
+add_executable( test_rate_limiting tests/rate_limiting.cpp )
+target_link_libraries( test_rate_limiting fc )
 
 if(WIN32)
    # add addtional import library on windows platform

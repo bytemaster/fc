@@ -1,5 +1,6 @@
 #include <fc/network/tcp_socket.hpp>
 #include <fc/network/ip.hpp>
+#include <fc/network/tcp_socket_io_hooks.hpp>
 #include <fc/fwd_impl.hpp>
 #include <fc/asio.hpp>
 #include <fc/log/logger.hpp>
@@ -12,14 +13,32 @@
 
 namespace fc {
 
-  class tcp_socket::impl {
+  class tcp_socket::impl : public tcp_socket_io_hooks{
     public:
-      impl():_sock( fc::asio::default_io_service() ){}
-      ~impl(){
+      impl() :
+        _sock(fc::asio::default_io_service()),
+        _io_hooks(this)
+      {}
+      ~impl()
+      {
         if( _sock.is_open() ) _sock.close();
       }
+      virtual size_t readsome(boost::asio::ip::tcp::socket& socket, char* buffer, size_t length) override;
+      virtual size_t writesome(boost::asio::ip::tcp::socket& socket, const char* buffer, size_t length) override;
+
       boost::asio::ip::tcp::socket _sock;
+      tcp_socket_io_hooks* _io_hooks;
   };
+
+  size_t tcp_socket::impl::readsome(boost::asio::ip::tcp::socket& socket, char* buffer, size_t length)
+  {
+    return fc::asio::read_some(socket, boost::asio::buffer(buffer, length));
+  }
+  size_t tcp_socket::impl::writesome(boost::asio::ip::tcp::socket& socket, const char* buffer, size_t length)
+  {
+    return fc::asio::write_some(socket, boost::asio::buffer(buffer, length));
+  }
+
   bool tcp_socket::is_open()const {
     return my->_sock.is_open();
   }
@@ -42,8 +61,8 @@ namespace fc {
     return !my->_sock.is_open();
   }
 
-  size_t   tcp_socket::writesome( const char* buf, size_t len ) {
-    return fc::asio::write_some( my->_sock, boost::asio::buffer( buf, len ) );
+  size_t tcp_socket::writesome(const char* buf, size_t len) {
+    return my->_io_hooks->writesome(my->_sock, buf, len);
   }
 
  fc::ip::endpoint tcp_socket::remote_endpoint()const
@@ -52,9 +71,8 @@ namespace fc {
    return  fc::ip::endpoint(rep.address().to_v4().to_ulong(), rep.port() );
  }
 
-  size_t tcp_socket::readsome( char* buf, size_t len ) {
-    auto r =  fc::asio::read_some( my->_sock, boost::asio::buffer( buf, len ) );
-    return r;
+  size_t tcp_socket::readsome(char* buf, size_t len) {
+    return my->_io_hooks->readsome(my->_sock, buf, len);
   }
 
   void tcp_socket::connect_to( const fc::ip::endpoint& remote_endpoint ) {
@@ -105,6 +123,11 @@ namespace fc {
       boost::asio::socket_base::keep_alive option(false);
       my->_sock.set_option(option);
     }
+  }
+
+  void tcp_socket::set_io_hooks(tcp_socket_io_hooks* new_hooks)
+  {
+    my->_io_hooks = new_hooks ? new_hooks : &*my;
   }
 
   class tcp_server::impl {

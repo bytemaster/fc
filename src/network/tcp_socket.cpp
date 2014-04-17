@@ -77,8 +77,8 @@ namespace fc {
 #if defined _WIN32 || defined WIN32 || defined OS_WIN64 || defined _WIN64 || defined WIN64 || defined WINNT
       struct tcp_keepalive keepalive_settings;
       keepalive_settings.onoff = 1;
-      keepalive_settings.keepalivetime = interval.count() / fc::milliseconds(1).count();
-      keepalive_settings.keepaliveinterval = interval.count() / fc::milliseconds(1).count();
+      keepalive_settings.keepalivetime = (ULONG)(interval.count() / fc::milliseconds(1).count());
+      keepalive_settings.keepaliveinterval = (ULONG)(interval.count() / fc::milliseconds(1).count());
 
       DWORD dwBytesRet = 0;
       if (WSAIoctl(my->_sock.native(), SIO_KEEPALIVE_VALS, &keepalive_settings, sizeof(keepalive_settings),

@@ -133,7 +133,7 @@ namespace fc { namespace raw {
 
        mutable_variant_object mvo;
        mvo.reserve(vs.value);
-       for( auto i = 0; i < vs.value; ++i )
+       for( uint32_t i = 0; i < vs.value; ++i )
        {
           fc::string key;
           fc::variant value;

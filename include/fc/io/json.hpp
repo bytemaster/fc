@@ -56,7 +56,7 @@ namespace fc
          template<typename T>
          static void save_to_file( const T& v, const string& p, bool pretty = true ) 
          {
-            save_to_file( variant(v), p, pretty );
+            save_to_file( variant(v), fc::path(p), pretty );
          } 
    };
 

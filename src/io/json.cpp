@@ -264,37 +264,58 @@ namespace fc
    variant token_from_stream( T& in )
    {
       fc::stringstream ss;
-      while( char c = in.peek() )
+      bool parsed_unexpected_character = false;
+      bool received_eof = false;
+      try
       {
-         switch( c )
-         {
-            case 'n':
-            case 'u':
-            case 'l':
-            case 't':
-            case 'r':
-            case 'e':
-            case 'f':
-            case 'a':
-            case 's':
-               ss.put( in.get() );
-               break;
-            default:
-            {
-               fc::string str = ss.str();
-               if( str == "null" )  return variant();
-               if( str == "true" )  return true;
-               if( str == "false" ) return false;
-               else 
-               {
-                  return str;
-                 // FC_THROW_EXCEPTION( parse_error_exception, "Invalid token '${token}'",
-                 //                          ("token",str) );
-               }
-            }
-         }
+        char c;
+        while( (c = in.peek())  && !parsed_unexpected_character)
+        {
+           switch( c )
+           {
+              case 'n':
+              case 'u':
+              case 'l':
+              case 't':
+              case 'r':
+              case 'e':
+              case 'f':
+              case 'a':
+              case 's':
+                 ss.put( in.get() );
+                 break;
+              default:
+                 parsed_unexpected_character = true;
+                 break;
+           }
+        }
       }
-	  FC_THROW_EXCEPTION( parse_error_exception, "Unexpected EOF" );
+      catch (fc::eof_exception&)
+      {
+        received_eof = true;
+      }
+
+      // we can get here either by processing a delimiter as in "null,"
+      // an EOF like "null<EOF>", or an invalid token like "nullZ"
+      fc::string str = ss.str();
+      if( str == "null" )  return variant();
+      if( str == "true" )  return true;
+      if( str == "false" ) return false;
+      else 
+      {
+        if (received_eof)
+          FC_THROW_EXCEPTION( parse_error_exception, "Unexpected EOF" );
+        else
+        {
+          // I'm not sure why we do this, a comment would be helpful.
+          // if we've reached this point, we've either seen a partial
+          // token ("tru<EOF>") or something our simple parser couldn't
+          // make out ("falfe")
+          return str;
+          // FC_THROW_EXCEPTION( parse_error_exception, "Invalid token '${token}'",
+          //                          ("token",str) );
+        }
+      }
    }
 
 

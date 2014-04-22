@@ -264,12 +264,14 @@ namespace fc {
 
   istream& operator>>( istream& o, std::string& v )
   {
+     assert(false && "not implemented");
      return o;
   }
 
 #ifdef USE_FC_STRING
   istream& operator>>( istream& o, fc::string& v )
   {
+     assert(false && "not implemented");
      return o;
   }
 #endif
@@ -282,51 +284,61 @@ namespace fc {
 
   istream& operator>>( istream& o, double& v )
   {
+     assert(false && "not implemented");
      return o;
   }
 
   istream& operator>>( istream& o, float& v )
   {
+     assert(false && "not implemented");
      return o;
   }
 
   istream& operator>>( istream& o, int64_t& v )
   {
+     assert(false && "not implemented");
      return o;
   }
 
   istream& operator>>( istream& o, uint64_t& v )
   {
+     assert(false && "not implemented");
      return o;
   }
 
   istream& operator>>( istream& o, int32_t& v )
   {
+     assert(false && "not implemented");
      return o;
   }
 
   istream& operator>>( istream& o, uint32_t& v )
   {
+     assert(false && "not implemented");
      return o;
   }
 
   istream& operator>>( istream& o, int16_t& v )
   {
+     assert(false && "not implemented");
      return o;
   }
 
   istream& operator>>( istream& o, uint16_t& v )
   {
+     assert(false && "not implemented");
      return o;
   }
 
   istream& operator>>( istream& o, int8_t& v )
   {
+     assert(false && "not implemented");
      return o;
   }
 
   istream& operator>>( istream& o, uint8_t& v )
   {
+     assert(false && "not implemented");
      return o;
   }
 

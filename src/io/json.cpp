@@ -211,54 +211,58 @@ namespace fc
    template<typename T>
    variant number_from_stream( T& in )
    {
-      char buf[30];
-      memset( buf, 0, sizeof(buf) );
-      char* pos = buf;
+      fc::stringstream ss;
+
       bool  dot = false;
       bool  neg = false;
       if( in.peek() == '-')
       {
         neg = true;
-        *pos = in.get();
-        ++pos;
+        ss.put( in.get() );
       }
       bool done = false;
-      while(  !done)
+
+      try
       {
-        char c = in.peek();
-        switch( c )
+        char c;
+        while((c = in.peek()) && !done)
         {
-            case '.':
-            {
-               if( dot ) 
-               {
-                  done = true;
-                  break;
-               }
-               dot = true;
-            }
-            case '0':
-            case '1':
-            case '2':
-            case '3':
-            case '4':
-            case '5':
-            case '6':
-            case '7':
-            case '8':
-            case '9':
-               *pos = c;
-               ++pos;
-               in.get();
-               break;
-            default:
-              done = true;
-              break;
+          
+          switch( c )
+          {
+              case '.':
+                 if (dot) 
+                    FC_THROW_EXCEPTION(parse_error_exception, "Can't parse a number with two decimal places");
+                 dot = true;
+              case '0':
+              case '1':
+              case '2':
+              case '3':
+              case '4':
+              case '5':
+              case '6':
+              case '7':
+              case '8':
+              case '9':
+                 ss.put( in.get() );
+                 break;
+              default:
+                done = true;
+                break;
+          }
         }
       }
-      if( dot ) return to_double(buf);
-      if( neg ) return to_int64(buf);
-      return to_uint64(buf);
+      catch (fc::eof_exception&)
+      {
+      }
+      fc::string str = ss.str();
+      if (str == "-." || str == ".") // check the obviously wrong things we could have encountered
+        FC_THROW_EXCEPTION(parse_error_exception, "Can't parse token \"${token}\" as a JSON numeric constant", ("token", str));
+      if( dot )
+        return to_double(str);
+      if( neg ) 
+        return to_int64(str);
+      return to_uint64(str);
    }
    template<typename T>
    variant token_from_stream( T& in )
@@ -269,7 +273,7 @@ namespace fc
       try
       {
         char c;
-        while( (c = in.peek())  && !parsed_unexpected_character)
+        while((c = in.peek()) && !parsed_unexpected_character)
         {
            switch( c )
            {

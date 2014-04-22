@@ -27,6 +27,11 @@ struct unsigned_int {
     friend bool operator>=( const unsigned_int& i, const unsigned_int& v ) { return v >= i.value; }
 };
 
+/**
+ *  @brief serializes a 32 bit signed interger in as few bytes as possible
+ *
+ *  Uses the google protobuf algorithm for seralizing signed numbers
+ */
 struct signed_int {
     signed_int( int32_t v = 0 ):value(v){}
     operator int32_t()const { return value; }

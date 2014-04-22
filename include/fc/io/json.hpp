@@ -1,9 +1,9 @@
 #pragma once
 #include <fc/variant.hpp>
+#include <fc/filesystem.hpp>
 
 namespace fc
 {
-   class path;
    class ostream;
    class buffered_istream;
 
@@ -54,7 +54,7 @@ namespace fc
          }
 
          template<typename T>
-         static void save_to_file( const T& v, const string& p, bool pretty = true ) 
+         static void save_to_file( const T& v, const std::string& p, bool pretty = true ) 
          {
             save_to_file( variant(v), fc::path(p), pretty );
          } 

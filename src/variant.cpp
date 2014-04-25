@@ -486,7 +486,7 @@ const string&        variant::get_string()const
 {
   if( get_type() == string_type )
      return **reinterpret_cast<const const_string_ptr*>(this);
-  FC_THROW_EXCEPTION( bad_cast_exception, "Invalid cast from ${type} to Object" );
+  FC_THROW_EXCEPTION( bad_cast_exception, "Invalid cast from type '${type}' to Object", ("type",int(get_type())) );
 }
 
 
@@ -495,7 +495,7 @@ const variant_object&  variant::get_object()const
 {
   if( get_type() == object_type )
      return **reinterpret_cast<const const_variant_object_ptr*>(this);
-  FC_THROW_EXCEPTION( bad_cast_exception, "Invalid cast from ${type} to Object" );
+  FC_THROW_EXCEPTION( bad_cast_exception, "Invalid cast from type '${type}' to Object", ("type",int(get_type())) );
 }
 
 void to_variant( const std::string& s, variant& v )

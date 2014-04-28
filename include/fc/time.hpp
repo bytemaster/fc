@@ -45,13 +45,14 @@ namespace fc {
         static time_point from_iso_string( const fc::string& s );
 
         const microseconds& time_since_epoch()const { return elapsed; }
+        uint32_t            sec_since_epoch()const  { return elapsed.count() / 1000000; }
         bool   operator > ( const time_point& t )const                              { return elapsed._count > t.elapsed._count; }
         bool   operator >=( const time_point& t )const                              { return elapsed._count >=t.elapsed._count; }
         bool   operator < ( const time_point& t )const                              { return elapsed._count < t.elapsed._count; }
         bool   operator <=( const time_point& t )const                              { return elapsed._count <=t.elapsed._count; }
         bool   operator ==( const time_point& t )const                              { return elapsed._count ==t.elapsed._count; }
         bool   operator !=( const time_point& t )const                              { return elapsed._count !=t.elapsed._count; }
-        time_point&  operator += ( const microseconds& m)                          { elapsed+=m; return *this;               }
+        time_point&  operator += ( const microseconds& m)                           { elapsed+=m; return *this;                 }
         time_point   operator + (const microseconds& m) const { return time_point(elapsed+m); }
         time_point   operator - (const microseconds& m) const { return time_point(elapsed-m); }
         microseconds operator - (const time_point& m) const { return microseconds(elapsed.count() - m.elapsed.count()); }
@@ -87,6 +88,7 @@ namespace fc {
         friend bool      operator <= ( const time_point_sec& a, const time_point_sec& b )  { return a.utc_seconds <= b.utc_seconds; }
         friend bool      operator >= ( const time_point_sec& a, const time_point_sec& b )  { return a.utc_seconds >= b.utc_seconds; }
         friend bool      operator == ( const time_point_sec& a, const time_point_sec& b ) { return a.utc_seconds == b.utc_seconds; }
+        friend bool      operator != ( const time_point_sec& a, const time_point_sec& b ) { return a.utc_seconds != b.utc_seconds; }
         time_point_sec&  operator += ( uint32_t m ) { utc_seconds+=m; return *this; }
 
         friend time_point   operator - ( const time_point_sec& t, const microseconds& m )   { return time_point(t) - m;             }

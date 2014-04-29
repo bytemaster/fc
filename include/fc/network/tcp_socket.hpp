@@ -15,12 +15,15 @@ namespace fc {
       void     connect_to( const fc::ip::endpoint& remote_endpoint );
       void     connect_to( const fc::ip::endpoint& remote_endpoint, const fc::ip::endpoint& local_endpoint );
       void     enable_keep_alives(const fc::microseconds& interval);
-      fc::ip::endpoint remote_endpoint()const;
+      void     set_reuse_address(bool enable = true); // set SO_REUSEADDR
+      fc::ip::endpoint remote_endpoint() const;
+      fc::ip::endpoint local_endpoint() const;
 
       void get( char& c )
       {
           read( &c, 1 );
       }
+
 
       /// istream interface
       /// @{
@@ -35,6 +38,7 @@ namespace fc {
       virtual void     close();
       /// @}
 
+      void open();
       bool   is_open()const;
 
     private:
@@ -57,6 +61,7 @@ namespace fc {
 
       void     close();
       void     accept( tcp_socket& s );
+      void     set_reuse_address(bool enable = true); // set SO_REUSEADDR, call before listen
       void     listen( uint16_t port );
       void     listen( const fc::ip::endpoint& ep );
       uint16_t get_port()const;

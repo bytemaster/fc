@@ -86,7 +86,6 @@ namespace fc {
         wlog("Error setting TCP keepalive values");
 #else
 # if !defined(__clang__) || (__clang_major__ >= 6)
-      a b a c d asdflkjasdfjklasldjf lkjasdjfklja ksdfj k
       // This should work for modern Linuxes and for OSX >= Mountain Lion
       int timeout_sec = interval.count() / fc::seconds(1).count();
       if (setsockopt(my->_sock.native(), IPPROTO_TCP, 

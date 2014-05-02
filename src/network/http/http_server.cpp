@@ -32,7 +32,7 @@ namespace fc { namespace http {
          }
          ss << "Content-Length: "<<body_length<<"\r\n\r\n";
          auto s = ss.str();
-         fc::cerr<<s<<"\n";
+         //fc::cerr<<s<<"\n";
          con->get_socket().write( s.c_str(), s.size() );
       }
 
@@ -76,7 +76,7 @@ namespace fc { namespace http {
              http::server::response rep( fc::shared_ptr<response::impl>( new response::impl(c) ) );
              auto req = c->read_request();
              if( do_on_req ) do_on_req( req, rep );
-              c->get_socket().close();
+             c->get_socket().close();
           } catch ( fc::exception& e ) {
              wlog( "unable to read request ${1}", ("1", e.to_detail_string() ) );//fc::except_str().c_str());
           }

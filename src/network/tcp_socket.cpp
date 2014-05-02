@@ -95,9 +95,12 @@ namespace fc {
 # endif
                      (char*)&timeout_sec, sizeof(timeout_sec)) < 0)
         wlog("Error setting TCP keepalive idle time");
+#ifndef __APPLE__ // TCP_KEEPINTVL does not seem to work on 10.8.4
       if (setsockopt(my->_sock.native(), IPPROTO_TCP, TCP_KEEPINTVL, 
                      (char*)&timeout_sec, sizeof(timeout_sec)) < 0)
         wlog("Error setting TCP keepalive interval");
+#endif // !__APPLE__
+
 #endif
     }
     else

@@ -14,12 +14,21 @@ namespace fc {
 
   class tcp_socket::impl {
     public:
-      impl():_sock( fc::asio::default_io_service() ){}
+      impl() : 
+        _sock( fc::asio::default_io_service() )
+      {}
       ~impl(){
-        if( _sock.is_open() ) _sock.close();
+        if( _sock.is_open() ) 
+          _sock.close();
       }
       boost::asio::ip::tcp::socket _sock;
   };
+
+  void tcp_socket::open()
+  {
+    my->_sock.open(boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), 0).protocol());
+  }
+
   bool tcp_socket::is_open()const {
     return my->_sock.is_open();
   }
@@ -46,11 +55,17 @@ namespace fc {
     return fc::asio::write_some( my->_sock, boost::asio::buffer( buf, len ) );
   }
 
- fc::ip::endpoint tcp_socket::remote_endpoint()const
- {
-   auto rep = my->_sock.remote_endpoint();
-   return  fc::ip::endpoint(rep.address().to_v4().to_ulong(), rep.port() );
- }
+  fc::ip::endpoint tcp_socket::remote_endpoint()const
+  {
+    auto rep = my->_sock.remote_endpoint();
+    return  fc::ip::endpoint(rep.address().to_v4().to_ulong(), rep.port() );
+  }
+
+  fc::ip::endpoint tcp_socket::local_endpoint() const
+  {
+    auto boost_local_endpoint = my->_sock.local_endpoint();
+    return fc::ip::endpoint(boost_local_endpoint.address().to_v4().to_ulong(), boost_local_endpoint.port() );
+  }
 
   size_t tcp_socket::readsome( char* buf, size_t len ) {
     auto r =  fc::asio::read_some( my->_sock, boost::asio::buffer( buf, len ) );
@@ -62,10 +77,17 @@ namespace fc {
   }
 
   void tcp_socket::connect_to( const fc::ip::endpoint& remote_endpoint, const fc::ip::endpoint& local_endpoint ) {
-    my->_sock = boost::asio::ip::tcp::socket(fc::asio::default_io_service(), 
-                                             boost::asio::ip::tcp::endpoint(boost::asio::ip::address_v4(local_endpoint.get_address()), 
-                                                                                                        local_endpoint.port()));
-    fc::asio::tcp::connect(my->_sock, fc::asio::tcp::endpoint( boost::asio::ip::address_v4(remote_endpoint.get_address()), remote_endpoint.port() ) ); 
+    try
+    {
+    my->_sock.bind(boost::asio::ip::tcp::endpoint(boost::asio::ip::address_v4(local_endpoint.get_address()), 
+                                                                              local_endpoint.port()));
+    }
+    catch (std::exception& except)
+    {
+      elog("Exception binding outgoing connection to desired local endpoint: ${what}", ("what", except.what()));
+      throw;
+    }
+    fc::asio::tcp::connect(my->_sock, fc::asio::tcp::endpoint(boost::asio::ip::address_v4(remote_endpoint.get_address()), remote_endpoint.port())); 
   }
 
   void tcp_socket::enable_keep_alives(const fc::microseconds& interval)
@@ -77,8 +99,8 @@ namespace fc {
 #if defined _WIN32 || defined WIN32 || defined OS_WIN64 || defined _WIN64 || defined WIN64 || defined WINNT
       struct tcp_keepalive keepalive_settings;
       keepalive_settings.onoff = 1;
-      keepalive_settings.keepalivetime = interval.count() / fc::milliseconds(1).count();
-      keepalive_settings.keepaliveinterval = interval.count() / fc::milliseconds(1).count();
+      keepalive_settings.keepalivetime = (ULONG)(interval.count() / fc::milliseconds(1).count());
+      keepalive_settings.keepaliveinterval = (ULONG)(interval.count() / fc::milliseconds(1).count());
 
       DWORD dwBytesRet = 0;
       if (WSAIoctl(my->_sock.native(), SIO_KEEPALIVE_VALS, &keepalive_settings, sizeof(keepalive_settings),
@@ -109,13 +131,21 @@ namespace fc {
     }
   }
 
+  void tcp_socket::set_reuse_address(bool enable /* = true */)
+  {
+    FC_ASSERT(my->_sock.is_open());
+    boost::asio::socket_base::reuse_address option(enable);
+    my->_sock.set_option(option);
+  }
+
+
   class tcp_server::impl {
     public:
-      impl(uint16_t port)
-      :_accept( fc::asio::default_io_service(), boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), port) ){}
-
-      impl(const fc::ip::endpoint& ep  )
-      :_accept( fc::asio::default_io_service(), boost::asio::ip::tcp::endpoint(boost::asio::ip::address_v4( ep.get_address()), ep.port()) ){}
+      impl()
+      :_accept( fc::asio::default_io_service() )
+      {
+        _accept.open(boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), 0).protocol());
+      }
 
       ~impl(){
         try {
@@ -130,8 +160,10 @@ namespace fc {
       boost::asio::ip::tcp::acceptor _accept;
   };
   void tcp_server::close() {
-    if( my && my->_accept.is_open() ) my->_accept.close();
-    delete my; my = nullptr;
+    if( my && my->_accept.is_open() ) 
+      my->_accept.close();
+    delete my;
+    my = nullptr;
   }
   tcp_server::tcp_server()
   :my(nullptr) {
@@ -149,20 +181,31 @@ namespace fc {
       fc::asio::tcp::accept( my->_accept, s.my->_sock  ); 
     } FC_RETHROW_EXCEPTIONS( warn, "Unable to accept connection on socket." );
   }
-
+  void tcp_server::set_reuse_address(bool enable /* = true */)
+  {
+    if( !my ) 
+      my = new impl;
+    boost::asio::ip::tcp::acceptor::reuse_address option(enable);
+    my->_accept.set_option(option);
+  }
   void tcp_server::listen( uint16_t port ) 
   {
-    if( my ) delete my;
-    my = new impl(port);
+    if( !my ) 
+      my = new impl;
+    my->_accept.bind(boost::asio::ip::tcp::endpoint(boost::asio::ip::address_v4(), port));
+    my->_accept.listen();
   }
   void tcp_server::listen( const fc::ip::endpoint& ep ) 
   {
-    if( my ) delete my;
-    my = new impl(ep);
+    if( !my ) 
+      my = new impl;
+    my->_accept.bind(boost::asio::ip::tcp::endpoint(boost::asio::ip::address_v4::from_string((string)ep.get_address()), ep.port()));
+    my->_accept.listen();
   }
 
   uint16_t tcp_server::get_port()const
   {
+     FC_ASSERT( my != nullptr );
      return my->_accept.local_endpoint().port();
   }
 

@@ -141,7 +141,7 @@ namespace fc { namespace rpc {
                         }
                      }
                   }
-                  else if( i != obj.end() )
+                  else if( i != obj.end() ) //handle any received JSON response
                   {
                      uint64_t id = i->value().as_int64();
                      auto await = _awaiting.find(id);
@@ -149,11 +149,11 @@ namespace fc { namespace rpc {
                      {
                         auto r = obj.find("result");
                         auto e = obj.find("error");
-                        if( r != obj.end() )
+                        if( r != obj.end() ) //if regular result response
                         {
                            await->second->set_value( r->value() ); 
                         }
-                        else if( e != obj.end() )
+                        else if( e != obj.end() ) //if error response
                         {
                           try
                           {

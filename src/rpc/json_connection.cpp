@@ -35,7 +35,7 @@ namespace fc { namespace rpc {
 
             void send_result( variant id, variant result )
             {
-               ilog( "send ${i} ${r}", ("i",id)("r",result) );
+               ilog( "send: {\"id\": ${i}, \"result\": ${r}}", ("i",id)("r",result) );
                {
                  fc::scoped_lock<fc::mutex> lock(_write_mutex);
                  *_out << "{\"id\":";
@@ -48,6 +48,8 @@ namespace fc { namespace rpc {
             }
             void send_error( variant id, fc::exception& e )
             {
+               ilog( "send: {\"id\": ${i}, \"error\":{\"message\": ${what},\"code\":0,\"data\":${data}}}",
+                     ("i",id)("what",e.what())("data", e) );
                {
                  fc::scoped_lock<fc::mutex> lock(_write_mutex);
                  *_out << "{\"id\":";

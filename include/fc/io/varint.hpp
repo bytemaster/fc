@@ -33,10 +33,12 @@ struct unsigned_int {
  *  Uses the google protobuf algorithm for seralizing signed numbers
  */
 struct signed_int {
-    signed_int( int32_t v = 0 ):value(v){}
+    signed_int( int64_t v = 0 ):value(v){}
     operator int32_t()const { return value; }
     template<typename T>
     signed_int& operator=( const T& v ) { value = v; return *this; }
+    signed_int& operator++(int){ ++value; return *this; }
+    signed_int& operator++(){ ++value; return *this; }
 
     int32_t value;
 };
@@ -50,4 +52,16 @@ void from_variant( const variant& var,  unsigned_int& vo );
 
 }  // namespace fc
 
-
+#include <unordered_map>
+namespace std
+{
+   template<>
+   struct hash<fc::signed_int>
+   {
+       public:
+         size_t operator()(const fc::signed_int &a) const 
+         {
+            return std::hash<int32_t>()(a.value);
+         }
+   };
+}

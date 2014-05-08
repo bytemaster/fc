@@ -7,7 +7,7 @@ namespace fc {
 
 namespace detail 
 {
-  NO_RETURN void throw_datastream_range_error( const char* file, size_t len, size_t over );
+  NO_RETURN void throw_datastream_range_error( const char* file, size_t len, int64_t over );
 }
 
 /**

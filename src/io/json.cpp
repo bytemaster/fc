@@ -640,4 +640,14 @@ namespace fc
       return out;
    }
 
+   bool     json::is_valid( const std::string& utf8_str )
+   {
+      if( utf8_str.size() == 0 ) return false;
+      fc::stringstream in( utf8_str );
+      variant_from_stream( in );
+      try { in.peek(); } catch ( const eof_exception& e ) { return true; }
+      return false;
+   }
+
+
 } // fc

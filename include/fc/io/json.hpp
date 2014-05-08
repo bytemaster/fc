@@ -26,6 +26,8 @@ namespace fc
          static string   to_string( const variant& v );
          static string   to_pretty_string( const variant& v );
 
+         static bool     is_valid( const std::string& json_str );
+
          template<typename T>
          static void     save_to_file( const T& v, const fc::path& fi, bool pretty = true )
          {

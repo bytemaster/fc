@@ -90,9 +90,13 @@ namespace fc
       uint32_t _upload_bytes_per_second;
       uint32_t _download_bytes_per_second;
 
-      microseconds _granularity;
+      microseconds _granularity; // how often to add tokens to the bucket
+      uint32_t _read_tokens;
+      uint32_t _unused_read_tokens; // gets filled with tokens for unused bytes (if I'm allowed to read 200 bytes and I try to read 200 bytes, but can only read 50, tokens for the other 150 get returned here)
+      uint32_t _write_tokens;
+      uint32_t _unused_write_tokens;
 
-      typedef std::list<std::unique_ptr<rate_limited_operation> > rate_limited_operation_list;
+      typedef std::list<rate_limited_operation*> rate_limited_operation_list;
       rate_limited_operation_list _read_operations_in_progress;
       rate_limited_operation_list _read_operations_for_next_iteration;
       rate_limited_operation_list _write_operations_in_progress;
@@ -101,8 +105,10 @@ namespace fc
       time_point _last_read_iteration_time;
       time_point _last_write_iteration_time;
 
-      fc::future<void> _process_pending_reads_loop_complete;
-      fc::future<void> _process_pending_writes_loop_complete;
+      future<void> _process_pending_reads_loop_complete;
+      promise<void>::ptr _new_read_operation_available_promise;
+      future<void> _process_pending_writes_loop_complete;
+      promise<void>::ptr _new_write_operation_available_promise;
 
       rate_limiting_group_impl(uint32_t upload_bytes_per_second, uint32_t download_bytes_per_second);
 
@@ -114,13 +120,19 @@ namespace fc
       void process_pending_operations(time_point& last_iteration_start_time,
                                       uint32_t& limit_bytes_per_second,
                                       rate_limited_operation_list& operations_in_progress,
-                                      rate_limited_operation_list& operations_for_next_iteration);
+                                      rate_limited_operation_list& operations_for_next_iteration,
+                                      uint32_t& tokens,
+                                      uint32_t& unused_tokens);
     };
 
     rate_limiting_group_impl::rate_limiting_group_impl(uint32_t upload_bytes_per_second, uint32_t download_bytes_per_second) :
       _upload_bytes_per_second(upload_bytes_per_second),
       _download_bytes_per_second(download_bytes_per_second),
-      _granularity(fc::milliseconds(50))
+      _granularity(milliseconds(50)),
+      _read_tokens(_download_bytes_per_second),
+      _unused_read_tokens(0),
+      _write_tokens(_upload_bytes_per_second),
+      _unused_write_tokens(0)
     {
     }
 
@@ -129,10 +141,18 @@ namespace fc
       if (_download_bytes_per_second)
       {
         promise<size_t>::ptr completion_promise(new promise<size_t>());
-        _read_operations_for_next_iteration.emplace_back(std::make_unique<rate_limited_tcp_read_operation>(socket, buffer, length, completion_promise));
-        if (!_process_pending_reads_loop_complete.valid())
+        rate_limited_tcp_read_operation read_operation(socket, buffer, length, completion_promise);
+        _read_operations_for_next_iteration.push_back(&read_operation);
+
+        // launch the read processing loop it if isn't running, or signal it to resume if it's paused.
+        if (!_process_pending_reads_loop_complete.valid() || _process_pending_reads_loop_complete.ready())
           _process_pending_reads_loop_complete = async([=](){ process_pending_reads(); });
-        return completion_promise->wait();
+        else if (_new_read_operation_available_promise)
+          _new_read_operation_available_promise->set_value();
+
+        size_t bytes_read = completion_promise->wait();
+        _unused_read_tokens += read_operation.permitted_length - bytes_read;
+        return bytes_read;
       }
       else
         return asio::read_some(socket, boost::asio::buffer(buffer, length));
@@ -142,10 +162,18 @@ namespace fc
       if (_upload_bytes_per_second)
       {
         promise<size_t>::ptr completion_promise(new promise<size_t>());
-        _write_operations_for_next_iteration.emplace_back(std::make_unique<rate_limited_tcp_write_operation>(socket, buffer, length, completion_promise));
-        if (!_process_pending_writes_loop_complete.valid())
+        rate_limited_tcp_write_operation write_operation(socket, buffer, length, completion_promise);
+        _write_operations_for_next_iteration.push_back(&write_operation);
+
+        // launch the write processing loop it if isn't running, or signal it to resume if it's paused.
+        if (!_process_pending_writes_loop_complete.valid() || _process_pending_writes_loop_complete.ready())
           _process_pending_writes_loop_complete = async([=](){ process_pending_writes(); });
-        return completion_promise->wait();
+        else if (_new_write_operation_available_promise)
+          _new_write_operation_available_promise->set_value();
+
+        size_t bytes_written = completion_promise->wait();
+        _unused_write_tokens += write_operation.permitted_length - bytes_written;
+        return bytes_written;
       }
       else
         return asio::write_some(socket, boost::asio::buffer(buffer, length));
@@ -155,8 +183,20 @@ namespace fc
       for (;;)
       {
         process_pending_operations(_last_read_iteration_time, _download_bytes_per_second,
-                                   _read_operations_in_progress, _read_operations_for_next_iteration);
-        fc::usleep(_granularity);
+                                   _read_operations_in_progress, _read_operations_for_next_iteration, _read_tokens, _unused_read_tokens);
+
+        _new_read_operation_available_promise = new promise<void>();
+        try
+        {
+          if (_read_operations_in_progress.empty())
+            _new_read_operation_available_promise->wait();
+          else
+            _new_read_operation_available_promise->wait(_granularity);
+        }
+        catch (const timeout_exception&)
+        {
+        }
+        _new_read_operation_available_promise.reset();
       }
     }
     void rate_limiting_group_impl::process_pending_writes()
@@ -164,18 +204,32 @@ namespace fc
       for (;;)
       {
         process_pending_operations(_last_write_iteration_time, _upload_bytes_per_second,
-                                   _write_operations_in_progress, _write_operations_for_next_iteration);
-        fc::usleep(_granularity);
+                                   _write_operations_in_progress, _write_operations_for_next_iteration, _write_tokens, _unused_write_tokens);
+
+        _new_write_operation_available_promise = new promise<void>();
+        try
+        {
+          if (_write_operations_in_progress.empty())
+            _new_write_operation_available_promise->wait();
+          else
+            _new_write_operation_available_promise->wait(_granularity);
+        }
+        catch (const timeout_exception&)
+        {
+        }
+        _new_write_operation_available_promise.reset();
       }
     }
     void rate_limiting_group_impl::process_pending_operations(time_point& last_iteration_start_time, 
                                                               uint32_t& limit_bytes_per_second,
                                                               rate_limited_operation_list& operations_in_progress,
-                                                              rate_limited_operation_list& operations_for_next_iteration)
+                                                              rate_limited_operation_list& operations_for_next_iteration,
+                                                              uint32_t& tokens,
+                                                              uint32_t& unused_tokens)
     {
       // lock here for multithreaded
-      std::copy(std::make_move_iterator(operations_for_next_iteration.begin()),
-                std::make_move_iterator(operations_for_next_iteration.end()),
+      std::copy(operations_for_next_iteration.begin(),
+                operations_for_next_iteration.end(),
                 std::back_inserter(operations_in_progress));
       operations_for_next_iteration.clear();
 
@@ -188,21 +242,23 @@ namespace fc
           time_since_last_iteration = seconds(1);
         else if (time_since_last_iteration < microseconds(0))
           time_since_last_iteration = microseconds(0);
+ 
+        tokens += (uint32_t)((limit_bytes_per_second * time_since_last_iteration.count()) / 1000000);
+        tokens += unused_tokens;
+        unused_tokens = 0;
+        tokens = std::min(tokens, limit_bytes_per_second);
 
-        uint32_t total_bytes_for_this_iteration = time_since_last_iteration.count() ? 
-          (uint32_t)((1000000 * limit_bytes_per_second) / time_since_last_iteration.count()) : 
-          0;
-        if (total_bytes_for_this_iteration)
+        if (tokens)
         {
           // sort the pending reads/writes in order of the number of bytes they need to write, smallest first
           std::vector<rate_limited_operation*> operations_sorted_by_length;
           operations_sorted_by_length.reserve(operations_in_progress.size());
-          for (std::unique_ptr<rate_limited_operation>& operation_data : operations_in_progress)
-            operations_sorted_by_length.push_back(operation_data.get());
+          for (rate_limited_operation* operation_data : operations_in_progress)
+            operations_sorted_by_length.push_back(operation_data);
           std::sort(operations_sorted_by_length.begin(), operations_sorted_by_length.end(), is_operation_shorter());
 
           // figure out how many bytes each reader/writer is allowed to read/write
-          uint32_t bytes_remaining_to_allocate = total_bytes_for_this_iteration;
+          uint32_t bytes_remaining_to_allocate = tokens;
           while (!operations_sorted_by_length.empty())
           {
             uint32_t bytes_permitted_for_this_operation = bytes_remaining_to_allocate / operations_sorted_by_length.size();
@@ -211,6 +267,7 @@ namespace fc
             bytes_remaining_to_allocate -= bytes_allocated_for_this_operation;
             operations_sorted_by_length.pop_back();
           }
+          tokens = bytes_remaining_to_allocate;
 
           // kick off the reads/writes in first-come order
           for (auto iter = operations_in_progress.begin(); iter != operations_in_progress.end();)
@@ -225,7 +282,7 @@ namespace fc
           }
         }
       }
-      else // upload speed is unlimited
+      else // down/upload speed is unlimited
       {
         // we shouldn't end up here often.  If the rate is unlimited, we should just execute
         // the operation immediately without being queued up.  This should only be hit if

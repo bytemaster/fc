@@ -50,7 +50,7 @@ namespace fc
   template<typename IntType, typename EnumType>
   void to_variant( const enum_type<IntType,EnumType>& var,  variant& vo )
   {
-    vo = var.value;
+    vo = (EnumType)var.value;
   }
   template<typename IntType, typename EnumType>
   void from_variant( const variant& var,  enum_type<IntType,EnumType>& vo )

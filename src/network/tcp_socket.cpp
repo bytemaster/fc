@@ -106,23 +106,23 @@ namespace fc {
       if (WSAIoctl(my->_sock.native(), SIO_KEEPALIVE_VALS, &keepalive_settings, sizeof(keepalive_settings),
                    NULL, 0, &dwBytesRet, NULL, NULL) == SOCKET_ERROR)
         wlog("Error setting TCP keepalive values");
-#else
-# if !defined(__clang__) || (__clang_major__ >= 6)
+#elif !defined(__clang__) || (__clang_major__ >= 6)
       // This should work for modern Linuxes and for OSX >= Mountain Lion
       int timeout_sec = interval.count() / fc::seconds(1).count();
       if (setsockopt(my->_sock.native(), IPPROTO_TCP, 
-#  if defined( __APPLE__ )
+      #if defined( __APPLE__ )
                      TCP_KEEPALIVE,
-#  else
+       #else
                      TCP_KEEPIDLE, 
-#  endif
+       #endif
                      (char*)&timeout_sec, sizeof(timeout_sec)) < 0)
         wlog("Error setting TCP keepalive idle time");
+# if !defined(__APPLE__) || defined(TCP_KEEPINTVL) // TCP_KEEPINTVL not defined before 10.9
       if (setsockopt(my->_sock.native(), IPPROTO_TCP, TCP_KEEPINTVL, 
                      (char*)&timeout_sec, sizeof(timeout_sec)) < 0)
         wlog("Error setting TCP keepalive interval");
-# endif
-#endif
+# endif // !__APPLE__ || TCP_KEEPINTVL
+#endif // !WIN32
     }
     else
     {

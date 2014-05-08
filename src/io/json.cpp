@@ -211,90 +211,115 @@ namespace fc
    template<typename T>
    variant number_from_stream( T& in )
    {
-      char buf[30];
-      memset( buf, 0, sizeof(buf) );
-      char* pos = buf;
+      fc::stringstream ss;
+
       bool  dot = false;
       bool  neg = false;
       if( in.peek() == '-')
       {
         neg = true;
-        *pos = in.get();
-        ++pos;
+        ss.put( in.get() );
       }
       bool done = false;
-      while(  !done)
+
+      try
       {
-        char c = in.peek();
-        switch( c )
+        char c;
+        while((c = in.peek()) && !done)
         {
-            case '.':
-            {
-               if( dot ) 
-               {
-                  done = true;
-                  break;
-               }
-               dot = true;
-            }
-            case '0':
-            case '1':
-            case '2':
-            case '3':
-            case '4':
-            case '5':
-            case '6':
-            case '7':
-            case '8':
-            case '9':
-               *pos = c;
-               ++pos;
-               in.get();
-               break;
-            default:
-              done = true;
-              break;
+          
+          switch( c )
+          {
+              case '.':
+                 if (dot) 
+                    FC_THROW_EXCEPTION(parse_error_exception, "Can't parse a number with two decimal places");
+                 dot = true;
+              case '0':
+              case '1':
+              case '2':
+              case '3':
+              case '4':
+              case '5':
+              case '6':
+              case '7':
+              case '8':
+              case '9':
+                 ss.put( in.get() );
+                 break;
+              default:
+                done = true;
+                break;
+          }
         }
       }
-      if( dot ) return to_double(buf);
-      if( neg ) return to_int64(buf);
-      return to_uint64(buf);
+      catch (fc::eof_exception&)
+      {
+      }
+      fc::string str = ss.str();
+      if (str == "-." || str == ".") // check the obviously wrong things we could have encountered
+        FC_THROW_EXCEPTION(parse_error_exception, "Can't parse token \"${token}\" as a JSON numeric constant", ("token", str));
+      if( dot )
+        return to_double(str);
+      if( neg ) 
+        return to_int64(str);
+      return to_uint64(str);
    }
    template<typename T>
    variant token_from_stream( T& in )
    {
       fc::stringstream ss;
-      while( char c = in.peek() )
+      bool parsed_unexpected_character = false;
+      bool received_eof = false;
+      try
       {
-         switch( c )
-         {
-            case 'n':
-            case 'u':
-            case 'l':
-            case 't':
-            case 'r':
-            case 'e':
-            case 'f':
-            case 'a':
-            case 's':
-               ss.put( in.get() );
-               break;
-            default:
-            {
-               fc::string str = ss.str();
-               if( str == "null" )  return variant();
-               if( str == "true" )  return true;
-               if( str == "false" ) return false;
-               else 
-               {
-                  return str;
-                 // FC_THROW_EXCEPTION( parse_error_exception, "Invalid token '${token}'",
-                 //                          ("token",str) );
-               }
-            }
-         }
+        char c;
+        while((c = in.peek()) && !parsed_unexpected_character)
+        {
+           switch( c )
+           {
+              case 'n':
+              case 'u':
+              case 'l':
+              case 't':
+              case 'r':
+              case 'e':
+              case 'f':
+              case 'a':
+              case 's':
+                 ss.put( in.get() );
+                 break;
+              default:
+                 parsed_unexpected_character = true;
+                 break;
+           }
+        }
       }
-	  FC_THROW_EXCEPTION( parse_error_exception, "Unexpected EOF" );
+      catch (fc::eof_exception&)
+      {
+        received_eof = true;
+      }
+
+      // we can get here either by processing a delimiter as in "null,"
+      // an EOF like "null<EOF>", or an invalid token like "nullZ"
+      fc::string str = ss.str();
+      if( str == "null" )  return variant();
+      if( str == "true" )  return true;
+      if( str == "false" ) return false;
+      else 
+      {
+        if (received_eof)
+          FC_THROW_EXCEPTION( parse_error_exception, "Unexpected EOF" );
+        else
+        {
+          // I'm not sure why we do this, a comment would be helpful.
+          // if we've reached this point, we've either seen a partial
+          // token ("tru<EOF>") or something our simple parser couldn't
+          // make out ("falfe")
+          return str;
+          // FC_THROW_EXCEPTION( parse_error_exception, "Invalid token '${token}'",
+          //                          ("token",str) );
+        }
+      }
    }
 
 

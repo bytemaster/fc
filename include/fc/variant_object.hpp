@@ -59,7 +59,7 @@ namespace fc
       const variant& operator[]( const string& key )const;
       const variant& operator[]( const char* key )const;
       size_t size()const;
-      bool   contains( const char* key ) { return find(key) != end(); }
+      bool   contains( const char* key ) const { return find(key) != end(); }
       ///@}
 
       variant_object();

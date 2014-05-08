@@ -76,6 +76,12 @@ namespace fc { namespace rpc  {
                                      const variant& a2, 
                                      const variant& a3 );
 
+         future<variant> async_call( const fc::string& method, 
+                                     const variant& a1, 
+                                     const variant& a2, 
+                                     const variant& a3, 
+                                     const variant& a4 );
+
          template<typename Result>
          Result call( const fc::string& method, 
                                const variant& a1, 
@@ -84,6 +90,17 @@ namespace fc { namespace rpc  {
                                microseconds timeout = microseconds::maximum())
          {
             return async_call( method, a1, a2, a3 ).wait(timeout).as<Result>();
+         }
+
+         template<typename Result>
+         Result call( const fc::string& method, 
+                               const variant& a1, 
+                               const variant& a2, 
+                               const variant& a3,
+                               const variant& a4,
+                               microseconds timeout = microseconds::maximum())
+         {
+            return async_call( method, a1, a2, a3, a4).wait(timeout).as<Result>();
          }
 
          template<typename Result>

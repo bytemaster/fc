@@ -25,6 +25,8 @@ namespace fc {
         enum status_code {
             OK                  = 200,
             RecordCreated       = 201,
+            BadRequest          = 400,
+            NotAuthorized       = 401,
             NotFound            = 404,
             Found               = 302,
             InternalServerError = 500
@@ -73,4 +75,7 @@ namespace fc {
      typedef std::shared_ptr<connection> connection_ptr;
 
 } } // fc::http
+
+#include <fc/reflect/reflect.hpp>
+FC_REFLECT( fc::http::header, (key)(val) )
 

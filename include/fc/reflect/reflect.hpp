@@ -136,7 +136,7 @@ template<> struct reflector<ENUM> { \
       switch( elem ) { \
         BOOST_PP_SEQ_FOR_EACH( FC_REFLECT_ENUM_TO_STRING, ENUM, FIELDS ) \
         default: \
-           fc::throw_bad_enum_cast( BOOST_PP_STRINGIZE(elem), BOOST_PP_STRINGIZE(ENUM) ); \
+           fc::throw_bad_enum_cast( fc::to_string(int64_t(elem)).c_str(), BOOST_PP_STRINGIZE(ENUM) ); \
       }\
       return nullptr; \
     } \

@@ -99,7 +99,7 @@ namespace fc
     inline void unpack( Stream& s, uint128& u ) { s.read( (char*)&u, sizeof(u) ); }
   }
 
-  uint64_t city_hash64(const char *buf, size_t len);
+  size_t city_hash_size_t(const char *buf, size_t len);
 } // namespace fc
 
 namespace std
@@ -109,7 +109,7 @@ namespace std
     {
        size_t operator()( const fc::uint128& s )const
        {
-           return  fc::city_hash64((char*)&s, sizeof(s));
+           return fc::city_hash_size_t((char*)&s, sizeof(s));
        }
     };
 }

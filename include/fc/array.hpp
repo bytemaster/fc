@@ -123,7 +123,7 @@ namespace std
     {
        size_t operator()( const fc::array<T,N>& e )const
        {
-          return fc::city_hash64( (char*)&e, sizeof(e) );
+          return fc::city_hash_size_t( (char*)&e, sizeof(e) );
        }
     };
 }

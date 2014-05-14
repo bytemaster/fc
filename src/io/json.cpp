@@ -608,8 +608,17 @@ namespace fc
 
    void          json::save_to_file( const variant& v, const fc::path& fi, bool pretty )
    {
+      if( pretty )
+      {
+        auto str = json::to_pretty_string( v );
+        fc::ofstream o(fi);
+        o.write( str.c_str(), str.size() );
+      }
+      else
+      {
        fc::ofstream o(fi);
        fc::to_stream( o, v );
+      }
    }
    variant json::from_file( const fc::path& p )
    {
@@ -639,5 +648,15 @@ namespace fc
       fc::to_stream( out, v );
       return out;
    }
+
+   bool     json::is_valid( const std::string& utf8_str )
+   {
+      if( utf8_str.size() == 0 ) return false;
+      fc::stringstream in( utf8_str );
+      variant_from_stream( in );
+      try { in.peek(); } catch ( const eof_exception& e ) { return true; }
+      return false;
+   }
+
 
 } // fc

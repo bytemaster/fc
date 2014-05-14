@@ -171,7 +171,7 @@ namespace fc
   FC_DECLARE_EXCEPTION( out_of_range_exception, "Out of Range" );
 
   /** @brief if an operation is unsupported or not valid this may be thrown */
-  FC_DECLARE_EXCEPTION( invalidOperation_exception, "Invalid Operation" );
+  FC_DECLARE_EXCEPTION( invalid_operation_exception, "Invalid Operation" );
 
   /**
    *  @brief used to report a canceled Operation

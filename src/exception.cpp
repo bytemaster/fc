@@ -24,6 +24,7 @@ namespace fc
           eof_exception_code           = 11,
           db_in_use_exception_code     = 12,
           std_exception_code           = 14,
+          invalid_operation_exception_code  = 15
       };
 
      void  to_variant( detail::exception_code e, variant& v )
@@ -69,6 +70,9 @@ namespace fc
           case db_in_use_exception_code:
             v = "db_in_use";
             break;
+          case invalid_operation_exception_code:
+            v = "invalid_operation";
+            break;
           case unspecified_exception_code:
           default:
              v = "unspecified";
@@ -79,20 +83,21 @@ namespace fc
      void  from_variant( const variant& e, detail::exception_code& ll )
      {
         string v = e.as_string();
-        if( v == "unspecified" )         ll = unspecified_exception_code;
-        else if( v == "unhandled" )      ll = unhandled_exception_code;
-        else if( v == "timeout" )        ll = timeout_exception_code;
-        else if( v == "key_not_found" )  ll = key_not_found_exception_code;
-        else if( v == "bad_cast" )       ll = bad_cast_exception_code;
-        else if( v == "file_not_found" ) ll = file_not_found_exception_code;
-        else if( v == "parse_error" )    ll = parse_error_exception_code;
-        else if( v == "invalid_arg" )    ll = invalid_arg_exception_code;
-        else if( v == "out_of_range" )   ll = out_of_range_exception_code;
-        else if( v == "canceled" )       ll = canceled_exception_code;
-        else if( v == "assert" )         ll = assert_exception_code;
-        else if( v == "std" )            ll = std_exception_code;
-        else if( v == "eof" )            ll = eof_exception_code;
-        else if( v == "db_in_use")       ll = db_in_use_exception_code;
+        if( v == "unspecified" )           ll = unspecified_exception_code;
+        else if( v == "unhandled" )        ll = unhandled_exception_code;
+        else if( v == "timeout" )          ll = timeout_exception_code;
+        else if( v == "key_not_found" )    ll = key_not_found_exception_code;
+        else if( v == "bad_cast" )         ll = bad_cast_exception_code;
+        else if( v == "file_not_found" )   ll = file_not_found_exception_code;
+        else if( v == "parse_error" )      ll = parse_error_exception_code;
+        else if( v == "invalid_arg" )      ll = invalid_arg_exception_code;
+        else if( v == "out_of_range" )     ll = out_of_range_exception_code;
+        else if( v == "canceled" )         ll = canceled_exception_code;
+        else if( v == "assert" )           ll = assert_exception_code;
+        else if( v == "std" )              ll = std_exception_code;
+        else if( v == "eof" )              ll = eof_exception_code;
+        else if( v == "db_in_use")         ll = db_in_use_exception_code;
+        else if( v == "invalid_operation") ll = invalid_operation_exception_code;
         else  FC_THROW_EXCEPTION( bad_cast_exception, 
                                        "Invalid Error Report _code  '${code}'",
                                        ("code", v) );
@@ -178,6 +183,7 @@ namespace fc
   FC_EXCEPTION_IMPL(key_not_found_exception)
   FC_EXCEPTION_IMPL(bad_cast_exception)
   FC_EXCEPTION_IMPL(out_of_range_exception)
+  FC_EXCEPTION_IMPL(invalid_operation_exception);
   FC_EXCEPTION_IMPL(canceled_exception)
   FC_EXCEPTION_IMPL(assert_exception)
   FC_EXCEPTION_IMPL(eof_exception)
@@ -295,6 +301,8 @@ namespace fc
            throw eof_exception( my->_elog );
         case detail::db_in_use_exception_code:
           throw db_in_use_exception( my->_elog );
+        case detail::invalid_operation_exception_code:
+          throw invalid_operation_exception( my->_elog );
         case detail::std_exception_code:
            throw std_exception( *this );
         case detail::unspecified_exception_code:
@@ -330,6 +338,8 @@ namespace fc
            return std::make_shared<eof_exception>( my->_elog );
         case detail::db_in_use_exception_code:
            return std::make_shared<db_in_use_exception>( my->_elog );
+        case detail::invalid_operation_exception_code:
+           return std::make_shared<invalid_operation_exception>( my->_elog );
         case detail::std_exception_code:
            return std::make_shared<std_exception>( *this );
         case detail::unspecified_exception_code:

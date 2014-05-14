@@ -158,6 +158,14 @@ namespace fc {
     FC_ASSERT(my->_sock.is_open());
     boost::asio::socket_base::reuse_address option(enable);
     my->_sock.set_option(option);
+#if defined(__APPLE__) || (defined(__linux__) && defined(SO_REUSEPORT))
+    // OSX needs SO_REUSEPORT in addition to SO_REUSEADDR.
+    // This probably needs to be set for any BSD
+    int reuseport_value = 1;
+    if (setsockopt(my->_sock.native(), SOL_SOCKET, SO_REUSEPORT, 
+                   (char*)&reuseport_value, sizeof(reuseport_value)) < 0)
+        wlog("Error setting SO_REUSEPORT");
+#endif // __APPLE__
   }
 
 
@@ -209,6 +217,14 @@ namespace fc {
       my = new impl;
     boost::asio::ip::tcp::acceptor::reuse_address option(enable);
     my->_accept.set_option(option);
+#if defined(__APPLE__) || (defined(__linux__) && defined(SO_REUSEPORT))
+    // OSX needs SO_REUSEPORT in addition to SO_REUSEADDR.
+    // This probably needs to be set for any BSD
+    int reuseport_value = 1;
+    if (setsockopt(my->_accept.native(), SOL_SOCKET, SO_REUSEPORT, 
+                   (char*)&reuseport_value, sizeof(reuseport_value)) < 0)
+        wlog("Error setting SO_REUSEPORT");
+#endif // __APPLE__
   }
   void tcp_server::listen( uint16_t port ) 
   {

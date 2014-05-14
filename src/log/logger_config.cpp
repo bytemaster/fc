@@ -47,8 +47,8 @@ namespace fc {
             auto ap = appender::get( *a );
             if( ap ) { lgr.add_appender(ap); }
          }
-         return reg_console_appender || reg_file_appender;
       }
+      return reg_console_appender || reg_file_appender;
       } catch ( exception& e )
       {
          fc::cerr<<e.to_detail_string()<<"\n";

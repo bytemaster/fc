@@ -31,13 +31,13 @@ namespace fc
            *  
            *  @return *this
            */
-          virtual iprocess& exec( const fc::path& exe, std::vector<std::string> args, 
-                             const fc::path& work_dir = fc::path(), exec_opts opts = open_all ) = 0;
+          virtual iprocess& exec( const path& exe, std::vector<std::string> args, 
+                                  const path& work_dir = path(), exec_opts opts = open_all ) = 0;
 
           /**
            *  @return blocks until the process exits
            */
-          virtual int result() = 0;
+          virtual int result(const microseconds& timeout = microseconds::maximum()) = 0;
 
 
           /**
@@ -48,16 +48,16 @@ namespace fc
           /**
            *  @brief returns a stream that writes to the process' stdin
            */
-          virtual fc::buffered_ostream_ptr in_stream() = 0;
+          virtual buffered_ostream_ptr in_stream() = 0;
           
           /**
            *  @brief returns a stream that reads from the process' stdout
            */
-          virtual fc::buffered_istream_ptr out_stream() = 0;
+          virtual buffered_istream_ptr out_stream() = 0;
           /**
            *  @brief returns a stream that reads from the process' stderr
            */
-          virtual fc::buffered_istream_ptr err_stream() = 0;
+          virtual buffered_istream_ptr err_stream() = 0;
 
     };
 

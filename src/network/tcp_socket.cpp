@@ -136,7 +136,7 @@ namespace fc {
     FC_ASSERT(my->_sock.is_open());
     boost::asio::socket_base::reuse_address option(enable);
     my->_sock.set_option(option);
-#if defined(__APPLE__)
+#if defined(__APPLE__) || (defined(__linux__) && defined(SO_REUSEPORT))
     // OSX needs SO_REUSEPORT in addition to SO_REUSEADDR.
     // This probably needs to be set for any BSD
     int reuseport_value = 1;
@@ -195,7 +195,7 @@ namespace fc {
       my = new impl;
     boost::asio::ip::tcp::acceptor::reuse_address option(enable);
     my->_accept.set_option(option);
-#if defined(__APPLE__)
+#if defined(__APPLE__) || (defined(__linux__) && defined(SO_REUSEPORT))
     // OSX needs SO_REUSEPORT in addition to SO_REUSEADDR.
     // This probably needs to be set for any BSD
     int reuseport_value = 1;

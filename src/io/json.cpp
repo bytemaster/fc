@@ -8,6 +8,7 @@
 //#include <utfcpp/utf8.h>
 #include <iostream>
 #include <fstream>
+#include <sstream>
 
 namespace fc
 {
@@ -104,11 +105,6 @@ namespace fc
       {
          char c = in.peek();
 
-    //     if( c != ' ' )
-    //        FC_THROW_EXCEPTION( parse_error_exception, 
-    //                                        "Expected '\"' but read '${char}'", 
-    //                                        ("char", string(&c, (&c) + 1) ) );
-    //     in.get();
          while( true )
          {
             switch( c = in.peek() )
@@ -118,15 +114,17 @@ namespace fc
                   break;
                case '\t':
                case ' ':
+               case '\0':
+               case '\n':
                   in.get();
                   return token.str();
                default:
+                  std::cerr<<c;
                   token << c;
                   in.get();
             }
          }
-        // FC_THROW_EXCEPTION( parse_error_exception, "EOF before closing '\"' in string '${token}'",
-        //                                  ("token", token.str() ) );
+         return token.str();
       } 
       catch( const fc::eof_exception& eof )
       {
@@ -375,9 +373,10 @@ namespace fc
       }
 	  return variant();
    }
-   variant json::from_string( const fc::string& utf8_str )
+   variant json::from_string( const std::string& utf8_str )
    {
-      fc::stringstream in( utf8_str );
+      std::stringstream in( utf8_str );
+      in.exceptions( std::ifstream::eofbit );
       return variant_from_stream( in );
    }
 

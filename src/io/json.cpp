@@ -248,6 +248,10 @@ namespace fc
                  ss.put( in.get() );
                  break;
               default:
+                 if( isalnum( c ) )
+                 {
+                    return ss.str() + stringFromToken( in );
+                 }
                 done = true;
                 break;
           }
@@ -270,12 +274,11 @@ namespace fc
    {
       std::stringstream ss;
       ss.exceptions( std::ifstream::badbit );
-      bool parsed_unexpected_character = false;
       bool received_eof = false;
       try
       {
         char c;
-        while((c = in.peek()) && !parsed_unexpected_character)
+        while((c = in.peek()) )
         {
            switch( c )
            {
@@ -291,8 +294,7 @@ namespace fc
                  ss.put( in.get() );
                  break;
               default:
-                 parsed_unexpected_character = true;
-                 break;
+                 return ss.str() + stringFromToken(in);
            }
         }
       }

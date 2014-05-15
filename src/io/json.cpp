@@ -119,9 +119,12 @@ namespace fc
                   in.get();
                   return token.str();
                default:
-                  std::cerr<<c;
+                if( isalnum( c ) )
+                {
                   token << c;
                   in.get();
+                }
+                else return token.str();
             }
          }
          return token.str();
@@ -265,7 +268,8 @@ namespace fc
    template<typename T>
    variant token_from_stream( T& in )
    {
-      fc::stringstream ss;
+      std::stringstream ss;
+      ss.exceptions( std::ifstream::badbit );
       bool parsed_unexpected_character = false;
       bool received_eof = false;
       try

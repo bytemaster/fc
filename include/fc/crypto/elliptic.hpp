@@ -153,3 +153,7 @@ namespace fc {
   } // namespace raw
 
 } // namespace fc 
+#include <fc/reflect/reflect.hpp>
+
+FC_REFLECT_TYPENAME( fc::ecc::private_key )
+FC_REFLECT_TYPENAME( fc::ecc::public_key )

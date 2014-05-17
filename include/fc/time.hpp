@@ -111,6 +111,10 @@ namespace fc {
   string get_approximate_relative_time_string(const time_point& event_time);
 }
 
+#include <fc/reflect/reflect.hpp>
+FC_REFLECT_TYPENAME( fc::time_point )
+FC_REFLECT_TYPENAME( fc::time_point_sec )
+
 #ifdef _MSC_VER
   #pragma warning (pop)
 #endif /// #ifdef _MSC_VER

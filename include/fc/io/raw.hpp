@@ -37,11 +37,11 @@ namespace fc {
 
     template<typename Stream>
     inline void unpack( Stream& s, fc::time_point_sec& tp )
-    {
+    { try { 
        uint32_t sec;
        s.read( (char*)&sec, sizeof(sec) );
        tp = fc::time_point() + fc::seconds(sec);
-    }
+    } FC_RETHROW_EXCEPTIONS( warn, "" ) }
 
     template<typename Stream>
     inline void pack( Stream& s, const fc::time_point& tp )
@@ -52,11 +52,11 @@ namespace fc {
 
     template<typename Stream>
     inline void unpack( Stream& s, fc::time_point& tp )
-    {
+    { try {
        uint64_t usec;
        s.read( (char*)&usec, sizeof(usec) );
        tp = fc::time_point() + fc::microseconds(usec);
-    }
+    } FC_RETHROW_EXCEPTIONS( warn, "" ) }
 
     template<typename Stream, typename T, size_t N> 
     inline void pack( Stream& s, const fc::array<T,N>& v) {
@@ -64,9 +64,10 @@ namespace fc {
     }
 
     template<typename Stream, typename T, size_t N> 
-    inline void unpack( Stream& s, fc::array<T,N>& v) {
+    inline void unpack( Stream& s, fc::array<T,N>& v) 
+    { try {
       s.read((char*)&v.data[0],N*sizeof(T));
-    }
+    } FC_RETHROW_EXCEPTIONS( warn, "fc::array<type,length>", ("type",fc::get_typename<T>::name())("length",N) ) }
 
     template<typename Stream> inline void pack( Stream& s, const signed_int& v ) {
       uint32_t val = (v.value<<1) ^ (v.value>>31);
@@ -119,10 +120,11 @@ namespace fc {
     }
 
     template<typename Stream, typename T>
-    void unpack( Stream& s, fc::optional<T>& v ) {
+    void unpack( Stream& s, fc::optional<T>& v ) 
+    { try {
       bool b; unpack( s, b ); 
       if( b ) { v = T(); unpack( s, *v ); }
-    }
+    } FC_RETHROW_EXCEPTIONS( warn, "optional<${type}>", ("type",fc::get_typename<T>::name() ) ) }
 
     // std::vector<char>
     template<typename Stream> inline void pack( Stream& s, const std::vector<char>& value ) { 
@@ -177,9 +179,10 @@ namespace fc {
         :c(_c),s(_s){}
 
         template<typename T, typename C, T(C::*p)>
-        inline void operator()( const char* name )const {
+        inline void operator()( const char* name )const 
+        { try {
           raw::unpack( s, c.*p );
-        }
+        } FC_RETHROW_EXCEPTIONS( warn, "Error unpacking field ${field}", ("field",name) ) }
         private:            
           Class&  c;
           Stream& s;
@@ -371,9 +374,10 @@ namespace fc {
       fc::raw::detail::if_reflected< typename fc::reflector<T>::is_defined >::pack(s,v);
     }
     template<typename Stream, typename T> 
-    inline void unpack( Stream& s, T& v ) {
+    inline void unpack( Stream& s, T& v ) 
+    { try {
       fc::raw::detail::if_reflected< typename fc::reflector<T>::is_defined >::unpack(s,v);
-    }
+    } FC_RETHROW_EXCEPTIONS( warn, "error unpacking ${type}", ("type",fc::get_typename<T>::name() ) ) }
 
 
     template<typename T>
@@ -390,14 +394,15 @@ namespace fc {
     }
 
     template<typename T>
-    inline T unpack( const std::vector<char>& s ) {
+    inline T unpack( const std::vector<char>& s ) 
+    { try  {
       T tmp;
       if( s.size() ) {
         datastream<const char*>  ds( s.data(), size_t(s.size()) ); 
         raw::unpack(ds,tmp);
       }
       return tmp;
-    }
+    } FC_RETHROW_EXCEPTIONS( warn, "error unpacking ${type}", ("type",fc::get_typename<T>::name() ) ) }
 
     template<typename T>
     inline void pack( char* d, uint32_t s, const T& v ) {
@@ -406,18 +411,21 @@ namespace fc {
     }
 
     template<typename T>
-    inline T unpack( const char* d, uint32_t s ) {
+    inline T unpack( const char* d, uint32_t s ) 
+    { try {
       T v;
       datastream<const char*>  ds( d, s );
       raw::unpack(ds,v);
       return v;
-    }
+    } FC_RETHROW_EXCEPTIONS( warn, "error unpacking ${type}", ("type",fc::get_typename<T>::name() ) ) }
+
     template<typename T>
-    inline void unpack( const char* d, uint32_t s, T& v ) {
+    inline void unpack( const char* d, uint32_t s, T& v ) 
+    { try {
       datastream<const char*>  ds( d, s );
       raw::unpack(ds,v);
       return v;
-    }
+    } FC_RETHROW_EXCEPTIONS( warn, "error unpacking ${type}", ("type",fc::get_typename<T>::name() ) ) }
     
 } } // namespace fc::raw
 

@@ -72,3 +72,6 @@ class sha512
   void from_variant( const variant& v, sha512& bi );
 
 } // fc
+
+#include <fc/reflect/reflect.hpp>
+FC_REFLECT_TYPENAME( fc::sha512 )

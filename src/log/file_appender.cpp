@@ -7,13 +7,14 @@
 #include <fc/reflect/variant.hpp>
 #include <iomanip>
 #include <sstream>
+#include <fc/filesystem.hpp>
 
 
 namespace fc {
    class file_appender::impl : public fc::retainable {
       public:
-         config                      cfg;
-         ofstream                    out;
+         config              cfg;
+         ofstream            out;
          boost::mutex        slock;
    };
    file_appender::config::config( const fc::path& p  )
@@ -25,8 +26,10 @@ namespace fc {
    {
       try {
          my->cfg = args.as<config>(); 
+         fc::create_directories( fc::path( my->cfg.filename.string() ).parent_path() );
          my->out.open( my->cfg.filename.string().c_str() );
       } catch ( ... ) {
+         std::cerr << "error opening log file: " << my->cfg.filename.string() << "\n";
          //elog( "%s", fc::except_str().c_str() );
       }
    }

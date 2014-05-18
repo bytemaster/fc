@@ -18,6 +18,8 @@ namespace fc
   fc::string to_string( uint16_t );
 #ifdef __APPLE__
   inline fc::string to_string( size_t s) { return to_string(uint64_t(s)); }
+#elif defined( WIN32 )
+  inline fc::string to_string( size_t s ) { return to_string(uint64_t(s)); }
 #endif
 
   typedef fc::optional<fc::string> ostring;

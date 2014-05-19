@@ -427,3 +427,6 @@ namespace fc
    }
 
 } // namespace fc
+
+#include <fc/reflect/reflect.hpp>
+FC_REFLECT_TYPENAME( fc::variant )

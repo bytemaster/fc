@@ -276,10 +276,12 @@ namespace fc
       std::stringstream ss;
       ss.exceptions( std::ifstream::badbit );
       bool received_eof = false;
+      bool done = false;
+
       try
       {
         char c;
-        while((c = in.peek()) )
+        while((c = in.peek()) && !done)
         {
            switch( c )
            {
@@ -295,7 +297,8 @@ namespace fc
                  ss.put( in.get() );
                  break;
               default:
-                 return ss.str() + stringFromToken(in);
+                 done = true;
+                 break;
            }
         }
       }
@@ -307,22 +310,29 @@ namespace fc
       // we can get here either by processing a delimiter as in "null,"
       // an EOF like "null<EOF>", or an invalid token like "nullZ"
       fc::string str = ss.str();
-      if( str == "null" )  return variant();
-      if( str == "true" )  return true;
-      if( str == "false" ) return false;
+      if( str == "null" )
+        return variant();
+      if( str == "true" )
+        return true;
+      if( str == "false" ) 
+        return false;
       else
       {
         if (received_eof)
-          FC_THROW_EXCEPTION( parse_error_exception, "Unexpected EOF" );
+        {
+          if (str.empty())
+            FC_THROW_EXCEPTION( parse_error_exception, "Unexpected EOF" );
+          else
+            return str;
+        }
         else
         {
-          // I'm not sure why we do this, a comment would be helpful.
           // if we've reached this point, we've either seen a partial
           // token ("tru<EOF>") or something our simple parser couldn't
           // make out ("falfe")
-          return str;
-          // FC_THROW_EXCEPTION( parse_error_exception, "Invalid token '${token}'",
-          //                          ("token",str) );
+          // A strict JSON parser would signal this as an error, but we
+          // will just treat the malformed token as an un-quoted string.
+          return str + stringFromToken(in);;
         }
       }
    }

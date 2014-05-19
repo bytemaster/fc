@@ -118,7 +118,7 @@ namespace fc
                   in.get();
                   return token.str();
                default:
-                if( isalnum( c ) || c == '_' || c == '-' || c == '.' || c == ':' )
+                if( isalnum( c ) || c == '_' || c == '-' || c == '.' || c == ':' || c == '/' )
                 {
                   token << c;
                   in.get();

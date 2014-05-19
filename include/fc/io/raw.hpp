@@ -9,6 +9,7 @@
 #include <fc/io/raw_fwd.hpp>
 #include <fc/filesystem.hpp>
 #include <fc/exception/exception.hpp>
+#include <map>
 
 #define MAX_ARRAY_ALLOC_SIZE (1024*1024*10) 
 
@@ -312,6 +313,29 @@ namespace fc {
       value.clear();
       FC_ASSERT( size.value*(sizeof(K)+sizeof(V)) < MAX_ARRAY_ALLOC_SIZE );
       value.reserve(size.value);
+      for( uint32_t i = 0; i < size.value; ++i )
+      {
+          std::pair<K,V> tmp;
+          fc::raw::unpack( s, tmp );
+          value.insert( std::move(tmp) );
+      }
+    }
+    template<typename Stream, typename K, typename V>
+    inline void pack( Stream& s, const std::map<K,V>& value ) {
+      pack( s, unsigned_int(value.size()) );
+      auto itr = value.begin();
+      auto end = value.end();
+      while( itr != end ) {
+        fc::raw::pack( s, *itr );
+        ++itr;
+      }
+    }
+    template<typename Stream, typename K, typename V>
+    inline void unpack( Stream& s, std::map<K,V>& value ) 
+    {
+      unsigned_int size; unpack( s, size );
+      value.clear();
+      FC_ASSERT( size.value*(sizeof(K)+sizeof(V)) < MAX_ARRAY_ALLOC_SIZE );
       for( uint32_t i = 0; i < size.value; ++i )
       {
           std::pair<K,V> tmp;

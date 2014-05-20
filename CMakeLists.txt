@@ -16,8 +16,8 @@ INCLUDE( VersionMacros )
 INCLUDE( SetupTargetMacros )
 INCLUDE(GetGitRevisionDescription)
 
-get_git_head_revision(GIT_REFSPEC GIT_SHA3)
-get_git_unix_timestamp(GIT_UNIX_TIMESTAMP3)
+get_git_head_revision(GIT_REFSPEC FC_GIT_REVISION_SHA)
+get_git_unix_timestamp(FC_GIT_REVISION_UNIX_TIMESTAMP)
 
 SET( DEFAULT_HEADER_INSTALL_DIR include/\${target} )
 SET( DEFAULT_LIBRARY_INSTALL_DIR lib/ )
@@ -168,8 +168,8 @@ set( sources
   ${fc_sources}
 )
 
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/GitSHA3.cpp.in" "${CMAKE_CURRENT_BINARY_DIR}/GitSHA3.cpp" @ONLY)
-list(APPEND sources "${CMAKE_CURRENT_BINARY_DIR}/GitSHA3.cpp" GitSHA3.h)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/git_revision.cpp.in" "${CMAKE_CURRENT_BINARY_DIR}/git_revision.cpp" @ONLY)
+list(APPEND sources "${CMAKE_CURRENT_BINARY_DIR}/git_revision.cpp")
 list(APPEND sources ${fc_headers})
 
 add_subdirectory( vendor/easylzma )

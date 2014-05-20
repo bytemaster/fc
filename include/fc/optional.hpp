@@ -183,7 +183,10 @@ namespace fc {
 
       bool valid()const     { return _valid;  }
       bool operator!()const { return !_valid; }
-      operator bool()const  { return _valid;  }
+
+      // this operation is not safe and can result in unintential 
+      // casts and comparisons, use valid() or !! 
+      explicit operator bool()const  { return _valid;  }
 
       T&       operator*()      { assert(_valid); return ref(); }
       const T& operator*()const { assert(_valid); return ref(); }

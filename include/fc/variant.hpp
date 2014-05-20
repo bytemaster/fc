@@ -238,7 +238,7 @@ namespace fc
         variant( const optional<T>& v )
         {
            memset( this, 0, sizeof(*this) );
-           if( v ) *this = variant(*v);
+           if( v.valid() ) *this = variant(*v);
         }
 
         template<typename T>

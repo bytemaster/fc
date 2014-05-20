@@ -159,7 +159,7 @@ namespace fc {
   {
   public:
      inline ~temp_file_base() { remove(); }
-     inline operator bool() const { return _path; }
+     inline operator bool() const { return _path.valid(); }
      inline bool operator!() const { return !_path; }
      const fc::path& path() const;
      void remove();

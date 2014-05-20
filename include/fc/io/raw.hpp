@@ -403,6 +403,13 @@ namespace fc {
       fc::raw::detail::if_reflected< typename fc::reflector<T>::is_defined >::unpack(s,v);
     } FC_RETHROW_EXCEPTIONS( warn, "error unpacking ${type}", ("type",fc::get_typename<T>::name() ) ) }
 
+    template<typename T>
+    inline size_t pack_size(  const T& v ) 
+    {
+      datastream<size_t> ps; 
+      raw::pack(ps,v );
+      return ps.tellp();
+    }
 
     template<typename T>
     inline std::vector<char> pack(  const T& v ) {

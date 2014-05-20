@@ -15,7 +15,6 @@
 *.a
 *.lib
 
-
 #CMake->MSVC artifacts
 *.sln
 *.vcxproj
@@ -41,5 +40,7 @@ libfc.a
 libfc_debug.a
 
 fc_automoc.cpp
-*.swp
+git_revision.cpp
 GitSHA3.cpp
+
+*.swp

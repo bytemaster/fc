@@ -9,13 +9,13 @@ namespace fc {
     public:
     impl( fc::string&s )
     :ss( s )
-    { ss.exceptions( std::stringstream::badbit | std::stringstream::eofbit ); }
+    { ss.exceptions( std::stringstream::badbit ); }
 
     impl( const fc::string&s )
     :ss( s )
-    { ss.exceptions( std::stringstream::badbit | std::stringstream::eofbit ); }
+    { ss.exceptions( std::stringstream::badbit ); }
 
-    impl(){ss.exceptions( std::stringstream::badbit | std::stringstream::eofbit ); }
+    impl(){ss.exceptions( std::stringstream::badbit ); }
     
     std::stringstream ss;
   };

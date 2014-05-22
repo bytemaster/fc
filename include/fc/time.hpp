@@ -18,6 +18,7 @@ namespace fc {
 
 
         bool operator==(const microseconds& c)const { return _count == c._count; }
+        bool operator!=(const microseconds& c)const { return _count != c._count; }
         friend bool operator>(const microseconds& a, const microseconds& b){ return a._count > b._count; }
         friend bool operator>=(const microseconds& a, const microseconds& b){ return a._count >= b._count; }
         friend bool operator<(const microseconds& a, const microseconds& b){ return a._count < b._count; }

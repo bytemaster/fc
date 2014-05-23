@@ -33,7 +33,7 @@ struct unsigned_int {
  *  Uses the google protobuf algorithm for seralizing signed numbers
  */
 struct signed_int {
-    signed_int( int64_t v = 0 ):value(v){}
+    signed_int( int32_t v = 0 ):value(v){}
     operator int32_t()const { return value; }
     template<typename T>
     signed_int& operator=( const T& v ) { value = v; return *this; }

@@ -1,6 +1,7 @@
 #pragma once
 #include <fc/crypto/base64.hpp>
 #include <fc/variant.hpp>
+#include <fc/reflect/reflect.hpp>
 
 namespace fc {
 
@@ -112,6 +113,14 @@ namespace fc {
   }
 
 
+  template<typename T,size_t N> struct get_typename< fc::array<T,N> >  
+  { 
+     static const char* name()  
+     { 
+        static std::string _name = std::string("fc::array<")+std::string(fc::get_typename<T>::name())+","+ fc::to_string(N) + ">";
+        return _name.c_str();
+     } 
+  }; 
 }
 
 #include <unordered_map>
@@ -123,7 +132,8 @@ namespace std
     {
        size_t operator()( const fc::array<T,N>& e )const
        {
-          return fc::city_hash64( (char*)&e, sizeof(e) );
+          return fc::city_hash_size_t( (char*)&e, sizeof(e) );
        }
     };
 }
+

@@ -29,7 +29,7 @@ namespace fc {
       enum seekdir { beg, cur, end };
 
       ifstream();
-      ifstream( const fc::path& file, int m );
+      ifstream( const fc::path& file, int m = binary);
       ~ifstream();
 
       void      open( const fc::path& file, int m );

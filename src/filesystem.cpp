@@ -356,7 +356,7 @@ namespace fc {
 
    void temp_file_base::remove()
    {
-      if (_path)
+      if (_path.valid())
       {
          try
          {

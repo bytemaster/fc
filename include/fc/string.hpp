@@ -16,6 +16,11 @@ namespace fc
   fc::string to_string( uint64_t );
   fc::string to_string( int64_t );
   fc::string to_string( uint16_t );
+  inline fc::string to_string( int32_t v ) { return to_string( int64_t(v) ); }
+  inline fc::string to_string( uint32_t v ){ return to_string( uint64_t(v) ); }
+#ifdef __APPLE__
+  inline fc::string to_string( size_t s) { return to_string(uint64_t(s)); }
+#endif
 
   typedef fc::optional<fc::string> ostring;
   class variant_object;

@@ -8,6 +8,7 @@
 //#include <utfcpp/utf8.h>
 #include <iostream>
 #include <fstream>
+#include <sstream>
 
 namespace fc
 {
@@ -42,9 +43,8 @@ namespace fc
 	    FC_THROW_EXCEPTION( parse_error_exception, "Expected '\\'"  );
    }
 
-
    template<typename T>
-   void          skip_white_space( T& in )
+   void skip_white_space( T& in )
    {
        while( true )
        {
@@ -66,18 +66,18 @@ namespace fc
    fc::string stringFromStream( T& in )
    {
       fc::stringstream token;
-      try 
+      try
       {
          char c = in.peek();
 
          if( c != '"' )
-            FC_THROW_EXCEPTION( parse_error_exception, 
-                                            "Expected '\"' but read '${char}'", 
+            FC_THROW_EXCEPTION( parse_error_exception,
+                                            "Expected '\"' but read '${char}'",
                                             ("char", string(&c, (&c) + 1) ) );
          in.get();
          while( true )
          {
-            
+
             switch( c = in.peek() )
             {
                case '\\':
@@ -93,22 +93,17 @@ namespace fc
          }
          FC_THROW_EXCEPTION( parse_error_exception, "EOF before closing '\"' in string '${token}'",
                                           ("token", token.str() ) );
-       } FC_RETHROW_EXCEPTIONS( warn, "while parsing token '${token}'", 
+       } FC_RETHROW_EXCEPTIONS( warn, "while parsing token '${token}'",
                                           ("token", token.str() ) );
    }
    template<typename T>
    fc::string stringFromToken( T& in )
    {
       fc::stringstream token;
-      try 
+      try
       {
          char c = in.peek();
 
-    //     if( c != ' ' )
-    //        FC_THROW_EXCEPTION( parse_error_exception, 
-    //                                        "Expected '\"' but read '${char}'", 
-    //                                        ("char", string(&c, (&c) + 1) ) );
-    //     in.get();
          while( true )
          {
             switch( c = in.peek() )
@@ -118,21 +113,26 @@ namespace fc
                   break;
                case '\t':
                case ' ':
+               case '\0':
+               case '\n':
                   in.get();
                   return token.str();
                default:
+                if( isalnum( c ) || c == '_' || c == '-' || c == '.' || c == ':' || c == '/' )
+                {
                   token << c;
                   in.get();
+                }
+                else return token.str();
             }
          }
-        // FC_THROW_EXCEPTION( parse_error_exception, "EOF before closing '\"' in string '${token}'",
-        //                                  ("token", token.str() ) );
-      } 
+         return token.str();
+      }
       catch( const fc::eof_exception& eof )
       {
          return token.str();
       }
-      FC_RETHROW_EXCEPTIONS( warn, "while parsing token '${token}'", 
+      FC_RETHROW_EXCEPTIONS( warn, "while parsing token '${token}'",
                                           ("token", token.str() ) );
    }
 
@@ -142,10 +142,10 @@ namespace fc
       mutable_variant_object obj;
       try
       {
-         char c = in.peek(); 
+         char c = in.peek();
          if( c != '{' )
-            FC_THROW_EXCEPTION( parse_error_exception, 
-                                     "Expected '{', but read '${char}'", 
+            FC_THROW_EXCEPTION( parse_error_exception,
+                                     "Expected '{', but read '${char}'",
                                      ("char",string(&c, &c + 1)) );
          in.get();
          skip_white_space(in);
@@ -175,8 +175,10 @@ namespace fc
             return obj;
          }
          FC_THROW_EXCEPTION( parse_error_exception, "Expected '}' after ${variant}", ("variant", obj ) );
-
-
+      }
+      catch( const fc::eof_exception& e )
+      {
+         FC_THROW_EXCEPTION( parse_error_exception, "Unexpected EOF: ${e}", ("e", e.to_detail_string() ) );
       } FC_RETHROW_EXCEPTIONS( warn, "Error parsing object" );
    }
 
@@ -193,7 +195,7 @@ namespace fc
 
         while( in.peek() != ']' )
         {
-           while( in.peek() == ',' ) 
+           while( in.peek() == ',' )
               in.get();
            ar.push_back( variant_from_stream(in) );
            skip_white_space(in);
@@ -203,7 +205,7 @@ namespace fc
                                     ("variant", ar) );
 
         in.get();
-      } FC_RETHROW_EXCEPTIONS( warn, "Attempting to parse array ${array}", 
+      } FC_RETHROW_EXCEPTIONS( warn, "Attempting to parse array ${array}",
                                          ("array", ar ) );
       return ar;
    }
@@ -227,11 +229,11 @@ namespace fc
         char c;
         while((c = in.peek()) && !done)
         {
-          
+
           switch( c )
           {
               case '.':
-                 if (dot) 
+                 if (dot)
                     FC_THROW_EXCEPTION(parse_error_exception, "Can't parse a number with two decimal places");
                  dot = true;
               case '0':
@@ -247,6 +249,10 @@ namespace fc
                  ss.put( in.get() );
                  break;
               default:
+                 if( isalnum( c ) )
+                 {
+                    return ss.str() + stringFromToken( in );
+                 }
                 done = true;
                 break;
           }
@@ -260,20 +266,22 @@ namespace fc
         FC_THROW_EXCEPTION(parse_error_exception, "Can't parse token \"${token}\" as a JSON numeric constant", ("token", str));
       if( dot )
         return to_double(str);
-      if( neg ) 
+      if( neg )
         return to_int64(str);
       return to_uint64(str);
    }
    template<typename T>
    variant token_from_stream( T& in )
    {
-      fc::stringstream ss;
-      bool parsed_unexpected_character = false;
+      std::stringstream ss;
+      ss.exceptions( std::ifstream::badbit );
       bool received_eof = false;
+      bool done = false;
+
       try
       {
         char c;
-        while((c = in.peek()) && !parsed_unexpected_character)
+        while((c = in.peek()) && !done)
         {
            switch( c )
            {
@@ -289,7 +297,7 @@ namespace fc
                  ss.put( in.get() );
                  break;
               default:
-                 parsed_unexpected_character = true;
+                 done = true;
                  break;
            }
         }
@@ -302,22 +310,29 @@ namespace fc
       // we can get here either by processing a delimiter as in "null,"
       // an EOF like "null<EOF>", or an invalid token like "nullZ"
       fc::string str = ss.str();
-      if( str == "null" )  return variant();
-      if( str == "true" )  return true;
-      if( str == "false" ) return false;
-      else 
+      if( str == "null" )
+        return variant();
+      if( str == "true" )
+        return true;
+      if( str == "false" ) 
+        return false;
+      else
       {
         if (received_eof)
-          FC_THROW_EXCEPTION( parse_error_exception, "Unexpected EOF" );
+        {
+          if (str.empty())
+            FC_THROW_EXCEPTION( parse_error_exception, "Unexpected EOF" );
+          else
+            return str;
+        }
         else
         {
-          // I'm not sure why we do this, a comment would be helpful.
           // if we've reached this point, we've either seen a partial
           // token ("tru<EOF>") or something our simple parser couldn't
           // make out ("falfe")
-          return str;
-          // FC_THROW_EXCEPTION( parse_error_exception, "Invalid token '${token}'",
-          //                          ("token",str) );
+          // A strict JSON parser would signal this as an error, but we
+          // will just treat the malformed token as an un-quoted string.
+          return str + stringFromToken(in);;
         }
       }
    }
@@ -368,16 +383,17 @@ namespace fc
             default:
             //  ilog( "unhandled char '${c}' int ${int}", ("c", fc::string( &c, 1 ) )("int", int(c)) );
               return stringFromToken(in);
-              in.get(); // 
+              in.get(); //
               ilog( "unhandled char '${c}' int ${int}", ("c", fc::string( &c, 1 ) )("int", int(c)) );
               return variant();
          }
       }
 	  return variant();
    }
-   variant json::from_string( const fc::string& utf8_str )
+   variant json::from_string( const std::string& utf8_str )
    {
-      fc::stringstream in( utf8_str );
+      std::stringstream in( utf8_str );
+      in.exceptions( std::ifstream::eofbit );
       return variant_from_stream( in );
    }
 
@@ -390,7 +406,7 @@ namespace fc
 
    void toUTF8( const wchar_t c, ostream& os )
    {
-      utf8::utf16to8( &c, (&c)+1, ostream_iterator<char>(os) ); 
+      utf8::utf16to8( &c, (&c)+1, ostream_iterator<char>(os) );
    }
    */
 
@@ -457,7 +473,7 @@ namespace fc
    {
        os << '{';
        auto itr = o.begin();
-       
+
        while( itr != o.end() )
        {
           escape_string( itr->key(), os );
@@ -475,13 +491,13 @@ namespace fc
    {
       switch( v.get_type() )
       {
-         case variant::null_type:     
+         case variant::null_type:
               os << "null";
               return;
-         case variant::int64_type: 
+         case variant::int64_type:
               os << v.as_int64();
               return;
-         case variant::uint64_type: 
+         case variant::uint64_type:
               os << v.as_uint64();
               return;
          case variant::double_type:
@@ -526,7 +542,7 @@ namespace fc
          switch( v[i] ) {
             case '\\':
               if( !escape ) {
-                if( quote ) 
+                if( quote )
                   escape = true;
               } else { escape = false; }
               ss<<v[i];
@@ -546,7 +562,7 @@ namespace fc
               }
               if( !escape ) {
                 quote = !quote;
-              } 
+              }
               escape = false;
               ss<<'"';
               break;
@@ -624,7 +640,7 @@ namespace fc
    {
       //auto tmp = std::make_shared<fc::ifstream>( p, ifstream::binary );
       //auto tmp = std::make_shared<std::ifstream>( p.generic_string().c_str(), std::ios::binary );
-      //buffered_istream bi( tmp ); 
+      //buffered_istream bi( tmp );
       std::ifstream bi( p.generic_string().c_str(), std::ios::binary );
       return variant_from_stream( bi  );
    }

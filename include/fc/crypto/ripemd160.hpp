@@ -77,7 +77,7 @@ class ripemd160
   typedef ripemd160 uint160_t;
   typedef ripemd160 uint160;
 
-  template<> struct get_typename<uint160>    { static const char* name()  { return "uint160";  } };
+  template<> struct get_typename<uint160_t>    { static const char* name()  { return "uint160_t";  } };
 
 } // namespace fc
 

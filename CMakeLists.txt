@@ -38,10 +38,6 @@ LIST(APPEND BOOST_COMPONENTS thread date_time system filesystem program_options 
 IF( WIN32 )
   MESSAGE(STATUS "Configuring fc to build on Win32")
 
-  #You need to set OPENSSL_ROOT environment variable for your system on WIN32
-  message(STATUS "Setting up OpenSSL root and include vars on Win32 platform")
-  set( OPENSSL_ROOT_DIR $ENV{OPENSSL_ROOT} )
-
   set( RPCRT4 Rpcrt4 )
 
   #boost
@@ -77,7 +73,13 @@ ELSE(WIN32)
   ENDIF(NOT APPLE)
 ENDIF(WIN32)
 
-find_package( OpenSSL )
+#IF($ENV{OPENSSL_ROOT_DIR})
+  set(OPENSSL_ROOT_DIR $ENV{OPENSSL_ROOT_DIR} )
+  set(OPENSSL_INCLUDE_DIR ${OPENSSL_ROOT_DIR}/include)
+  message(STATUS "Setting up OpenSSL root and include vars to ${OPENSSL_ROOT_DIR}, ${OPENSSL_INCLUDE_DIR}")
+#ENDIF()
+
+find_package(OpenSSL)
 
 set( CMAKE_FIND_LIBRARY_SUFFIXES ${ORIGINAL_LIB_SUFFIXES} )
 

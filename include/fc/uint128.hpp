@@ -61,6 +61,7 @@ namespace fc
       friend uint128 operator - ( const uint128& l, const uint128& r )   { return uint128(l)-=r;   }
       friend uint128 operator * ( const uint128& l, const uint128& r )   { return uint128(l)*=r;   }
       friend uint128 operator / ( const uint128& l, const uint128& r )   { return uint128(l)/=r;   }
+      friend uint128 operator % ( const uint128& l, const uint128& r )   { return uint128(l)%=r;   }
       friend uint128 operator | ( const uint128& l, const uint128& r )   { return uint128(l)=(r);  }
       friend uint128 operator & ( const uint128& l, const uint128& r )   { return uint128(l)&=r;   }
       friend uint128 operator ^ ( const uint128& l, const uint128& r )   { return uint128(l)^=r;   }

@@ -1,6 +1,8 @@
 #include <fc/network/rate_limiting.hpp>
 #include <fc/network/tcp_socket_io_hooks.hpp>
 #include <fc/network/tcp_socket.hpp>
+#include <list>
+#include <algorithm>
 #include <fc/network/ip.hpp>
 #include <fc/fwd_impl.hpp>
 #include <fc/asio.hpp>
@@ -262,7 +264,7 @@ namespace fc
           while (!operations_sorted_by_length.empty())
           {
             uint32_t bytes_permitted_for_this_operation = bytes_remaining_to_allocate / operations_sorted_by_length.size();
-            uint32_t bytes_allocated_for_this_operation = std::min(operations_sorted_by_length.back()->length, bytes_permitted_for_this_operation);
+            uint32_t bytes_allocated_for_this_operation = std::min<size_t>(operations_sorted_by_length.back()->length, bytes_permitted_for_this_operation);
             operations_sorted_by_length.back()->permitted_length = bytes_allocated_for_this_operation;
             bytes_remaining_to_allocate -= bytes_allocated_for_this_operation;
             operations_sorted_by_length.pop_back();

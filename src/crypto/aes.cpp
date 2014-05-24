@@ -38,7 +38,7 @@ void aes_encoder::init( const fc::sha256& key, const fc::uint128& init_value )
     *    is 128 bits */
     if(1 != EVP_EncryptInit_ex(my->ctx, EVP_aes_256_cbc(), NULL, (unsigned char*)&key, (unsigned char*)&init_value))
     {
-        FC_THROW_EXCEPTION( exception, "error durring aes 256 cbc encryption init", 
+        FC_THROW_EXCEPTION( exception, "error during aes 256 cbc encryption init", 
                            ("s", ERR_error_string( ERR_get_error(), nullptr) ) );
     }
     EVP_CIPHER_CTX_set_padding( my->ctx, 0 );
@@ -52,7 +52,7 @@ uint32_t aes_encoder::encode( const char* plaintxt, uint32_t plaintext_len, char
     *       */
     if(1 != EVP_EncryptUpdate(my->ctx, (unsigned char*)ciphertxt, &ciphertext_len, (const unsigned char*)plaintxt, plaintext_len))
     {
-        FC_THROW_EXCEPTION( exception, "error durring aes 256 cbc encryption update", 
+        FC_THROW_EXCEPTION( exception, "error during aes 256 cbc encryption update", 
                            ("s", ERR_error_string( ERR_get_error(), nullptr) ) );
     }
     FC_ASSERT( ciphertext_len == plaintext_len, "", ("ciphertext_len",ciphertext_len)("plaintext_len",plaintext_len) );
@@ -67,7 +67,7 @@ uint32_t aes_encoder::final_encode( char* ciphertxt )
     *       */
     if(1 != EVP_EncryptFinal_ex(my->ctx, (unsigned char*)ciphertxt, &ciphertext_len)) 
     {
-        FC_THROW_EXCEPTION( exception, "error durring aes 256 cbc encryption final", 
+        FC_THROW_EXCEPTION( exception, "error during aes 256 cbc encryption final", 
                            ("s", ERR_error_string( ERR_get_error(), nullptr) ) );
     }
     return ciphertext_len;
@@ -98,7 +98,7 @@ void aes_decoder::init( const fc::sha256& key, const fc::uint128& init_value )
     *    is 128 bits */
     if(1 != EVP_DecryptInit_ex(my->ctx, EVP_aes_256_cbc(), NULL, (unsigned char*)&key, (unsigned char*)&init_value))
     {
-        FC_THROW_EXCEPTION( exception, "error durring aes 256 cbc encryption init", 
+        FC_THROW_EXCEPTION( exception, "error during aes 256 cbc encryption init", 
                            ("s", ERR_error_string( ERR_get_error(), nullptr) ) );
     }
     EVP_CIPHER_CTX_set_padding( my->ctx, 0 );
@@ -115,7 +115,7 @@ uint32_t aes_decoder::decode( const char* ciphertxt, uint32_t plaintext_len, cha
     *       */
     if(1 != EVP_DecryptUpdate(my->ctx, (unsigned char*)plaintext, &ciphertext_len, (const unsigned char*)ciphertxt, plaintext_len))
     {
-        FC_THROW_EXCEPTION( exception, "error durring aes 256 cbc encryption update", 
+        FC_THROW_EXCEPTION( exception, "error during aes 256 cbc encryption update", 
                            ("s", ERR_error_string( ERR_get_error(), nullptr) ) );
     }
     FC_ASSERT( ciphertext_len == plaintext_len, "", ("ciphertext_len",ciphertext_len)("plaintext_len",plaintext_len) );
@@ -131,7 +131,7 @@ uint32_t aes_decoder::final_decode( char* plaintext )
     *       */
     if(1 != EVP_DecryptFinal_ex(my->ctx, (unsigned char*)plaintext, &ciphertext_len)) 
     {
-        FC_THROW_EXCEPTION( exception, "error durring aes 256 cbc encryption final", 
+        FC_THROW_EXCEPTION( exception, "error during aes 256 cbc encryption final", 
                            ("s", ERR_error_string( ERR_get_error(), nullptr) ) );
     }
     return ciphertext_len;
@@ -172,7 +172,7 @@ int aes_encrypt(unsigned char *plaintext, int plaintext_len, unsigned char *key,
     *    is 128 bits */
     if(1 != EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, key, iv))
     {
-        FC_THROW_EXCEPTION( exception, "error durring aes 256 cbc encryption init", 
+        FC_THROW_EXCEPTION( exception, "error during aes 256 cbc encryption init", 
                            ("s", ERR_error_string( ERR_get_error(), nullptr) ) );
     }
 
@@ -181,7 +181,7 @@ int aes_encrypt(unsigned char *plaintext, int plaintext_len, unsigned char *key,
     *       */
     if(1 != EVP_EncryptUpdate(ctx, ciphertext, &len, plaintext, plaintext_len))
     {
-        FC_THROW_EXCEPTION( exception, "error durring aes 256 cbc encryption update", 
+        FC_THROW_EXCEPTION( exception, "error during aes 256 cbc encryption update", 
                            ("s", ERR_error_string( ERR_get_error(), nullptr) ) );
     }
     ciphertext_len = len;
@@ -191,7 +191,7 @@ int aes_encrypt(unsigned char *plaintext, int plaintext_len, unsigned char *key,
     *       */
     if(1 != EVP_EncryptFinal_ex(ctx, ciphertext + len, &len)) 
     {
-        FC_THROW_EXCEPTION( exception, "error durring aes 256 cbc encryption final", 
+        FC_THROW_EXCEPTION( exception, "error during aes 256 cbc encryption final", 
                            ("s", ERR_error_string( ERR_get_error(), nullptr) ) );
     }
     ciphertext_len += len;
@@ -220,7 +220,7 @@ int aes_decrypt(unsigned char *ciphertext, int ciphertext_len, unsigned char *ke
     *             * is 128 bits */
     if(1 != EVP_DecryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, key, iv))
     {
-        FC_THROW_EXCEPTION( exception, "error durring aes 256 cbc decrypt init", 
+        FC_THROW_EXCEPTION( exception, "error during aes 256 cbc decrypt init", 
                            ("s", ERR_error_string( ERR_get_error(), nullptr) ) );
     }
 
@@ -229,7 +229,7 @@ int aes_decrypt(unsigned char *ciphertext, int ciphertext_len, unsigned char *ke
     *       */
     if(1 != EVP_DecryptUpdate(ctx, plaintext, &len, ciphertext, ciphertext_len))
     {
-        FC_THROW_EXCEPTION( exception, "error durring aes 256 cbc decrypt update", 
+        FC_THROW_EXCEPTION( exception, "error during aes 256 cbc decrypt update", 
                            ("s", ERR_error_string( ERR_get_error(), nullptr) ) );
     }
 
@@ -240,7 +240,7 @@ int aes_decrypt(unsigned char *ciphertext, int ciphertext_len, unsigned char *ke
     *       */
     if(1 != EVP_DecryptFinal_ex(ctx, plaintext + len, &len)) 
     {
-        FC_THROW_EXCEPTION( exception, "error durring aes 256 cbc decrypt final", 
+        FC_THROW_EXCEPTION( exception, "error during aes 256 cbc decrypt final", 
                            ("s", ERR_error_string( ERR_get_error(), nullptr) ) );
     }
     plaintext_len += len;
@@ -269,7 +269,7 @@ int aes_cfb_decrypt(unsigned char *ciphertext, int ciphertext_len, unsigned char
     *             * is 128 bits */
     if(1 != EVP_DecryptInit_ex(ctx, EVP_aes_256_cfb128(), NULL, key, iv))
     {
-        FC_THROW_EXCEPTION( exception, "error durring aes 256 cbc decrypt init",
+        FC_THROW_EXCEPTION( exception, "error during aes 256 cbc decrypt init",
                            ("s", ERR_error_string( ERR_get_error(), nullptr) ) );
     }
 
@@ -278,7 +278,7 @@ int aes_cfb_decrypt(unsigned char *ciphertext, int ciphertext_len, unsigned char
     *       */
     if(1 != EVP_DecryptUpdate(ctx, plaintext, &len, ciphertext, ciphertext_len))
     {
-        FC_THROW_EXCEPTION( exception, "error durring aes 256 cbc decrypt update",
+        FC_THROW_EXCEPTION( exception, "error during aes 256 cbc decrypt update",
                            ("s", ERR_error_string( ERR_get_error(), nullptr) ) );
     }
 
@@ -289,7 +289,7 @@ int aes_cfb_decrypt(unsigned char *ciphertext, int ciphertext_len, unsigned char
     *       */
     if(1 != EVP_DecryptFinal_ex(ctx, plaintext + len, &len))
     {
-        FC_THROW_EXCEPTION( exception, "error durring aes 256 cbc decrypt final",
+        FC_THROW_EXCEPTION( exception, "error during aes 256 cbc decrypt final",
                            ("s", ERR_error_string( ERR_get_error(), nullptr) ) );
     }
     plaintext_len += len;

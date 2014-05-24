@@ -6,6 +6,9 @@
 
 namespace fc {
   namespace ip { class endpoint; } 
+
+  class tcp_socket_io_hooks;
+
   class tcp_socket : public virtual iostream 
   {
     public:
@@ -15,7 +18,8 @@ namespace fc {
       void     connect_to( const fc::ip::endpoint& remote_endpoint );
       void     connect_to( const fc::ip::endpoint& remote_endpoint, const fc::ip::endpoint& local_endpoint );
       void     enable_keep_alives(const fc::microseconds& interval);
-      void     set_reuse_address(bool enable = true); // set SO_REUSEADDR
+      void set_io_hooks(tcp_socket_io_hooks* new_hooks);
+      void set_reuse_address(bool enable = true); // set SO_REUSEADDR
       fc::ip::endpoint remote_endpoint() const;
       fc::ip::endpoint local_endpoint() const;
 
@@ -45,9 +49,9 @@ namespace fc {
       friend class tcp_server;
       class impl;
       #ifdef _WIN64
-      fc::fwd<impl,0x68> my;
+      fc::fwd<impl,0x70> my;
       #else
-      fc::fwd<impl,0x44> my;
+      fc::fwd<impl,0x4c> my;
       #endif
   };
   typedef std::shared_ptr<tcp_socket> tcp_socket_ptr;

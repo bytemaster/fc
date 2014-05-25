@@ -8,6 +8,7 @@
 //#include <fc/crypto/base64.hpp>
 #include <fc/crypto/hex.hpp>
 #include <boost/scoped_array.hpp>
+#include <fc/reflect/variant.hpp>
 
 namespace fc
 {
@@ -351,7 +352,7 @@ int64_t variant::as_int64()const
       case null_type:
           return 0;
       default:
-         FC_THROW_EXCEPTION( bad_cast_exception, "Invalid cast from ${type} to int64", ("type", "") );
+         FC_THROW_EXCEPTION( bad_cast_exception, "Invalid cast from ${type} to int64", ("type", get_type()) );
    }
 }
 
@@ -372,7 +373,7 @@ uint64_t variant::as_uint64()const
       case null_type:
           return 0;
       default:
-         FC_THROW_EXCEPTION( bad_cast_exception,"Invalid cast from ${type} to uint64", ("type",""));
+         FC_THROW_EXCEPTION( bad_cast_exception,"Invalid cast from ${type} to uint64", ("type",get_type()));
    }
 }
 
@@ -394,7 +395,7 @@ double  variant::as_double()const
       case null_type:
           return 0;
       default:
-         FC_THROW_EXCEPTION( bad_cast_exception, "Invalid cast from ${type} to double" );
+         FC_THROW_EXCEPTION( bad_cast_exception, "Invalid cast from ${type} to double", ("type",get_type()) );
    }
 }
 
@@ -415,7 +416,7 @@ bool  variant::as_bool()const
       case null_type:
           return false;
       default:
-         FC_THROW_EXCEPTION( bad_cast_exception, "Invalid cast from ${type} to bool" );
+         FC_THROW_EXCEPTION( bad_cast_exception, "Invalid cast from ${type} to bool" , ("type",get_type()));
    }
 }
 
@@ -436,7 +437,7 @@ string    variant::as_string()const
       case null_type:
           return string();
       default:
-      FC_THROW_EXCEPTION( bad_cast_exception, "Invalid cast from ${type} to string", ("type", int64_t(get_type()) ) );
+      FC_THROW_EXCEPTION( bad_cast_exception, "Invalid cast from ${type} to string", ("type", get_type() ) );
    }
 }
 
@@ -447,7 +448,7 @@ variants&         variant::get_array()
   if( get_type() == array_type )
      return **reinterpret_cast<variants**>(this);
    
-  FC_THROW_EXCEPTION( bad_cast_exception, "Invalid cast from ${type} to Array" );
+  FC_THROW_EXCEPTION( bad_cast_exception, "Invalid cast from ${type} to Array", ("type",get_type()) );
 }
 
 
@@ -456,7 +457,7 @@ const variants&       variant::get_array()const
 {
   if( get_type() == array_type )
      return **reinterpret_cast<const const_variants_ptr*>(this);
-  FC_THROW_EXCEPTION( bad_cast_exception, "Invalid cast from ${type} to Array" );
+  FC_THROW_EXCEPTION( bad_cast_exception, "Invalid cast from ${type} to Array", ("type",get_type()) );
 }
 
 
@@ -465,7 +466,7 @@ variant_object&        variant::get_object()
 {
   if( get_type() == object_type )
      return **reinterpret_cast<variant_object**>(this);
-  FC_THROW_EXCEPTION( bad_cast_exception, "Invalid cast from ${type} to Object" );
+  FC_THROW_EXCEPTION( bad_cast_exception, "Invalid cast from ${type} to Object", ("type",get_type()) );
 }
 
 const variant& variant::operator[]( const char* key )const
@@ -486,7 +487,7 @@ const string&        variant::get_string()const
 {
   if( get_type() == string_type )
      return **reinterpret_cast<const const_string_ptr*>(this);
-  FC_THROW_EXCEPTION( bad_cast_exception, "Invalid cast from type '${type}' to Object", ("type",int(get_type())) );
+  FC_THROW_EXCEPTION( bad_cast_exception, "Invalid cast from type '${type}' to Object", ("type",get_type()) );
 }
 
 
@@ -495,7 +496,7 @@ const variant_object&  variant::get_object()const
 {
   if( get_type() == object_type )
      return **reinterpret_cast<const const_variant_object_ptr*>(this);
-  FC_THROW_EXCEPTION( bad_cast_exception, "Invalid cast from type '${type}' to Object", ("type",int(get_type())) );
+  FC_THROW_EXCEPTION( bad_cast_exception, "Invalid cast from type '${type}' to Object", ("type",get_type()) );
 }
 
 void to_variant( const std::string& s, variant& v )

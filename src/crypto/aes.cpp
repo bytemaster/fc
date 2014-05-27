@@ -107,19 +107,19 @@ aes_decoder::~aes_decoder()
 {
 }
 
-uint32_t aes_decoder::decode( const char* ciphertxt, uint32_t plaintext_len, char* plaintext )
+uint32_t aes_decoder::decode( const char* ciphertxt, uint32_t ciphertxt_len, char* plaintext )
 {
-    int ciphertext_len = 0;
-    /* Provide the message to be encrypted, and obtain the encrypted output.
+    int plaintext_len = 0;
+    /* Provide the message to be decrypted, and obtain the decrypted output.
     *    * EVP_DecryptUpdate can be called multiple times if necessary
     *       */
-    if(1 != EVP_DecryptUpdate(my->ctx, (unsigned char*)plaintext, &ciphertext_len, (const unsigned char*)ciphertxt, plaintext_len))
+	if (1 != EVP_DecryptUpdate(my->ctx, (unsigned char*)plaintext, &plaintext_len, (const unsigned char*)ciphertxt, ciphertxt_len))
     {
-        FC_THROW_EXCEPTION( exception, "error durring aes 256 cbc encryption update", 
+        FC_THROW_EXCEPTION( exception, "error durring aes 256 cbc decryption update", 
                            ("s", ERR_error_string( ERR_get_error(), nullptr) ) );
     }
-    FC_ASSERT( ciphertext_len == plaintext_len, "", ("ciphertext_len",ciphertext_len)("plaintext_len",plaintext_len) );
-    return ciphertext_len;
+    FC_ASSERT( ciphertxt_len == plaintext_len, "", ("ciphertxt_len",ciphertxt_len)("plaintext_len",plaintext_len) );
+	return plaintext_len;
 }
 #if 0
 uint32_t aes_decoder::final_decode( char* plaintext )

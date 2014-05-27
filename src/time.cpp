@@ -5,6 +5,7 @@
 #include <sstream>
 #include <fc/string.hpp>
 #include <fc/io/sstream.hpp>
+#include <fc/exception/exception.hpp>
 
 namespace fc {
   namespace bch = boost::chrono;
@@ -18,10 +19,15 @@ namespace fc {
       
       return boost::posix_time::to_iso_string( boost::posix_time::from_time_t(tt) + boost::posix_time::microseconds( elapsed._count % 1000000 ) ); 
   }
-  time_point time_point::from_iso_string( const fc::string& s ) {
-     auto pt = boost::posix_time::from_iso_string(s);
-     //return fc::time_point(fc::seconds( (pt - boost::posix_time::from_time_t(0)).total_seconds() ));
-     return fc::time_point(fc::microseconds( (pt - boost::posix_time::from_time_t(0)).total_microseconds() ));
+  time_point time_point::from_iso_string( const fc::string& s ) 
+  {
+    try
+    {
+      auto pt = boost::posix_time::from_iso_string(s);
+      //return fc::time_point(fc::seconds( (pt - boost::posix_time::from_time_t(0)).total_seconds() ));
+      return fc::time_point(fc::microseconds( (pt - boost::posix_time::from_time_t(0)).total_microseconds() ));
+    }
+    FC_RETHROW_EXCEPTIONS(warn, "unable to convert ISO-formatted string to fc::time_point")
   }
   void to_variant( const fc::time_point& t, variant& v ) {
     v = fc::string(t);

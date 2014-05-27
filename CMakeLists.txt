@@ -16,8 +16,8 @@ INCLUDE( VersionMacros )
 INCLUDE( SetupTargetMacros )
 INCLUDE(GetGitRevisionDescription)
 
-get_git_head_revision(GIT_REFSPEC GIT_SHA3)
-get_git_unix_timestamp(GIT_UNIX_TIMESTAMP3)
+get_git_head_revision(GIT_REFSPEC FC_GIT_REVISION_SHA)
+get_git_unix_timestamp(FC_GIT_REVISION_UNIX_TIMESTAMP)
 
 SET( DEFAULT_HEADER_INSTALL_DIR include/\${target} )
 SET( DEFAULT_LIBRARY_INSTALL_DIR lib/ )
@@ -37,10 +37,6 @@ LIST(APPEND BOOST_COMPONENTS thread date_time system filesystem program_options 
 
 IF( WIN32 )
   MESSAGE(STATUS "Configuring fc to build on Win32")
-
-  #You need to set OPENSSL_ROOT environment variable for your system on WIN32
-  message(STATUS "Setting up OpenSSL root and include vars on Win32 platform")
-  set( OPENSSL_ROOT_DIR $ENV{OPENSSL_ROOT} )
 
   set( RPCRT4 Rpcrt4 )
 
@@ -77,7 +73,13 @@ ELSE(WIN32)
   ENDIF(NOT APPLE)
 ENDIF(WIN32)
 
-find_package( OpenSSL )
+#IF($ENV{OPENSSL_ROOT_DIR})
+  set(OPENSSL_ROOT_DIR $ENV{OPENSSL_ROOT_DIR} )
+  set(OPENSSL_INCLUDE_DIR ${OPENSSL_ROOT_DIR}/include)
+  message(STATUS "Setting up OpenSSL root and include vars to ${OPENSSL_ROOT_DIR}, ${OPENSSL_INCLUDE_DIR}")
+#ENDIF()
+
+find_package(OpenSSL)
 
 set( CMAKE_FIND_LIBRARY_SUFFIXES ${ORIGINAL_LIB_SUFFIXES} )
 
@@ -147,6 +149,7 @@ set( fc_sources
      src/network/http/http_connection.cpp
      src/network/http/http_server.cpp
      src/network/ip.cpp
+     src/network/rate_limiting.cpp
      src/network/resolve.cpp
      src/network/url.cpp
      src/compress/smaz.cpp
@@ -168,8 +171,8 @@ set( sources
   ${fc_sources}
 )
 
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/GitSHA3.cpp.in" "${CMAKE_CURRENT_BINARY_DIR}/GitSHA3.cpp" @ONLY)
-list(APPEND sources "${CMAKE_CURRENT_BINARY_DIR}/GitSHA3.cpp" GitSHA3.h)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/git_revision.cpp.in" "${CMAKE_CURRENT_BINARY_DIR}/git_revision.cpp" @ONLY)
+list(APPEND sources "${CMAKE_CURRENT_BINARY_DIR}/git_revision.cpp")
 list(APPEND sources ${fc_headers})
 
 add_subdirectory( vendor/easylzma )
@@ -186,13 +189,13 @@ IF(WIN32)
   # Add /U options to be sure settings specific to dynamic boost link are ineffective 
   target_compile_options(fc PUBLIC /EHsc /UBOOST_ALL_DYN_LINK /UBOOST_LINKING_PYTHON /UBOOST_DEBUG_PYTHON)
 ELSE()
-  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99 -Wall" )
+  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99 -Wall")
 
   IF(APPLE)
-    SET(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -std=c++11 -stdlib=libc++  -Wall" )
+    SET(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -std=c++11 -stdlib=libc++ -Wall")
   ELSE()
-    target_compile_options(fc PUBLIC -std=c++11 -Wall -fnon-call-exceptions -Wno-unused-local-typedefs -fmax-errors=3)
-    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused-local-typedefs -fmax-errors=3 ")
+    target_compile_options(fc PUBLIC -std=c++11 -Wall -fnon-call-exceptions)
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
   ENDIF()
 ENDIF()
  
@@ -217,6 +220,8 @@ target_link_libraries( fc PUBLIC easylzma_static ${Boost_LIBRARIES} ${OPENSSL_LI
 #target_link_libraries( test_aes fc ${rt_library} ${pthread_library} )
 #add_executable( test_sleep tests/sleep.cpp )
 #target_link_libraries( test_sleep fc )
+#add_executable( test_rate_limiting tests/rate_limiting.cpp )
+#target_link_libraries( test_rate_limiting fc )
 
 if(WIN32)
    # add addtional import library on windows platform

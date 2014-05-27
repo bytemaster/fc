@@ -1,7 +1,0 @@
-#include <stdint.h>
-#include "GitSHA3.h"
-
-#define GIT_SHA3 "@GIT_SHA3@"
-const char* const g_GIT_SHA3 = GIT_SHA3;
-#define GIT_UNIX_TIMESTAMP3 @GIT_UNIX_TIMESTAMP3@
-const uint32_t g_GIT_UNIX_TIMESTAMP3 = GIT_UNIX_TIMESTAMP3;

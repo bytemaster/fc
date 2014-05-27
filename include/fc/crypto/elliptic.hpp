@@ -16,6 +16,7 @@ namespace fc {
     }
 
     typedef fc::array<char,33>          public_key_data;
+    typedef fc::sha256                  private_key_secret;
     typedef fc::array<char,65>          public_key_point_data; ///< the full non-compressed version of the ECC point
     typedef fc::array<char,72>          signature;
     typedef fc::array<unsigned char,65> compact_signature;
@@ -92,7 +93,9 @@ namespace fc {
             */
            static private_key generate_from_seed( const fc::sha256& seed, const fc::sha256& offset = fc::sha256() );
 
-           fc::sha256 get_secret()const; // get the private key secret
+           private_key_secret get_secret()const; // get the private key secret
+
+           operator private_key_secret ()const { return get_secret(); }
 
            /**
             *  Given a public key, calculatse a 512 bit shared secret between that

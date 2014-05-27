@@ -239,10 +239,10 @@ do { if( !(TEST) ) { FC_THROW_EXCEPTION( assert_exception, #TEST ": "  __VA_ARGS
    catch( fc::exception& er ) { \
       FC_RETHROW_EXCEPTION( er, LOG_LEVEL, FORMAT, __VA_ARGS__ ); \
    } catch( const std::exception& e ) {  \
-      throw  fc::std_exception( \
-                FC_LOG_MESSAGE( LOG_LEVEL, FORMAT,__VA_ARGS__), \
+      fc::std_exception fce( \
+                FC_LOG_MESSAGE( LOG_LEVEL, "what: ${what} - " FORMAT,__VA_ARGS__("what",e.what())), \
                 std::current_exception(), \
-                e.what() ) ; \
+                e.what() ) ; throw fce;\
    } catch( ... ) {  \
       throw fc::unhandled_exception( \
                 FC_LOG_MESSAGE( LOG_LEVEL, FORMAT,__VA_ARGS__), \

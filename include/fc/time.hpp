@@ -116,6 +116,7 @@ namespace fc {
 
 #include <fc/reflect/reflect.hpp>
 FC_REFLECT_TYPENAME( fc::time_point )
+FC_REFLECT_TYPENAME( fc::microseconds )
 FC_REFLECT_TYPENAME( fc::time_point_sec )
 
 #ifdef _MSC_VER

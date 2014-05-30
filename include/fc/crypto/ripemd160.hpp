@@ -15,7 +15,7 @@ class ripemd160
     explicit ripemd160( const string& hex_str );
 
     string str()const;
-    operator string()const;
+    explicit operator string()const;
 
     char*    data()const;
 

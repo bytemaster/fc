@@ -16,7 +16,7 @@ namespace fc {
       ~tcp_socket();
 
       void     connect_to( const fc::ip::endpoint& remote_endpoint );
-      void     connect_to( const fc::ip::endpoint& remote_endpoint, const fc::ip::endpoint& local_endpoint );
+      void     bind( const fc::ip::endpoint& local_endpoint );
       void     enable_keep_alives(const fc::microseconds& interval);
       void set_io_hooks(tcp_socket_io_hooks* new_hooks);
       void set_reuse_address(bool enable = true); // set SO_REUSEADDR
@@ -68,6 +68,7 @@ namespace fc {
       void     set_reuse_address(bool enable = true); // set SO_REUSEADDR, call before listen
       void     listen( uint16_t port );
       void     listen( const fc::ip::endpoint& ep );
+      fc::ip::endpoint get_local_endpoint() const;
       uint16_t get_port()const;
     private:
       // non copyable

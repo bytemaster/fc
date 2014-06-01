@@ -93,18 +93,18 @@ namespace fc {
     fc::asio::tcp::connect(my->_sock, fc::asio::tcp::endpoint( boost::asio::ip::address_v4(remote_endpoint.get_address()), remote_endpoint.port() ) ); 
   }
 
-  void tcp_socket::connect_to( const fc::ip::endpoint& remote_endpoint, const fc::ip::endpoint& local_endpoint ) {
+  void tcp_socket::bind(const fc::ip::endpoint& local_endpoint)
+  {
     try
     {
-    my->_sock.bind(boost::asio::ip::tcp::endpoint(boost::asio::ip::address_v4(local_endpoint.get_address()), 
-                                                                              local_endpoint.port()));
+      my->_sock.bind(boost::asio::ip::tcp::endpoint(boost::asio::ip::address_v4(local_endpoint.get_address()), 
+                                                                                local_endpoint.port()));
     }
-    catch (std::exception& except)
+    catch (const std::exception& except)
     {
       elog("Exception binding outgoing connection to desired local endpoint: ${what}", ("what", except.what()));
-      throw;
+      FC_THROW("error binding to ${endpoint}: ${what}", ("endpoint", local_endpoint)("what", except.what()));
     }
-    fc::asio::tcp::connect(my->_sock, fc::asio::tcp::endpoint(boost::asio::ip::address_v4(remote_endpoint.get_address()), remote_endpoint.port())); 
   }
 
   void tcp_socket::enable_keep_alives(const fc::microseconds& interval)
@@ -230,21 +230,36 @@ namespace fc {
   {
     if( !my ) 
       my = new impl;
-    my->_accept.bind(boost::asio::ip::tcp::endpoint(boost::asio::ip::address_v4(), port));
-    my->_accept.listen();
+    try
+    {
+      my->_accept.bind(boost::asio::ip::tcp::endpoint(boost::asio::ip::address_v4(), port));
+      my->_accept.listen();
+    } 
+    FC_RETHROW_EXCEPTIONS(warn, "error listening on socket");
   }
   void tcp_server::listen( const fc::ip::endpoint& ep ) 
   {
     if( !my ) 
       my = new impl;
-    my->_accept.bind(boost::asio::ip::tcp::endpoint(boost::asio::ip::address_v4::from_string((string)ep.get_address()), ep.port()));
-    my->_accept.listen();
+    try
+    {
+      my->_accept.bind(boost::asio::ip::tcp::endpoint(boost::asio::ip::address_v4::from_string((string)ep.get_address()), ep.port()));
+      my->_accept.listen();
+    } 
+    FC_RETHROW_EXCEPTIONS(warn, "error listening on socket");
+  }
+
+  fc::ip::endpoint tcp_server::get_local_endpoint() const
+  {
+    FC_ASSERT( my != nullptr );
+    return fc::ip::endpoint(my->_accept.local_endpoint().address().to_v4().to_ulong(), 
+                            my->_accept.local_endpoint().port() );
   }
 
   uint16_t tcp_server::get_port()const
   {
-     FC_ASSERT( my != nullptr );
-     return my->_accept.local_endpoint().port();
+    FC_ASSERT( my != nullptr );
+    return my->_accept.local_endpoint().port();
   }
 
 

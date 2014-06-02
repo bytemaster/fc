@@ -65,7 +65,7 @@ namespace fc {
         size_t size = BN_num_bytes(n);
         uint64_t abs_value = 0;
         BN_bn2bin(n, (unsigned char*)&abs_value + (sizeof(uint64_t) - size));
-        return BN_is_negative(n) ? -bswap_64(abs_value) : bswap_64(abs_value);
+        return BN_is_negative(n) ? -(int64_t)bswap_64(abs_value) : bswap_64(abs_value);
       }
 
       int64_t bigint::log2()const { return BN_num_bits(n); }

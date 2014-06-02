@@ -10,17 +10,20 @@
 
 namespace fc {
 
-static int init = init_openssl();
-
 struct aes_encoder::impl 
 {
    evp_cipher_ctx ctx;
 };
 
-aes_encoder::aes_encoder(){}
+aes_encoder::aes_encoder()
+{
+  static int init = init_openssl();
+}
+
 aes_encoder::~aes_encoder()
 {
 }
+
 void aes_encoder::init( const fc::sha256& key, const fc::uint128& init_value )
 {
     my->ctx.obj = EVP_CIPHER_CTX_new();
@@ -80,7 +83,11 @@ struct aes_decoder::impl
    evp_cipher_ctx ctx;
 };
 
-aes_decoder::aes_decoder(){}
+aes_decoder::aes_decoder()
+  {
+  static int init = init_openssl();
+  }
+
 void aes_decoder::init( const fc::sha256& key, const fc::uint128& init_value )
 {
     my->ctx.obj = EVP_CIPHER_CTX_new();

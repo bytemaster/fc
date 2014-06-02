@@ -10,8 +10,6 @@
 #include <assert.h>
 
 namespace fc { namespace ecc {
-    static int init = init_openssl();
-
     namespace detail 
     { 
       class public_key_impl
@@ -20,7 +18,9 @@ namespace fc { namespace ecc {
           public_key_impl()
           :_key(nullptr)
           {
+          static int init = init_openssl();
           }
+
           ~public_key_impl()
           {
             if( _key != nullptr )
@@ -40,6 +40,7 @@ namespace fc { namespace ecc {
           private_key_impl()
           :_key(nullptr)
           {
+          static int init = init_openssl();
           }
           ~private_key_impl()
           {

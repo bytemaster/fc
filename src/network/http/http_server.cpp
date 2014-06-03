@@ -96,10 +96,15 @@ namespace fc { namespace http {
 
   server::~server(){}
 
-  void server::listen( const fc::ip::endpoint& p ) {
+  void server::listen( const fc::ip::endpoint& p ) 
+  {
     my.reset( new impl(p) );
   }
 
+  fc::ip::endpoint server::get_local_endpoint() const
+  {
+    return my->tcp_serv.get_local_endpoint();
+  }
 
 
   server::response::response(){}

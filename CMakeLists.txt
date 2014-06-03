@@ -312,8 +312,10 @@ ELSE()
   SET (OPENSSL_CONF_TARGET ${CMAKE_CURRENT_BINARY_DIR})
 ENDIF()
 
+    IF(WIN32)
 SET(POST_BUILD_STEP_COMMANDS ${POST_BUILD_STEP_COMMANDS}
-  COMMAND ${CMAKE_COMMAND} -E copy_if_different "${OPENSSL_ROOT_DIR}/ssl/openssl.cnf" "${OPENSSL_CONF_TARGET}/openssl.cnf")
+     COMMAND ${CMAKE_COMMAND} -E copy_if_different "${OPENSSL_ROOT_DIR}/ssl/openssl.cnf" "${OPENSSL_CONF_TARGET}/openssl.cnf")
+    ENDIF(WIN32)
 
 ADD_CUSTOM_COMMAND(TARGET fc POST_BUILD ${POST_BUILD_STEP_COMMANDS} 
   COMMENT "Copying OpenSSL/ssl/openssl.cnf into target directory."

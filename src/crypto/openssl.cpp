@@ -6,12 +6,13 @@
 
 #include <cstdlib>
 #include <string>
+#include <stdlib.h>
 
 namespace  fc 
 {
     struct openssl_scope
     {
-      static path _configurationFilePath;
+       static path _configurationFilePath;
        openssl_scope()
        {
           ERR_load_crypto_strings(); 
@@ -19,11 +20,11 @@ namespace  fc
 
           const boost::filesystem::path& boostPath = _configurationFilePath;
           if(boostPath.empty() == false)
-            {
-            std::string varSetting("OPENSSL_CONF=");
-            varSetting += _configurationFilePath.to_native_ansi_path();
-            putenv(varSetting.c_str());
-            }
+          {
+               std::string varSetting("OPENSSL_CONF=");
+               varSetting += _configurationFilePath.to_native_ansi_path();
+               putenv((char*)varSetting.c_str());
+          }
 
           OPENSSL_config(nullptr);
        }
@@ -38,9 +39,9 @@ namespace  fc
     path openssl_scope::_configurationFilePath;
 
     void store_configuration_path(const path& filePath)
-      {
+    {
       openssl_scope::_configurationFilePath = filePath;
-      }
+    }
    
     int init_openssl()
     {

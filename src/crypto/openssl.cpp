@@ -4,6 +4,7 @@
 
 #include <boost/filesystem/path.hpp>
 
+#include <cstdlib>
 #include <string>
 
 namespace  fc 
@@ -15,8 +16,16 @@ namespace  fc
        {
           ERR_load_crypto_strings(); 
           OpenSSL_add_all_algorithms();
+
           const boost::filesystem::path& boostPath = _configurationFilePath;
-          OPENSSL_config(boostPath.empty() ? nullptr : _configurationFilePath.to_native_ansi_path().c_str());
+          if(boostPath.empty() == false)
+            {
+            std::string varSetting("OPENSSL_CONF=");
+            varSetting += _configurationFilePath.to_native_ansi_path();
+            putenv(varSetting.c_str());
+            }
+
+          OPENSSL_config(nullptr);
        }
 
        ~openssl_scope()

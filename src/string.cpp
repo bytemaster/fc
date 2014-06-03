@@ -5,12 +5,28 @@
 #include <boost/algorithm/string.hpp>
 
 #include <string>
+#include <locale>
 
 /**
  *  Implemented with std::string for now.
  */
 
 namespace fc  {
+   class comma_numpunct : public std::numpunct<char>
+   {
+      protected:
+         virtual char do_thousands_sep() const { return ','; }
+         virtual std::string do_grouping() const { return "\03"; }
+   };
+
+  std::string to_pretty_string( int64_t value )
+  {
+     std::stringstream ss;
+     ss.imbue( {std::locale(), new comma_numpunct} );
+     ss << std::fixed << value;
+     return ss.str();
+  }
+
 #ifdef USE_FC_STRING
   string::string(const char* s, int l) :my(s,l){ }
   string::string(){}

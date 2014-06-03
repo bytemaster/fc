@@ -305,5 +305,12 @@ if(WIN32)
 
 endif(WIN32)
 
+SET(POST_BUILD_STEP_COMMANDS ${POST_BUILD_STEP_COMMANDS}
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different "${OPENSSL_ROOT_DIR}/ssl/openssl.cnf" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/openssl.cnf")
+
+ADD_CUSTOM_COMMAND(TARGET fc POST_BUILD ${POST_BUILD_STEP_COMMANDS} 
+  COMMENT "Copying OpenSSL/ssl/openssl.cnf into target directory."
+)
+
 MESSAGE(STATUS "Finished fc module configuration...")
 

@@ -11,7 +11,7 @@ namespace fc {
     public:
       bigint( const std::vector<char>& bige );
       bigint( const char* bige, uint32_t l );
-      bigint( unsigned long i );
+      bigint(uint64_t value);
       bigint( );
       bigint( const bigint& c );
       bigint( bigint&& c );

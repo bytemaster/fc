@@ -99,4 +99,14 @@ namespace fc {
   string get_approximate_relative_time_string(const time_point& event_time) {
     return get_approximate_relative_time_string(time_point_sec(event_time));
   }
-}
+
+  void to_variant( const microseconds& input_microseconds,  variant& output_variant )
+  {
+    output_variant = input_microseconds.count();
+  }
+  void from_variant( const variant& input_variant,  microseconds& output_microseconds )
+  {
+    output_microseconds = microseconds(input_variant.as_int64());
+  }
+
+} //namespace fc

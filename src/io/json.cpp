@@ -391,11 +391,11 @@ namespace fc
 	  return variant();
    }
    variant json::from_string( const std::string& utf8_str )
-   {
-      std::stringstream in( utf8_str );
-      in.exceptions( std::ifstream::eofbit );
+   { try {
+      fc::stringstream in( utf8_str );
+      //in.exceptions( std::ifstream::eofbit );
       return variant_from_stream( in );
-   }
+   } FC_RETHROW_EXCEPTIONS( warn, "", ("str",utf8_str) ) }
 
    /*
    void toUTF8( const char str, ostream& os )

@@ -37,6 +37,10 @@ namespace fc {
   inline microseconds hours(int64_t h) { return minutes(60*h); }
   inline microseconds days(int64_t d) { return hours(24*d); }
 
+  class variant;
+  void to_variant( const fc::microseconds&,  fc::variant&  );
+  void from_variant( const fc::variant& , fc::microseconds& );
+
   class time_point {
     public:
         explicit time_point( microseconds e = microseconds() ) :elapsed(e){}

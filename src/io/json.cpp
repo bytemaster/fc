@@ -83,6 +83,9 @@ namespace fc
                case '\\':
                   token << parseEscape( in );
                   break;
+               case 0x04:
+                  FC_THROW_EXCEPTION( parse_error_exception, "EOF before closing '\"' in string '${token}'",
+                                                   ("token", token.str() ) );
                case '"':
                   in.get();
                   return token.str();

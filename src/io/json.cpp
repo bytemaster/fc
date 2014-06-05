@@ -132,6 +132,11 @@ namespace fc
       {
          return token.str();
       }
+      catch (const std::ios_base::failure&)
+      {
+         return token.str();
+      }
+
       FC_RETHROW_EXCEPTIONS( warn, "while parsing token '${token}'",
                                           ("token", token.str() ) );
    }
@@ -179,6 +184,10 @@ namespace fc
       catch( const fc::eof_exception& e )
       {
          FC_THROW_EXCEPTION( parse_error_exception, "Unexpected EOF: ${e}", ("e", e.to_detail_string() ) );
+      }
+      catch( const std::ios_base::failure& e )
+      {
+         FC_THROW_EXCEPTION( parse_error_exception, "Unexpected EOF: ${e}", ("e", e.what() ) );
       } FC_RETHROW_EXCEPTIONS( warn, "Error parsing object" );
    }
 
@@ -261,6 +270,9 @@ namespace fc
       catch (fc::eof_exception&)
       {
       }
+      catch (const std::ios_base::failure&)
+      {
+      }
       fc::string str = ss.str();
       if (str == "-." || str == ".") // check the obviously wrong things we could have encountered
         FC_THROW_EXCEPTION(parse_error_exception, "Can't parse token \"${token}\" as a JSON numeric constant", ("token", str));
@@ -303,6 +315,10 @@ namespace fc
         }
       }
       catch (fc::eof_exception&)
+      {
+        received_eof = true;
+      }
+      catch (const std::ios_base::failure&)
       {
         received_eof = true;
       }
@@ -391,11 +407,11 @@ namespace fc
 	  return variant();
    }
    variant json::from_string( const std::string& utf8_str )
-   {
-      std::stringstream in( utf8_str );
-      in.exceptions( std::ifstream::eofbit );
+   { try {
+      fc::stringstream in( utf8_str );
+      //in.exceptions( std::ifstream::eofbit );
       return variant_from_stream( in );
-   }
+   } FC_RETHROW_EXCEPTIONS( warn, "", ("str",utf8_str) ) }
 
    /*
    void toUTF8( const char str, ostream& os )

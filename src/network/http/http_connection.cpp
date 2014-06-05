@@ -8,6 +8,7 @@
 #include <fc/log/logger.hpp>
 #include <fc/io/stdio.hpp>
 #include <fc/network/url.hpp>
+#include <boost/algorithm/string.hpp>
 
 
 class fc::http::connection::impl 
@@ -55,7 +56,7 @@ class fc::http::connection::impl
           while( *end != '\r' ) ++end;
           h.val = fc::string(skey,end);
           rep.headers.push_back(h);
-          if( h.key == "Content-Length" ) {
+          if( boost::iequals(h.key, "Content-Length") ) {
              rep.body.resize( static_cast<size_t>(to_uint64( fc::string(h.val) ) ));
           }
         }
@@ -151,12 +152,12 @@ http::request    connection::read_request()const {
     while( *end != '\r' ) ++end;
     h.val = fc::string(skey,end);
     req.headers.push_back(h);
-    if( h.key == "Content-Length" ) {
+    if( boost::iequals(h.key, "Content-Length")) {
        auto s = static_cast<size_t>(to_uint64( fc::string(h.val) ) );
        FC_ASSERT( s < 1024*1024 );
        req.body.resize( static_cast<size_t>(to_uint64( fc::string(h.val) ) ));
     }
-    if( h.key == "Host" ) {
+    if( boost::iequals(h.key, "Host") ) {
        req.domain = h.val;
     }
   }

@@ -1,6 +1,7 @@
 #include <fc/string.hpp>
 #include <fc/utility.hpp>
 #include <fc/fwd_impl.hpp>
+#include <fc/exception/exception.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
 
@@ -86,19 +87,19 @@ namespace fc  {
 
 
   int64_t    to_int64( const fc::string& i )
-  {
+  { try {
     return boost::lexical_cast<int64_t>(i.c_str());
-  }
+  } FC_RETHROW_EXCEPTIONS( warn, "${i} => int64_t", ("i",i) ) }
 
   uint64_t   to_uint64( const fc::string& i )
-  {
+  { try {
     return boost::lexical_cast<uint64_t>(i.c_str());
-  }
+  } FC_RETHROW_EXCEPTIONS( warn, "${i} => uint64_t", ("i",i) ) }
 
   double     to_double( const fc::string& i)
-  {
+  { try {
     return boost::lexical_cast<double>(i.c_str());
-  }
+  } FC_RETHROW_EXCEPTIONS( warn, "${i} => double", ("i",i) ) }
 
   fc::string to_string( double d)
   {

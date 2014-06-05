@@ -21,9 +21,13 @@ namespace  fc
           const boost::filesystem::path& boostPath = _configurationFilePath;
           if(boostPath.empty() == false)
           {
-               std::string varSetting("OPENSSL_CONF=");
-               varSetting += _configurationFilePath.to_native_ansi_path();
-               putenv((char*)varSetting.c_str());
+            std::string varSetting("OPENSSL_CONF=");
+            varSetting += _configurationFilePath.to_native_ansi_path();
+#if defined(WIN32)
+            _putenv((char*)varSetting.c_str());
+#else
+            putenv((char*)varSetting.c_str());
+#endif
           }
 
           OPENSSL_config(nullptr);

@@ -136,4 +136,8 @@ namespace fc
 
 #define idump( SEQ ) \
     ilog( FC_FORMAT(SEQ), FC_FORMAT_ARG_PARAMS(SEQ) )  
+#define wdump( SEQ ) \
+    wlog( FC_FORMAT(SEQ), FC_FORMAT_ARG_PARAMS(SEQ) )  
+#define edump( SEQ ) \
+    elog( FC_FORMAT(SEQ), FC_FORMAT_ARG_PARAMS(SEQ) )  
 

@@ -326,17 +326,19 @@ do { if( !(TEST) ) { FC_THROW_EXCEPTION( fc::assert_exception, #TEST ": "  __VA_
                 FC_LOG_MESSAGE( LOG_LEVEL, FORMAT,__VA_ARGS__), \
                 std::current_exception() ); \
    }
-#define FC_CAPTURE_AND_RETHROW( SEQ ) \
+
+#define FC_CAPTURE_AND_RETHROW( __VA_ARGS__ ) \
    catch( fc::exception& er ) { \
-      FC_RETHROW_EXCEPTION( er, fc::log_level::warn, "", FC_FORMAT_ARG_PARAMS(SEQ) ); \
+      FC_RETHROW_EXCEPTION( er, warn, "", FC_FORMAT_ARG_PARAMS(__VA_ARGS__) ); \
    } catch( const std::exception& e ) {  \
       fc::exception fce( \
-                FC_LOG_MESSAGE( fc::log_level::warn, "${what}",FC_FORMAT_ARG_PARAMS(SEQ)("what",e.what())), \
+                FC_LOG_MESSAGE( warn, "${what}",FC_FORMAT_ARG_PARAMS(__VA_ARGS__)("what",e.what())), \
                 fc::std_exception_code,\
                 typeid(e).name(), \
                 e.what() ) ; throw fce;\
    } catch( ... ) {  \
       throw fc::unhandled_exception( \
-                FC_LOG_MESSAGE( fc::log_level::warn, "",FC_FORMAT_ARG_PARAMS(SEQ)), \
+                FC_LOG_MESSAGE( warn, "",FC_FORMAT_ARG_PARAMS(__VA_ARGS__)), \
                 std::current_exception() ); \
    }
+

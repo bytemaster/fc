@@ -186,7 +186,7 @@ namespace fc
            _registered_exceptions[T::code_value] = &builder;
         }
         
-        void rethrow( const exception& e )const;
+        void NO_RETURN rethrow( const exception& e )const;
 
         static exception_factory& instance()
         {

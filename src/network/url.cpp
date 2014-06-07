@@ -3,6 +3,7 @@
 #include <fc/io/sstream.hpp>
 #include <fc/exception/exception.hpp>
 #include <fc/log/logger.hpp>
+#include <sstream>
 
 namespace fc
 {
@@ -13,19 +14,19 @@ namespace fc
       public:
          void parse( const fc::string& s )
          {
-           fc::stringstream ss(s);
-           fc::string skip,_lpath,_largs,luser,lpass;
-           fc::getline( ss, _proto, ':' );
-           fc::getline( ss, skip, '/' );
-           fc::getline( ss, skip, '/' );
+           std::stringstream ss(s);
+           std::string skip,_lpath,_largs,luser,lpass;
+           std::getline( ss, _proto, ':' );
+           std::getline( ss, skip, '/' );
+           std::getline( ss, skip, '/' );
            
            if( s.find('@') != size_t(fc::string::npos) ) {
              fc::string user_pass;
-             fc::getline( ss, user_pass, '@' );
-             fc::stringstream upss(user_pass);
+             std::getline( ss, user_pass, '@' );
+             std::stringstream upss(user_pass);
              if( user_pass.find( ':' ) != size_t(fc::string::npos) ) {
-                fc::getline( upss, luser, ':' );
-                fc::getline( upss, lpass, ':' );
+                std::getline( upss, luser, ':' );
+                std::getline( upss, lpass, ':' );
                 _user = fc::move(luser);
                 _pass = fc::move(lpass);
              } else {
@@ -33,7 +34,7 @@ namespace fc
              }
            }
            fc::string host_port;
-           fc::getline( ss, host_port, '/' );
+           std::getline( ss, host_port, '/' );
            auto pos = host_port.find( ':' );
            if( pos != fc::string::npos ) {
               try {
@@ -45,7 +46,7 @@ namespace fc
            } else {
               _host = fc::move(host_port);
            }
-           fc::getline( ss, _lpath, '?' );
+           std::getline( ss, _lpath, '?' );
 #ifdef WIN32
            // On windows, a URL like file:///c:/autoexec.bat would result in _lpath = c:/autoexec.bat
            // which is what we really want (it's already an absolute path)
@@ -58,7 +59,7 @@ namespace fc
            // but we really want to make it the absolute path /etc/rc.local
            _path = fc::path( "/" ) / _lpath;
 #endif
-           fc::getline( ss, _largs );
+           std::getline( ss, _largs );
            if( _args.valid() && _args->size() ) 
            {
              // TODO: args = fc::move(_args);
@@ -86,7 +87,7 @@ namespace fc
 
   url::operator string()const
   {
-      fc::stringstream ss;
+      std::stringstream ss;
       ss<<my->_proto<<"://";
       if( my->_user.valid() ) {
         ss << *my->_user;

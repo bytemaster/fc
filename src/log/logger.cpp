@@ -7,6 +7,7 @@
 #include <fc/filesystem.hpp>
 #include <unordered_map>
 #include <string>
+#include <fc/log/logger_config.hpp>
 
 namespace fc {
 
@@ -105,5 +106,7 @@ namespace fc {
         return my->_appenders;
     }
 
+   bool configure_logging( const logging_config& cfg );
+   bool do_default_config      = configure_logging( logging_config::default_config() );
 
 } // namespace fc

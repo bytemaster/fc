@@ -85,5 +85,4 @@ namespace fc {
       cfg.loggers.push_back( dlc );
       return cfg;
    }
-   bool do_default_config      = configure_logging( logging_config::default_config() );
 }

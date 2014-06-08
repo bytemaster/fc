@@ -59,6 +59,12 @@ variant::variant( fc::nullptr_t )
    set_variant_type( this, null_type );
 }
 
+variant::variant( uint32_t val )
+{
+   *reinterpret_cast<int64_t*>(this)  = val;
+   set_variant_type( this, int64_type );
+}
+
 variant::variant( int64_t val )
 {
    *reinterpret_cast<int64_t*>(this)  = val;

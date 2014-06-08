@@ -131,6 +131,7 @@ namespace fc
         variant( const wchar_t* str );
         variant( int val );
         variant( float val );
+        variant( uint32_t val );
         variant( int64_t val );
         variant( uint64_t val );
         variant( double val );

@@ -327,7 +327,7 @@ do { if( !(TEST) ) { FC_THROW_EXCEPTION( fc::assert_exception, #TEST ": "  __VA_
                 std::current_exception() ); \
    }
 
-#define FC_CAPTURE_AND_RETHROW( __VA_ARGS__ ) \
+#define FC_CAPTURE_AND_RETHROW( ... ) \
    catch( fc::exception& er ) { \
       FC_RETHROW_EXCEPTION( er, warn, "", FC_FORMAT_ARG_PARAMS(__VA_ARGS__) ); \
    } catch( const std::exception& e ) {  \

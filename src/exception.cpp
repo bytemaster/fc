@@ -11,6 +11,7 @@ namespace fc
                            (parse_error_exception)
                            (invalid_arg_exception)
                            (invalid_operation_exception)
+                           (unknown_host_exception)
                            (key_not_found_exception)
                            (bad_cast_exception)
                            (out_of_range_exception)

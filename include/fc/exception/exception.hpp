@@ -29,7 +29,8 @@ namespace fc
        assert_exception_code             = 10,
        eof_exception_code                = 11,
        std_exception_code                = 13,
-       invalid_operation_exception_code  = 14
+       invalid_operation_exception_code  = 14,
+       unknown_host_exception_code       = 15
    };
 
    /**
@@ -253,6 +254,10 @@ namespace fc
   FC_DECLARE_EXCEPTION( invalid_operation_exception, 
                         invalid_operation_exception_code, 
                         "Invalid Operation" );
+  /** @brief if an host name can not be resolved this may be thrown */
+  FC_DECLARE_EXCEPTION( unknown_host_exception,
+                         unknown_host_exception_code,
+                         "Unknown Host" );
 
   /**
    *  @brief used to report a canceled Operation

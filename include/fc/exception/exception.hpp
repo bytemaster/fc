@@ -225,7 +225,7 @@ namespace fc
        :exception(c){} \
        TYPE( const exception& c ) \
        :exception(c){} \
-       TYPE():exception(){}\
+       TYPE():exception(CODE, BOOST_PP_STRINGIZE(TYPE), WHAT){}\
        \
        virtual std::shared_ptr<exception> dynamic_copy_exception()const\
        { return std::make_shared<TYPE>( *this ); } \

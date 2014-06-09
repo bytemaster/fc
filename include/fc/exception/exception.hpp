@@ -315,6 +315,70 @@ do { if( !(TEST) ) { FC_THROW_EXCEPTION( fc::assert_exception, #TEST ": "  __VA_
      throw;\
   } while(false)
 
+#define FC_LOG_AND_RETHROW( )  \
+   catch( fc::exception& er ) { \
+      wlog( "${details}", ("details",er.to_detail_string()) ); \
+      FC_RETHROW_EXCEPTION( er, warn, "rethrow" ); \
+   } catch( const std::exception& e ) {  \
+      fc::exception fce( \
+                FC_LOG_MESSAGE( warn, "rethrow ${what}", ("what",e.what())), \
+                fc::std_exception_code,\
+                typeid(e).name(), \
+                e.what() ) ; \
+      wlog( "${details}", ("details",fce.to_detail_string()) ); \
+      throw fce;\
+   } catch( ... ) {  \
+      fc::unhandled_exception e( \
+                FC_LOG_MESSAGE( warn, "rethrow"), \
+                std::current_exception() ); \
+      wlog( "${details}", ("details",e.to_detail_string()) ); \
+      throw e; \
+   }
+
+#define FC_CAPTURE_LOG_AND_RETHROW( ... )  \
+   catch( fc::exception& er ) { \
+      wlog( "${details}", ("details",er.to_detail_string()) ); \
+      wdump( __VA_ARGS__ ); \
+      FC_RETHROW_EXCEPTION( er, warn, "rethrow", FC_FORMAT_ARG_PARAMS(__VA_ARGS__) ); \
+   } catch( const std::exception& e ) {  \
+      fc::exception fce( \
+                FC_LOG_MESSAGE( warn, "rethrow ${what}", FC_FORMAT_ARG_PARAMS( __VA_ARGS__ )("what",e.what())), \
+                fc::std_exception_code,\
+                typeid(e).name(), \
+                e.what() ) ; \
+      wlog( "${details}", ("details",fce.to_detail_string()) ); \
+      wdump( __VA_ARGS__ ); \
+      throw fce;\
+   } catch( ... ) {  \
+      fc::unhandled_exception e( \
+                FC_LOG_MESSAGE( warn, "rethrow", FC_FORMAT_ARG_PARAMS( __VA_ARGS__) ), \
+                std::current_exception() ); \
+      wlog( "${details}", ("details",e.to_detail_string()) ); \
+      wdump( __VA_ARGS__ ); \
+      throw e; \
+   }
+
+#define FC_CAPTURE_AND_LOG( ... )  \
+   catch( fc::exception& er ) { \
+      wlog( "${details}", ("details",er.to_detail_string()) ); \
+      wdump( __VA_ARGS__ ); \
+   } catch( const std::exception& e ) {  \
+      fc::exception fce( \
+                FC_LOG_MESSAGE( warn, "rethrow ${what} ",FC_FORMAT_ARG_PARAMS( __VA_ARGS__  )("what",e.what()) ), \
+                fc::std_exception_code,\
+                typeid(e).name(), \
+                e.what() ) ; \
+      wlog( "${details}", ("details",fce.to_detail_string()) ); \
+      wdump( __VA_ARGS__ ); \
+   } catch( ... ) {  \
+      fc::unhandled_exception e( \
+                FC_LOG_MESSAGE( warn, "rethrow", FC_FORMAT_ARG_PARAMS( __VA_ARGS__) ), \
+                std::current_exception() ); \
+      wlog( "${details}", ("details",e.to_detail_string()) ); \
+      wdump( __VA_ARGS__ ); \
+   }
+
+
 /**
  *  @def FC_RETHROW_EXCEPTIONS(LOG_LEVEL,FORMAT,...)
  *  @brief  Catchs all exception's, std::exceptions, and ... and rethrows them after

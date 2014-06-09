@@ -217,6 +217,12 @@ namespace fc
        enum code_enum { \
           code_value = CODE, \
        }; \
+       explicit TYPE( int64_t code, const std::string& name_value, const std::string& what_value ) \
+       :BASE( code, name_value, what_value ){} \
+       explicit TYPE( fc::log_message&& m, int64_t code, const std::string& name_value, const std::string& what_value ) \
+       :BASE( std::move(m), code, name_value, what_value ){} \
+       explicit TYPE( fc::log_messages&& m, int64_t code, const std::string& name_value, const std::string& what_value )\
+       :BASE( std::move(m), code, name_value, what_value ){}\
        TYPE( fc::log_message&& m ) \
        :BASE( fc::move(m), CODE, BOOST_PP_STRINGIZE(TYPE), WHAT ){}\
        TYPE( fc::log_messages msgs ) \
@@ -225,13 +231,13 @@ namespace fc
        :BASE(c){} \
        TYPE( const BASE& c ) \
        :BASE(c){} \
-       TYPE():BASE(CODE, BOOST_PP_STRINGIZE(TYPE), WHAT){}\
+       TYPE():exception(CODE, BOOST_PP_STRINGIZE(TYPE), WHAT){}\
        \
-       virtual std::shared_ptr<exception> dynamic_copy_exception()const\
+       virtual std::shared_ptr<fc::exception> dynamic_copy_exception()const\
        { return std::make_shared<TYPE>( *this ); } \
        virtual NO_RETURN void     dynamic_rethrow_exception()const \
        { if( code() == CODE ) throw *this;\
-         else BASE::dynamic_rethrow_exception(); \
+         else fc::exception::dynamic_rethrow_exception(); \
        } \
    };
    

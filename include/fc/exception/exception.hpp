@@ -210,31 +210,33 @@ namespace fc
    }();  \
 
 
-#define FC_DECLARE_EXCEPTION( TYPE, CODE, WHAT ) \
-   class TYPE : public fc::exception \
+#define FC_DECLARE_DERIVED_EXCEPTION( TYPE, BASE, CODE, WHAT ) \
+   class TYPE : public BASE  \
    { \
       public: \
        enum code_enum { \
           code_value = CODE, \
        }; \
        TYPE( fc::log_message&& m ) \
-       :exception( fc::move(m), CODE, BOOST_PP_STRINGIZE(TYPE), WHAT ){}\
+       :BASE( fc::move(m), CODE, BOOST_PP_STRINGIZE(TYPE), WHAT ){}\
        TYPE( fc::log_messages msgs ) \
-       :exception( fc::move( msgs ), CODE, BOOST_PP_STRINGIZE(TYPE), WHAT ) {} \
+       :BASE( fc::move( msgs ), CODE, BOOST_PP_STRINGIZE(TYPE), WHAT ) {} \
        TYPE( const TYPE& c ) \
-       :exception(c){} \
-       TYPE( const exception& c ) \
-       :exception(c){} \
-       TYPE():exception(CODE, BOOST_PP_STRINGIZE(TYPE), WHAT){}\
+       :BASE(c){} \
+       TYPE( const BASE& c ) \
+       :BASE(c){} \
+       TYPE():BASE(CODE, BOOST_PP_STRINGIZE(TYPE), WHAT){}\
        \
        virtual std::shared_ptr<exception> dynamic_copy_exception()const\
        { return std::make_shared<TYPE>( *this ); } \
        virtual NO_RETURN void     dynamic_rethrow_exception()const \
        { if( code() == CODE ) throw *this;\
-         else fc::exception::dynamic_rethrow_exception(); \
+         else BASE::dynamic_rethrow_exception(); \
        } \
    };
    
+  #define FC_DECLARE_EXCEPTION( TYPE, CODE, WHAT ) \
+      FC_DECLARE_DERIVED_EXCEPTION( TYPE, fc::exception, CODE, WHAT )
 
   FC_DECLARE_EXCEPTION( timeout_exception, timeout_exception_code, "Timeout" );
   FC_DECLARE_EXCEPTION( file_not_found_exception, file_not_found_exception_code, "File Not Found" );

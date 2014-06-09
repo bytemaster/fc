@@ -327,7 +327,7 @@ do { if( !(TEST) ) { FC_THROW_EXCEPTION( fc::assert_exception, #TEST ": "  __VA_
       FC_RETHROW_EXCEPTION( er, warn, "rethrow" ); \
    } catch( const std::exception& e ) {  \
       fc::exception fce( \
-                FC_LOG_MESSAGE( warn, "rethrow ${what}", ("what",e.what())), \
+                FC_LOG_MESSAGE( warn, "rethrow ${what}: ", ("what",e.what())), \
                 fc::std_exception_code,\
                 typeid(e).name(), \
                 e.what() ) ; \
@@ -348,7 +348,7 @@ do { if( !(TEST) ) { FC_THROW_EXCEPTION( fc::assert_exception, #TEST ": "  __VA_
       FC_RETHROW_EXCEPTION( er, warn, "rethrow", FC_FORMAT_ARG_PARAMS(__VA_ARGS__) ); \
    } catch( const std::exception& e ) {  \
       fc::exception fce( \
-                FC_LOG_MESSAGE( warn, "rethrow ${what}", FC_FORMAT_ARG_PARAMS( __VA_ARGS__ )("what",e.what())), \
+                FC_LOG_MESSAGE( warn, "rethrow ${what}: ", FC_FORMAT_ARG_PARAMS( __VA_ARGS__ )("what",e.what())), \
                 fc::std_exception_code,\
                 typeid(e).name(), \
                 e.what() ) ; \
@@ -370,7 +370,7 @@ do { if( !(TEST) ) { FC_THROW_EXCEPTION( fc::assert_exception, #TEST ": "  __VA_
       wdump( __VA_ARGS__ ); \
    } catch( const std::exception& e ) {  \
       fc::exception fce( \
-                FC_LOG_MESSAGE( warn, "rethrow ${what} ",FC_FORMAT_ARG_PARAMS( __VA_ARGS__  )("what",e.what()) ), \
+                FC_LOG_MESSAGE( warn, "rethrow ${what}: ",FC_FORMAT_ARG_PARAMS( __VA_ARGS__  )("what",e.what()) ), \
                 fc::std_exception_code,\
                 typeid(e).name(), \
                 e.what() ) ; \
@@ -395,7 +395,7 @@ do { if( !(TEST) ) { FC_THROW_EXCEPTION( fc::assert_exception, #TEST ": "  __VA_
       FC_RETHROW_EXCEPTION( er, LOG_LEVEL, FORMAT, __VA_ARGS__ ); \
    } catch( const std::exception& e ) {  \
       fc::exception fce( \
-                FC_LOG_MESSAGE( LOG_LEVEL, "${what}" FORMAT,__VA_ARGS__("what",e.what())), \
+                FC_LOG_MESSAGE( LOG_LEVEL, "${what}: " FORMAT,__VA_ARGS__("what",e.what())), \
                 fc::std_exception_code,\
                 typeid(e).name(), \
                 e.what() ) ; throw fce;\
@@ -410,7 +410,7 @@ do { if( !(TEST) ) { FC_THROW_EXCEPTION( fc::assert_exception, #TEST ": "  __VA_
       FC_RETHROW_EXCEPTION( er, warn, "", FC_FORMAT_ARG_PARAMS(__VA_ARGS__) ); \
    } catch( const std::exception& e ) {  \
       fc::exception fce( \
-                FC_LOG_MESSAGE( warn, "${what}",FC_FORMAT_ARG_PARAMS(__VA_ARGS__)("what",e.what())), \
+                FC_LOG_MESSAGE( warn, "${what}: ",FC_FORMAT_ARG_PARAMS(__VA_ARGS__)("what",e.what())), \
                 fc::std_exception_code,\
                 typeid(e).name(), \
                 e.what() ) ; throw fce;\

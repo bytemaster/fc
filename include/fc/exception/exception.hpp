@@ -3,7 +3,7 @@
  *  @file exception.hpp
  *  @brief Defines exception's used by fc 
  */
-#include <fc/log/log_message.hpp>
+#include <fc/log/logger.hpp>
 #include <fc/optional.hpp>
 #include <exception>
 #include <unordered_map>

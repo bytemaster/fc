@@ -231,7 +231,7 @@ namespace fc
        :BASE(c){} \
        TYPE( const BASE& c ) \
        :BASE(c){} \
-       TYPE():exception(CODE, BOOST_PP_STRINGIZE(TYPE), WHAT){}\
+       TYPE():BASE(CODE, BOOST_PP_STRINGIZE(TYPE), WHAT){}\
        \
        virtual std::shared_ptr<fc::exception> dynamic_copy_exception()const\
        { return std::make_shared<TYPE>( *this ); } \

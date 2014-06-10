@@ -128,7 +128,7 @@ namespace fc
    string exception::to_detail_string( log_level ll  )const
    {
       fc::stringstream ss;
-      ss << variant(my->_code).as_string() <<"\n";
+      ss << variant(my->_code).as_string() <<" " << my->_name << ": " <<my->_what<<"\n";
       for( auto itr = my->_elog.begin(); itr != my->_elog.end();  )
       {
          ss << itr->get_message() <<"\n"; //fc::format_string( itr->get_format(), itr->get_data() ) <<"\n";

@@ -3,8 +3,10 @@
 #include <fc/network/resolve.hpp>
 #include <fc/network/ip.hpp>
 
-#ifdef _WIN32
+#if defined(_WIN32)
 # include <WinSock2.h> // for ntohl()
+#elif defined(__linux__)
+# include <arpa/inet.h>
 #endif
 
 #include <array>

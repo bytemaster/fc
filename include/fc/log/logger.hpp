@@ -131,8 +131,10 @@ namespace fc
 #define FC_FORMAT( SEQ )\
     BOOST_PP_SEQ_FOR_EACH( FC_FORMAT_ARG, v, SEQ ) 
 
-#define FC_FORMAT_ARG_PARAMS( SEQ )\
-    BOOST_PP_SEQ_FOR_EACH( FC_FORMAT_ARGS, v, SEQ ) 
+// takes a ... instead of a SEQ arg because it can be called with an empty SEQ 
+// from FC_CAPTURE_AND_THROW()
+#define FC_FORMAT_ARG_PARAMS( ... )\
+    BOOST_PP_SEQ_FOR_EACH( FC_FORMAT_ARGS, v, __VA_ARGS__ ) 
 
 #define idump( SEQ ) \
     ilog( FC_FORMAT(SEQ), FC_FORMAT_ARG_PARAMS(SEQ) )  

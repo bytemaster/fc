@@ -297,10 +297,12 @@ namespace fc
    do { throw EXCEPTION_TYPE( FC_LOG_MESSAGE( error, "", FC_FORMAT_ARG_PARAMS(__VA_ARGS__) ) ); } while(false);
 
 //#define FC_THROW( FORMAT, ... ) 
-
+// FC_INDIRECT_EXPAND workas around a bug in Visual C++ variadic macro processing that prevents it
+// from separating __VA_ARGS__ into separate tokens
+#define FC_INDIRECT_EXPAND(MACRO, ARGS) MACRO ARGS
 #define FC_THROW(  ... ) \
    do { \
-   throw fc::exception( FC_LOG_MESSAGE( error, __VA_ARGS__ ) );  \
+   throw fc::exception( FC_INDIRECT_EXPAND(FC_LOG_MESSAGE, ( error, __VA_ARGS__ )) );  \
    } while(0)
 
 #define FC_EXCEPTION( EXCEPTION_TYPE, FORMAT, ... ) \

@@ -19,11 +19,12 @@ namespace fc
 
   fc::time_point ntp::get_time()
   {
-     static bool init_ntp_server = [](){
+     static bool init_ntp_server = false;
+     if( !init_ntp_server )
+     {
         set_server( "pool.ntp.org", 123 );
-        return true;
-     }();
-     (void)init_ntp_server;
+        init_ntp_server = true;
+     }
 
      udp_socket sock;
      sock.open();

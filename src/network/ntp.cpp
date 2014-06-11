@@ -3,6 +3,10 @@
 #include <fc/network/resolve.hpp>
 #include <fc/network/ip.hpp>
 
+#ifdef _WIN32
+# include <WinSock2.h> // for ntohl()
+#endif
+
 #include <array>
 
 namespace fc

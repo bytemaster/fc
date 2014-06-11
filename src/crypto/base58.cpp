@@ -609,6 +609,12 @@ std::string to_base58( const char* d, size_t s ) {
   return EncodeBase58( (const unsigned char*)d, (const unsigned char*)d+s ).c_str();
 }
 
+std::string to_base58( const std::vector<char>& d )
+{
+  if( d.size() )
+     return to_base58( d.data(), d.size() );
+  return std::string();
+}
 std::vector<char> from_base58( const std::string& base58_str ) {
    std::vector<unsigned char> out;
    if( !DecodeBase58( base58_str.c_str(), out ) ) {

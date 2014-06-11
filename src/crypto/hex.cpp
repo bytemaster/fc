@@ -39,5 +39,11 @@ namespace fc {
         }
         return out_pos - (uint8_t*)out_data;
     }
+    std::string to_hex( const std::vector<char>& data )
+    {
+       if( data.size() )
+          return to_hex( data.data(), data.size() );
+       return "";
+    }
 
 }

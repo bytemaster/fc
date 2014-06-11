@@ -148,6 +148,7 @@ set( fc_sources
      src/network/udp_socket.cpp
      src/network/http/http_connection.cpp
      src/network/http/http_server.cpp
+     src/network/ntp.cpp
      src/network/ip.cpp
      src/network/rate_limiting.cpp
      src/network/resolve.cpp
@@ -213,6 +214,9 @@ target_include_directories(fc
   )
 
 target_link_libraries( fc PUBLIC easylzma_static ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} ${ZLIB_LIBRARIES} ${CMAKE_DL_LIBS})
+
+add_executable( ntp_test ntp_test.cpp )
+target_link_libraries( ntp_test fc )
 
 #add_executable( test_compress tests/compress.cpp )
 #target_link_libraries( test_compress fc )

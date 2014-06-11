@@ -3,11 +3,8 @@
 #include <fc/network/resolve.hpp>
 #include <fc/network/ip.hpp>
 
-#if defined(_WIN32)
-# include <WinSock2.h> // for ntohl()
-#elif defined(__linux__)
-# include <arpa/inet.h>
-#endif
+#include <stdint.h>
+#include "../byteswap.hpp"
 
 #include <array>
 
@@ -40,10 +37,17 @@ namespace fc
      sock.send_to( (const char*)send_buf.data(), send_buf.size(), ntp_server );
 
      fc::ip::endpoint from;
-     std::array<unsigned long, 1024> recv_buf;
+     std::array<uint64_t, 1024> recv_buf;
      sock.receive_from( (char*)recv_buf.data(), recv_buf.size(), from );
 
-     return fc::time_point() + fc::seconds( ntohl((time_t)recv_buf[4]) - 2208988800U);
+     uint64_t receive_timestamp_net_order = recv_buf[4];
+     uint64_t receive_timestamp_host = bswap_64(receive_timestamp_net_order);
+     uint32_t fractional_seconds = receive_timestamp_host & 0xffffffff;
+     uint32_t microseconds = (uint32_t)(((((uint64_t)fractional_seconds) * 1000000) + (UINT64_C(1)<<31)) >> 32);
+     uint32_t seconds_since_1900 = receive_timestamp_host >> 32;
+     uint32_t seconds_since_epoch = seconds_since_1900 - 2208988800;
+
+     return fc::time_point() + fc::seconds(seconds_since_epoch) + fc::microseconds(microseconds);
   }
 
 }

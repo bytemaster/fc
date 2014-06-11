@@ -2,11 +2,7 @@
 #include <fc/variant.hpp>
 #include <fc/crypto/bigint.hpp>
 #include <stdexcept>
-#ifdef WIN32
-#include <WinSock2.h>
-#else
-#include <arpa/inet.h>
-#endif
+#include "byteswap.hpp"
 
 namespace fc 
 {
@@ -118,10 +114,9 @@ namespace fc
     }
 
 
-    #define bswap64(y) (((uint64_t)ntohl(y)) << 32 | ntohl(y>>32))
     uint128::operator bigint()const
     {
-       auto tmp  = uint128( bswap64( hi ), bswap64( lo ) );
+       auto tmp  = uint128( bswap_64( hi ), bswap_64( lo ) );
        bigint bi( (char*)&tmp, sizeof(tmp) );
        return bi;
     }

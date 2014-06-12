@@ -27,16 +27,27 @@ namespace fc {
 #endif
    };
 
-   console_appender::console_appender( const variant& args ) : 
-     my(new impl)
+   console_appender::console_appender( const variant& args ) 
+   :my(new impl)
    {
+      configure( args.as<config>() );
+   }
+
+   console_appender::console_appender( const config& cfg )
+   :my(new impl)
+   {
+      configure( cfg );
+   }
+   console_appender::console_appender()
+   :my(new impl){}
+
+
+   void console_appender::configure( const config& console_appender_config )
+   { try {
 #ifdef WIN32
       my->console_handle = INVALID_HANDLE_VALUE;
 #endif
-      try
-      {
-         my->cfg = args.as<config>();//fc::variant_cast<config>(args);
-
+      my->cfg = console_appender_config;
 #ifdef WIN32
          if (my->cfg.stream = stream::std_error)
            my->console_handle = GetStdHandle(STD_ERROR_HANDLE);
@@ -48,13 +59,7 @@ namespace fc {
             my->lc[i] = color::console_default;
          for( auto itr = my->cfg.level_colors.begin(); itr != my->cfg.level_colors.end(); ++itr )
             my->lc[itr->level] = itr->color;
-      } 
-      catch ( exception& e )
-      {
-         fc::cerr<<e.to_detail_string()<<"\n";
-         throw;
-      }
-   }
+   } FC_CAPTURE_AND_RETHROW( (console_appender_config) ) }
 
    console_appender::~console_appender() {}
 
@@ -113,19 +118,29 @@ namespace fc {
       line << "] ";
       fc::string message = fc::format_string( m.get_format(), m.get_data() );
       line << message;//.c_str();
-      //
-      //
-
 
       fc::unique_lock<boost::mutex> lock(log_mutex());
+
+      print( line.str(), my->lc[m.get_context().get_log_level()] );
+
+      fprintf( out, "\n" );
+
+      if( my->cfg.flush ) fflush( out );
+   }
+
+   void console_appender::print( const std::string& text, color::type text_color )
+   {
+      FILE* out = stream::std_error ? stderr : stdout;
+
       #ifdef WIN32
-      if (my->console_handle != INVALID_HANDLE_VALUE)
-        SetConsoleTextAttribute(my->console_handle, get_console_color( my->lc[m.get_context().get_log_level()] ));
+         if (my->console_handle != INVALID_HANDLE_VALUE)
+           SetConsoleTextAttribute(my->console_handle, get_console_color(text_color));
       #else
-      if(isatty(fileno(out))) fprintf( out, "\r%s", get_console_color( my->lc[m.get_context().get_log_level()] ) );
+         if(isatty(fileno(out))) fprintf( out, "\r%s", get_console_color( text_color ) );
       #endif
 
-      fprintf( out, "%s", line.str().c_str()); //fmt_str.c_str() ); 
+      if( text.size() )
+         fprintf( out, "%s", text.c_str() ); //fmt_str.c_str() ); 
 
       #ifdef WIN32
       if (my->console_handle != INVALID_HANDLE_VALUE)
@@ -133,7 +148,7 @@ namespace fc {
       #else
       if(isatty(fileno(out))) fprintf( out, "\r%s", CONSOLE_DEFAULT );
       #endif
-      fprintf( out, "\n" );
+
       if( my->cfg.flush ) fflush( out );
    }
 

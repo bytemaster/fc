@@ -9,6 +9,7 @@ namespace fc {
 # pragma warning(disable:4521)  /* multiple copy ctors */
 # pragma warning(disable:4522) /* multiple assignment operators */
 #endif
+  bool assert_optional(bool is_valid ); // defined in exception.cpp
 
   /**
    *  @brief provides stack-based nullable value similar to boost::optional
@@ -188,17 +189,17 @@ namespace fc {
       // casts and comparisons, use valid() or !! 
       explicit operator bool()const  { return _valid;  }
 
-      T&       operator*()      { assert(_valid); return ref(); }
-      const T& operator*()const { assert(_valid); return ref(); }
+      T&       operator*()      { assert(assert_optional(_valid)); return ref(); }
+      const T& operator*()const { assert(assert_optional(_valid)); return ref(); }
 
       T*       operator->()      
       { 
-         assert( _valid );
+         assert( assert_optional(_valid) );
          return ptr(); 
       }
       const T* operator->()const 
       { 
-         assert( _valid );
+         assert( assert_optional(_valid) );
          return ptr(); 
       }
 

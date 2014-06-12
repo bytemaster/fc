@@ -11,13 +11,14 @@ namespace fc
                            (parse_error_exception)
                            (invalid_arg_exception)
                            (invalid_operation_exception)
-                           (unknown_host_exception)
                            (key_not_found_exception)
                            (bad_cast_exception)
                            (out_of_range_exception)
                            (canceled_exception)
                            (assert_exception)
                            (eof_exception)
+                           (unknown_host_exception)
+                           (null_optional)
                          )
 
    namespace detail
@@ -193,6 +194,13 @@ namespace fc
       FC_THROW_EXCEPTION( bad_cast_exception, 
                           "invalid name '${key}' in enum '${enum}'", 
                           ("key",k)("enum",e) );
+   }
+
+   bool assert_optional(bool is_valid )
+   {
+      if( !is_valid )
+         throw null_optional();
+      return true;
    }
 
 } // fc

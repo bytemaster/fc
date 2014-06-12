@@ -30,7 +30,8 @@ namespace fc
        eof_exception_code                = 11,
        std_exception_code                = 13,
        invalid_operation_exception_code  = 14,
-       unknown_host_exception_code       = 15
+       unknown_host_exception_code       = 15,
+       null_optional_code                = 16
    };
 
    /**
@@ -276,6 +277,7 @@ namespace fc
    */
   FC_DECLARE_EXCEPTION( assert_exception, assert_exception_code, "Assert Exception" );
   FC_DECLARE_EXCEPTION( eof_exception, eof_exception_code, "End Of File" );
+  FC_DECLARE_EXCEPTION( null_optional, null_optional_code, "null optional" );
 
   std::string except_str();
 

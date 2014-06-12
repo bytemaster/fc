@@ -21,7 +21,7 @@ namespace fc {
       bigint& operator = ( const bigint& a );
       bigint& operator = ( bigint&& a );
 
-      operator bool()const;
+      explicit operator bool()const;
 
       bool    is_negative()const;
       int64_t to_int64()const;

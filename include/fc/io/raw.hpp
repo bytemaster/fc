@@ -16,6 +16,42 @@
 namespace fc { 
     namespace raw {
     template<typename Stream>
+    inline void pack( Stream& s, const fc::exception& e )
+    {
+       fc::raw::pack( s, e.code() );
+       fc::raw::pack( s, std::string(e.name()) );
+       fc::raw::pack( s, std::string(e.what()) );
+       fc::raw::pack( s, e.get_log() );
+    }
+    template<typename Stream>
+    inline void unpack( Stream& s, fc::exception& e )
+    {
+       int64_t code;
+       std::string name, what;
+       log_messages msgs;
+
+       fc::raw::unpack( s, code );
+       fc::raw::unpack( s, name );
+       fc::raw::unpack( s, what );
+       fc::raw::unpack( s, msgs );
+
+       e = fc::exception( fc::move(msgs), code, name, what );
+    }
+
+    template<typename Stream>
+    inline void pack( Stream& s, const fc::log_message& msg )
+    {
+       fc::raw::pack( s, variant(msg) );
+    }
+    template<typename Stream>
+    inline void unpack( Stream& s, fc::log_message& msg )
+    {
+       fc::variant vmsg;
+       fc::raw::unpack( s, vmsg );
+       msg = vmsg.as<log_message>();
+    }
+
+    template<typename Stream>
     inline void pack( Stream& s, const fc::path& tp )
     {
        fc::raw::pack( s, tp.generic_string() );

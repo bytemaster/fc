@@ -3,6 +3,7 @@
 #include <vector>
 namespace fc {
   class value;
+  class exception;
   template<typename T> class get_typename{};
   template<> struct get_typename<int32_t>  { static const char* name()  { return "int32_t";  } };
   template<> struct get_typename<int64_t>  { static const char* name()  { return "int64_t";  } };
@@ -18,7 +19,8 @@ namespace fc {
   template<> struct get_typename<char>     { static const char* name()  { return "char";     } };
   template<> struct get_typename<void>     { static const char* name()  { return "char";     } };
   template<> struct get_typename<string>   { static const char* name()  { return "string";   } };
-  template<> struct get_typename<value>   { static const char* name()   { return "value";   } };
+  template<> struct get_typename<value>    { static const char* name()   { return "value";   } };
+  template<> struct get_typename<fc::exception>   { static const char* name()   { return "fc::exception";   } };
   template<> struct get_typename<std::vector<char>>   { static const char* name()   { return "std::vector<char>";   } };
 
   struct signed_int;

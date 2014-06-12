@@ -110,6 +110,9 @@ namespace fc
 
          friend void to_variant( const exception& e, variant& v );
          friend void from_variant( const variant& e, exception& ll );
+
+         exception& operator=( const exception& copy );
+         exception& operator=( exception&& copy );
       protected:
          std::unique_ptr<detail::exception_impl> my;
    };

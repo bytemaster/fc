@@ -32,6 +32,16 @@ namespace fc
             log_messages    _elog;
       };
    }
+   exception::exception( log_messages&& msgs, int64_t code,
+                                    const std::string& name_value, 
+                                    const std::string& what_value )
+   :my( new detail::exception_impl() )
+   {
+      my->_code = code;
+      my->_what = what_value;
+      my->_name = name_value;
+      my->_elog = fc::move(msgs);
+   }
 
    unhandled_exception::unhandled_exception( log_message&& m, std::exception_ptr e ) 
    :exception( fc::move(m) ) 
@@ -201,6 +211,17 @@ namespace fc
       if( !is_valid )
          throw null_optional();
       return true;
+   }
+   exception& exception::operator=( const exception& copy )
+   {
+      *my = *copy.my;
+      return *this;
+   }
+
+   exception& exception::operator=( exception&& copy )
+   {
+      my = std::move(copy.my);
+      return *this;
    }
 
 } // fc

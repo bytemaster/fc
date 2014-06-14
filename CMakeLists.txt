@@ -213,10 +213,10 @@ target_include_directories(fc
     ${CMAKE_CURRENT_SOURCE_DIR}/vendor/easylzma/src
   )
 
-target_link_libraries( fc PUBLIC easylzma_static ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} ${ZLIB_LIBRARIES} ${CMAKE_DL_LIBS})
+target_link_libraries( fc PUBLIC easylzma_static ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} ${ZLIB_LIBRARIES} ${CMAKE_DL_LIBS} ${rt_library})
 
 add_executable( ntp_test ntp_test.cpp )
-target_link_libraries( ntp_test fc ${rt_library} )
+target_link_libraries( ntp_test fc )
 
 #add_executable( test_compress tests/compress.cpp )
 #target_link_libraries( test_compress fc )

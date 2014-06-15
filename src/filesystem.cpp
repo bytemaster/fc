@@ -16,7 +16,6 @@
 #else
   #include <sys/types.h>
   #include <pwd.h>
-  #include <uuid/uuid.h>
 #endif
 
 namespace fc {

@@ -43,45 +43,47 @@ namespace fc {
   }
 
   // inspired by show_date_relative() in git's date.c
-  string get_approximate_relative_time_string(const time_point_sec& event_time) {
-    time_point_sec now_in_sec(time_point::now());
-    if (event_time > now_in_sec)
+  string get_approximate_relative_time_string(const time_point_sec& event_time, 
+                                              const time_point_sec& relative_to_time /* = fc::time_point::now() */, 
+                                              const std::string& ago /* = " ago" */) {
+    
+    if (event_time > relative_to_time)
       return "in the future";
     stringstream result;
-    uint32_t seconds_ago = now_in_sec.sec_since_epoch() - event_time.sec_since_epoch();
+    uint32_t seconds_ago = relative_to_time.sec_since_epoch() - event_time.sec_since_epoch();
     if (seconds_ago < 90)
     {
-      result << seconds_ago << " second" << (seconds_ago > 1 ? "s" : "") << " ago";
+      result << seconds_ago << " second" << (seconds_ago > 1 ? "s" : "") << ago;
       return result.str();
     }
     uint32_t minutes_ago = (seconds_ago + 30) / 60;
     if (minutes_ago < 90)
     {
-      result << minutes_ago << " minute" << (minutes_ago > 1 ? "s" : "") << " ago";
+      result << minutes_ago << " minute" << (minutes_ago > 1 ? "s" : "") << ago;
       return result.str();
     }
     uint32_t hours_ago = (minutes_ago + 30) / 60;
     if (hours_ago < 90)
     {
-      result << hours_ago << " hour" << (hours_ago > 1 ? "s" : "") << " ago";
+      result << hours_ago << " hour" << (hours_ago > 1 ? "s" : "") << ago;
       return result.str();
     }
     uint32_t days_ago = (hours_ago + 12) / 24;
     if (days_ago < 90)
     {
-      result << days_ago << " day" << (days_ago > 1 ? "s" : "") << " ago";
+      result << days_ago << " day" << (days_ago > 1 ? "s" : "") << ago;
       return result.str();
     }
     uint32_t weeks_ago = (days_ago + 3) / 7;
     if (weeks_ago < 70)
     {
-      result << weeks_ago << " week" << (weeks_ago > 1 ? "s" : "") << " ago";
+      result << weeks_ago << " week" << (weeks_ago > 1 ? "s" : "") << ago;
       return result.str();
     }
     uint32_t months_ago = (days_ago + 15) / 30;
     if (months_ago < 12)
     {
-      result << months_ago << " month" << (months_ago > 1 ? "s" : "") << " ago";
+      result << months_ago << " month" << (months_ago > 1 ? "s" : "") << ago;
       return result.str();
     }
     uint32_t years_ago = days_ago / 365;
@@ -93,11 +95,13 @@ namespace fc {
       if (leftover_months)
         result << leftover_months <<  " month" << (months_ago > 1 ? "s" : "");
     }
-    result << " ago";
+    result << ago;
     return result.str();
   }
-  string get_approximate_relative_time_string(const time_point& event_time) {
-    return get_approximate_relative_time_string(time_point_sec(event_time));
+  string get_approximate_relative_time_string(const time_point& event_time, 
+                                              const time_point& relative_to_time /* = fc::time_point::now() */, 
+                                              const std::string& ago /* = " ago" */) {
+    return get_approximate_relative_time_string(time_point_sec(event_time), time_point_sec(relative_to_time), ago);
   }
 
   void to_variant( const microseconds& input_microseconds,  variant& output_variant )

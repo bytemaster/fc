@@ -117,8 +117,12 @@ namespace fc {
   /** return a human-readable approximate time, relative to now()
    * e.g., "4 hours ago", "2 months ago", etc.
    */
-  string get_approximate_relative_time_string(const time_point_sec& event_time);
-  string get_approximate_relative_time_string(const time_point& event_time);
+  string get_approximate_relative_time_string(const time_point_sec& event_time, 
+                                              const time_point_sec& relative_to_time = fc::time_point::now(), 
+                                              const std::string& ago = " ago");
+  string get_approximate_relative_time_string(const time_point& event_time,
+                                              const time_point_sec& relative_to_time = fc::time_point::now(), 
+                                              const std::string& ago = " ago");
 }
 
 #include <fc/reflect/reflect.hpp>

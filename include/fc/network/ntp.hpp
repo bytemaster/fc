@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <memory>
 #include <fc/time.hpp>
 #include <fc/optional.hpp>
 

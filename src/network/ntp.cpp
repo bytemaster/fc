@@ -2,6 +2,7 @@
 #include <fc/network/udp_socket.hpp>
 #include <fc/network/resolve.hpp>
 #include <fc/network/ip.hpp>
+#include <fc/thread/thread.hpp>
 
 #include <stdint.h>
 #include "../byteswap.hpp"
@@ -10,44 +11,133 @@
 
 namespace fc
 {
-  static fc::ip::endpoint ntp_server;
+  namespace detail {
+
+     class ntp_impl 
+     {
+        public:
+           ntp_impl() :_request_interval_sec( 60*60 /* 1 hr */) 
+           { 
+              _ntp_hosts.push_back( std::make_pair( "pool.ntp.org",123 ) );
+           } 
+
+           /** vector < host, port >  */
+           std::vector< std::pair< std::string, uint16_t> > _ntp_hosts;
+           fc::future<void>                                 _request_loop;
+           fc::future<void>                                 _read_loop;
+           udp_socket                                       _sock;
+           uint32_t                                         _request_interval_sec;
+           fc::time_point                                   _next_request_time;
+           optional<fc::microseconds>                       _last_ntp_delta;
+
+           void request_now()
+           {
+               for( auto item : _ntp_hosts )
+               {
+                  try 
+                  {
+                     ilog( "resolving... ${r}", ("r", item) );
+                     auto eps = resolve( item.first, item.second );
+                     for( auto ep : eps )
+                     {
+                        ilog( "sending request to ${ep}", ("ep",ep) );
+                        std::array<unsigned char, 48> send_buf { {010,0,0,0,0,0,0,0,0} };
+                        _sock.send_to( (const char*)send_buf.data(), send_buf.size(), ep );
+                     }
+                  } 
+                  // this could fail to resolve but we want to go on to other hosts..
+                  catch ( const fc::exception& e )
+                  {
+                      elog(  "${e}", ("e",e.to_detail_string() ) ); 
+                  }
+               }
+           } // request_now
+
+           void request_loop()
+           {
+              while( !_request_loop.canceled() )
+              { 
+                  if( _next_request_time < fc::time_point::now() )
+                  {
+                     _next_request_time += fc::seconds( _request_interval_sec );
+                     request_now();
+                  }
+                  fc::usleep( fc::seconds(1) ); // TODO: fix FC timers..
+              } // while
+           } // request_loop
+
+           void read_loop()
+           {
+              while( !_read_loop.canceled() )
+              {
+                 fc::ip::endpoint from;
+                 std::array<uint64_t, 1024> recv_buf;
+                 _sock.receive_from( (char*)recv_buf.data(), recv_buf.size(), from );
+
+                 uint64_t receive_timestamp_net_order = recv_buf[4];
+                 uint64_t receive_timestamp_host = bswap_64(receive_timestamp_net_order);
+                 uint32_t fractional_seconds = receive_timestamp_host & 0xffffffff;
+                 uint32_t microseconds = (uint32_t)(((((uint64_t)fractional_seconds) * 1000000) + (UINT64_C(1)<<31)) >> 32);
+                 uint32_t seconds_since_1900 = receive_timestamp_host >> 32;
+                 uint32_t seconds_since_epoch = seconds_since_1900 - 2208988800;
+
+                 auto ntp_time = (fc::time_point() + fc::seconds(seconds_since_epoch) + fc::microseconds(microseconds));
+                 _last_ntp_delta =  ntp_time - fc::time_point::now();
+              }
+           } // read_loop
+     };
+
+  } // namespace detail
 
 
-  void ntp::set_server( const std::string& hostname, uint16_t port  )
+
+
+  ntp::ntp()
+  :my( new detail::ntp_impl() )
   {
-     auto eps = resolve( hostname, port );
-     if(  eps.size() )
-        ntp_server = eps.front();
+     my->_sock.open();
+
+     my->_request_loop = fc::async( [=](){ my->request_loop(); } );
+     my->_read_loop    = fc::async( [=](){ my->read_loop(); } );
   }
 
-  fc::time_point ntp::get_time()
+  ntp::~ntp()
   {
-     static bool init_ntp_server = false;
-     if( !init_ntp_server )
-     {
-        set_server( "pool.ntp.org", 123 );
-        init_ntp_server = true;
-     }
+    try {
+        my->_request_loop.cancel();
+        my->_read_loop.cancel();
+        my->_sock.close();
+        my->_request_loop.wait();
+        my->_read_loop.wait();
+    } 
+    catch ( const fc::exception& e )
+    {
+       // we exepect canceled exceptions, but cannot throw
+       // from destructor
+    }
+  }
 
-     udp_socket sock;
-     sock.open();
 
-     std::array<unsigned char, 48> send_buf { {010,0,0,0,0,0,0,0,0} };
+  void ntp::add_server( const std::string& hostname, uint16_t port)
+  {
+     my->_ntp_hosts.push_back( std::make_pair(hostname,port) );
+  }
 
-     sock.send_to( (const char*)send_buf.data(), send_buf.size(), ntp_server );
+  void ntp::set_request_interval( uint32_t interval_sec )
+  {
+     my->_request_interval_sec = interval_sec;
+     my->_next_request_time = fc::time_point::now();
+  }
+  void ntp::request_now()
+  {
+     my->request_now();
+  }
 
-     fc::ip::endpoint from;
-     std::array<uint64_t, 1024> recv_buf;
-     sock.receive_from( (char*)recv_buf.data(), recv_buf.size(), from );
-
-     uint64_t receive_timestamp_net_order = recv_buf[4];
-     uint64_t receive_timestamp_host = bswap_64(receive_timestamp_net_order);
-     uint32_t fractional_seconds = receive_timestamp_host & 0xffffffff;
-     uint32_t microseconds = (uint32_t)(((((uint64_t)fractional_seconds) * 1000000) + (UINT64_C(1)<<31)) >> 32);
-     uint32_t seconds_since_1900 = receive_timestamp_host >> 32;
-     uint32_t seconds_since_epoch = seconds_since_1900 - 2208988800;
-
-     return fc::time_point() + fc::seconds(seconds_since_epoch) + fc::microseconds(microseconds);
+  optional<time_point> ntp::get_time()const
+  {
+     if( my->_last_ntp_delta )
+        return fc::time_point::now() + *my->_last_ntp_delta;
+     return optional<time_point>();
   }
 
 }

@@ -18,6 +18,7 @@ namespace fc
         public:
            ntp_impl() :_request_interval_sec( 60*60 /* 1 hr */) 
            { 
+              _next_request_time = fc::time_point::now();
               _ntp_hosts.push_back( std::make_pair( "pool.ntp.org",123 ) );
            } 
 
@@ -43,6 +44,7 @@ namespace fc
                         ilog( "sending request to ${ep}", ("ep",ep) );
                         std::array<unsigned char, 48> send_buf { {010,0,0,0,0,0,0,0,0} };
                         _sock.send_to( (const char*)send_buf.data(), send_buf.size(), ep );
+                        break;
                      }
                   } 
                   // this could fail to resolve but we want to go on to other hosts..
@@ -82,7 +84,13 @@ namespace fc
                  uint32_t seconds_since_epoch = seconds_since_1900 - 2208988800;
 
                  auto ntp_time = (fc::time_point() + fc::seconds(seconds_since_epoch) + fc::microseconds(microseconds));
-                 _last_ntp_delta =  ntp_time - fc::time_point::now();
+                 if( ntp_time - fc::time_point::now() < fc::seconds(60*60*24) &&
+                     fc::time_point::now() - ntp_time < fc::seconds(60*60*24) )
+                 {
+                    _last_ntp_delta =  ntp_time - fc::time_point::now();
+                 }
+                 else
+                    elog( "NTP time is way off ${time}", ("time",ntp_time)("local",fc::time_point::now()) );
               }
            } // read_loop
      };

@@ -57,6 +57,10 @@ namespace fc
 
 } // namespace fc
 
+#ifndef DEFAULT_LOOGER
+#define DEFAULT_LOOGER
+#endif
+
    
 #define fc_dlog( LOGGER, FORMAT, ... ) \
   do { \
@@ -88,29 +92,29 @@ namespace fc
 
 #define dlog( FORMAT, ... ) \
   do { \
-   if( (fc::logger::get()).is_enabled( fc::log_level::debug ) ) { \
-      (fc::logger::get()).log( FC_LOG_MESSAGE( debug, FORMAT, __VA_ARGS__ ) ); \
+   if( (fc::logger::get(DEFAULT_LOOGER)).is_enabled( fc::log_level::debug ) ) { \
+      (fc::logger::get(DEFAULT_LOOGER)).log( FC_LOG_MESSAGE( debug, FORMAT, __VA_ARGS__ ) ); \
    } \
   } while (0)
 
 #define ilog( FORMAT, ... ) \
   do { \
-   if( (fc::logger::get()).is_enabled( fc::log_level::info ) ) { \
-      (fc::logger::get()).log( FC_LOG_MESSAGE( info, FORMAT, __VA_ARGS__ ) ); \
+   if( (fc::logger::get(DEFAULT_LOOGER)).is_enabled( fc::log_level::info ) ) { \
+      (fc::logger::get(DEFAULT_LOOGER)).log( FC_LOG_MESSAGE( info, FORMAT, __VA_ARGS__ ) ); \
    } \
   } while (0)
 
 #define wlog( FORMAT, ... ) \
   do { \
-   if( (fc::logger::get()).is_enabled( fc::log_level::warn ) ) { \
-      (fc::logger::get()).log( FC_LOG_MESSAGE( warn, FORMAT, __VA_ARGS__ ) ); \
+   if( (fc::logger::get(DEFAULT_LOOGER)).is_enabled( fc::log_level::warn ) ) { \
+      (fc::logger::get(DEFAULT_LOOGER)).log( FC_LOG_MESSAGE( warn, FORMAT, __VA_ARGS__ ) ); \
    } \
   } while (0)
 
 #define elog( FORMAT, ... ) \
   do { \
-   if( (fc::logger::get()).is_enabled( fc::log_level::error ) ) { \
-      (fc::logger::get()).log( FC_LOG_MESSAGE( error, FORMAT, __VA_ARGS__ ) ); \
+   if( (fc::logger::get(DEFAULT_LOOGER)).is_enabled( fc::log_level::error ) ) { \
+      (fc::logger::get(DEFAULT_LOOGER)).log( FC_LOG_MESSAGE( error, FORMAT, __VA_ARGS__ ) ); \
    } \
   } while (0)
 

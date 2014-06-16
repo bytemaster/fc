@@ -189,7 +189,7 @@ namespace fc {
         return *r._p != *l._p;
       }
 
-
+      
   bool exists( const path& p ) { return boost::filesystem::exists(p); }
   void create_directories( const path& p ) { 
     try {
@@ -232,7 +232,7 @@ namespace fc {
   void rename( const path& f, const path& t ) { 
      try {
   	    boost::filesystem::rename( boost::filesystem::path(f), boost::filesystem::path(t) ); 
-     } catch ( boost::system::system_error& e ) {
+     } catch ( boost::system::system_error& ) {
          try{
              boost::filesystem::copy( boost::filesystem::path(f), boost::filesystem::path(t) ); 
              boost::filesystem::remove( boost::filesystem::path(f)); 

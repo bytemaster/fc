@@ -110,7 +110,7 @@ namespace fc
         my->_request_loop.wait();
         my->_read_loop.wait();
     } 
-    catch ( const fc::exception& e )
+    catch ( const fc::exception& )
     {
        // we exepect canceled exceptions, but cannot throw
        // from destructor

@@ -121,7 +121,7 @@ namespace fc {
                                               const time_point_sec& relative_to_time = fc::time_point::now(), 
                                               const std::string& ago = " ago");
   string get_approximate_relative_time_string(const time_point& event_time,
-                                              const time_point_sec& relative_to_time = fc::time_point::now(), 
+                                              const time_point& relative_to_time = fc::time_point::now(), 
                                               const std::string& ago = " ago");
 }
 

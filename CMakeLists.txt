@@ -55,6 +55,10 @@ IF( WIN32 )
     LIST(APPEND BOOST_COMPONENTS coroutine)
     SET(Boost_LIBRARIES ${BOOST_LIBRARIES_TEMP} ${Boost_LIBRARIES})
   ENDIF()
+
+  set( PLATFORM_SPECIFIC_LIBS WS2_32.lib )
+  # iphlpapi.lib
+
 ELSE(WIN32)
   MESSAGE(STATUS "Configuring fc to build on Unix/Apple")
 
@@ -73,11 +77,11 @@ ELSE(WIN32)
   ENDIF(NOT APPLE)
 ENDIF(WIN32)
 
-#IF($ENV{OPENSSL_ROOT_DIR})
+IF($ENV{OPENSSL_ROOT_DIR})
   set(OPENSSL_ROOT_DIR $ENV{OPENSSL_ROOT_DIR} )
   set(OPENSSL_INCLUDE_DIR ${OPENSSL_ROOT_DIR}/include)
   message(STATUS "Setting up OpenSSL root and include vars to ${OPENSSL_ROOT_DIR}, ${OPENSSL_INCLUDE_DIR}")
-#ENDIF()
+ENDIF()
 
 find_package(OpenSSL)
 
@@ -213,7 +217,7 @@ target_include_directories(fc
     ${CMAKE_CURRENT_SOURCE_DIR}/vendor/easylzma/src
   )
 
-target_link_libraries( fc PUBLIC easylzma_static ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} ${ZLIB_LIBRARIES} ${CMAKE_DL_LIBS} ${rt_library})
+target_link_libraries( fc PUBLIC easylzma_static ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} ${ZLIB_LIBRARIES} ${PLATFORM_SPECIFIC_LIBS} ${RPCRT4} ${CMAKE_DL_LIBS} ${rt_library})
 
 add_executable( ntp_test ntp_test.cpp )
 target_link_libraries( ntp_test fc )

@@ -49,10 +49,13 @@ namespace fc {
     
 
     string ago = default_ago;
-    if (event_time > relative_to_time)
+    int32_t seconds_ago = relative_to_time.sec_since_epoch() - event_time.sec_since_epoch();
+    if (seconds_ago < 0)
+    {
        ago = " in the future";
+       seconds_ago = -seconds_ago;
+    }
     stringstream result;
-    uint32_t seconds_ago = abs(relative_to_time.sec_since_epoch() - event_time.sec_since_epoch());
     if (seconds_ago < 90)
     {
       result << seconds_ago << " second" << (seconds_ago > 1 ? "s" : "") << ago;

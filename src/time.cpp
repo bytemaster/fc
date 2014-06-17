@@ -45,12 +45,14 @@ namespace fc {
   // inspired by show_date_relative() in git's date.c
   string get_approximate_relative_time_string(const time_point_sec& event_time, 
                                               const time_point_sec& relative_to_time /* = fc::time_point::now() */, 
-                                              const std::string& ago /* = " ago" */) {
+                                              const std::string& default_ago /* = " ago" */) {
     
+
+    string ago = default_ago;
     if (event_time > relative_to_time)
-      return "in the future";
+       ago = " in the future";
     stringstream result;
-    uint32_t seconds_ago = relative_to_time.sec_since_epoch() - event_time.sec_since_epoch();
+    uint32_t seconds_ago = abs(relative_to_time.sec_since_epoch() - event_time.sec_since_epoch());
     if (seconds_ago < 90)
     {
       result << seconds_ago << " second" << (seconds_ago > 1 ? "s" : "") << ago;

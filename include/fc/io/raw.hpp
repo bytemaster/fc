@@ -95,6 +95,21 @@ namespace fc {
        tp = fc::time_point() + fc::microseconds(usec);
     } FC_RETHROW_EXCEPTIONS( warn, "" ) }
 
+    template<typename Stream>
+    inline void pack( Stream& s, const fc::microseconds& usec )
+    {
+       uint64_t usec_as_int64 = usec.count();
+       s.write( (const char*)&usec_as_int64, sizeof(usec_as_int64) );
+    }
+
+    template<typename Stream>
+    inline void unpack( Stream& s, fc::microseconds& usec )
+    { try {
+       uint64_t usec_as_int64;
+       s.read( (char*)&usec_as_int64, sizeof(usec_as_int64) );
+       usec = fc::microseconds(usec_as_int64);
+    } FC_RETHROW_EXCEPTIONS( warn, "" ) }
+    
     template<typename Stream, typename T, size_t N> 
     inline void pack( Stream& s, const fc::array<T,N>& v) {
       s.write((const char*)&v.data[0],N*sizeof(T));

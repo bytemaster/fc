@@ -97,6 +97,18 @@ namespace fc
    } \
   } while (0)
 
+/**
+ * Sends the log message to a special 'user' log stream designed for messages that
+ * the end user may like to see.
+ */
+#define ulog( FORMAT, ... ) \
+  do { \
+   if( (fc::logger::get("user")).is_enabled( fc::log_level::debug ) ) { \
+      (fc::logger::get("user")).log( FC_LOG_MESSAGE( debug, FORMAT, __VA_ARGS__ ) ); \
+   } \
+  } while (0)
+
+
 #define ilog( FORMAT, ... ) \
   do { \
    if( (fc::logger::get(DEFAULT_LOGGER)).is_enabled( fc::log_level::info ) ) { \

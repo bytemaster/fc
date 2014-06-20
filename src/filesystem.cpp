@@ -158,6 +158,7 @@ namespace fc {
       directory_iterator::~directory_iterator(){}
 
       fc::path            directory_iterator::operator*()const { return boost::filesystem::path(*(*_p)); }
+      detail::path_wrapper directory_iterator::operator->() const { return detail::path_wrapper(boost::filesystem::path(*(*_p))); }
       directory_iterator& directory_iterator::operator++(int)  { (*_p)++; return *this; }
       directory_iterator& directory_iterator::operator++()     { (*_p)++; return *this; }
 

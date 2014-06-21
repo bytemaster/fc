@@ -1,3 +1,4 @@
+#pragma once 
 #include <boost/signals2/signal.hpp>
 #include <fc/thread/future.hpp>
 #include <fc/thread/thread.hpp>

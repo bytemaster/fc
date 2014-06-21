@@ -85,6 +85,24 @@ namespace fc {
     #endif
   };
 
+  namespace detail
+  {
+    class path_wrapper
+    {
+    public:
+      path_wrapper(path p) :
+        _path(p)
+      {
+      }
+      const path* operator->() const
+      {
+        return &_path;
+      }
+    private:
+      path _path;
+    };
+  }
+
   class directory_iterator {
     public:
       directory_iterator( const fc::path& p );
@@ -92,6 +110,7 @@ namespace fc {
       ~directory_iterator();
 
       fc::path            operator*()const;
+      detail::path_wrapper operator->() const;
       directory_iterator& operator++(int);
       directory_iterator& operator++();
 

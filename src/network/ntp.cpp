@@ -74,7 +74,10 @@ namespace fc
               {
                  fc::ip::endpoint from;
                  std::array<uint64_t, 1024> recv_buf;
-                 _sock.receive_from( (char*)recv_buf.data(), recv_buf.size(), from );
+                 try
+                 {
+                   _sock.receive_from( (char*)recv_buf.data(), recv_buf.size(), from );
+                 } FC_RETHROW_EXCEPTIONS(error, "Error reading from NTP socket");
 
                  uint64_t receive_timestamp_net_order = recv_buf[4];
                  uint64_t receive_timestamp_host = bswap_64(receive_timestamp_net_order);
@@ -120,7 +123,7 @@ namespace fc
     } 
     catch ( const fc::exception& )
     {
-       // we exepect canceled exceptions, but cannot throw
+       // we expect canceled exceptions, but cannot throw
        // from destructor
     }
   }

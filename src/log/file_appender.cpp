@@ -39,7 +39,8 @@ namespace fc {
    void file_appender::log( const log_message& m )
    {
       std::stringstream line;
-      line << (m.get_context().get_timestamp().time_since_epoch().count() % (1000ll*1000ll*60ll*60))/1000 <<"ms ";
+      //line << (m.get_context().get_timestamp().time_since_epoch().count() % (1000ll*1000ll*60ll*60))/1000 <<"ms ";
+      line << std::string(m.get_context().get_timestamp()) << " ";
       line << std::setw( 10 ) << m.get_context().get_thread_name().substr(0,9).c_str() <<" ";
 
       auto me = m.get_context().get_method();

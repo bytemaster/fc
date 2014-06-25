@@ -182,6 +182,7 @@ list(APPEND sources "${CMAKE_CURRENT_BINARY_DIR}/git_revision.cpp")
 list(APPEND sources ${fc_headers})
 
 add_subdirectory( vendor/easylzma )
+add_subdirectory( vendor/udt4 )
 
 setup_library( fc SOURCES ${sources} LIBRARY_TYPE STATIC DONT_INSTALL_LIBRARY )
 
@@ -216,12 +217,21 @@ target_include_directories(fc
     ${CMAKE_CURRENT_SOURCE_DIR}/vendor/boost_1.51/include
     ${CMAKE_CURRENT_SOURCE_DIR}/vendor/salsa20
     ${CMAKE_CURRENT_SOURCE_DIR}/vendor/easylzma/src
+    ${CMAKE_CURRENT_SOURCE_DIR}/vendor/udt4/src
   )
 
 target_link_libraries( fc PUBLIC easylzma_static ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} ${ZLIB_LIBRARIES} ${PLATFORM_SPECIFIC_LIBS} ${RPCRT4} ${CMAKE_DL_LIBS} ${rt_library})
 
 add_executable( ntp_test ntp_test.cpp )
 target_link_libraries( ntp_test fc )
+
+include_directories( vendor/udt4/src )
+
+add_executable( udt_server tests/udt_server.cpp )
+target_link_libraries( udt_server fc udt )
+
+add_executable( udt_client tests/udt_client.cpp )
+target_link_libraries( udt_client fc udt )
 
 #add_executable( test_compress tests/compress.cpp )
 #target_link_libraries( test_compress fc )

@@ -63,7 +63,7 @@ namespace fc
        my->file         = obj["file"].as_string();
        my->line         = obj["line"].as_uint64();
        my->method       = obj["method"].as_string();
-       my->method       = obj["hostname"].as_string();
+       my->hostname     = obj["hostname"].as_string();
        my->thread_name  = obj["thread_name"].as_string();
        my->timestamp    = obj["timestamp"].as<time_point>();
        if( obj.contains( "context" ) )

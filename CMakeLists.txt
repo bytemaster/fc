@@ -151,6 +151,7 @@ set( fc_sources
 #     src/crypto/romix.cpp
      src/network/tcp_socket.cpp
      src/network/udp_socket.cpp
+     src/network/udt_socket.cpp
      src/network/http/http_connection.cpp
      src/network/http/http_server.cpp
      src/network/ntp.cpp

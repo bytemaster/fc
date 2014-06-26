@@ -24,11 +24,25 @@ void download_url(const std::string& ip_address, const std::string& url)
 
 int main( int argc, char** argv )
 {
+  rate_limiter.set_actual_rate_time_constant(fc::seconds(1));
+
   std::vector<fc::future<void> > download_futures;
   download_futures.push_back(fc::async([](){ download_url("198.82.184.145", "http://mirror.cs.vt.edu/pub/cygwin/glibc/releases/glibc-2.9.tar.gz"); }));
   download_futures.push_back(fc::async([](){ download_url("198.82.184.145", "http://mirror.cs.vt.edu/pub/cygwin/glibc/releases/glibc-2.7.tar.gz"); }));
 
-  for (int i = 0; i < download_futures.size(); ++i)
+  while (1)
+  {
+    bool all_done = true;
+    for (unsigned i = 0; i < download_futures.size(); ++i)
+      if (!download_futures[i].ready())
+        all_done = false;
+    if (all_done)
+      break;
+    std::cout << "Current measurement of actual transfer rate: upload " << rate_limiter.get_actual_upload_rate() << ", download " << rate_limiter.get_actual_download_rate() << "\n";
+    fc::usleep(fc::seconds(1));
+  }
+
+  for (unsigned i = 0; i < download_futures.size(); ++i)
     download_futures[i].wait();
   return 0;
 }

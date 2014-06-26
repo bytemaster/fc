@@ -226,7 +226,7 @@ target_link_libraries( fc PUBLIC easylzma_static ${Boost_LIBRARIES} ${OPENSSL_LI
 add_executable( ntp_test ntp_test.cpp )
 target_link_libraries( ntp_test fc )
 
-include_directories( vendor/udt4/src )
+#include_directories( vendor/udt4/src )
 
 #add_executable( udt_server tests/udt_server.cpp )
 #target_link_libraries( udt_server fc udt )

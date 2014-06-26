@@ -50,6 +50,7 @@ written by
    #include <windows.h>
 #endif
 #include <cstdlib>
+#include <stdint.h>
 #include "udt.h"
 
 

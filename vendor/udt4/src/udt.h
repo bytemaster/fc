@@ -58,6 +58,8 @@ written by
 #include <string>
 #include <vector>
 
+#include <stdint.h>
+
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -69,7 +71,7 @@ written by
 
 
 #ifdef WIN32
-   #ifndef __MINGW__
+   #if !defined(__MINGW__) && defined(UDT_IS_DLL)
       // Explicitly define 32-bit and 64-bit numbers
       typedef __int32 int32_t;
       typedef __int64 int64_t;

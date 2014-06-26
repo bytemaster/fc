@@ -265,7 +265,7 @@ namespace fc { namespace ecc {
     std::string public_key::to_base58() const
     {
       public_key_data key = serialize();
-      uint32_t check = sha256::hash(key.data, sizeof(key))._hash[0];
+      uint32_t check = (uint32_t)sha256::hash(key.data, sizeof(key))._hash[0];
       assert(key.size() + sizeof(check) == 37);
       array<char, 37> data;
       memcpy(data.data, key.begin(), key.size());
@@ -280,7 +280,7 @@ namespace fc { namespace ecc {
         FC_ASSERT( s == sizeof(data) );
 
         public_key_data key;
-        uint32_t check = sha256::hash(data.data, sizeof(key))._hash[0];
+        uint32_t check = (uint32_t)sha256::hash(data.data, sizeof(key))._hash[0];
         FC_ASSERT( memcmp( (char*)&check, data.data + sizeof(key), sizeof(check) ) == 0 );
         memcpy( (char*)key.data, data.data, sizeof(key) );
         return public_key(key);

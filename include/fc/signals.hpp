@@ -8,6 +8,8 @@ namespace fc {
 #if !defined(BOOST_NO_TEMPLATE_ALIASES) 
    template<typename T>
    using signal = boost::signals2::signal<T>;
+
+   using scoped_connection = boost::signals2::scoped_connection;
 #else
   /** Workaround for missing Template Aliases feature in the VS 2012.
       \warning Class defined below cannot have defined constructor (even base class has it)

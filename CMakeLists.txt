@@ -183,7 +183,7 @@ list(APPEND sources "${CMAKE_CURRENT_BINARY_DIR}/git_revision.cpp")
 list(APPEND sources ${fc_headers})
 
 add_subdirectory( vendor/easylzma )
-#add_subdirectory( vendor/udt4 )
+add_subdirectory( vendor/udt4 )
 
 setup_library( fc SOURCES ${sources} LIBRARY_TYPE STATIC DONT_INSTALL_LIBRARY )
 
@@ -228,11 +228,11 @@ target_link_libraries( ntp_test fc )
 
 #include_directories( vendor/udt4/src )
 
-#add_executable( udt_server tests/udt_server.cpp )
-#target_link_libraries( udt_server fc udt )
+add_executable( udt_server tests/udts.cpp )
+target_link_libraries( udt_server fc udt )
 
-#add_executable( udt_client tests/udt_client.cpp )
-#target_link_libraries( udt_client fc udt )
+add_executable( udt_client tests/udtc.cpp )
+target_link_libraries( udt_client fc udt )
 
 #add_executable( test_compress tests/compress.cpp )
 #target_link_libraries( test_compress fc )

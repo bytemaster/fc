@@ -157,13 +157,13 @@ uint32_t aes_decoder::final_decode( char* plaintext )
 
 
 /** example method from wiki.opensslfoundation.com */
-int aes_encrypt(unsigned char *plaintext, int plaintext_len, unsigned char *key,
-              unsigned char *iv, unsigned char *ciphertext)
+unsigned aes_encrypt(unsigned char *plaintext, int plaintext_len, unsigned char *key,
+                     unsigned char *iv, unsigned char *ciphertext)
 {
     evp_cipher_ctx ctx( EVP_CIPHER_CTX_new() );
 
     int len = 0;
-    int ciphertext_len = 0;
+    unsigned ciphertext_len = 0;
 
     /* Create and initialise the context */
     if(!ctx)
@@ -206,12 +206,12 @@ int aes_encrypt(unsigned char *plaintext, int plaintext_len, unsigned char *key,
     return ciphertext_len;
 }
 
-int aes_decrypt(unsigned char *ciphertext, int ciphertext_len, unsigned char *key,
-              unsigned char *iv, unsigned char *plaintext)
+unsigned aes_decrypt(unsigned char *ciphertext, int ciphertext_len, unsigned char *key,
+                     unsigned char *iv, unsigned char *plaintext)
 {
     evp_cipher_ctx ctx( EVP_CIPHER_CTX_new() );
     int len = 0;
-    int plaintext_len = 0;
+    unsigned plaintext_len = 0;
 
     /* Create and initialise the context */
     if(!ctx) 
@@ -255,12 +255,12 @@ int aes_decrypt(unsigned char *ciphertext, int ciphertext_len, unsigned char *ke
     return plaintext_len;
 }
 
-int aes_cfb_decrypt(unsigned char *ciphertext, int ciphertext_len, unsigned char *key,
-              unsigned char *iv, unsigned char *plaintext)
+unsigned aes_cfb_decrypt(unsigned char *ciphertext, int ciphertext_len, unsigned char *key,
+                         unsigned char *iv, unsigned char *plaintext)
 {
     evp_cipher_ctx ctx( EVP_CIPHER_CTX_new() );
     int len = 0;
-    int plaintext_len = 0;
+    unsigned plaintext_len = 0;
 
     /* Create and initialise the context */
     if(!ctx)
@@ -308,8 +308,8 @@ std::vector<char> aes_encrypt( const fc::sha512& key, const std::vector<char>& p
 {
     std::vector<char> cipher_text(plain_text.size()+16);
     auto cipher_len = aes_encrypt( (unsigned char*)plain_text.data(), plain_text.size(),  
-                                 (unsigned char*)&key, ((unsigned char*)&key)+32,
-                                 (unsigned char*)cipher_text.data() );
+                                   (unsigned char*)&key, ((unsigned char*)&key)+32,
+                                   (unsigned char*)cipher_text.data() );
     FC_ASSERT( cipher_len <= cipher_text.size() );
     cipher_text.resize(cipher_len);
     return cipher_text;

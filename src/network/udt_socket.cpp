@@ -11,6 +11,16 @@
 
 namespace fc {
 
+   void check_udt_errors()
+   {
+      UDT::ERRORINFO& error_info = UDT::getlasterror();
+      if( error_info.getErrorCode() )
+      {
+         std::string  error_message = error_info.getErrorMessage();
+         error_info.clear();
+         FC_CAPTURE_AND_THROW( udt_exception, (error_message) );
+      }
+   }
    
    class udt_epoll_service 
    {
@@ -18,6 +28,8 @@ namespace fc {
          udt_epoll_service()
          :_epoll_thread("udt_epoll")
          {
+            UDT::startup();
+            check_udt_errors();
             _epoll_id = UDT::epoll_create();
             _epoll_loop = _epoll_thread.async( [=](){ poll_loop(); } );
          }
@@ -25,6 +37,8 @@ namespace fc {
          ~udt_epoll_service()
          {
             _epoll_loop.cancel();
+            _epoll_loop.wait();
+            UDT::cleanup();
          }
 
          void poll_loop()
@@ -111,16 +125,6 @@ namespace fc {
    }
 
 
-   void check_udt_errors()
-   {
-      UDT::ERRORINFO& error_info = UDT::getlasterror();
-      if( error_info.getErrorCode() )
-      {
-         std::string  error_message = error_info.getErrorMessage();
-         error_info.clear();
-         FC_CAPTURE_AND_THROW( udt_exception, (error_message) );
-      }
-   }
 
    udt_socket::udt_socket()
    :_udt_socket_id( UDT::INVALID_SOCK )

@@ -221,7 +221,7 @@ target_include_directories(fc
     ${CMAKE_CURRENT_SOURCE_DIR}/vendor/udt4/src
   )
 
-target_link_libraries( fc PUBLIC easylzma_static ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} ${ZLIB_LIBRARIES} ${PLATFORM_SPECIFIC_LIBS} ${RPCRT4} ${CMAKE_DL_LIBS} ${rt_library})
+target_link_libraries( fc PUBLIC udt easylzma_static ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} ${ZLIB_LIBRARIES} ${PLATFORM_SPECIFIC_LIBS} ${RPCRT4} ${CMAKE_DL_LIBS} ${rt_library})
 
 add_executable( ntp_test ntp_test.cpp )
 target_link_libraries( ntp_test fc )

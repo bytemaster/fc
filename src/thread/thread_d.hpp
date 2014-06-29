@@ -251,8 +251,7 @@ namespace fc {
                  {
                     (*task_itr)->run();
                     (*task_itr)->release();
-                    *task_itr = task_sch_queue.back();
-                    task_sch_queue.pop_back();
+                    task_itr = task_sch_queue.erase(task_itr);
                     canceled_task = true;
                     continue;
                  }

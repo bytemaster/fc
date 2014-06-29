@@ -341,6 +341,7 @@ namespace fc {
            bool run_next_task() {
                 check_for_timeouts();
                 task_base* next = dequeue();
+
                 if( next ) {
                     next->_set_active_context( current );
                     current->cur_task = next;

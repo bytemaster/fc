@@ -239,6 +239,31 @@ namespace fc {
                 }
                 return p;
            }
+
+           bool process_canceled_tasks()
+           {
+              bool canceled_task = false;
+              for( auto task_itr = task_sch_queue.begin();
+                   task_itr != task_sch_queue.end();
+                   )
+              {
+                 if( (*task_itr)->canceled() )
+                 {
+                    (*task_itr)->run();
+                    (*task_itr)->release();
+                    *task_itr = task_sch_queue.back();
+                    task_sch_queue.pop_back();
+                    canceled_task = true;
+                    continue;
+                 }
+                 ++task_itr;
+              }
+
+              if( canceled_task )  
+                 std::make_heap( task_sch_queue.begin(), task_sch_queue.end(), task_when_less() );
+
+              return canceled_task;
+           }
            
            /**
             * This should be before or after a context switch to
@@ -378,6 +403,8 @@ namespace fc {
                    continue;
                 }
 
+                if( process_canceled_tasks() ) continue;
+
                 clear_free_list();
 
                 { // lock scope
@@ -389,6 +416,10 @@ namespace fc {
                   if( timeout_time == time_point::maximum() ) {
                     task_ready.wait( lock );
                   } else if( timeout_time != time_point::min() ) {
+                     // there may be tasks that have been canceled we should filter them out now
+                     // rather than waiting... 
+
+
                     /* This bit is kind of sloppy -- this wait was originally implemented as a wait
                      * with respect to boost::chrono::system_clock.  This behaved rather comically
                      * if you were to do a:

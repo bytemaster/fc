@@ -226,6 +226,9 @@ target_link_libraries( fc PUBLIC udt easylzma_static ${Boost_LIBRARIES} ${OPENSS
 add_executable( ntp_test ntp_test.cpp )
 target_link_libraries( ntp_test fc )
 
+add_executable( task_cancel_test tests/task_cancel.cpp )
+target_link_libraries( task_cancel_test fc )
+
 #include_directories( vendor/udt4/src )
 
 add_executable( udt_server tests/udts.cpp )

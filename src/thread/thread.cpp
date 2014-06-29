@@ -200,7 +200,7 @@ namespace fc {
    void thread::exec() {
       if( !my->current ) my->current = new fc::context(&fc::thread::current());
       try {
-      my->process_tasks(); 
+        my->process_tasks(); 
       } 
       catch( canceled_exception& )
       {
@@ -225,35 +225,15 @@ namespace fc {
       my->start_next_fiber(reschedule);
       my->check_fiber_exceptions();
    }
+
    void thread::sleep_until( const time_point& tp ) {
-      //ilog( "sleep until ${tp}    wait: ${delta}", ("tp",tp)("delta",(tp-fc::time_point::now()).count()) );
-     
       if( tp <= (time_point::now()+fc::microseconds(10000)) ) 
       {
          this->yield(true);
       }
       my->yield_until( tp, false );
-      /*
-      my->check_fiber_exceptions();
-      
-      BOOST_ASSERT( &current() == this );
-      if( !my->current )  {
-        my->current = new fc::context(&fc::thread::current());
-      }
-
-      my->current->resume_time = tp;
-      my->current->clear_blocking_promises();
-
-      my->sleep_pqueue.push_back(my->current);
-      std::push_heap( my->sleep_pqueue.begin(),
-                      my->sleep_pqueue.end(), sleep_priority_less()   );
-
-      my->start_next_fiber();
-      my->current->resume_time = time_point::maximum();
-
-      my->check_fiber_exceptions();
-      */
    }
+
    int  thread::wait_any_until( std::vector<promise_base::ptr>&& p, const time_point& timeout) {
        for( size_t i = 0; i < p.size(); ++i ) {
          if( p[i]->ready() ) return i;

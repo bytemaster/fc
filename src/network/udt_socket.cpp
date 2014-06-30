@@ -77,6 +77,7 @@ namespace fc {
             } // while not canceled
          } // poll_loop
 
+
          void notify_read( int udt_socket_id, 
                            const promise<void>::ptr& p )
          {
@@ -110,6 +111,22 @@ namespace fc {
          }
          void remove( int udt_socket_id )
          {
+             { synchronized(_read_promises_mutex)
+                auto read_itr = _read_promises.find( udt_socket_id );
+                if( read_itr != _read_promises.end() )
+                {
+                   read_itr->second->set_exception( fc::copy_exception( fc::canceled_exception() ) );
+                   _read_promises.erase(read_itr);
+                }
+             }
+             { synchronized(_write_promises_mutex)
+                auto write_itr = _write_promises.find( udt_socket_id );
+                if( write_itr != _write_promises.end() )
+                {
+                   write_itr->second->set_exception( fc::copy_exception( fc::canceled_exception() ) );
+                   _write_promises.erase(write_itr);
+                }
+             }
              UDT::epoll_remove_usock( _epoll_id, udt_socket_id );
          }
 
@@ -264,10 +281,13 @@ namespace fc {
       if( is_open() )
       {
          default_epool_service().remove( _udt_socket_id );
-
          UDT::close( _udt_socket_id );
          check_udt_errors();
          _udt_socket_id = UDT::INVALID_SOCK;
+      }
+      else
+      {
+         wlog( "already closed" );
       }
    } FC_CAPTURE_AND_RETHROW() }
    /// @}
@@ -317,9 +337,9 @@ namespace fc {
   { try {
      if( _udt_socket_id != UDT::INVALID_SOCK )
      {
-        default_epool_service().remove( _udt_socket_id );
         UDT::close( _udt_socket_id );
         check_udt_errors();
+        default_epool_service().remove( _udt_socket_id );
         _udt_socket_id = UDT::INVALID_SOCK;
      }
   } FC_CAPTURE_AND_RETHROW() }
@@ -330,17 +350,17 @@ namespace fc {
       int namelen;
       sockaddr_in their_addr;
 
-      s._udt_socket_id = UDT::accept( _udt_socket_id, (sockaddr*)&their_addr, &namelen );
 
-      if( s._udt_socket_id == UDT::INVALID_SOCK )
+      while( s._udt_socket_id == UDT::INVALID_SOCK )
       {
+         s._udt_socket_id = UDT::accept( _udt_socket_id, (sockaddr*)&their_addr, &namelen );
          if( UDT::getlasterror().getErrorCode() == CUDTException::EASYNCRCV )
          {
             UDT::getlasterror().clear();
             promise<void>::ptr p(new promise<void>("udt_server::accept"));
             default_epool_service().notify_read( _udt_socket_id, p );
             p->wait();
-            this->accept(s);
+            s._udt_socket_id = UDT::accept( _udt_socket_id, (sockaddr*)&their_addr, &namelen );
          }
          else
             check_udt_errors();

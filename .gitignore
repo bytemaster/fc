@@ -46,5 +46,6 @@ git_revision.cpp
 GitSHA3.cpp
 
 ntp_test
+task_cancel_test
 udt_client
 udt_server

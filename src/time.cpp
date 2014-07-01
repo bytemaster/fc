@@ -92,7 +92,7 @@ namespace fc {
       return result.str();
     }
     uint32_t years_ago = days_ago / 365;
-    result << years_ago << " year" << (months_ago > 1 ? "s" : "");
+    result << years_ago << " year" << (months_ago > 1 ? "s " : " ");
     if (months_ago < 12 * 5)
     {
       uint32_t leftover_days = days_ago - (years_ago * 365);

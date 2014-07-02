@@ -108,6 +108,14 @@ namespace fc { namespace rpc  {
                                      );
 
          template<typename Result>
+         Result call( const fc::string& method,
+                               const variants& args,
+                               microseconds timeout = microseconds::maximum())
+         {
+             return async_call( method, args ).wait(timeout).as<Result>();
+         }
+
+         template<typename Result>
          Result call( const fc::string& method, 
                                const variant& a1, 
                                const variant& a2, 

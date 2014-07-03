@@ -9,7 +9,7 @@ namespace fc {
 
   class thread {
     public:
-      thread( const char* name = "" );
+      thread( const std::string& name = "" );
       thread( thread&& m );
       thread& operator=(thread&& t );
 

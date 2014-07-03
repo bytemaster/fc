@@ -70,11 +70,11 @@ namespace fc {
       return t;
    }
 
-   thread::thread( const char* name  ) {
+   thread::thread( const std::string& name  ) {
       promise<void>::ptr p(new promise<void>());
       boost::thread* t = new boost::thread( [this,p,name]() {
           try {
-		    set_thread_name(name); // set thread's name for the debugger to display
+		    set_thread_name(name.c_str()); // set thread's name for the debugger to display
             this->my = new thread_d(*this);
             current_thread() = this;
             p->set_value();
@@ -126,17 +126,15 @@ namespace fc {
    void          thread::debug( const fc::string& d ) { /*my->debug(d);*/ }
 
    void thread::quit() {
-     //if quiting from a different thread, start quit task on thread.
+     //if quitting from a different thread, start quit task on thread.
      //If we have and know our attached boost thread, wait for it to finish, then return.
       if( &current() != this ) {
           async( [=](){quit();} );//.wait();
           if( my->boost_thread ) {
             auto n = name();
-            ilog( "joining... ${n}", ("n",n) );//n.c_str() );
             my->boost_thread->join();
             delete my;
             my = nullptr;
-            ilog( "done joining...${n}", ("n",n) ); //n.c_str() );
           }
           return;
       }

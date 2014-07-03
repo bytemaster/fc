@@ -33,7 +33,7 @@ endif()
 SET (ORIGINAL_LIB_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES})
 
 SET(BOOST_COMPONENTS)
-LIST(APPEND BOOST_COMPONENTS thread date_time system filesystem program_options signals serialization chrono unit_test_framework context locale)
+LIST(APPEND BOOST_COMPONENTS thread date_time system filesystem program_options signals serialization chrono unit_test_framework context locale iostreams)
 
 IF( WIN32 )
   MESSAGE(STATUS "Configuring fc to build on Win32")
@@ -236,6 +236,9 @@ target_link_libraries( udt_server fc udt )
 
 add_executable( udt_client tests/udtc.cpp )
 target_link_libraries( udt_client fc udt )
+
+add_executable( lzma_test tests/lzma_test.cpp )
+target_link_libraries( lzma_test fc )
 
 #add_executable( test_compress tests/compress.cpp )
 #target_link_libraries( test_compress fc )

@@ -1,12 +1,11 @@
 #pragma once
+
+#include <fc/filesystem.hpp>
 #include <fc/log/appender.hpp>
 #include <fc/log/logger.hpp>
-#include <fc/filesystem.hpp>
 #include <fc/time.hpp>
 
 namespace fc {
-
-class varaint;
 
 class file_appender : public appender {
     public:
@@ -20,6 +19,7 @@ class file_appender : public appender {
             bool                               rotate;
             microseconds                       rotation_interval;
             microseconds                       rotation_limit;
+            bool                               rotation_compression;
          };
          file_appender( const variant& args );
          ~file_appender();
@@ -32,4 +32,5 @@ class file_appender : public appender {
 } // namespace fc
 
 #include <fc/reflect/reflect.hpp>
-FC_REFLECT( fc::file_appender::config, (format)(filename)(flush)(truncate)(rotate)(rotation_interval)(rotation_limit) )
+FC_REFLECT( fc::file_appender::config,
+            (format)(filename)(flush)(truncate)(rotate)(rotation_interval)(rotation_limit)(rotation_compression) )

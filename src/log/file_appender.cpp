@@ -1,3 +1,4 @@
+#include <fc/compress/lzma.hpp>
 #include <fc/io/fstream.hpp>
 #include <fc/log/file_appender.hpp>
 #include <fc/reflect/variant.hpp>
@@ -41,14 +42,22 @@ namespace fc {
              for( ; itr != directory_iterator(); itr++ )
              {
                  const auto current_filename = itr->string();
-                 const auto current_pos = current_filename.find( log_filename );
+                 auto current_pos = current_filename.find( log_filename );
                  if( current_pos != 0 ) continue;
-                 const auto current_timestamp = current_filename.substr( log_filename.size() + 1 ); // TODO SKI{P EXTENSION
+                 current_pos = log_filename.size() + 1;
+                 const auto current_timestamp = current_filename.substr( current_pos, current_pos + 10 );
                  try
                  {
                      if( std::stoi( current_timestamp ) < limit_time.sec_since_epoch() )
+                     {
                          remove_all( current_filename );
-                     //else compress if not already compressed
+                     }
+                     else if( cfg.rotation_compression )
+                     {
+                         if( current_filename.substr( current_filename.size() - 3 ) == ".7z" ) continue;
+                         lzma_compress_file( current_filename, current_filename + ".7z" );
+                         remove_all( current_filename );
+                     }
                  }
                  catch( ... )
                  {

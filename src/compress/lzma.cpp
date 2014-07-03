@@ -1,7 +1,7 @@
+#include <boost/filesystem/fstream.hpp>
 #include <boost/iostreams/device/mapped_file.hpp>
 #include <fc/compress/lzma.hpp>
 #include <fc/exception/exception.hpp>
-#include <fstream>
 #include <lzma_c.h>
 
 namespace fc {
@@ -59,7 +59,7 @@ struct lzma_file_ctx
     path dst_path;
 };
 
-static int input_callback( void* input_ctx, void* input_buf, size_t* input_len )
+static int lzma_file_input_callback( void* input_ctx, void* input_buf, size_t* input_len )
 {
     FC_ASSERT( input_ctx != NULL );
     FC_ASSERT( input_buf != NULL );
@@ -79,7 +79,7 @@ static int input_callback( void* input_ctx, void* input_buf, size_t* input_len )
     return 0;
 }
 
-static size_t output_callback( void* output_ctx, const void* output_buf, size_t output_len )
+static size_t lzma_file_output_callback( void* output_ctx, const void* output_buf, size_t output_len )
 {
     FC_ASSERT( output_ctx != NULL );
     FC_ASSERT( output_buf != NULL );
@@ -91,8 +91,8 @@ static size_t output_callback( void* output_ctx, const void* output_buf, size_t 
         size_t dst_len = 0;
         if( !exists( ctx->dst_path ) )
         {
-            auto fs = std::ofstream( ctx->dst_path.string() );
-            fs.close();
+            boost::filesystem::ofstream ofs( ctx->dst_path.string() );
+            ofs.close();
         }
         else
         {
@@ -154,9 +154,9 @@ void lzma_compress_file( const path& src_path,
     }
 
     rc = elzma_compress_run( handle,
-                             input_callback,
+                             lzma_file_input_callback,
                              ( void * )&ctx,
-                             output_callback,
+                             lzma_file_output_callback,
                              ( void * )&ctx,
                              NULL,
                              NULL );
@@ -185,9 +185,9 @@ void lzma_decompress_file( const path& src_path,
     ctx.dst_path = dst_path;
 
     auto rc = elzma_decompress_run( handle,
-                                    input_callback,
+                                    lzma_file_input_callback,
                                     ( void * )&ctx,
-                                    output_callback,
+                                    lzma_file_output_callback,
                                     ( void * )&ctx,
                                     elzma_file_format::ELZMA_lzma );
 

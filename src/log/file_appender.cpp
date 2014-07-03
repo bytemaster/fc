@@ -4,6 +4,7 @@
 #include <fc/reflect/variant.hpp>
 #include <fc/thread/scoped_lock.hpp>
 #include <fc/variant.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/thread/mutex.hpp>
 #include <iomanip>
 #include <sstream>
@@ -23,6 +24,17 @@ namespace fc {
              return time_point_sec( file_number * interval_seconds );
          }
 
+         string timestamp_to_string( const time_point_sec& timestamp )
+         {
+             auto ptime = boost::posix_time::from_time_t( time_t ( timestamp.sec_since_epoch() ) );
+             return boost::posix_time::to_iso_string( ptime );
+         }
+
+         time_point_sec string_to_timestamp( const string& str )
+         {
+             return time_point::from_iso_string( str );
+         }
+
          void rotate_files( bool initializing = false )
          {
              if( !cfg.rotate ) return;
@@ -35,6 +47,7 @@ namespace fc {
              }
 
              auto log_filename = cfg.filename.string();
+             const auto timestamp_string = timestamp_to_string( start_time );
 
              /* Delete old log files */
              const auto limit_time = now - cfg.rotation_limit;
@@ -45,10 +58,11 @@ namespace fc {
                  auto current_pos = current_filename.find( log_filename );
                  if( current_pos != 0 ) continue;
                  current_pos = log_filename.size() + 1;
-                 const auto current_timestamp = current_filename.substr( current_pos, current_pos + 10 );
+                 const auto current_timestamp = string( current_filename.begin() + current_pos,
+                                                        current_filename.begin() + current_pos + timestamp_string.size() );
                  try
                  {
-                     if( std::stoi( current_timestamp ) < limit_time.sec_since_epoch() )
+                     if( string_to_timestamp( current_timestamp ) < limit_time )
                      {
                          remove_all( current_filename );
                      }
@@ -64,10 +78,9 @@ namespace fc {
                  }
              }
 
-             // TODO: Convert to proper timestamp string
-             log_filename += "." + std::to_string( start_time.sec_since_epoch() );
-             out.open( log_filename.c_str() );
              current_file_start_time = start_time;
+             log_filename += "." + timestamp_string;
+             out.open( log_filename.c_str() );
          }
    };
    file_appender::config::config( const fc::path& p  )

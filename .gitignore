@@ -33,9 +33,11 @@ ZERO_CHECK
 Debug/
 Release/
 
+CMakeCache.txt
 CMakeFiles
 Makefile
-cmake_install.cmake
+*.cmake
+
 libfc.a
 libfc_debug.a
 
@@ -45,6 +47,7 @@ fc_automoc.cpp
 git_revision.cpp
 GitSHA3.cpp
 
+lzma_test
 ntp_test
 task_cancel_test
 udt_client

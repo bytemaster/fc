@@ -1,15 +1,8 @@
+#include <boost/iostreams/device/mapped_file.hpp>
 #include <fc/compress/lzma.hpp>
 #include <fc/exception/exception.hpp>
-
-#include <lzma_c.h>
-
-#include <boost/iostreams/device/mapped_file.hpp>
-
 #include <fstream>
-
-
-
-#include <iostream>
+#include <lzma_c.h>
 
 namespace fc {
 
@@ -120,8 +113,8 @@ static size_t output_callback( void* output_ctx, const void* output_buf, size_t 
     return output_len;
 }
 
-void lzma_compress_file( path src_path,
-                         path dst_path,
+void lzma_compress_file( const path& src_path,
+                         const path& dst_path,
                          unsigned char level,
                          unsigned int dict_size )
 {
@@ -170,29 +163,36 @@ void lzma_compress_file( path src_path,
 
     elzma_compress_free( &handle );
     FC_ASSERT( rc == ELZMA_E_OK );
+}
 
+void lzma_decompress_file( const path& src_path,
+                           const path& dst_path )
+{
+    FC_ASSERT( exists( src_path ) );
+    FC_ASSERT( !exists( dst_path ) );
 
-    /* TEST */
-    FC_ASSERT( exists( dst_path ) );
+    boost::iostreams::mapped_file_source src_file;
+    src_file.open( src_path.string() );
+    FC_ASSERT( src_file.is_open() );
 
-    boost::iostreams::mapped_file_source dst_file;
-    dst_file.open( dst_path.string() );
-    FC_ASSERT( dst_file.is_open() );
+    elzma_decompress_handle handle = NULL;
+    handle = elzma_decompress_alloc();
+    FC_ASSERT( handle != NULL );
 
-    std::vector<char> result( dst_file.data(), dst_file.data() + dst_file.size() );
-    dst_file.close();
+    struct lzma_file_ctx ctx;
+    ctx.src_buf = ( const unsigned char* )src_file.data();
+    ctx.src_len = src_file.size();
+    ctx.dst_path = dst_path;
 
-    for( const auto& c : result )
-    {
-        std::cout << c;
-    }
-    std::cout << "\n";
+    auto rc = elzma_decompress_run( handle,
+                                    input_callback,
+                                    ( void * )&ctx,
+                                    output_callback,
+                                    ( void * )&ctx,
+                                    elzma_file_format::ELZMA_lzma );
 
-    result = lzma_decompress( result );
-    for( const auto& c : result )
-    {
-        std::cout << c;
-    }
+    elzma_decompress_free( &handle );
+    FC_ASSERT( rc == ELZMA_E_OK );
 }
 
 } // namespace fc

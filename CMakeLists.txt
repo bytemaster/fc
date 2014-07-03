@@ -237,8 +237,8 @@ target_link_libraries( udt_server fc udt )
 add_executable( udt_client tests/udtc.cpp )
 target_link_libraries( udt_client fc udt )
 
-add_executable( lzma_compress_file tests/lzma_compress_file.cpp )
-target_link_libraries( lzma_compress_file fc )
+add_executable( lzma_test tests/lzma_test.cpp )
+target_link_libraries( lzma_test fc )
 
 #add_executable( test_compress tests/compress.cpp )
 #target_link_libraries( test_compress fc )

@@ -8,16 +8,17 @@ using namespace fc;
 
 int main( int argc, char** argv )
 {
-    if( argc != 2 && argc != 3 )
+    if( argc != 2 )
     {
-        std::cout << "usage: " << argv[0] << " <src_path> [dst_path = src_path.lzma]\n";
+        std::cout << "usage: " << argv[0] << " <filename>\n";
         exit( -1 );
     }
 
     auto src = std::string( argv[1] );
-    auto dst = (argc == 3) ? std::string( argv[2] ) : src + ".lzma";
-
+    auto dst = src + ".compressed";
     lzma_compress_file( src, dst );
+
+    lzma_decompress_file( dst, src + ".decompressed" );
 
     return 0;
 }

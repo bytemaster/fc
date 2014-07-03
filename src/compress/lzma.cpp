@@ -1,8 +1,10 @@
-#include <boost/filesystem/fstream.hpp>
 #include <boost/iostreams/device/mapped_file.hpp>
 #include <fc/compress/lzma.hpp>
 #include <fc/exception/exception.hpp>
+#include <fc/io/fstream.hpp>
 #include <lzma_c.h>
+
+#include <iostream>
 
 namespace fc {
 
@@ -91,8 +93,8 @@ static size_t lzma_file_output_callback( void* output_ctx, const void* output_bu
         size_t dst_len = 0;
         if( !exists( ctx->dst_path ) )
         {
-            boost::filesystem::ofstream ofs( ctx->dst_path.string() );
-            ofs.close();
+            ofstream fs( ctx->dst_path );
+            fs.close();
         }
         else
         {

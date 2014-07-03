@@ -7,8 +7,6 @@
 
 namespace fc {
 
-class varaint;
-
 class file_appender : public appender {
     public:
          struct config {

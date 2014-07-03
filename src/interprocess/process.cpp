@@ -74,7 +74,7 @@ process::~process(){}
 
 iprocess& process::exec( const fc::path& exe, 
                          std::vector<std::string> args, 
-                         const fc::path& work_dir, exec_opts opt  ) 
+                         const fc::path& work_dir, int opt  ) 
 {
 
   my->pctx.work_dir = work_dir.string();

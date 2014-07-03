@@ -18,7 +18,7 @@ namespace fc {
       virtual iprocess& exec( const fc::path&  exe, 
                               std::vector<std::string>   args, 
                               const fc::path&  work_dir = fc::path(), 
-                              exec_opts        opts     = open_all    );
+                              int              opts     = open_all    );
 
       
       virtual int                        result(const microseconds& timeout = microseconds::maximum());

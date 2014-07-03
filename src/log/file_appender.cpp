@@ -47,6 +47,8 @@ namespace fc {
              }
 
              auto log_filename = cfg.filename.string();
+             const auto link_filename = log_filename;
+             remove_all( link_filename );
              const auto timestamp_string = timestamp_to_string( start_time );
 
              /* Delete old log files */
@@ -69,6 +71,7 @@ namespace fc {
                      else if( cfg.rotation_compression )
                      {
                          if( current_filename.substr( current_filename.size() - 3 ) == ".7z" ) continue;
+                         /* TODO: Possibly move compression to another thread */
                          lzma_compress_file( current_filename, current_filename + ".7z" );
                          remove_all( current_filename );
                      }
@@ -81,6 +84,7 @@ namespace fc {
              current_file_start_time = start_time;
              log_filename += "." + timestamp_string;
              out.open( log_filename.c_str() );
+             create_hard_link( log_filename, link_filename );
          }
    };
    file_appender::config::config( const fc::path& p  )

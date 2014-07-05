@@ -70,6 +70,9 @@ namespace fc {
          {
              if( cfg.rotate )
              {
+                 FC_ASSERT( cfg.rotation_interval >= seconds( 1 ) );
+                 FC_ASSERT( cfg.rotation_limit >= cfg.rotation_interval );
+
                  if( cfg.rotation_compression )
                      _compression_thread.reset( new thread( "compression") );
 
@@ -100,7 +103,12 @@ namespace fc {
 
              if( !initializing )
              {
-                 if( start_time <= _current_file_start_time ) return;
+                 if( start_time <= _current_file_start_time )
+                 {
+                     _rotation_task = schedule( [this]() { rotate_files(); }, _current_file_start_time + cfg.rotation_interval.to_seconds() );
+                     return;
+                 }
+
                  fc::scoped_lock<boost::mutex> lock( slock );
                  out.flush();
                  out.close();
@@ -143,7 +151,7 @@ namespace fc {
              }
 
              _current_file_start_time = start_time;
-             _rotation_task = schedule( [this]() { rotate_files(); }, now + cfg.rotation_interval );
+             _rotation_task = schedule( [this]() { rotate_files(); }, _current_file_start_time + cfg.rotation_interval.to_seconds() );
          }
    };
    file_appender::config::config( const fc::path& p  )

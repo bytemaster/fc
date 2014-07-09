@@ -37,6 +37,7 @@ CMakeCache.txt
 CMakeFiles
 Makefile
 *.cmake
+*.cbp
 
 libfc.a
 libfc_debug.a

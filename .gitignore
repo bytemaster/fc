@@ -36,6 +36,8 @@ Release/
 CMakeFiles
 Makefile
 cmake_install.cmake
+*.cbp
+
 libfc.a
 libfc_debug.a
 

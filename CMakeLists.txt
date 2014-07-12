@@ -200,10 +200,9 @@ ELSE()
   SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99 -Wall")
 
   IF(APPLE)
-    SET(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -std=c++11 -stdlib=libc++ -Wall")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -stdlib=libc++ -Wall")
   ELSE()
-    target_compile_options(fc PUBLIC -std=c++11 -Wall -fnon-call-exceptions)
-    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -fnon-call-exceptions")
   ENDIF()
 ENDIF()
  

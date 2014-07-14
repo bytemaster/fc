@@ -1,3 +1,8 @@
+IF (WIN32)
+ELSE (WIN32)
+  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -no-integrated-as")
+ENDIF (WIN32)
+
 add_definitions( -DSCRYPT_SALSA )
 add_definitions( -DSCRYPT_SHA256 )
 

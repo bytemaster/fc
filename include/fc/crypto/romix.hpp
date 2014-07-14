@@ -43,6 +43,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #pragma once
+#include <stdint.h>
 #include <string>
 
 namespace fc {
@@ -56,21 +57,21 @@ namespace fc {
     class romix
     {
     public:
-        romix(u_int32_t memReqts, u_int32_t numIter, std::string salt);
+        romix(uint32_t memReqts, uint32_t numIter, std::string salt);
 
         std::string deriveKey_OneIter(std::string const & password);
         std::string deriveKey(std::string const & password);
 
     private:
-        u_int32_t hashOutputBytes_;
-        u_int32_t kdfOutputBytes_;    // size of final key data
+        uint32_t hashOutputBytes_;
+        uint32_t kdfOutputBytes_;    // size of final key data
 
-        u_int32_t memoryReqtBytes_;
-        u_int32_t sequenceCount_;
+        uint32_t memoryReqtBytes_;
+        uint32_t sequenceCount_;
         std::string salt_;            // prob not necessary amidst numIter, memReqts
                                       // but I guess it can't hurt
 
-        u_int32_t numIterations_;     // We set the ROMIX params for a given memory
+        uint32_t numIterations_;     // We set the ROMIX params for a given memory
                                       // req't. Then run it numIter times to meet
                                       // the computation-time req't
     };

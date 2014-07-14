@@ -147,8 +147,7 @@ set( fc_sources
      src/crypto/rand.cpp
      src/crypto/salsa20.cpp
      src/crypto/scrypt.cpp
-# commented out until committed
-#     src/crypto/romix.cpp
+     src/crypto/romix.cpp
      src/network/tcp_socket.cpp
      src/network/udp_socket.cpp
      src/network/udt_socket.cpp

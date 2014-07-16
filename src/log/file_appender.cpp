@@ -101,20 +101,23 @@ namespace fc {
              const auto link_filename = cfg.filename.string();
              const auto log_filename = link_filename + "." + timestamp_string;
 
-             if( !initializing )
              {
-                 if( start_time <= _current_file_start_time )
-                 {
-                     _rotation_task = schedule( [this]() { rotate_files(); }, _current_file_start_time + cfg.rotation_interval.to_seconds() );
-                     return;
-                 }
+               fc::scoped_lock<boost::mutex> lock( slock );
 
-                 fc::scoped_lock<boost::mutex> lock( slock );
-                 out.flush();
-                 out.close();
+               if( !initializing )
+               {
+                   if( start_time <= _current_file_start_time )
+                   {
+                       _rotation_task = schedule( [this]() { rotate_files(); }, _current_file_start_time + cfg.rotation_interval.to_seconds() );
+                       return;
+                   }
+
+                   out.flush();
+                   out.close();
+               }
+
+               out.open( log_filename.c_str() );
              }
-
-             out.open( log_filename.c_str() );
              remove_all( link_filename );
              create_hard_link( log_filename, link_filename );
 

@@ -108,7 +108,7 @@ namespace fc {
    }
 
    thread::~thread() {
-      //slog( "my %p", my );
+      //wlog( "my ${n}", ("n",name()) );
       if( is_current() )
       {
         wlog( "delete my" );
@@ -139,7 +139,7 @@ namespace fc {
           return;
       }
 
- //     wlog( "%s", my->name.c_str() );
+      wlog( "${s}", ("s",name()) );
       // We are quiting from our own thread...
 
       // break all promises, thread quit!
@@ -155,8 +155,8 @@ namespace fc {
             cur = n;
         }
         if( my->blocked ) { 
-  //        wlog( "still blocking... whats up with that?");
-  //        debug( "on quit" ); 
+          wlog( "still blocking... whats up with that?");
+          debug( "on quit" ); 
         }
       }
       BOOST_ASSERT( my->blocked == 0 );

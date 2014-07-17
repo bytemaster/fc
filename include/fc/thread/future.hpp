@@ -204,7 +204,7 @@ namespace fc {
       bool error()const { return m_prom->error(); }
 
       void cancel()const { if( m_prom ) m_prom->cancel(); }
-      bool canceled()const { return m_prom->canceled(); }
+      bool canceled()const { if( m_prom ) return m_prom->canceled(); else return true;}
 
       void cancel_and_wait()
       {
@@ -261,7 +261,7 @@ namespace fc {
       }
 
       bool valid()const    { return !!m_prom;           }
-      bool canceled()const { return m_prom->canceled(); }
+      bool canceled()const { return m_prom ? m_prom->canceled() : true; }
 
       void cancel_and_wait() 
       {

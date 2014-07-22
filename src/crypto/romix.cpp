@@ -13,7 +13,7 @@
 
 namespace fc
 {
-    romix::romix( u_int32_t memReqts, u_int32_t numIter, std::string salt ) :
+    romix::romix( uint32_t memReqts, uint32_t numIter, std::string salt ) :
        hashOutputBytes_( 64 ),
        kdfOutputBytes_( 32 )
     {
@@ -32,7 +32,7 @@ namespace fc
 
         // Prepare the lookup table
         char *lookupTable_ = new char[memoryReqtBytes_];
-        u_int32_t const HSZ = hashOutputBytes_;
+        uint32_t const HSZ = hashOutputBytes_;
 
         // First hash to seed the lookup table, input is variable length anyway
         fc::sha512 hash = sha512.hash(saltedPassword);
@@ -40,7 +40,7 @@ namespace fc
 
         // Compute <sequenceCount_> consecutive hashes of the passphrase
         // Every iteration is stored in the next 64-bytes in the Lookup table
-        for( u_int32_t nByte = 0; nByte < memoryReqtBytes_ - HSZ; nByte += HSZ )
+        for( uint32_t nByte = 0; nByte < memoryReqtBytes_ - HSZ; nByte += HSZ )
         {
             // Compute hash of slot i, put result in slot i+1
             fc::sha512 hash = sha512.hash(lookupTable_ + nByte, HSZ);
@@ -54,11 +54,11 @@ namespace fc
 
         // We "integerize" a hash value by taking the last 4 bytes of
         // as a u_int32_t, and take modulo sequenceCount
-        u_int64_t* X64ptr = (u_int64_t*)(X.data());
-        u_int64_t* Y64ptr = (u_int64_t*)(Y.data());
-        u_int64_t* V64ptr = NULL;
-        u_int32_t newIndex;
-        u_int32_t const nXorOps = HSZ / sizeof(u_int64_t);
+        uint64_t* X64ptr = (uint64_t*)(X.data());
+        uint64_t* Y64ptr = (uint64_t*)(Y.data());
+        uint64_t* V64ptr = NULL;
+        uint32_t newIndex;
+        uint32_t const nXorOps = HSZ / sizeof(uint64_t);
 
         // Pure ROMix would use sequenceCount_ for the number of lookups.
         // We divide by 2 to reduce computation time RELATIVE to the memory usage
@@ -66,17 +66,17 @@ namespace fc
         // memory in the same amount of time (and this is the justification for
         // the scrypt algorithm -- it is basically ROMix, modified for more
         // flexibility in controlling compute-time vs memory-usage).
-        u_int32_t const nLookups = sequenceCount_ / 2;
-        for(u_int32_t nSeq=0; nSeq<nLookups; nSeq++)
+        uint32_t const nLookups = sequenceCount_ / 2;
+        for(uint32_t nSeq=0; nSeq<nLookups; nSeq++)
         {
             // Interpret last 4 bytes of last result (mod seqCt) as next LUT index
-            newIndex = *(u_int32_t*)(X.data()+HSZ-4) % sequenceCount_;
+            newIndex = *(uint32_t*)(X.data()+HSZ-4) % sequenceCount_;
 
             // V represents the hash result at <newIndex>
-            V64ptr = (u_int64_t*)(lookupTable_ + HSZ * newIndex);
+            V64ptr = (uint64_t*)(lookupTable_ + HSZ * newIndex);
 
             // xor X with V, and store the result in X
-            for(u_int32_t i = 0; i < nXorOps; i++)
+            for(uint32_t i = 0; i < nXorOps; i++)
                 *(Y64ptr + i) = *(X64ptr + i) ^ *(V64ptr + i);
 
             // Hash the xor'd data to get the next index for lookup
@@ -91,7 +91,7 @@ namespace fc
     std::string romix::deriveKey( std::string const & password )
     {
         std::string masterKey(password);
-        for(u_int32_t i=0; i<numIterations_; i++)
+        for(uint32_t i=0; i<numIterations_; i++)
             masterKey = deriveKey_OneIter(masterKey);
 
         return masterKey;

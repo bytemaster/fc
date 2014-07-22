@@ -70,11 +70,11 @@ namespace fc {
       return t;
    }
 
-   thread::thread( const char* name  ) {
+   thread::thread( const std::string& name  ) {
       promise<void>::ptr p(new promise<void>());
       boost::thread* t = new boost::thread( [this,p,name]() {
           try {
-		    set_thread_name(name); // set thread's name for the debugger to display
+		    set_thread_name(name.c_str()); // set thread's name for the debugger to display
             this->my = new thread_d(*this);
             current_thread() = this;
             p->set_value();
@@ -108,7 +108,7 @@ namespace fc {
    }
 
    thread::~thread() {
-      //slog( "my %p", my );
+      //wlog( "my ${n}", ("n",name()) );
       if( is_current() )
       {
         wlog( "delete my" );
@@ -126,22 +126,20 @@ namespace fc {
    void          thread::debug( const fc::string& d ) { /*my->debug(d);*/ }
 
    void thread::quit() {
-     //if quiting from a different thread, start quit task on thread.
+     //if quitting from a different thread, start quit task on thread.
      //If we have and know our attached boost thread, wait for it to finish, then return.
       if( &current() != this ) {
           async( [=](){quit();} );//.wait();
           if( my->boost_thread ) {
             auto n = name();
-            ilog( "joining... ${n}", ("n",n) );//n.c_str() );
             my->boost_thread->join();
             delete my;
             my = nullptr;
-            ilog( "done joining...${n}", ("n",n) ); //n.c_str() );
           }
           return;
       }
 
- //     wlog( "%s", my->name.c_str() );
+      wlog( "${s}", ("s",name()) );
       // We are quiting from our own thread...
 
       // break all promises, thread quit!
@@ -157,8 +155,8 @@ namespace fc {
             cur = n;
         }
         if( my->blocked ) { 
-  //        wlog( "still blocking... whats up with that?");
-  //        debug( "on quit" ); 
+          wlog( "still blocking... whats up with that?");
+          debug( "on quit" ); 
         }
       }
       BOOST_ASSERT( my->blocked == 0 );
@@ -200,7 +198,7 @@ namespace fc {
    void thread::exec() {
       if( !my->current ) my->current = new fc::context(&fc::thread::current());
       try {
-      my->process_tasks(); 
+        my->process_tasks(); 
       } 
       catch( canceled_exception& )
       {
@@ -225,35 +223,15 @@ namespace fc {
       my->start_next_fiber(reschedule);
       my->check_fiber_exceptions();
    }
+
    void thread::sleep_until( const time_point& tp ) {
-      //ilog( "sleep until ${tp}    wait: ${delta}", ("tp",tp)("delta",(tp-fc::time_point::now()).count()) );
-     
       if( tp <= (time_point::now()+fc::microseconds(10000)) ) 
       {
          this->yield(true);
       }
       my->yield_until( tp, false );
-      /*
-      my->check_fiber_exceptions();
-      
-      BOOST_ASSERT( &current() == this );
-      if( !my->current )  {
-        my->current = new fc::context(&fc::thread::current());
-      }
-
-      my->current->resume_time = tp;
-      my->current->clear_blocking_promises();
-
-      my->sleep_pqueue.push_back(my->current);
-      std::push_heap( my->sleep_pqueue.begin(),
-                      my->sleep_pqueue.end(), sleep_priority_less()   );
-
-      my->start_next_fiber();
-      my->current->resume_time = time_point::maximum();
-
-      my->check_fiber_exceptions();
-      */
    }
+
    int  thread::wait_any_until( std::vector<promise_base::ptr>&& p, const time_point& timeout) {
        for( size_t i = 0; i < p.size(); ++i ) {
          if( p[i]->ready() ) return i;

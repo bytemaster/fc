@@ -16,6 +16,7 @@ int main( int argc, char** argv )
       auto hours = delta.count() / 1000000 / 60 / 60;
       auto seconds = delta.count() / 1000000;
       auto msec= delta.count() / 1000;
+      idump( (fc::time_point::now() ) );
       idump( (ntp_time)(delta)(msec)(seconds)(minutes)(hours) );
    }
    else

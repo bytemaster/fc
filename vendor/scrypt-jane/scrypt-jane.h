@@ -19,9 +19,15 @@
 
 #include <stdlib.h>
 
-typedef void (*scrypt_fatal_errorfn)(const char *msg);
-void scrypt_set_fatal_error(scrypt_fatal_errorfn fn);
+#ifdef __cplusplus
+extern "C" {
+#endif
+    typedef void (*scrypt_fatal_errorfn)(const char *msg);
+    void scrypt_set_fatal_error(scrypt_fatal_errorfn fn);
 
-void scrypt(const unsigned char *password, size_t password_len, const unsigned char *salt, size_t salt_len, unsigned char Nfactor, unsigned char rfactor, unsigned char pfactor, unsigned char *out, size_t bytes);
+    void scrypt(const unsigned char *password, size_t password_len, const unsigned char *salt, size_t salt_len, unsigned char Nfactor, unsigned char rfactor, unsigned char pfactor, unsigned char *out, size_t bytes);
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* SCRYPT_JANE_H */

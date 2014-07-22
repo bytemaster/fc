@@ -52,8 +52,8 @@ ENDIF (APPLE)
 
 ### copy the two required headers into our output dir as a post build step
 # copy public headers to output directory
-FOREACH (header ${PUB_HDRS})
+#FOREACH (header ${PUB_HDRS})
   # preserve relative pathing		
-  ADD_CUSTOM_COMMAND(TARGET easylzma_s POST_BUILD
-      COMMAND ${CMAKE_COMMAND} -E copy_if_different ${header} ${incDir})
-ENDFOREACH (header ${PUB_HDRS})
+  #ADD_CUSTOM_COMMAND(TARGET easylzma_s POST_BUILD
+  #COMMAND ${CMAKE_COMMAND} -E copy_if_different ${header} ${incDir})
+  #ENDFOREACH (header ${PUB_HDRS})

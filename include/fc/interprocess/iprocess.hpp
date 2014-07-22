@@ -32,7 +32,7 @@ namespace fc
            *  @return *this
            */
           virtual iprocess& exec( const path& exe, std::vector<std::string> args, 
-                                  const path& work_dir = path(), exec_opts opts = open_all ) = 0;
+                                  const path& work_dir = path(), int opts = open_all ) = 0;
 
           /**
            *  @return blocks until the process exits

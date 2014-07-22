@@ -79,11 +79,11 @@ namespace asio {
      *  @return the number of bytes read.
      */
     template<typename AsyncReadStream, typename MutableBufferSequence>
-    size_t read_some(AsyncReadStream& s, const MutableBufferSequence& buf)
+    future<size_t> read_some(AsyncReadStream& s, const MutableBufferSequence& buf)
     {
       promise<size_t>::ptr p(new promise<size_t>("fc::asio::async_read_some"));
       s.async_read_some(buf, boost::bind(detail::read_write_handler, p, _1, _2));
-      return p->wait();
+      return p;//->wait();
     }
 
     template<typename AsyncReadStream, typename MutableBufferSequence>
@@ -117,10 +117,10 @@ namespace asio {
      *  @return the number of bytes written
      */
     template<typename AsyncWriteStream, typename ConstBufferSequence>
-    size_t write_some( AsyncWriteStream& s, const ConstBufferSequence& buf ) {
+    future<size_t> write_some( AsyncWriteStream& s, const ConstBufferSequence& buf ) {
         promise<size_t>::ptr p(new promise<size_t>("fc::asio::write_some"));
         s.async_write_some( buf, boost::bind( detail::read_write_handler, p, _1, _2 ) );
-        return p->wait();
+        return p; //->wait();
     }
 
     /**
@@ -183,7 +183,7 @@ namespace asio {
 
           virtual size_t readsome( char* buf, size_t len )
           {
-             auto r = fc::asio::read_some(*_stream, boost::asio::buffer(buf, len) );
+             auto r = fc::asio::read_some(*_stream, boost::asio::buffer(buf, len) ).wait();
              return r;
           }
     
@@ -200,7 +200,7 @@ namespace asio {
 
           virtual size_t writesome( const char* buf, size_t len )
           {
-             return fc::asio::write_some(*_stream, boost::asio::const_buffers_1(buf, len) );
+             return fc::asio::write_some(*_stream, boost::asio::const_buffers_1(buf, len) ).wait();
           }
     
           virtual void       close(){ _stream->close(); }

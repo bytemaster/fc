@@ -184,14 +184,15 @@ namespace fc {
       /// @post ready()
       /// @throws timeout
       const T& wait( const microseconds& timeout = microseconds::maximum() )const {
-        return m_prom->wait(timeout);
+           return m_prom->wait(timeout);
       }
 
       /// @pre valid()
       /// @post ready()
       /// @throws timeout
       const T& wait_until( const time_point& tp )const {
-        return m_prom->wait_until(tp);
+         if( m_prom )
+           return m_prom->wait_until(tp);
       }
 
       bool valid()const { return !!m_prom;       }
@@ -203,7 +204,16 @@ namespace fc {
       bool error()const { return m_prom->error(); }
 
       void cancel()const { if( m_prom ) m_prom->cancel(); }
-      bool canceled()const { return m_prom->canceled(); }
+      bool canceled()const { if( m_prom ) return m_prom->canceled(); else return true;}
+
+      void cancel_and_wait()
+      {
+         if( valid() )
+         {
+            cancel();
+            wait();
+         }
+      }
 
       /**
        * @pre valid()
@@ -239,7 +249,8 @@ namespace fc {
       /// @post ready()
       /// @throws timeout
       void wait( const microseconds& timeout = microseconds::maximum() ){
-        m_prom->wait(timeout);
+         if( m_prom )
+           m_prom->wait(timeout);
       }
 
       /// @pre valid()
@@ -250,7 +261,13 @@ namespace fc {
       }
 
       bool valid()const    { return !!m_prom;           }
-      bool canceled()const { return m_prom->canceled(); }
+      bool canceled()const { return m_prom ? m_prom->canceled() : true; }
+
+      void cancel_and_wait() 
+      {
+         cancel();
+         wait();
+      }
 
       /// @pre valid()
       bool ready()const { return m_prom->ready(); }

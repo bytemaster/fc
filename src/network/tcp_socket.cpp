@@ -23,21 +23,25 @@ namespace fc {
       {
         if( _sock.is_open() ) 
           _sock.close();
+        if( _read_in_progress.valid() ) try { _read_in_progress.wait(); } catch ( ... ) {}
+        if( _write_in_progress.valid() ) try { _write_in_progress.wait(); } catch ( ... ) {}
       }
       virtual size_t readsome(boost::asio::ip::tcp::socket& socket, char* buffer, size_t length) override;
       virtual size_t writesome(boost::asio::ip::tcp::socket& socket, const char* buffer, size_t length) override;
 
+      fc::future<size_t> _write_in_progress;
+      fc::future<size_t> _read_in_progress;
       boost::asio::ip::tcp::socket _sock;
       tcp_socket_io_hooks* _io_hooks;
   };
 
   size_t tcp_socket::impl::readsome(boost::asio::ip::tcp::socket& socket, char* buffer, size_t length)
   {
-    return fc::asio::read_some(socket, boost::asio::buffer(buffer, length));
+    return (_read_in_progress = fc::asio::read_some(socket, boost::asio::buffer(buffer, length))).wait();
   }
   size_t tcp_socket::impl::writesome(boost::asio::ip::tcp::socket& socket, const char* buffer, size_t length)
   {
-    return fc::asio::write_some(socket, boost::asio::buffer(buffer, length));
+    return (_write_in_progress = fc::asio::write_some(socket, boost::asio::buffer(buffer, length))).wait();
   }
 
 

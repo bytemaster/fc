@@ -9,7 +9,7 @@ namespace fc {
 
   class thread {
     public:
-      thread( const char* name = "" );
+      thread( const std::string& name = "" );
       thread( thread&& m );
       thread& operator=(thread&& t );
 
@@ -174,6 +174,10 @@ namespace fc {
    template<typename Functor>
    auto async( Functor&& f, const char* desc ="", priority prio = priority()) -> fc::future<decltype(f())> {
       return fc::thread::current().async( fc::forward<Functor>(f), desc, prio );
+   }
+   template<typename Functor>
+   auto schedule( Functor&& f, const fc::time_point& t, const char* desc ="", priority prio = priority()) -> fc::future<decltype(f())> {
+      return fc::thread::current().schedule( fc::forward<Functor>(f), t, desc, prio );
    }
 
 } // end namespace fc

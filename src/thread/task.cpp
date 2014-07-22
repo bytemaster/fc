@@ -35,7 +35,10 @@ namespace fc {
   }
   void task_base::run_impl() {
     try {
-      _run_functor( _functor, _promise_impl  );
+      if( !canceled() )
+         _run_functor( _functor, _promise_impl  );
+      else
+         FC_THROW_EXCEPTION( canceled_exception, "${description}", ("description", get_desc() ) );
     } 
     catch ( const exception& e ) 
     {

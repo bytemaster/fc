@@ -33,7 +33,7 @@ endif()
 SET (ORIGINAL_LIB_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES})
 
 SET(BOOST_COMPONENTS)
-LIST(APPEND BOOST_COMPONENTS thread date_time system filesystem program_options signals serialization chrono unit_test_framework context locale)
+LIST(APPEND BOOST_COMPONENTS thread date_time system filesystem program_options signals serialization chrono unit_test_framework context locale iostreams)
 
 IF( WIN32 )
   MESSAGE(STATUS "Configuring fc to build on Win32")
@@ -147,10 +147,10 @@ set( fc_sources
      src/crypto/rand.cpp
      src/crypto/salsa20.cpp
      src/crypto/scrypt.cpp
-# commented out until committed
-#     src/crypto/romix.cpp
+     src/crypto/romix.cpp
      src/network/tcp_socket.cpp
      src/network/udp_socket.cpp
+     src/network/udt_socket.cpp
      src/network/http/http_connection.cpp
      src/network/http/http_server.cpp
      src/network/ntp.cpp
@@ -182,6 +182,7 @@ list(APPEND sources "${CMAKE_CURRENT_BINARY_DIR}/git_revision.cpp")
 list(APPEND sources ${fc_headers})
 
 add_subdirectory( vendor/easylzma )
+add_subdirectory( vendor/scrypt-jane )
 add_subdirectory( vendor/udt4 )
 
 setup_library( fc SOURCES ${sources} LIBRARY_TYPE STATIC DONT_INSTALL_LIBRARY )
@@ -199,10 +200,9 @@ ELSE()
   SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99 -Wall")
 
   IF(APPLE)
-    SET(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -std=c++11 -stdlib=libc++ -Wall")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -stdlib=libc++ -Wall")
   ELSE()
-    target_compile_options(fc PUBLIC -std=c++11 -Wall -fnon-call-exceptions)
-    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -fnon-call-exceptions")
   ENDIF()
 ENDIF()
  
@@ -220,18 +220,24 @@ target_include_directories(fc
     ${CMAKE_CURRENT_SOURCE_DIR}/vendor/udt4/src
   )
 
-target_link_libraries( fc PUBLIC easylzma_static ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} ${ZLIB_LIBRARIES} ${PLATFORM_SPECIFIC_LIBS} ${RPCRT4} ${CMAKE_DL_LIBS} ${rt_library})
+target_link_libraries( fc PUBLIC easylzma_static scrypt udt ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} ${ZLIB_LIBRARIES} ${PLATFORM_SPECIFIC_LIBS} ${RPCRT4} ${CMAKE_DL_LIBS} ${rt_library})
 
 add_executable( ntp_test ntp_test.cpp )
 target_link_libraries( ntp_test fc )
 
+add_executable( task_cancel_test tests/task_cancel.cpp )
+target_link_libraries( task_cancel_test fc )
+
 #include_directories( vendor/udt4/src )
 
-#add_executable( udt_server tests/udt_server.cpp )
-#target_link_libraries( udt_server fc udt )
+add_executable( udt_server tests/udts.cpp )
+target_link_libraries( udt_server fc udt )
 
-#add_executable( udt_client tests/udt_client.cpp )
-#target_link_libraries( udt_client fc udt )
+add_executable( udt_client tests/udtc.cpp )
+target_link_libraries( udt_client fc udt )
+
+add_executable( lzma_test tests/lzma_test.cpp )
+target_link_libraries( lzma_test fc )
 
 #add_executable( test_compress tests/compress.cpp )
 #target_link_libraries( test_compress fc )

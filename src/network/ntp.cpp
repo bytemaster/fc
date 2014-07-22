@@ -16,20 +16,19 @@ namespace fc
      class ntp_impl 
      {
         public:
-           ntp_impl() :_request_interval_sec( 60*60 /* 1 hr */) 
+           ntp_impl():_request_interval_sec( 60*60 /* 1 hr */),_ntp_thread("ntp") 
            { 
-              _next_request_time = fc::time_point::now();
               _ntp_hosts.push_back( std::make_pair( "pool.ntp.org",123 ) );
            } 
 
            /** vector < host, port >  */
            std::vector< std::pair< std::string, uint16_t> > _ntp_hosts;
-           fc::future<void>                                 _request_loop;
            fc::future<void>                                 _read_loop;
            udp_socket                                       _sock;
            uint32_t                                         _request_interval_sec;
-           fc::time_point                                   _next_request_time;
+           fc::time_point                                   _last_request_time;
            optional<fc::microseconds>                       _last_ntp_delta;
+           fc::thread                                       _ntp_thread;
 
            void request_now()
            {
@@ -43,6 +42,7 @@ namespace fc
                      {
                         ilog( "sending request to ${ep}", ("ep",ep) );
                         std::array<unsigned char, 48> send_buf { {010,0,0,0,0,0,0,0,0} };
+                        _last_request_time = fc::time_point::now();
                         _sock.send_to( (const char*)send_buf.data(), send_buf.size(), ep );
                         break;
                      }
@@ -55,17 +55,10 @@ namespace fc
                }
            } // request_now
 
-           void request_loop()
+           void request_time()
            {
-              while( !_request_loop.canceled() )
-              { 
-                  if( _next_request_time < fc::time_point::now() )
-                  {
-                     _next_request_time += fc::seconds( _request_interval_sec );
-                     request_now();
-                  }
-                  fc::usleep( fc::seconds(1) ); // TODO: fix FC timers..
-              } // while
+              request_now();
+              _ntp_thread.schedule( [=](){ request_time(); }, fc::time_point::now() + fc::seconds(_request_interval_sec) );
            } // request_loop
 
            void read_loop()
@@ -86,14 +79,19 @@ namespace fc
                  uint32_t seconds_since_1900 = receive_timestamp_host >> 32;
                  uint32_t seconds_since_epoch = seconds_since_1900 - 2208988800;
 
-                 auto ntp_time = (fc::time_point() + fc::seconds(seconds_since_epoch) + fc::microseconds(microseconds));
-                 if( ntp_time - fc::time_point::now() < fc::seconds(60*60*24) &&
-                     fc::time_point::now() - ntp_time < fc::seconds(60*60*24) )
-                 {
-                    _last_ntp_delta =  ntp_time - fc::time_point::now();
-                 }
+                 if( fc::time_point::now() - _last_request_time > fc::seconds(1) )
+                    request_now();
                  else
-                    elog( "NTP time is way off ${time}", ("time",ntp_time)("local",fc::time_point::now()) );
+                 {
+                    auto ntp_time = (fc::time_point() + fc::seconds(seconds_since_epoch) + fc::microseconds(microseconds));
+                    if( ntp_time - fc::time_point::now() < fc::seconds(60*60*24) &&
+                        fc::time_point::now() - ntp_time < fc::seconds(60*60*24) )
+                    {
+                       _last_ntp_delta =  ntp_time - fc::time_point::now();
+                    }
+                    else
+                       elog( "NTP time is way off ${time}", ("time",ntp_time)("local",fc::time_point::now()) );
+                 }
               }
            } // read_loop
      };
@@ -108,17 +106,15 @@ namespace fc
   {
      my->_sock.open();
 
-     my->_request_loop = fc::async( [=](){ my->request_loop(); } );
-     my->_read_loop    = fc::async( [=](){ my->read_loop(); } );
+     my->_ntp_thread.async( [=](){ my->request_time(); } );
+     my->_read_loop =  my->_ntp_thread.async( [=](){ my->read_loop(); } );
   }
 
   ntp::~ntp()
   {
     try {
-        my->_request_loop.cancel();
         my->_read_loop.cancel();
         my->_sock.close();
-        my->_request_loop.wait();
         my->_read_loop.wait();
     } 
     catch ( const fc::exception& )
@@ -137,8 +133,8 @@ namespace fc
   void ntp::set_request_interval( uint32_t interval_sec )
   {
      my->_request_interval_sec = interval_sec;
-     my->_next_request_time = fc::time_point::now();
   }
+
   void ntp::request_now()
   {
      my->request_now();

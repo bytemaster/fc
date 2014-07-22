@@ -165,6 +165,9 @@ namespace fc {
    */
   const path& app_path();
 
+  /** @return application executable path */
+  const fc::path& current_path();
+
   class variant;
   void to_variant( const fc::path&,  fc::variant&  );
   void from_variant( const fc::variant& , fc::path& );

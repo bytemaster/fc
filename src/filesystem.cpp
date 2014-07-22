@@ -421,4 +421,10 @@ namespace fc {
       #endif
       return appdir;
    }
+
+   const fc::path& current_path()
+   {
+     static fc::path appCurrentPath = boost::filesystem::current_path();
+     return appCurrentPath;
+   }
 }

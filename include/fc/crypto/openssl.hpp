@@ -58,7 +58,7 @@ namespace fc
 
     /** Allows to explicitly specify OpenSSL configuration file path to be loaded at OpenSSL library init.
         If not set OpenSSL will try to load the conf. file (openssl.cnf) from the path it was
-        configured with what caused serious Keyhotee startup bugs on some Win7 machines.
+        configured with what caused serious Keyhotee startup bugs on some Win7, Win8 machines.
         \warning to be effective this method should be used before any part using OpenSSL, especially
         before init_openssl call
     */

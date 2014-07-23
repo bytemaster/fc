@@ -21,10 +21,10 @@ namespace fc { namespace http {
          fc::stringstream ss;
          ss << "HTTP/1.1 " << rep.status << " ";
          switch( rep.status ) {
-            case fc::http::reply::OK: ss << "OK\n\r"; break;
-            case fc::http::reply::RecordCreated: ss << "Record Created\n\r"; break;
-            case fc::http::reply::NotFound: ss << "Not Found\n\r"; break;
-            case fc::http::reply::Found: ss << "Found\n\r"; break;
+            case fc::http::reply::OK: ss << "OK\r\n"; break;
+            case fc::http::reply::RecordCreated: ss << "Record Created\r\n"; break;
+            case fc::http::reply::NotFound: ss << "Not Found\r\n"; break;
+            case fc::http::reply::Found: ss << "Found\r\n"; break;
             case fc::http::reply::InternalServerError: ss << "Internal Server Error\r\n"; break;
          }
          for( uint32_t i = 0; i < rep.headers.size(); ++i ) {

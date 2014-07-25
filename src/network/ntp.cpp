@@ -44,6 +44,8 @@ namespace fc
                         std::array<unsigned char, 48> send_buf { {010,0,0,0,0,0,0,0,0} };
                         _last_request_time = fc::time_point::now();
                         _sock.send_to( (const char*)send_buf.data(), send_buf.size(), ep );
+                        if (!_read_loop.valid() || _read_loop.ready())
+                          _read_loop = async( [this](){ read_loop(); } );
                         break;
                      }
                   } 
@@ -105,9 +107,9 @@ namespace fc
   :my( new detail::ntp_impl() )
   {
      my->_sock.open();
-
+     // if you start the read loop here, the recieve_from call will throw "invalid argument" on win32,
+     // so instead we trigger the read loop after making our first request
      my->_ntp_thread.async( [=](){ my->request_time(); } );
-     my->_read_loop =  my->_ntp_thread.async( [=](){ my->read_loop(); } );
   }
 
   ntp::~ntp()
@@ -137,7 +139,7 @@ namespace fc
 
   void ntp::request_now()
   {
-     my->request_now();
+     my->_ntp_thread.async( [=](){ my->request_now(); } ).wait();
   }
 
   optional<time_point> ntp::get_time()const

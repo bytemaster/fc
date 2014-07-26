@@ -211,7 +211,13 @@ namespace fc {
          if( valid() )
          {
             cancel();
-            wait();
+            try
+            {
+              wait();
+            }
+            catch (const canceled_exception&)
+            {
+            }
          }
       }
 
@@ -265,8 +271,14 @@ namespace fc {
 
       void cancel_and_wait() 
       {
-         cancel();
-         wait();
+        cancel();
+        try
+        {
+          wait();
+        }
+        catch (const canceled_exception&)
+        {
+        }
       }
 
       /// @pre valid()

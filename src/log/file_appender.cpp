@@ -82,14 +82,22 @@ namespace fc {
 
          ~impl()
          {
-             try
-             {
-                 _rotation_task.cancel_and_wait();
-                 if( _compression_thread ) _compression_thread->quit();
-             }
-             catch( ... )
-             {
-             }
+            try
+            {
+              _rotation_task.cancel_and_wait();
+            }
+            catch( ... )
+            {
+            }
+
+            try
+            {
+              if( _compression_thread ) 
+                _compression_thread->quit();
+            }
+            catch( ... )
+            {
+            }
          }
 
          void rotate_files( bool initializing = false )
@@ -108,7 +116,7 @@ namespace fc {
                {
                    if( start_time <= _current_file_start_time )
                    {
-                       _rotation_task = schedule( [this]() { rotate_files(); }, _current_file_start_time + cfg.rotation_interval.to_seconds() );
+                       _rotation_task = schedule( [this]() { rotate_files(); }, _current_file_start_time + cfg.rotation_interval.to_seconds(), "log_rotation_task" );
                        return;
                    }
 

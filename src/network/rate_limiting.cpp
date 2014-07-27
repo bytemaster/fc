@@ -213,7 +213,7 @@ namespace fc
 
         // launch the read processing loop it if isn't running, or signal it to resume if it's paused.
         if (!_process_pending_reads_loop_complete.valid() || _process_pending_reads_loop_complete.ready())
-          _process_pending_reads_loop_complete = async([=](){ process_pending_reads(); });
+          _process_pending_reads_loop_complete = async([=](){ process_pending_reads(); }, "process_pending_reads" );
         else if (_new_read_operation_available_promise)
           _new_read_operation_available_promise->set_value();
 
@@ -238,7 +238,7 @@ namespace fc
 
         // launch the write processing loop it if isn't running, or signal it to resume if it's paused.
         if (!_process_pending_writes_loop_complete.valid() || _process_pending_writes_loop_complete.ready())
-          _process_pending_writes_loop_complete = async([=](){ process_pending_writes(); });
+          _process_pending_writes_loop_complete = async([=](){ process_pending_writes(); }, "process_pending_writes");
         else if (_new_write_operation_available_promise)
           _new_write_operation_available_promise->set_value();
 

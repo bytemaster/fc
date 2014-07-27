@@ -49,7 +49,7 @@ namespace fc {
              FC_ASSERT( _compression_thread );
              if( !_compression_thread->is_current() )
              {
-                 _compression_thread->async( [this, filename]() { compress_file( filename ); } ).wait();
+                 _compression_thread->async( [this, filename]() { compress_file( filename ); }, "compress_file" ).wait();
                  return;
              }
 
@@ -74,7 +74,7 @@ namespace fc {
                  if( cfg.rotation_compression )
                      _compression_thread.reset( new thread( "compression") );
 
-                 _rotation_task = async( [this]() { rotate_files( true ); } );
+                 _rotation_task = async( [this]() { rotate_files( true ); }, "rotate_files" );
              }
          }
 

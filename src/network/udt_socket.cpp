@@ -31,7 +31,7 @@ namespace fc {
             UDT::startup();
             check_udt_errors();
             _epoll_id = UDT::epoll_create();
-            _epoll_loop = _epoll_thread.async( [=](){ poll_loop(); } );
+            _epoll_loop = _epoll_thread.async( [=](){ poll_loop(); }, "udt_poll_loop" );
          }
 
          ~udt_epoll_service()

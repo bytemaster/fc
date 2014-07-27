@@ -160,7 +160,7 @@ namespace fc
       {
         wlog( "Exception thrown while shutting down NTP's read_loop, ignoring" );
       }
-    }).wait();
+    }, "ntp_shutdown_task").wait();
   }
 
 

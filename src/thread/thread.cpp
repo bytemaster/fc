@@ -129,7 +129,7 @@ namespace fc {
      //if quitting from a different thread, start quit task on thread.
      //If we have and know our attached boost thread, wait for it to finish, then return.
       if( &current() != this ) {
-          async( [=](){quit();} );//.wait();
+          async( [=](){quit();}, "thread::quit" );//.wait();
           if( my->boost_thread ) {
             auto n = name();
             my->boost_thread->join();
@@ -139,7 +139,7 @@ namespace fc {
           return;
       }
 
-      wlog( "${s}", ("s",name()) );
+      //wlog( "${s}", ("s",name()) );
       // We are quiting from our own thread...
 
       // break all promises, thread quit!
@@ -155,7 +155,7 @@ namespace fc {
             cur = n;
         }
         if( my->blocked ) { 
-          wlog( "still blocking... whats up with that?");
+          //wlog( "still blocking... whats up with that?");
           debug( "on quit" ); 
         }
       }
@@ -289,6 +289,7 @@ namespace fc {
    void thread::async_task( task_base* t, const priority& p, const time_point& tp, const char* desc ) {
       assert(my);
       t->_when = tp;
+      t->_desc = desc;
      // slog( "when %lld", t->_when.time_since_epoch().count() );
      // slog( "delay %lld", (tp - fc::time_point::now()).count() );
       task_base* stale_head = my->task_in_queue.load(boost::memory_order_relaxed);

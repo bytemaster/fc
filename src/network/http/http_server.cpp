@@ -50,7 +50,7 @@ namespace fc { namespace http {
       impl(){}
       impl(const fc::ip::endpoint& p ) {
         tcp_serv.listen(p);
-        accept_complete = fc::async([this](){ this->accept_loop(); });
+        accept_complete = fc::async([this](){ this->accept_loop(); }, "http_server accept_loop");
       }
       fc::future<void> accept_complete;
       ~impl() {
@@ -66,7 +66,7 @@ namespace fc { namespace http {
               http::connection_ptr con = std::make_shared<http::connection>();
               tcp_serv.accept( con->get_socket() );
               //ilog( "Accept Connection" );
-              fc::async( [=](){ handle_connection( con, on_req ); } );
+              fc::async( [=](){ handle_connection( con, on_req ); }, "http_server handle_connection" );
             }
       }
 
@@ -144,7 +144,7 @@ namespace fc { namespace http {
       if( false || my->handle_next_req ) {
         ilog( "handle next request..." );
         //fc::async( std::function<void()>(my->handle_next_req) );
-        fc::async( my->handle_next_req );
+        fc::async( my->handle_next_req, "http_server handle_next_req" );
       }
     }
   }

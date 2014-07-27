@@ -17,7 +17,7 @@ namespace fc {
   struct cin_buffer {
     cin_buffer():eof(false),write_pos(0),read_pos(0),cinthread("cin"){
     
-      cinthread.async( [=](){read();} );
+      cinthread.async( [=](){read();}, "cin_buffer::read" );
     }
 
     void     read() {

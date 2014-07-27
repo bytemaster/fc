@@ -6,7 +6,6 @@
 #include <fc/thread/scoped_lock.hpp>
 #include <fc/thread/thread.hpp>
 #include <fc/variant.hpp>
-#include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/thread/mutex.hpp>
 #include <iomanip>
 #include <queue>
@@ -36,8 +35,7 @@ namespace fc {
 
          string timestamp_to_string( const time_point_sec& timestamp )
          {
-             auto ptime = boost::posix_time::from_time_t( time_t ( timestamp.sec_since_epoch() ) );
-             return boost::posix_time::to_iso_string( ptime );
+             return timestamp.to_iso_string();
          }
 
          time_point_sec string_to_timestamp( const string& str )

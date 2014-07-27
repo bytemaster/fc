@@ -109,6 +109,9 @@ namespace fc {
         friend microseconds operator - ( const time_point_sec& t, const time_point_sec& m ) { return time_point(t) - time_point(m); }
         friend microseconds operator - ( const time_point& t, const time_point_sec& m ) { return time_point(t) - time_point(m); }
 
+        fc::string to_iso_string()const;
+        fc::string to_iso_extended_string()const;
+
     private:
         uint32_t utc_seconds;
   };

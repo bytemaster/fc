@@ -194,7 +194,7 @@ namespace fc {
       connect_thread.async( [&](){
          if( UDT::ERROR == UDT::connect(_udt_socket_id, (sockaddr*)&serv_addr, sizeof(serv_addr)) )
             check_udt_errors();
-      }).wait();
+      }, "udt_socket::connect_to").wait();
 
       bool block = false;
       UDT::setsockopt(_udt_socket_id, 0, UDT_SNDSYN, &block, sizeof(bool));

@@ -71,7 +71,7 @@ namespace fc {
    }
 
    thread::thread( const std::string& name  ) {
-      promise<void>::ptr p(new promise<void>());
+      promise<void>::ptr p(new promise<void>("thread start"));
       boost::thread* t = new boost::thread( [this,p,name]() {
           try {
 		    set_thread_name(name.c_str()); // set thread's name for the debugger to display
@@ -277,8 +277,8 @@ namespace fc {
        return -1;
    }
 
-   void thread::async_task( task_base* t, const priority& p, const char* desc ) {
-      async_task( t, p, time_point::min(), desc );
+   void thread::async_task( task_base* t, const priority& p ) {
+      async_task( t, p, time_point::min() );
    }
 
    void thread::poke() {
@@ -286,10 +286,9 @@ namespace fc {
      my->task_ready.notify_one();
    }
 
-   void thread::async_task( task_base* t, const priority& p, const time_point& tp, const char* desc ) {
+   void thread::async_task( task_base* t, const priority& p, const time_point& tp ) {
       assert(my);
       t->_when = tp;
-      t->_desc = desc;
      // slog( "when %lld", t->_when.time_since_epoch().count() );
      // slog( "delay %lld", (tp - fc::time_point::now()).count() );
       task_base* stale_head = my->task_in_queue.load(boost::memory_order_relaxed);

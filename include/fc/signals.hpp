@@ -26,13 +26,13 @@ namespace fc {
 
    template<typename T>
    inline T wait( boost::signals2::signal<void(T)>& sig, const microseconds& timeout_us=microseconds::maximum() ) {
-     typename promise<T>::ptr p(new promise<T>());
+     typename promise<T>::ptr p(new promise<T>("fc::signal::wait"));
      boost::signals2::scoped_connection c( sig.connect( [=]( T t ) { p->set_value(t); } )); 
      return p->wait( timeout_us ); 
    }
 
    inline void wait( boost::signals2::signal<void()>& sig, const microseconds& timeout_us=microseconds::maximum() ) {
-     promise<void>::ptr p(new promise<void>());
+     promise<void>::ptr p(new promise<void>("fc::signal::wait"));
      boost::signals2::scoped_connection c( sig.connect( [=]() { p->set_value(); } )); 
      p->wait( timeout_us ); 
    }

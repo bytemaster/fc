@@ -487,7 +487,7 @@ namespace fc {
 
          void unblock( fc::context* c ) {
              if(  fc::thread::current().my != this ) {
-               self.async( [=](){ unblock(c); } );
+               self.async( [=](){ unblock(c); }, "thread_d::unblock" );
                return;
              }
                if( c != current ) ready_push_front(c); 

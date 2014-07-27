@@ -207,7 +207,7 @@ namespace fc
       size_t bytes_read;
       if (_download_bytes_per_second)
       {
-        promise<size_t>::ptr completion_promise(new promise<size_t>());
+        promise<size_t>::ptr completion_promise(new promise<size_t>("rate_limiting_group_impl::readsome"));
         rate_limited_tcp_read_operation read_operation(socket, buffer, length, completion_promise);
         _read_operations_for_next_iteration.push_back(&read_operation);
 
@@ -232,7 +232,7 @@ namespace fc
       size_t bytes_written;
       if (_upload_bytes_per_second)
       {
-        promise<size_t>::ptr completion_promise(new promise<size_t>());
+        promise<size_t>::ptr completion_promise(new promise<size_t>("rate_limiting_group_impl::writesome"));
         rate_limited_tcp_write_operation write_operation(socket, buffer, length, completion_promise);
         _write_operations_for_next_iteration.push_back(&write_operation);
 
@@ -259,7 +259,7 @@ namespace fc
         process_pending_operations(_last_read_iteration_time, _download_bytes_per_second,
                                    _read_operations_in_progress, _read_operations_for_next_iteration, _read_tokens, _unused_read_tokens);
 
-        _new_read_operation_available_promise = new promise<void>();
+        _new_read_operation_available_promise = new promise<void>("rate_limiting_group_impl::process_pending_reads");
         try
         {
           if (_read_operations_in_progress.empty())
@@ -280,7 +280,7 @@ namespace fc
         process_pending_operations(_last_write_iteration_time, _upload_bytes_per_second,
                                    _write_operations_in_progress, _write_operations_for_next_iteration, _write_tokens, _unused_write_tokens);
 
-        _new_write_operation_available_promise = new promise<void>();
+        _new_write_operation_available_promise = new promise<void>("rate_limiting_group_impl::process_pending_writes");
         try
         {
           if (_write_operations_in_progress.empty())

@@ -6,6 +6,13 @@
 #include <fc/thread/spin_yield_lock.hpp>
 #include <fc/optional.hpp>
 
+//#define FC_TASK_NAMES_ARE_MANDATORY 1
+#ifdef FC_TASK_NAMES_ARE_MANDATORY
+# define FC_TASK_NAME_DEFAULT_ARG
+#else
+# define FC_TASK_NAME_DEFAULT_ARG = "?"
+#endif
+
 namespace fc {
   class abstract_thread;
   struct void_t{};
@@ -47,7 +54,7 @@ namespace fc {
   class promise_base : public virtual retainable{
     public:
       typedef fc::shared_ptr<promise_base> ptr;
-      promise_base(const char* desc="?");
+      promise_base(const char* desc FC_TASK_NAME_DEFAULT_ARG);
 
       const char* get_desc()const;
                    
@@ -92,7 +99,7 @@ namespace fc {
   class promise : virtual public promise_base {
     public:
       typedef fc::shared_ptr< promise<T> > ptr;
-      promise( const char* desc = "?" ):promise_base(desc){}
+      promise( const char* desc FC_TASK_NAME_DEFAULT_ARG):promise_base(desc){}
       promise( const T& val ){ set_value(val); }
       promise( T&& val ){ set_value(fc::move(val) ); }
     
@@ -128,8 +135,8 @@ namespace fc {
   class promise<void> : virtual public promise_base {
     public:
       typedef fc::shared_ptr< promise<void> > ptr;
-      promise( const char* desc = "?" ):promise_base(desc){}
-      promise( const void_t& ){ set_value(); }
+      promise( const char* desc FC_TASK_NAME_DEFAULT_ARG):promise_base(desc){}
+      //promise( const void_t& ){ set_value(); }
     
       void wait(const microseconds& timeout = microseconds::maximum() ){
         this->_wait( timeout );

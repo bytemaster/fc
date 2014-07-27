@@ -28,9 +28,9 @@ namespace fc {
 
          time_point_sec get_file_start_time( const time_point_sec& timestamp, const microseconds& interval )
          {
-             const auto interval_seconds = interval.to_seconds();
-             const auto file_number = timestamp.sec_since_epoch() / interval_seconds;
-             return time_point_sec( file_number * interval_seconds );
+             int64_t interval_seconds = interval.to_seconds();
+             int64_t file_number = timestamp.sec_since_epoch() / interval_seconds;
+             return time_point_sec( (uint32_t)(file_number * interval_seconds) );
          }
 
          string timestamp_to_string( const time_point_sec& timestamp )
@@ -74,7 +74,7 @@ namespace fc {
                  if( cfg.rotation_compression )
                      _compression_thread.reset( new thread( "compression") );
 
-                 _rotation_task = async( [this]() { rotate_files( true ); }, "rotate_files" );
+                 _rotation_task = async( [this]() { rotate_files( true ); }, "rotate_files(1)" );
              }
          }
 
@@ -114,7 +114,7 @@ namespace fc {
                {
                    if( start_time <= _current_file_start_time )
                    {
-                       _rotation_task = schedule( [this]() { rotate_files(); }, _current_file_start_time + cfg.rotation_interval.to_seconds(), "log_rotation_task" );
+                       _rotation_task = schedule( [this]() { rotate_files(); }, _current_file_start_time + cfg.rotation_interval.to_seconds(), "rotate_files(2)" );
                        return;
                    }
 
@@ -160,7 +160,7 @@ namespace fc {
              }
 
              _current_file_start_time = start_time;
-             _rotation_task = schedule( [this]() { rotate_files(); }, _current_file_start_time + cfg.rotation_interval.to_seconds() );
+             _rotation_task = schedule( [this]() { rotate_files(); }, _current_file_start_time + cfg.rotation_interval.to_seconds(), "rotate_files(3)" );
          }
    };
    file_appender::config::config( const fc::path& p  )

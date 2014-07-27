@@ -120,7 +120,7 @@ namespace fc {
     namespace tcp {
         std::vector<boost::asio::ip::tcp::endpoint> resolve( const std::string& hostname, const std::string& port) {
             resolver res( fc::asio::default_io_service() );
-            promise<std::vector<boost::asio::ip::tcp::endpoint> >::ptr p( new promise<std::vector<boost::asio::ip::tcp::endpoint> >() );
+            promise<std::vector<boost::asio::ip::tcp::endpoint> >::ptr p( new promise<std::vector<boost::asio::ip::tcp::endpoint> >("tcp::resolve completion") );
             res.async_resolve( boost::asio::ip::tcp::resolver::query(hostname,port), 
                              boost::bind( detail::resolve_handler<boost::asio::ip::tcp::endpoint,resolver_iterator>, p, _1, _2 ) );
             return p->wait();;
@@ -129,7 +129,7 @@ namespace fc {
     namespace udp {
                 std::vector<udp::endpoint> resolve( resolver& r, const std::string& hostname, const std::string& port) {
                 resolver res( fc::asio::default_io_service() );
-                promise<std::vector<endpoint> >::ptr p( new promise<std::vector<endpoint> >() );
+                promise<std::vector<endpoint> >::ptr p( new promise<std::vector<endpoint> >("udp::resolve completion") );
                 res.async_resolve( resolver::query(hostname,port), 
                                     boost::bind( detail::resolve_handler<endpoint,resolver_iterator>, p, _1, _2 ) );
                 return p->wait();

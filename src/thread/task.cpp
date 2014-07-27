@@ -15,6 +15,7 @@
 namespace fc {
   task_base::task_base(void* func)
   :
+  promise_base("task_base"),
   _posted_num(0),
   _active_context(nullptr),
   _next(nullptr),

@@ -61,7 +61,7 @@ namespace fc {
   class task : virtual public task_base, virtual public promise<R> {
     public:
       template<typename Functor>
-      task( Functor&& f ):task_base(&_functor) {
+      task( Functor&& f, const char* desc ):task_base(&_functor), promise_base(desc), promise<R>(desc) {
         typedef typename fc::deduce<Functor>::type FunctorType;
         static_assert( sizeof(f) <= sizeof(_functor), "sizeof(Functor) is larger than FunctorSize" );
         new ((char*)&_functor) FunctorType( fc::forward<Functor>(f) );
@@ -78,7 +78,7 @@ namespace fc {
   class task<void,FunctorSize> : virtual public task_base, virtual public promise<void> {
     public:
       template<typename Functor>
-      task( Functor&& f ):task_base(&_functor) {
+      task( Functor&& f, const char* desc ):task_base(&_functor), promise_base(desc), promise<void>(desc) {
         typedef typename fc::deduce<Functor>::type FunctorType;
         static_assert( sizeof(f) <= sizeof(_functor), "sizeof(Functor) is larger than FunctorSize"  );
         new ((char*)&_functor) FunctorType( fc::forward<Functor>(f) );

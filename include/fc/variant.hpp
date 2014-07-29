@@ -31,14 +31,20 @@ namespace fc
    class time_point_sec;
    class microseconds;
 
-   void to_variant( const int16_t& var,  variant& vo );
-   void from_variant( const variant& var,  int16_t& vo );
-   void to_variant( const uint16_t& var,  variant& vo );
-   void from_variant( const variant& var,  uint16_t& vo );
-   void to_variant( const uint32_t& var,  variant& vo );
-   void from_variant( const variant& var,  uint32_t& vo );
    void to_variant( const uint8_t& var,  variant& vo );
    void from_variant( const variant& var,  uint8_t& vo );
+   void to_variant( const int8_t& var,  variant& vo );
+   void from_variant( const variant& var,  int8_t& vo );
+
+   void to_variant( const uint16_t& var,  variant& vo );
+   void from_variant( const variant& var,  uint16_t& vo );
+   void to_variant( const int16_t& var,  variant& vo );
+   void from_variant( const variant& var,  int16_t& vo );
+
+   void to_variant( const uint32_t& var,  variant& vo );
+   void from_variant( const variant& var,  uint32_t& vo );
+   void to_variant( const int32_t& var,  variant& vo );
+   void from_variant( const variant& var,  int32_t& vo );
 
    void to_variant( const variant_object& var,  variant& vo );
    void from_variant( const variant& var,  variant_object& vo );
@@ -94,7 +100,6 @@ namespace fc
    template<typename A, typename B>
    void from_variant( const variant& v, std::pair<A,B>& p );
 
-
    /**
     * @brief stores null, int64, uint64, double, bool, string, std::vector<variant>,
     *        and variant_object's.  
@@ -129,11 +134,15 @@ namespace fc
         variant( char* str );
         variant( wchar_t* str );
         variant( const wchar_t* str );
-        variant( int val );
         variant( float val );
+        variant( uint8_t val );
+        variant( int8_t val );
+        variant( uint16_t val );
+        variant( int16_t val );
         variant( uint32_t val );
-        variant( int64_t val );
+        variant( int32_t val );
         variant( uint64_t val );
+        variant( int64_t val );
         variant( double val );
         variant( bool val );
         variant( fc::string val );

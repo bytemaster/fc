@@ -32,7 +32,8 @@ namespace fc
        invalid_operation_exception_code  = 14,
        unknown_host_exception_code       = 15,
        null_optional_code                = 16,
-       udt_error_code                    = 17
+       udt_error_code                    = 17,
+       aes_error_code                    = 18
    };
 
    /**
@@ -283,6 +284,7 @@ namespace fc
   FC_DECLARE_EXCEPTION( eof_exception, eof_exception_code, "End Of File" );
   FC_DECLARE_EXCEPTION( null_optional, null_optional_code, "null optional" );
   FC_DECLARE_EXCEPTION( udt_exception, udt_error_code, "UDT error" );
+  FC_DECLARE_EXCEPTION( aes_exception, aes_error_code, "AES error" );
 
   std::string except_str();
 

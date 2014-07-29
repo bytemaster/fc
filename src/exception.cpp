@@ -19,6 +19,8 @@ namespace fc
                            (eof_exception)
                            (unknown_host_exception)
                            (null_optional)
+                           (udt_exception)
+                           (aes_exception)
                          )
 
    namespace detail

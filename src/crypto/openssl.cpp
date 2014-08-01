@@ -49,12 +49,6 @@ namespace  fc
    
     int init_openssl()
     {
-      auto strAppDir = current_path();
-      fc::path appDir(strAppDir);
-      fc::path openSSLConf = appDir / "openssl.cnf";
-      if (fc::exists(openSSLConf))
-        fc::store_configuration_path(openSSLConf);
-
       static openssl_scope ossl;
       return 0;
     }

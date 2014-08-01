@@ -17,7 +17,7 @@ namespace fc {
   struct cin_buffer {
     cin_buffer():eof(false),write_pos(0),read_pos(0),cinthread("cin"){
     
-      cinthread.async( [=](){read();} );
+      cinthread.async( [=](){read();}, "cin_buffer::read" );
     }
 
     void     read() {
@@ -25,7 +25,7 @@ namespace fc {
       std::cin.read(&c,1);
       while( !std::cin.eof() ) {
         while( write_pos - read_pos > 0xfffff ) {
-          fc::promise<void>::ptr wr( new fc::promise<void>() );
+          fc::promise<void>::ptr wr( new fc::promise<void>("cin_buffer::write_ready") );
           write_ready = wr;
           if( write_pos - read_pos <= 0xfffff ) {
             wr->wait();
@@ -141,7 +141,7 @@ namespace fc {
     do {
         while( !b.eof &&  (b.write_pos - b.read_pos)==0 ){ 
            // wait for more... 
-           fc::promise<void>::ptr rr( new fc::promise<void>() );
+           fc::promise<void>::ptr rr( new fc::promise<void>("cin_buffer::read_ready") );
            {  // copy read_ready because it is accessed from multiple threads
              fc::scoped_lock<boost::mutex> lock( b.read_ready_mutex ); 
              b.read_ready = rr;

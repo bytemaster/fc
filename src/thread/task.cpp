@@ -3,6 +3,7 @@
 #include <fc/thread/unique_lock.hpp>
 #include <fc/thread/spin_lock.hpp>
 #include <fc/fwd_impl.hpp>
+#include "context.hpp"
 
 #include <fc/log/logger.hpp>
 #include <boost/exception/all.hpp>
@@ -15,6 +16,7 @@
 namespace fc {
   task_base::task_base(void* func)
   :
+  promise_base("task_base"),
   _posted_num(0),
   _active_context(nullptr),
   _next(nullptr),
@@ -33,6 +35,7 @@ namespace fc {
     }
 #endif
   }
+
   void task_base::run_impl() {
     try {
       if( !canceled() )
@@ -49,6 +52,16 @@ namespace fc {
        set_exception( std::make_shared<unhandled_exception>( FC_LOG_MESSAGE( warn, "unhandled exception: ${diagnostic}", ("diagnostic",boost::current_exception_diagnostic_information()) ) ) );
     }
   }
+
+  void task_base::cancel()
+  {
+    promise_base::cancel();
+    if (_active_context)
+    {
+      _active_context->canceled = true;
+    }
+  }
+
   task_base::~task_base() {
     _destroy_functor( _functor );
   }

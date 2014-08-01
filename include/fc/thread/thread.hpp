@@ -52,13 +52,13 @@ namespace fc {
        *  @param prio the priority relative to other tasks
        */
       template<typename Functor>
-      auto async( Functor&& f, const char* desc ="", priority prio = priority()) -> fc::future<decltype(f())> {
+      auto async( Functor&& f, const char* desc FC_TASK_NAME_DEFAULT_ARG, priority prio = priority()) -> fc::future<decltype(f())> {
          typedef decltype(f()) Result;
          typedef typename fc::deduce<Functor>::type FunctorType;
          fc::task<Result,sizeof(FunctorType)>* tsk = 
-              new fc::task<Result,sizeof(FunctorType)>( fc::forward<Functor>(f) );
+              new fc::task<Result,sizeof(FunctorType)>( fc::forward<Functor>(f), desc );
          fc::future<Result> r(fc::shared_ptr< fc::promise<Result> >(tsk,true) );
-         async_task(tsk,prio,desc);
+         async_task(tsk,prio);
          return r;
       }
       void poke();
@@ -75,12 +75,12 @@ namespace fc {
        */
       template<typename Functor>
       auto schedule( Functor&& f, const fc::time_point& when, 
-                     const char* desc = "", priority prio = priority()) -> fc::future<decltype(f())> {
+                     const char* desc FC_TASK_NAME_DEFAULT_ARG, priority prio = priority()) -> fc::future<decltype(f())> {
          typedef decltype(f()) Result;
          fc::task<Result,sizeof(Functor)>* tsk = 
-              new fc::task<Result,sizeof(Functor)>( fc::forward<Functor>(f) );
+              new fc::task<Result,sizeof(Functor)>( fc::forward<Functor>(f), desc );
          fc::future<Result> r(fc::shared_ptr< fc::promise<Result> >(tsk,true) );
-         async_task(tsk,prio,when,desc);
+         async_task(tsk,prio,when);
          return r;
       }
      
@@ -133,8 +133,8 @@ namespace fc {
       void  exec();
       int  wait_any_until( std::vector<promise_base::ptr>&& v, const time_point& );
 
-      void async_task( task_base* t, const priority& p, const char* desc );
-      void async_task( task_base* t, const priority& p, const time_point& tp, const char* desc );
+      void async_task( task_base* t, const priority& p );
+      void async_task( task_base* t, const priority& p, const time_point& tp );
       class thread_d* my;
 
   };
@@ -172,11 +172,11 @@ namespace fc {
    int wait_any_until( std::vector<promise_base::ptr>&& v, const time_point& tp );
 
    template<typename Functor>
-   auto async( Functor&& f, const char* desc ="", priority prio = priority()) -> fc::future<decltype(f())> {
+   auto async( Functor&& f, const char* desc FC_TASK_NAME_DEFAULT_ARG, priority prio = priority()) -> fc::future<decltype(f())> {
       return fc::thread::current().async( fc::forward<Functor>(f), desc, prio );
    }
    template<typename Functor>
-   auto schedule( Functor&& f, const fc::time_point& t, const char* desc ="", priority prio = priority()) -> fc::future<decltype(f())> {
+   auto schedule( Functor&& f, const fc::time_point& t, const char* desc FC_TASK_NAME_DEFAULT_ARG, priority prio = priority()) -> fc::future<decltype(f())> {
       return fc::thread::current().schedule( fc::forward<Functor>(f), t, desc, prio );
    }
 

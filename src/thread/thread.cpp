@@ -71,7 +71,7 @@ namespace fc {
    }
 
    thread::thread( const std::string& name  ) {
-      promise<void>::ptr p(new promise<void>());
+      promise<void>::ptr p(new promise<void>("thread start"));
       boost::thread* t = new boost::thread( [this,p,name]() {
           try {
 		    set_thread_name(name.c_str()); // set thread's name for the debugger to display
@@ -129,7 +129,7 @@ namespace fc {
      //if quitting from a different thread, start quit task on thread.
      //If we have and know our attached boost thread, wait for it to finish, then return.
       if( &current() != this ) {
-          async( [=](){quit();} );//.wait();
+          async( [=](){quit();}, "thread::quit" );//.wait();
           if( my->boost_thread ) {
             auto n = name();
             my->boost_thread->join();
@@ -139,7 +139,7 @@ namespace fc {
           return;
       }
 
-      wlog( "${s}", ("s",name()) );
+      //wlog( "${s}", ("s",name()) );
       // We are quiting from our own thread...
 
       // break all promises, thread quit!
@@ -155,7 +155,7 @@ namespace fc {
             cur = n;
         }
         if( my->blocked ) { 
-          wlog( "still blocking... whats up with that?");
+          //wlog( "still blocking... whats up with that?");
           debug( "on quit" ); 
         }
       }
@@ -277,8 +277,8 @@ namespace fc {
        return -1;
    }
 
-   void thread::async_task( task_base* t, const priority& p, const char* desc ) {
-      async_task( t, p, time_point::min(), desc );
+   void thread::async_task( task_base* t, const priority& p ) {
+      async_task( t, p, time_point::min() );
    }
 
    void thread::poke() {
@@ -286,7 +286,7 @@ namespace fc {
      my->task_ready.notify_one();
    }
 
-   void thread::async_task( task_base* t, const priority& p, const time_point& tp, const char* desc ) {
+   void thread::async_task( task_base* t, const priority& p, const time_point& tp ) {
       assert(my);
       t->_when = tp;
      // slog( "when %lld", t->_when.time_since_epoch().count() );

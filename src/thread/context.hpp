@@ -52,7 +52,6 @@ namespace fc {
       cur_task(0)
     {
 #if BOOST_VERSION >= 105400
-     bco::stack_context   stack_ctx;
      size_t stack_size =  bco::stack_allocator::default_stacksize() * 4;
      alloc.allocate(stack_ctx, stack_size);
      my_context = bc::make_fcontext( stack_ctx.sp, stack_ctx.size, sf);

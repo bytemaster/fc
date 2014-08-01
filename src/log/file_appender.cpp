@@ -6,7 +6,6 @@
 #include <fc/thread/scoped_lock.hpp>
 #include <fc/thread/thread.hpp>
 #include <fc/variant.hpp>
-#include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/thread/mutex.hpp>
 #include <iomanip>
 #include <queue>
@@ -29,15 +28,14 @@ namespace fc {
 
          time_point_sec get_file_start_time( const time_point_sec& timestamp, const microseconds& interval )
          {
-             const auto interval_seconds = interval.to_seconds();
-             const auto file_number = timestamp.sec_since_epoch() / interval_seconds;
-             return time_point_sec( file_number * interval_seconds );
+             int64_t interval_seconds = interval.to_seconds();
+             int64_t file_number = timestamp.sec_since_epoch() / interval_seconds;
+             return time_point_sec( (uint32_t)(file_number * interval_seconds) );
          }
 
          string timestamp_to_string( const time_point_sec& timestamp )
          {
-             auto ptime = boost::posix_time::from_time_t( time_t ( timestamp.sec_since_epoch() ) );
-             return boost::posix_time::to_iso_string( ptime );
+             return timestamp.to_iso_string();
          }
 
          time_point_sec string_to_timestamp( const string& str )
@@ -51,7 +49,7 @@ namespace fc {
              FC_ASSERT( _compression_thread );
              if( !_compression_thread->is_current() )
              {
-                 _compression_thread->async( [this, filename]() { compress_file( filename ); } ).wait();
+                 _compression_thread->async( [this, filename]() { compress_file( filename ); }, "compress_file" ).wait();
                  return;
              }
 
@@ -76,20 +74,28 @@ namespace fc {
                  if( cfg.rotation_compression )
                      _compression_thread.reset( new thread( "compression") );
 
-                 _rotation_task = async( [this]() { rotate_files( true ); } );
+                 _rotation_task = async( [this]() { rotate_files( true ); }, "rotate_files(1)" );
              }
          }
 
          ~impl()
          {
-             try
-             {
-                 _rotation_task.cancel_and_wait();
-                 if( _compression_thread ) _compression_thread->quit();
-             }
-             catch( ... )
-             {
-             }
+            try
+            {
+              _rotation_task.cancel_and_wait();
+            }
+            catch( ... )
+            {
+            }
+
+            try
+            {
+              if( _compression_thread ) 
+                _compression_thread->quit();
+            }
+            catch( ... )
+            {
+            }
          }
 
          void rotate_files( bool initializing = false )
@@ -108,7 +114,7 @@ namespace fc {
                {
                    if( start_time <= _current_file_start_time )
                    {
-                       _rotation_task = schedule( [this]() { rotate_files(); }, _current_file_start_time + cfg.rotation_interval.to_seconds() );
+                       _rotation_task = schedule( [this]() { rotate_files(); }, _current_file_start_time + cfg.rotation_interval.to_seconds(), "rotate_files(2)" );
                        return;
                    }
 
@@ -154,7 +160,7 @@ namespace fc {
              }
 
              _current_file_start_time = start_time;
-             _rotation_task = schedule( [this]() { rotate_files(); }, _current_file_start_time + cfg.rotation_interval.to_seconds() );
+             _rotation_task = schedule( [this]() { rotate_files(); }, _current_file_start_time + cfg.rotation_interval.to_seconds(), "rotate_files(3)" );
          }
    };
    file_appender::config::config( const fc::path& p  )

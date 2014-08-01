@@ -19,7 +19,7 @@ BOOST_AUTO_TEST_CASE( cancel_an_active_task )
     {
       return sleep_aborted;
     }
-  });
+  }, "test_task");
 
   fc::time_point start_time = fc::time_point::now();
 
@@ -55,7 +55,7 @@ BOOST_AUTO_TEST_CASE( cleanup_cancelled_task )
     {
       BOOST_TEST_MESSAGE("Caught exception in async task, leaving the task's functor");
     }
-  });
+  }, "test_task");
   std::weak_ptr<std::string> weak_string_ptr(some_string);
   some_string.reset();
   BOOST_CHECK_MESSAGE(!weak_string_ptr.expired(), "Weak pointer should still be valid because async task should be holding the strong pointer");
@@ -75,18 +75,30 @@ BOOST_AUTO_TEST_CASE( cleanup_cancelled_task )
   BOOST_CHECK_MESSAGE(weak_string_ptr.expired(), "Weak pointer should now be invalid because async task should have been destroyed");
 }
 
+int task_execute_count = 0;
+fc::future<void> simple_task_done;
+void simple_task()
+{
+  task_execute_count++;
+  simple_task_done = fc::schedule([](){ simple_task(); }, 
+                                  fc::time_point::now() + fc::seconds(3),
+                                  "simple_task");
+}
+
 BOOST_AUTO_TEST_CASE( cancel_scheduled_task )
 {
   bool task_executed = false;
   try 
   {
-    auto result = fc::schedule( [&]() { task_executed = true; }, fc::time_point::now() + fc::seconds(3) );
-    result.cancel();
-    result.wait();
+    simple_task();
+    simple_task();
+    fc::usleep(fc::seconds(4));
+    simple_task_done.cancel();
+    simple_task_done.wait();
   } 
   catch ( const fc::exception& e )
   {
     wlog( "${e}", ("e",e.to_detail_string() ) );
   }
-  BOOST_CHECK(!task_executed);
+  BOOST_CHECK_EQUAL(task_execute_count, 2);
 }

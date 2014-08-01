@@ -10,7 +10,9 @@ namespace fc {
 
   class task_base : virtual public promise_base {
     public:
-      void        run(); 
+              void run(); 
+      virtual void cancel() override;
+
     protected:
       ~task_base();
       /// Task priority looks like unsupported feature.

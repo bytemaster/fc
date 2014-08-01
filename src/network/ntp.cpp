@@ -68,12 +68,14 @@ namespace fc
                }
            } // request_now
 
+           //started for first time in ntp() constructor, canceled in ~ntp() destructor
            void request_time_task()
            {
+              assert(_ntp_thread.is_current());
               request_now();
-              _request_time_task_done = _ntp_thread.schedule( [=](){ request_time_task(); }, 
-                                                              fc::time_point::now() + fc::seconds(_request_interval_sec), 
-                                                              "request_time_task" );
+              _request_time_task_done = schedule( [=](){ request_time_task(); }, 
+                                                  fc::time_point::now() + fc::seconds(_request_interval_sec), 
+                                                  "request_time_task" );
            } // request_loop
 
            void read_loop()

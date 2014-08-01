@@ -58,7 +58,7 @@ namespace fc {
 
       const char* get_desc()const;
                    
-      void cancel();
+      virtual void cancel();
       bool canceled()const { return _canceled; }
       bool ready()const;
       bool error()const;

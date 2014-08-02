@@ -72,6 +72,8 @@ namespace fc {
         _promise_impl = static_cast<promise<R>*>(this);
         _run_functor  = &detail::functor_run<FunctorType>::run;
       }
+      virtual void cancel() override { task_base::cancel(); }
+
       aligned<FunctorSize> _functor;
     private:
       ~task(){}
@@ -90,7 +92,9 @@ namespace fc {
         _promise_impl = static_cast<promise<void>*>(this);
         _run_functor  = &detail::void_functor_run<FunctorType>::run;
       }
-      aligned<FunctorSize> _functor;
+      virtual void cancel() override { task_base::cancel(); }
+
+      aligned<FunctorSize> _functor;      
     private:
       ~task(){}
   };

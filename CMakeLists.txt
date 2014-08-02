@@ -101,6 +101,7 @@ set( fc_sources
      src/thread/spin_lock.cpp 
      src/thread/spin_yield_lock.cpp 
      src/thread/mutex.cpp
+     src/thread/non_preemptable_scope_check.cpp
      src/asio.cpp
      src/string.cpp
      src/shared_ptr.cpp

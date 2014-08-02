@@ -119,6 +119,9 @@ namespace fc {
       friend class promise_base;
       friend class thread_d;
       friend class mutex;
+#ifndef NDEBUG
+      friend class non_preemptable_scope_check;
+#endif
       friend void yield();
       friend void usleep(const microseconds&);
       friend void sleep_until(const time_point&);

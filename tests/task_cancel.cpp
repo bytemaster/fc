@@ -4,6 +4,38 @@
 #include <fc/thread/thread.hpp>
 #include <fc/log/logger.hpp>
 #include <fc/exception/exception.hpp>
+#include <fc/thread/non_preemptable_scope_check.hpp>
+
+BOOST_AUTO_TEST_CASE( test_non_preemptable_assertion )
+{
+  return; // this isn't a real test, because the thing it tries to test works by asserting, not by throwing
+  fc::usleep(fc::milliseconds(10)); // this should not assert
+  {
+    ASSERT_TASK_NOT_PREEMPTED();
+    fc::usleep(fc::seconds(1)); // this should assert
+  }
+
+  {
+    ASSERT_TASK_NOT_PREEMPTED();
+    {
+      ASSERT_TASK_NOT_PREEMPTED();
+      fc::usleep(fc::seconds(1)); // this should assert
+    }
+  }
+
+  {
+    ASSERT_TASK_NOT_PREEMPTED();
+    {
+      ASSERT_TASK_NOT_PREEMPTED();
+      int i = 4;
+      i += 2;
+    }
+    fc::usleep(fc::seconds(1)); // this should assert
+  }
+
+  fc::usleep(fc::seconds(1));  // this should not assert
+  BOOST_TEST_PASSPOINT();
+}
 
 BOOST_AUTO_TEST_CASE( cancel_an_active_task )
 {

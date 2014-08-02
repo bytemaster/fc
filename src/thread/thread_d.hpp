@@ -27,6 +27,9 @@ namespace fc {
              ready_head(0),
              ready_tail(0),
              blocked(0)
+#ifndef NDEBUG
+             ,non_preemptable_scope_count(0)
+#endif
             { 
               static boost::atomic<int> cnt(0);
               name = fc::string("th_") + char('a'+cnt++); 
@@ -84,8 +87,9 @@ namespace fc {
            fc::context*             ready_tail;
 
            fc::context*             blocked;
-
-
+#ifndef NDEBUG
+           unsigned                 non_preemptable_scope_count;
+#endif
 
 #if 0
            void debug( const fc::string& s ) {
@@ -284,6 +288,7 @@ namespace fc {
             *   have it wait for something to do.
             */
            bool start_next_fiber( bool reschedule = false ) {
+              assert(non_preemptable_scope_count == 0);
               check_for_timeouts();
               if( !current ) current = new fc::context( &fc::thread::current() );
 

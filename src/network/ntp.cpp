@@ -73,9 +73,10 @@ namespace fc
            {
               assert(_ntp_thread.is_current());
               request_now();
-              _request_time_task_done = schedule( [=](){ request_time_task(); }, 
-                                                  fc::time_point::now() + fc::seconds(_request_interval_sec), 
-                                                  "request_time_task" );
+              if (!_request_time_task_done.canceled())
+                _request_time_task_done = schedule( [=](){ request_time_task(); }, 
+                                                    fc::time_point::now() + fc::seconds(_request_interval_sec), 
+                                                    "request_time_task" );
            } // request_loop
 
            void read_loop()

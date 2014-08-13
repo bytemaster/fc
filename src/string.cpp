@@ -6,6 +6,8 @@
 #include <boost/algorithm/string.hpp>
 
 #include <string>
+#include <sstream>
+#include <iomanip>
 #include <locale>
 
 /**
@@ -103,7 +105,9 @@ namespace fc  {
 
   fc::string to_string( double d)
   {
-    return boost::lexical_cast<std::string>(d);
+     std::stringstream ss; 
+     ss << std::setprecision(12) << std::fixed << d;
+    return ss.str(); //boost::lexical_cast<std::string>(d);
   }
 
   fc::string to_string( uint64_t d)

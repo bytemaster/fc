@@ -2,9 +2,22 @@
 #include <boost/test/unit_test.hpp>
 
 #include <fc/thread/thread.hpp>
+#include <fc/thread/scoped_lock.hpp>
 #include <fc/log/logger.hpp>
+#include <fc/thread/mutex.hpp>
 #include <fc/exception/exception.hpp>
 #include <fc/thread/non_preemptable_scope_check.hpp>
+
+BOOST_AUTO_TEST_CASE( leave_mutex_locked )
+{
+  {
+    fc::mutex test_mutex;
+    fc::future<void> test_task = fc::async([&](){ fc::scoped_lock<fc::mutex> test_lock(test_mutex); for (int i = 0; i < 10; ++i) fc::usleep(fc::seconds(1));});
+    fc::usleep(fc::seconds(3));
+    test_task.cancel_and_wait();
+  }
+  BOOST_TEST_PASSPOINT();
+}
 
 BOOST_AUTO_TEST_CASE( test_non_preemptable_assertion )
 {

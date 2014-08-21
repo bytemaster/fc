@@ -41,7 +41,8 @@ namespace fc
 
   class gntp_notifier {
   public:
-    gntp_notifier(const std::string& host_to_notify = "127.0.0.1", uint16_t port = 23053);
+    gntp_notifier(const std::string& host_to_notify = "127.0.0.1", uint16_t port = 23053,
+                  const optional<std::string>& password = optional<std::string>());
     ~gntp_notifier();
     void set_application_name(std::string application_name);
     void set_application_icon(const gntp_icon_ptr& icon);

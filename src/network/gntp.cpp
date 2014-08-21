@@ -6,10 +6,14 @@
 #include <fc/network/tcp_socket.hpp>
 #include <fc/crypto/sha1.hpp>
 #include <fc/crypto/base32.hpp>
+#include <fc/crypto/sha256.hpp>
+#include <fc/crypto/rand.hpp>
+#include <fc/crypto/hex.hpp>
 
 #include <set>
 #include <boost/lexical_cast.hpp>
 #include <boost/foreach.hpp>
+#include <boost/algorithm/string/case_conv.hpp>
 
 namespace fc 
 {
@@ -41,11 +45,12 @@ namespace fc
     class gntp_notifier_impl 
     {
     public:
-      gntp_notifier_impl(const std::string& host_to_notify = "127.0.0.1", uint16_t port = 23053);
+      gntp_notifier_impl(const std::string& host_to_notify = "127.0.0.1", uint16_t port = 23053, const optional<std::string>& password = optional<std::string>());
 
       // there's no API to change these right now, it will always notify localhost at the default GNTP port
       std::string hostname;
       uint16_t port;
+      optional<std::string> password;
 
       std::string application_name;
       gntp_icon_ptr application_icon;
@@ -60,9 +65,11 @@ namespace fc
       void send_gntp_message(const std::string& message);
     };
 
-    gntp_notifier_impl::gntp_notifier_impl(const std::string& host_to_notify /* = "127.0.0.1" */, uint16_t port /* = 23053 */ ) :
+    gntp_notifier_impl::gntp_notifier_impl(const std::string& host_to_notify /* = "127.0.0.1" */, uint16_t port /* = 23053 */,
+                                           const optional<std::string>& password /* = optional<std::string>() */) :
       hostname(host_to_notify),
       port(port),
+      password(password),
       connection_failed(false),
       is_registered(false)
     {
@@ -157,8 +164,9 @@ namespace fc
   {
   }
    
-  gntp_notifier::gntp_notifier(const std::string& host_to_notify /* = "127.0.0.1" */, uint16_t port /* = 23053 */ ) :
-    my(new detail::gntp_notifier_impl(host_to_notify, port))
+  gntp_notifier::gntp_notifier(const std::string& host_to_notify /* = "127.0.0.1" */, uint16_t port /* = 23053 */,
+                               const optional<std::string>& password /* = optional<std::string>() */) :
+    my(new detail::gntp_notifier_impl(host_to_notify, port, password))
   {
   }
 
@@ -246,7 +254,17 @@ namespace fc
     rand_pseudo_bytes(notification_id.data(), 20);
 
     std::ostringstream message;
-    message << "GNTP/1.0 NOTIFY NONE\r\n";
+    message << "GNTP/1.0 NOTIFY NONE";
+    if (my->password)
+    {
+      char salt[16];
+      rand_pseudo_bytes(salt, sizeof(salt));
+      std::string salted_password = *my->password + std::string(salt, 16);
+      sha256 key = sha256::hash(salted_password);
+      sha256 keyhash = sha256::hash(key.data(), 32);
+      message << " SHA256:" << boost::to_upper_copy(to_hex(keyhash.data(), 32)) << "." << boost::to_upper_copy(to_hex(salt, sizeof(salt)));
+    }
+    message << "\r\n";
     message << "Application-Name: " << my->application_name << "\r\n";
     message << "Notification-Name: " << name << "\r\n";
     message << "Notification-ID: " << notification_id.str() << "\r\n";

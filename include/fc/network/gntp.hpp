@@ -2,6 +2,7 @@
 #include <fc/crypto/ripemd160.hpp>
 #include <fc/crypto/rand.hpp>
 #include <fc/optional.hpp>
+#include <fc/network/ip.hpp>
 
 #include <memory>
 #include <vector>
@@ -40,7 +41,7 @@ namespace fc
 
   class gntp_notifier {
   public:
-    gntp_notifier();
+    gntp_notifier(const std::string& host_to_notify = "127.0.0.1", uint16_t port = 23053);
     ~gntp_notifier();
     void set_application_name(std::string application_name);
     void set_application_icon(const gntp_icon_ptr& icon);

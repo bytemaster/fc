@@ -41,7 +41,7 @@ namespace fc
     class gntp_notifier_impl 
     {
     public:
-      gntp_notifier_impl();
+      gntp_notifier_impl(const std::string& host_to_notify = "127.0.0.1", uint16_t port = 23053);
 
       // there's no API to change these right now, it will always notify localhost at the default GNTP port
       std::string hostname;
@@ -60,9 +60,9 @@ namespace fc
       void send_gntp_message(const std::string& message);
     };
 
-    gntp_notifier_impl::gntp_notifier_impl() :
-      hostname("127.0.0.1"),
-      port(23053),
+    gntp_notifier_impl::gntp_notifier_impl(const std::string& host_to_notify /* = "127.0.0.1" */, uint16_t port /* = 23053 */ ) :
+      hostname(host_to_notify),
+      port(port),
       connection_failed(false),
       is_registered(false)
     {
@@ -157,15 +157,14 @@ namespace fc
   {
   }
    
-  gntp_notifier::gntp_notifier() :
-    my(new detail::gntp_notifier_impl)
+  gntp_notifier::gntp_notifier(const std::string& host_to_notify /* = "127.0.0.1" */, uint16_t port /* = 23053 */ ) :
+    my(new detail::gntp_notifier_impl(host_to_notify, port))
   {
   }
 
   gntp_notifier::~gntp_notifier()
   {
   }
-
 
   void gntp_notifier::set_application_name(std::string appName)
   {

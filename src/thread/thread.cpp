@@ -139,7 +139,7 @@ namespace fc {
           return;
       }
 
-      //wlog( "${s}", ("s",name()) );
+//      wlog( "${s}", ("s",name()) );
       // We are quiting from our own thread...
 
       // break all promises, thread quit!
@@ -200,9 +200,9 @@ namespace fc {
       try {
         my->process_tasks(); 
       } 
-      catch( canceled_exception& )
+      catch( canceled_exception& e )
       {
-         wlog( "thread canceled" );
+         wlog( "thread canceled: ${e}", ("e", e.to_detail_string()) );
       }
       delete my->current;
       my->current = 0;

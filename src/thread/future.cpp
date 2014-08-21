@@ -26,6 +26,7 @@ namespace fc {
   }
                
   void promise_base::cancel(){
+//      wlog("${desc} canceled!", ("desc", _desc? _desc : ""));
     _canceled = true;
   }
   bool promise_base::ready()const {

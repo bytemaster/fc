@@ -345,8 +345,10 @@ namespace fc {
                 //current = prev;
               }
 
-              if( current->canceled )
+              if( current->canceled ) {
+                   current->canceled = false;
                    FC_THROW_EXCEPTION( canceled_exception, "" );
+              }
 
               return true;
            }

@@ -78,9 +78,10 @@ namespace fc {
 
     std::unordered_map<std::string,logger>& get_logger_map() {
       static bool force_link_default_config = fc::do_default_config;
-      static std::unordered_map<std::string,logger> lm;
+      //TODO: Atomic compare/swap set
+      static std::unordered_map<std::string,logger>* lm = new std::unordered_map<std::string, logger>();
       (void)force_link_default_config; // hide warning;
-      return lm;
+      return *lm;
     }
 
     logger logger::get( const fc::string& s ) {

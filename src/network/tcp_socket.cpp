@@ -78,15 +78,23 @@ namespace fc {
 
   fc::ip::endpoint tcp_socket::remote_endpoint()const
   {
-    auto rep = my->_sock.remote_endpoint();
-    return  fc::ip::endpoint(rep.address().to_v4().to_ulong(), rep.port() );
+    try
+    {
+      auto rep = my->_sock.remote_endpoint();
+      return  fc::ip::endpoint(rep.address().to_v4().to_ulong(), rep.port() );
+    } 
+    FC_RETHROW_EXCEPTIONS( warn, "error getting socket's remote endpoint" );
   }
 
 
   fc::ip::endpoint tcp_socket::local_endpoint() const
   {
-    auto boost_local_endpoint = my->_sock.local_endpoint();
-    return fc::ip::endpoint(boost_local_endpoint.address().to_v4().to_ulong(), boost_local_endpoint.port() );
+    try
+    {
+      auto boost_local_endpoint = my->_sock.local_endpoint();
+      return fc::ip::endpoint(boost_local_endpoint.address().to_v4().to_ulong(), boost_local_endpoint.port() );
+    } 
+    FC_RETHROW_EXCEPTIONS( warn, "error getting socket's local endpoint" );
   }
 
   size_t tcp_socket::readsome( char* buf, size_t len ) {

@@ -20,6 +20,7 @@ namespace fc
             uint64_t     line;
             string       method;
             string       thread_name;
+            string       task_name;
             string       hostname;
             string       context;
             time_point   timestamp;
@@ -53,6 +54,8 @@ namespace fc
       my->method      = method;
       my->timestamp   = time_point::now();
       my->thread_name = fc::thread::current().name();
+      const char* current_task_desc = fc::thread::current().current_task_desc();
+      my->task_name   = current_task_desc ? current_task_desc : "?unnamed?";
    }
 
    log_context::log_context( const variant& v )
@@ -65,6 +68,8 @@ namespace fc
        my->method       = obj["method"].as_string();
        my->hostname     = obj["hostname"].as_string();
        my->thread_name  = obj["thread_name"].as_string();
+       if (obj.contains("task_name"))
+         my->task_name    = obj["task_name"].as_string();
        my->timestamp    = obj["timestamp"].as<time_point>();
        if( obj.contains( "context" ) )
            my->context      = obj["context"].as<string>();
@@ -149,6 +154,7 @@ namespace fc
    uint64_t   log_context::get_line_number()const { return my->line; }
    string     log_context::get_method()const     { return my->method; }
    string     log_context::get_thread_name()const { return my->thread_name; }
+   string     log_context::get_task_name()const { return my->task_name; }
    string     log_context::get_host_name()const   { return my->hostname; }
    time_point  log_context::get_timestamp()const  { return my->timestamp; }
    log_level  log_context::get_log_level()const{ return my->level;   }

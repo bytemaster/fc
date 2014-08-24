@@ -192,7 +192,7 @@ namespace fc {
       std::stringstream line;
       //line << (m.get_context().get_timestamp().time_since_epoch().count() % (1000ll*1000ll*60ll*60))/1000 <<"ms ";
       line << std::string(m.get_context().get_timestamp()) << " ";
-      line << std::setw( 10 ) << m.get_context().get_thread_name().substr(0,9).c_str() <<" ";
+      line << std::setw( 21 ) << (m.get_context().get_thread_name().substr(0,9) + string(":") + m.get_context().get_task_name()).c_str() <<" ";
 
       auto me = m.get_context().get_method();
       // strip all leading scopes...

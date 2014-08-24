@@ -32,6 +32,8 @@ namespace fc {
        */
       void        set_name( const string& n );
        
+      const char* current_task_desc() const;
+
       /**
        *  @brief print debug info about the state of every context / promise.
        *

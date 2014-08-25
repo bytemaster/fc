@@ -60,6 +60,10 @@ namespace fc
                         break;
                      }
                   } 
+                  catch (const fc::canceled_exception&)
+                  {
+                    throw;
+                  }
                   // this could fail to resolve but we want to go on to other hosts..
                   catch ( const fc::exception& e )
                   {

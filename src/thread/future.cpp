@@ -44,13 +44,16 @@ namespace fc {
   }
 
   void promise_base::_wait( const microseconds& timeout_us ){
-     if( timeout_us == microseconds::maximum() ) _wait_until( time_point::maximum() );
-     else _wait_until( time_point::now() + timeout_us );
+     if( timeout_us == microseconds::maximum() ) 
+       _wait_until( time_point::maximum() );
+     else 
+       _wait_until( time_point::now() + timeout_us );
   }
   void promise_base::_wait_until( const time_point& timeout_us ){
     { synchronized(_spin_yield) 
       if( _ready ) {
-        if( _exceptp ) _exceptp->dynamic_rethrow_exception();
+        if( _exceptp ) 
+          _exceptp->dynamic_rethrow_exception();
         return;
       }
       _enqueue_thread();

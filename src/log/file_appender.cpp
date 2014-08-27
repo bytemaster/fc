@@ -82,7 +82,7 @@ namespace fc {
          {
             try
             {
-              _rotation_task.cancel_and_wait();
+              _rotation_task.cancel_and_wait("file_appender is destructing");
             }
             catch( ... )
             {

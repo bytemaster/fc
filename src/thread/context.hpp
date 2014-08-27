@@ -48,6 +48,9 @@ namespace fc {
       next(0), 
       ctx_thread(t),
       canceled(false),
+#ifndef NDEBUG
+      cancellation_reason(nullptr),
+#endif
       complete(false),
       cur_task(0)
     {
@@ -78,6 +81,9 @@ namespace fc {
      next(0), 
      ctx_thread(t),
      canceled(false),
+#ifndef NDEBUG
+     cancellation_reason(nullptr),
+#endif
      complete(false),
      cur_task(0)
     {}
@@ -192,6 +198,9 @@ namespace fc {
     fc::context*                next;
     fc::thread*                 ctx_thread;
     bool                         canceled;
+#ifndef NDEBUG
+    const char*                  cancellation_reason;
+#endif
     bool                         complete;
     task_base*                   cur_task;
   };

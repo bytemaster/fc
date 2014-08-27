@@ -54,12 +54,15 @@ namespace fc {
     }
   }
 
-  void task_base::cancel()
+  void task_base::cancel(const char* reason /* = nullptr */)
   {
-    promise_base::cancel();
+    promise_base::cancel(reason);
     if (_active_context)
     {
       _active_context->canceled = true;
+#ifndef NDEBUG
+      _active_context->cancellation_reason = reason;
+#endif
     }
   }
 

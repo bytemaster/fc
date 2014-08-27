@@ -17,6 +17,9 @@ namespace fc {
 #endif
    _timeout(time_point::maximum()),
    _canceled(false),
+#ifndef NDEBUG
+   _cancellation_reason(nullptr),
+#endif
    _desc(desc),
    _compl(nullptr)
   { }
@@ -25,9 +28,12 @@ namespace fc {
     return _desc; 
   }
                
-  void promise_base::cancel(){
+  void promise_base::cancel(const char* reason /* = nullptr */){
 //      wlog("${desc} canceled!", ("desc", _desc? _desc : ""));
     _canceled = true;
+#ifndef NDEBUG
+    _cancellation_reason = reason;
+#endif
   }
   bool promise_base::ready()const {
     return _ready;

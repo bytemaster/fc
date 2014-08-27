@@ -18,7 +18,7 @@ BOOST_AUTO_TEST_CASE( leave_mutex_locked )
         fc::usleep(fc::seconds(1));
     }, "test_task");
     fc::usleep(fc::seconds(3));
-    test_task.cancel_and_wait();
+    test_task.cancel_and_wait("cancel called directly by test");
   }
   BOOST_TEST_PASSPOINT();
 }
@@ -57,7 +57,7 @@ BOOST_AUTO_TEST_CASE( cancel_task_blocked_on_mutex)
     }
     fc::usleep(fc::seconds(3));
 
-    test_task.cancel_and_wait();
+    test_task.cancel_and_wait("cleaning up test");
   }
 }
 
@@ -115,7 +115,7 @@ BOOST_AUTO_TEST_CASE( cancel_an_active_task )
   fc::usleep(fc::milliseconds(100));
 
   BOOST_TEST_MESSAGE("Canceling task");
-  task.cancel();
+  task.cancel("canceling to test if cancel works");
   try
   {
     task_result result = task.wait();
@@ -149,7 +149,7 @@ BOOST_AUTO_TEST_CASE( cleanup_cancelled_task )
   BOOST_CHECK_MESSAGE(!weak_string_ptr.expired(), "Weak pointer should still be valid because async task should be holding the strong pointer");
   fc::usleep(fc::milliseconds(100));
   BOOST_TEST_MESSAGE("Canceling task");
-  task.cancel();
+  task.cancel("canceling to test if cancel works");
   try
   {
     task.wait();
@@ -181,7 +181,7 @@ BOOST_AUTO_TEST_CASE( cancel_scheduled_task )
     simple_task();
     simple_task();
     fc::usleep(fc::seconds(4));
-    simple_task_done.cancel();
+    simple_task_done.cancel("canceling scheduled task to test if cancel works");
     simple_task_done.wait();
   } 
   catch ( const fc::exception& e )

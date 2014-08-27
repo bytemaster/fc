@@ -30,7 +30,7 @@ namespace fc {
   class task_base : virtual public promise_base {
     public:
               void run(); 
-      virtual void cancel() override;
+      virtual void cancel(const char* reason FC_CANCELATION_REASON_DEFAULT_ARG) override;
 
     protected:
       ~task_base();
@@ -99,7 +99,7 @@ namespace fc {
         _promise_impl = static_cast<promise<R>*>(this);
         _run_functor  = &detail::functor_run<FunctorType>::run;
       }
-      virtual void cancel() override { task_base::cancel(); }
+      virtual void cancel(const char* reason FC_CANCELATION_REASON_DEFAULT_ARG) override { task_base::cancel(reason); }
 
       aligned<FunctorSize> _functor;
     private:
@@ -119,7 +119,7 @@ namespace fc {
         _promise_impl = static_cast<promise<void>*>(this);
         _run_functor  = &detail::void_functor_run<FunctorType>::run;
       }
-      virtual void cancel() override { task_base::cancel(); }
+      virtual void cancel(const char* reason FC_CANCELATION_REASON_DEFAULT_ARG) override { task_base::cancel(reason); }
 
       aligned<FunctorSize> _functor;      
     private:

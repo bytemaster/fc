@@ -39,7 +39,7 @@ BOOST_AUTO_TEST_CASE( cancel_task_blocked_on_mutex)
         BOOST_TEST_MESSAGE("--- In test_task, sleeps done, exiting");
       }, "test_task");
       fc::usleep(fc::seconds(3));
-      test_task.cancel();
+      //test_task.cancel();
       try
       {
         test_task.wait(fc::seconds(1));
@@ -55,6 +55,8 @@ BOOST_AUTO_TEST_CASE( cancel_task_blocked_on_mutex)
       }
       BOOST_TEST_MESSAGE("Unlocking mutex locked from the main task so the test task will have the opportunity to lock it and be canceled");
     }
+    fc::usleep(fc::seconds(3));
+
     test_task.cancel_and_wait();
   }
 }

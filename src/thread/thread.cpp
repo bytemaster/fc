@@ -201,6 +201,7 @@ namespace fc {
         my->check_for_timeouts();
       }
       my->clear_free_list();
+      my->cleanup_thread_specific_data();
    }
      
    void thread::exec() {

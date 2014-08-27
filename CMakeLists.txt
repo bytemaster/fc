@@ -96,6 +96,7 @@ set( fc_sources
      src/exception.cpp
      src/variant_object.cpp
      src/thread/thread.cpp
+     src/thread/thread_specific.cpp
      src/thread/future.cpp
      src/thread/task.cpp
      src/thread/spin_lock.cpp 

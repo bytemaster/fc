@@ -111,6 +111,21 @@ namespace fc {
 #endif
     }
 
+    void reinitialize()
+    {
+      canceled = false;
+#ifndef NDEBUG
+      cancellation_reason = nullptr;
+#endif
+      blocking_prom.clear();
+      caller_context = nullptr;
+      resume_time = fc::time_point();
+      next_blocked = nullptr;
+      next_blocked_mutex = nullptr;
+      next = nullptr;
+      complete = false;
+    }
+
     struct blocked_promise {
       blocked_promise( promise_base* p=0, bool r=true )
       :prom(p),required(r){}
@@ -168,7 +183,7 @@ namespace fc {
         i->prom->set_exception( std::make_shared<timeout_exception>() );
       }
     }
-    void except_blocking_promises( const exception_ptr& e ) {
+    void set_exception_on_blocking_promises( const exception_ptr& e ) {
       for( auto i = blocking_prom.begin(); i != blocking_prom.end(); ++i ) {
         i->prom->set_exception( e );
       }

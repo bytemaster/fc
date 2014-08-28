@@ -284,10 +284,14 @@ namespace fc {
             */
            void check_fiber_exceptions() {
               if( current && current->canceled ) {
+#ifdef NDEBUG
                 FC_THROW_EXCEPTION( canceled_exception, "" );
+#else
+                FC_THROW_EXCEPTION( canceled_exception, "cancellation reason: ${reason}", ("reason", current->cancellation_reason ? current->cancellation_reason : "[none given]"));
+#endif
               } else if( done )  {
                 ilog( "throwing canceled exception" );
-                FC_THROW_EXCEPTION( canceled_exception, "" ); 
+                FC_THROW_EXCEPTION( canceled_exception, "cancellation reason: thread quitting" ); 
              //   BOOST_THROW_EXCEPTION( thread_quit() );
               }
            }
@@ -335,6 +339,7 @@ namespace fc {
                   next = pt_head;
                   pt_head = pt_head->next;
                   next->next = 0;
+                  next->reinitialize();
                 } else { // create new context.
                   next = new fc::context( &thread_d::start_process_tasks, stack_alloc,
                                                                       &fc::thread::current() );
@@ -356,8 +361,12 @@ namespace fc {
               }
 
               if( current->canceled ) {
-                   current->canceled = false;
-                   FC_THROW_EXCEPTION( canceled_exception, "" );
+                //current->canceled = false;
+#ifdef NDEBUG
+                FC_THROW_EXCEPTION( canceled_exception, "" );
+#else
+                FC_THROW_EXCEPTION( canceled_exception, "cancellation reason: ${reason}", ("reason", current->cancellation_reason ? current->cancellation_reason : "[none given]"));
+#endif
               }
 
               return true;
@@ -390,6 +399,7 @@ namespace fc {
                     current->cur_task = 0;
                     next->_set_active_context(0);
                     next->release();
+                    current->reinitialize();
                     return true;
                 }
                 return false;

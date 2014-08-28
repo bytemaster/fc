@@ -13,7 +13,7 @@
 # define FC_TASK_NAME_DEFAULT_ARG = "?"
 #endif
 
-#define FC_CANCELATION_REASONS_ARE_MANDATORY 1
+//#define FC_CANCELATION_REASONS_ARE_MANDATORY 1
 #ifdef FC_CANCELATION_REASONS_ARE_MANDATORY
 # define FC_CANCELATION_REASON_DEFAULT_ARG
 #else
@@ -98,7 +98,11 @@ namespace fc {
       time_point                  _timeout;
       fc::exception_ptr           _exceptp;
       bool                        _canceled;
+#ifndef NDEBUG
+    protected:
       const char*                 _cancellation_reason;
+    private:
+#endif
       const char*                 _desc;
       detail::completion_handler* _compl;
   };

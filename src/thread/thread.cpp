@@ -157,8 +157,8 @@ namespace fc {
             fc::context* n = cur->next;
             // this will move the context into the ready list.
             //cur->prom->set_exception( boost::copy_exception( error::thread_quit() ) );
-            //cur->except_blocking_promises( thread_quit() );
-            cur->except_blocking_promises( std::make_shared<canceled_exception>() );
+            //cur->set_exception_on_blocking_promises( thread_quit() );
+            cur->set_exception_on_blocking_promises( std::make_shared<canceled_exception>(FC_LOG_MESSAGE(error, "cancellation reason: thread quitting")) );
                
             cur = n;
         }

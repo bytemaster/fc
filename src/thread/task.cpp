@@ -42,7 +42,13 @@ namespace fc {
       if( !canceled() )
          _run_functor( _functor, _promise_impl  );
       else
-         FC_THROW_EXCEPTION( canceled_exception, "${description}", ("description", get_desc() ) );
+#ifdef NDEBUG
+         FC_THROW_EXCEPTION( canceled_exception, "task ${description} canceled before starting", ("description", get_desc()));
+#else
+         FC_THROW_EXCEPTION( canceled_exception, "task ${description} canceled before starting, reason ${reason}", 
+                             ("description", get_desc())
+                             ("reason", _cancellation_reason ? _cancellation_reason : "[none given]"));
+#endif
     } 
     catch ( const exception& e ) 
     {

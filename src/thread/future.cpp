@@ -30,11 +30,11 @@ namespace fc {
                
   void promise_base::cancel(const char* reason /* = nullptr */){
 //      wlog("${desc} canceled!", ("desc", _desc? _desc : ""));
-    _canceled = true;
+      _canceled = true;
 #ifndef NDEBUG
-    _cancellation_reason = reason;
+      _cancellation_reason = reason;
 #endif
-  }
+    }
   bool promise_base::ready()const {
     return _ready;
   }

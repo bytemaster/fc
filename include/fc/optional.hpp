@@ -189,17 +189,17 @@ namespace fc {
       // casts and comparisons, use valid() or !! 
       explicit operator bool()const  { return _valid;  }
 
-      T&       operator*()      { assert(assert_optional(_valid)); return ref(); }
-      const T& operator*()const { assert(assert_optional(_valid)); return ref(); }
+      T&       operator*()      { assert(_valid); return ref(); }
+      const T& operator*()const { assert(_valid); return ref(); }
 
       T*       operator->()      
       { 
-         assert( assert_optional(_valid) );
+         assert(_valid);
          return ptr(); 
       }
       const T* operator->()const 
       { 
-         assert( assert_optional(_valid) );
+         assert(_valid);
          return ptr(); 
       }
 

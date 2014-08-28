@@ -11,44 +11,53 @@ namespace fc {
   :m_blist(0){}
 
   mutex::~mutex() {
-    if( m_blist ) {
-      auto c = m_blist;
+    if( m_blist ) 
+    {
+      context* c = m_blist;
       fc::thread::current().debug("~mutex");
+#if 0
       while( c )  {
  //       elog( "still blocking on context %p (%s)", m_blist, (m_blist->cur_task ? m_blist->cur_task->get_desc() : "no current task") ); 
         c = c->next_blocked_mutex;
       }
+#endif
+      BOOST_ASSERT( false && "Attempt to free mutex while others are blocking on lock." );
     }
-    BOOST_ASSERT( !m_blist && "Attempt to free mutex while others are blocking on lock." );
   }
 
   /**
-   *  @param  next - is set to the next context to get the lock.
+   *  @param  last_context - is set to the next context to get the lock (the next-to-last element of the list)
    *  @return the last context (the one with the lock)
    */
-  static fc::context* get_tail( fc::context* h, fc::context*& next ) {
-    next = 0;
-    fc::context* n = h;
-    if( !n ) return n;
-    while( n->next_blocked_mutex ) { 
-      next = n;
-      n=n->next_blocked_mutex;
+  static fc::context* get_tail( fc::context* list_head, fc::context*& context_to_unblock ) {
+    context_to_unblock = 0;
+    fc::context* list_context_iter = list_head;
+    if( !list_context_iter ) 
+      return list_context_iter;
+    while( list_context_iter->next_blocked_mutex ) 
+    { 
+      context_to_unblock = list_context_iter;
+      list_context_iter = list_context_iter->next_blocked_mutex;
     }
-    return n;
+    return list_context_iter;
   }
+
   static fc::context* remove( fc::context* head, fc::context* target ) {
-    fc::context* c = head;
-    fc::context* p = 0;
-    while( c ) {
-      if( c == target ) {
-        if( p ) { 
-          p->next_blocked_mutex = c->next_blocked_mutex; 
+    fc::context* context_iter = head;
+    fc::context* previous = 0;
+    while( context_iter ) 
+    {
+      if( context_iter == target ) 
+      {
+        if( previous ) 
+        { 
+          previous->next_blocked_mutex = context_iter->next_blocked_mutex; 
           return head; 
         }
-        return c->next_blocked_mutex;
+        return context_iter->next_blocked_mutex;
       }
-      p = c;
-      c = c->next_blocked_mutex;
+      previous = context_iter;
+      context_iter = context_iter->next_blocked_mutex;
     }
     return head;
   }
@@ -56,7 +65,8 @@ namespace fc {
     {  
       fc::unique_lock<fc::spin_yield_lock> lock(syl);
       if( cc->next_blocked_mutex ) {
-        bl = remove(bl, cc ); 
+        bl = remove(bl, cc); 
+        cc->next_blocked_mutex = nullptr;
         return;
       }
     }
@@ -114,17 +124,25 @@ namespace fc {
   }
 
   void mutex::lock() {
-    fc::context* n  = 0;
-    fc::context* cc = fc::thread::current().my->current;
+    fc::context* current_context = fc::thread::current().my->current;
+    if( !current_context ) 
+      current_context = fc::thread::current().my->current = new fc::context( &fc::thread::current() );
+
     {
       fc::unique_lock<fc::spin_yield_lock> lock(m_blist_lock);
-      if( !m_blist ) { 
-        m_blist = cc;
+      if( !m_blist ) 
+      { 
+        // nobody else owns the mutex, so we get it; add our context as the last and only element on the mutex's list
+        m_blist = current_context;
+        assert(!current_context->next_blocked_mutex);
         return;
       }
 
       // allow recusive locks
-      if ( get_tail( m_blist, n ) == cc ) {
+      fc::context* dummy_context_to_unblock  = 0;
+      if ( get_tail( m_blist, dummy_context_to_unblock ) == current_context ) {
+        // if we already have the lock (meaning we're on the tail of the list) then
+        // we shouldn't be trying to grab the lock again
         assert(false);
         // EMF: I think recursive locks are currently broken -- we need to 
 	// keep track of how many times this mutex has been locked by the
@@ -132,9 +150,11 @@ namespace fc {
 	// the next context only if the count drops to zero
         return;
       }
-      cc->next_blocked_mutex = m_blist;
-      m_blist = cc;
+      // add ourselves to the head of the list
+      current_context->next_blocked_mutex = m_blist;
+      m_blist = current_context;
 
+#if 0
       int cnt = 0;
       auto i = m_blist;
       while( i ) {
@@ -142,25 +162,36 @@ namespace fc {
         ++cnt;
       }
       //wlog( "wait queue len %1%", cnt );
+#endif
     }
 
-    try {
+    try 
+    {
       fc::thread::current().yield(false);
-      BOOST_ASSERT( cc->next_blocked_mutex == 0 );
-    } catch ( ... ) {
-      wlog( "lock threw" );
-      cleanup( *this, m_blist_lock, m_blist, cc);
+      // if yield() returned normally, we should now own the lock (we should be at the tail of the list)
+      BOOST_ASSERT( current_context->next_blocked_mutex == 0 );
+    }
+    catch ( exception& e )
+    {
+      wlog( "lock threw: ${e}", ("e", e));
+      cleanup( *this, m_blist_lock, m_blist, current_context);
+      FC_RETHROW_EXCEPTION(e, warn, "lock threw: ${e}", ("e", e));
+    }
+    catch ( ... ) 
+    {
+      wlog( "lock threw unexpected exception" );
+      cleanup( *this, m_blist_lock, m_blist, current_context);
       throw;
     }
   }
 
   void mutex::unlock() {
-    fc::context* next = 0;
+    fc::context* context_to_unblock = 0;
     { fc::unique_lock<fc::spin_yield_lock> lock(m_blist_lock);
-      get_tail(m_blist, next);
-      if( next ) {
-        next->next_blocked_mutex = 0;
-        next->ctx_thread->my->unblock( next );
+      get_tail(m_blist, context_to_unblock);
+      if( context_to_unblock ) {
+        context_to_unblock->next_blocked_mutex = 0;
+        context_to_unblock->ctx_thread->my->unblock( context_to_unblock );
       } else {
         m_blist   = 0;
       }

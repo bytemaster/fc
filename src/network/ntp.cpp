@@ -60,6 +60,10 @@ namespace fc
                         break;
                      }
                   } 
+                  catch (const fc::canceled_exception&)
+                  {
+                    throw;
+                  }
                   // this could fail to resolve but we want to go on to other hosts..
                   catch ( const fc::exception& e )
                   {
@@ -135,7 +139,7 @@ namespace fc
     my->_ntp_thread.async([=](){
       try
       {
-        my->_request_time_task_done.cancel_and_wait();
+        my->_request_time_task_done.cancel_and_wait("ntp object is destructing");
       }
       catch ( const fc::exception& e )
       {
@@ -148,7 +152,7 @@ namespace fc
       
       try 
       {
-        my->_read_loop_done.cancel();
+        my->_read_loop_done.cancel("ntp object is destructing");
         my->_sock.close();
         my->_read_loop_done.wait();
       } 

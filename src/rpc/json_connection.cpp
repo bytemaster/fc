@@ -243,7 +243,7 @@ namespace fc { namespace rpc {
       {
          if( my->_done.valid() && !my->_done.ready() )
          {
-            my->_done.cancel();
+            my->_done.cancel("json_connection is destructing");
             my->_out->close();
             my->_done.wait();
          }

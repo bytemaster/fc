@@ -8,10 +8,29 @@ namespace fc {
   struct context;
   class spin_lock;
 
+   namespace detail
+   {
+      struct specific_data_info
+      {
+         void* value;
+         void (*cleanup)(void*);
+         specific_data_info() :
+            value(0),
+            cleanup(0)
+            {}
+         specific_data_info(void* value, void (*cleanup)(void*)) :
+            value(value),
+            cleanup(cleanup)
+         {}
+      };
+      void* get_task_specific_data(unsigned slot);
+      void set_task_specific_data(unsigned slot, void* new_value, void(*cleanup)(void*));
+   }
+
   class task_base : virtual public promise_base {
     public:
               void run(); 
-      virtual void cancel() override;
+      virtual void cancel(const char* reason FC_CANCELATION_REASON_DEFAULT_ARG) override;
 
     protected:
       ~task_base();
@@ -22,6 +41,12 @@ namespace fc {
       void        _set_active_context(context*);
       context*    _active_context;
       task_base*  _next;
+
+      // support for task-specific data
+      std::vector<detail::specific_data_info> *_task_specific_data;
+
+      friend void* detail::get_task_specific_data(unsigned slot);
+      friend void detail::set_task_specific_data(unsigned slot, void* new_value, void(*cleanup)(void*));
 
       task_base(void* func);
       // opaque internal / private data used by
@@ -37,6 +62,8 @@ namespace fc {
       void          (*_run_functor)(void*, void* );
 
       void          run_impl(); 
+
+      void cleanup_task_specific_data();
   };
 
   namespace detail {
@@ -72,7 +99,7 @@ namespace fc {
         _promise_impl = static_cast<promise<R>*>(this);
         _run_functor  = &detail::functor_run<FunctorType>::run;
       }
-      virtual void cancel() override { task_base::cancel(); }
+      virtual void cancel(const char* reason FC_CANCELATION_REASON_DEFAULT_ARG) override { task_base::cancel(reason); }
 
       aligned<FunctorSize> _functor;
     private:
@@ -92,7 +119,7 @@ namespace fc {
         _promise_impl = static_cast<promise<void>*>(this);
         _run_functor  = &detail::void_functor_run<FunctorType>::run;
       }
-      virtual void cancel() override { task_base::cancel(); }
+      virtual void cancel(const char* reason FC_CANCELATION_REASON_DEFAULT_ARG) override { task_base::cancel(reason); }
 
       aligned<FunctorSize> _functor;      
     private:

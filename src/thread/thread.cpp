@@ -123,6 +123,14 @@ namespace fc {
    }
    const string& thread::name()const { return my->name; }
    void          thread::set_name( const fc::string& n ) { my->name = n; }
+
+   const char* thread::current_task_desc() const
+   {
+      if (my->current && my->current->cur_task)
+         return my->current->cur_task->get_desc();
+      return NULL;
+   }
+   
    void          thread::debug( const fc::string& d ) { /*my->debug(d);*/ }
 
    void thread::quit() {
@@ -193,6 +201,7 @@ namespace fc {
         my->check_for_timeouts();
       }
       my->clear_free_list();
+      my->cleanup_thread_specific_data();
    }
      
    void thread::exec() {

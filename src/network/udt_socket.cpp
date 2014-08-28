@@ -36,7 +36,7 @@ namespace fc {
 
          ~udt_epoll_service()
          {
-            _epoll_loop.cancel();
+            _epoll_loop.cancel("udt_epoll_service is destructing");
             _epoll_loop.wait();
             UDT::cleanup();
          }

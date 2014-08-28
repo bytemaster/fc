@@ -13,6 +13,13 @@
 # define FC_TASK_NAME_DEFAULT_ARG = "?"
 #endif
 
+#define FC_CANCELATION_REASONS_ARE_MANDATORY 1
+#ifdef FC_CANCELATION_REASONS_ARE_MANDATORY
+# define FC_CANCELATION_REASON_DEFAULT_ARG
+#else
+# define FC_CANCELATION_REASON_DEFAULT_ARG = nullptr
+#endif
+
 namespace fc {
   class abstract_thread;
   struct void_t{};
@@ -58,7 +65,7 @@ namespace fc {
 
       const char* get_desc()const;
                    
-      virtual void cancel();
+      virtual void cancel(const char* reason FC_CANCELATION_REASON_DEFAULT_ARG);
       bool canceled()const { return _canceled; }
       bool ready()const;
       bool error()const;
@@ -91,6 +98,7 @@ namespace fc {
       time_point                  _timeout;
       fc::exception_ptr           _exceptp;
       bool                        _canceled;
+      const char*                 _cancellation_reason;
       const char*                 _desc;
       detail::completion_handler* _compl;
   };
@@ -210,14 +218,14 @@ namespace fc {
       /// @pre valid()
       bool error()const { return m_prom->error(); }
 
-      void cancel()const { if( m_prom ) m_prom->cancel(); }
+      void cancel(const char* reason FC_CANCELATION_REASON_DEFAULT_ARG) const { if( m_prom ) m_prom->cancel(reason); }
       bool canceled()const { if( m_prom ) return m_prom->canceled(); else return true;}
 
-      void cancel_and_wait()
+      void cancel_and_wait(const char* reason FC_CANCELATION_REASON_DEFAULT_ARG)
       {
          if( valid() )
          {
-            cancel();
+            cancel(reason);
             try
             {
               wait();
@@ -276,9 +284,9 @@ namespace fc {
       bool valid()const    { return !!m_prom;           }
       bool canceled()const { return m_prom ? m_prom->canceled() : true; }
 
-      void cancel_and_wait() 
+      void cancel_and_wait(const char* reason FC_CANCELATION_REASON_DEFAULT_ARG) 
       {
-        cancel();
+        cancel(reason);
         try
         {
           wait();
@@ -294,7 +302,7 @@ namespace fc {
       /// @pre valid()
       bool error()const { return m_prom->error(); }
 
-      void cancel()const { if( m_prom ) m_prom->cancel(); }
+      void cancel(const char* reason FC_CANCELATION_REASON_DEFAULT_ARG) const { if( m_prom ) m_prom->cancel(reason); }
 
       template<typename CompletionHandler>
       void on_complete( CompletionHandler&& c ) {

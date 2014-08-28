@@ -68,6 +68,7 @@ namespace fc
         uint64_t      get_line_number()const;
         string        get_method()const;
         string        get_thread_name()const;
+        string        get_task_name()const;
         string        get_host_name()const;
         time_point    get_timestamp()const;
         log_level     get_log_level()const;

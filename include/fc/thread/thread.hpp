@@ -7,6 +7,15 @@ namespace fc {
   class time_point;
   class microseconds;
 
+   namespace detail
+   {
+      void* get_thread_specific_data(unsigned slot);
+      void set_thread_specific_data(unsigned slot, void* new_value, void(*cleanup)(void*));
+      unsigned get_next_unused_task_storage_slot();
+      void* get_task_specific_data(unsigned slot);
+      void set_task_specific_data(unsigned slot, void* new_value, void(*cleanup)(void*));
+   }
+
   class thread {
     public:
       thread( const std::string& name = "" );
@@ -32,6 +41,8 @@ namespace fc {
        */
       void        set_name( const string& n );
        
+      const char* current_task_desc() const;
+
       /**
        *  @brief print debug info about the state of every context / promise.
        *
@@ -119,6 +130,11 @@ namespace fc {
       friend class promise_base;
       friend class thread_d;
       friend class mutex;
+      friend void* detail::get_thread_specific_data(unsigned slot);
+      friend void detail::set_thread_specific_data(unsigned slot, void* new_value, void(*cleanup)(void*));
+      friend unsigned detail::get_next_unused_task_storage_slot();
+      friend void* detail::get_task_specific_data(unsigned slot);
+      friend void detail::set_task_specific_data(unsigned slot, void* new_value, void(*cleanup)(void*));
 #ifndef NDEBUG
       friend class non_preemptable_scope_check;
 #endif

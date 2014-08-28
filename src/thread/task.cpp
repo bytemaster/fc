@@ -20,6 +20,7 @@ namespace fc {
   _posted_num(0),
   _active_context(nullptr),
   _next(nullptr),
+  _task_specific_data(nullptr),
   _promise_impl(nullptr),
   _functor(func){
   }
@@ -53,16 +54,20 @@ namespace fc {
     }
   }
 
-  void task_base::cancel()
+  void task_base::cancel(const char* reason /* = nullptr */)
   {
-    promise_base::cancel();
+    promise_base::cancel(reason);
     if (_active_context)
     {
       _active_context->canceled = true;
+#ifndef NDEBUG
+      _active_context->cancellation_reason = reason;
+#endif
     }
   }
 
   task_base::~task_base() {
+    cleanup_task_specific_data();
     _destroy_functor( _functor );
   }
 
@@ -71,4 +76,17 @@ namespace fc {
         _active_context = c; 
       }
   }
+
+  void task_base::cleanup_task_specific_data()
+  {
+    if (_task_specific_data)
+    {
+      for (auto iter = _task_specific_data->begin(); iter != _task_specific_data->end(); ++iter)
+        if (iter->cleanup)
+            iter->cleanup(iter->value);
+      delete _task_specific_data;
+      _task_specific_data = nullptr;
+    }
+  }
+
 }

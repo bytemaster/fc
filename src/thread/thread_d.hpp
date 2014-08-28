@@ -26,7 +26,8 @@ namespace fc {
              pt_head(0),
              ready_head(0),
              ready_tail(0),
-             blocked(0)
+             blocked(0),
+             next_unused_task_storage_slot(0)
 #ifndef NDEBUG
              ,non_preemptable_scope_count(0)
 #endif
@@ -87,6 +88,15 @@ namespace fc {
            fc::context*             ready_tail;
 
            fc::context*             blocked;
+
+           // values for thread specific data objects for this thread
+           std::vector<detail::specific_data_info> thread_specific_data;
+           // values for task_specific data for code executing on a thread that's
+           // not a task launched by async (usually the default task on the main 
+           // thread in a process)
+           std::vector<detail::specific_data_info> non_task_specific_data;
+           unsigned next_unused_task_storage_slot;
+
 #ifndef NDEBUG
            unsigned                 non_preemptable_scope_count;
 #endif
@@ -570,5 +580,17 @@ namespace fc {
 
           check_fiber_exceptions();
         }
+
+        void cleanup_thread_specific_data()
+        {
+          for (auto iter = non_task_specific_data.begin(); iter != non_task_specific_data.end(); ++iter)
+            if (iter->cleanup)
+              iter->cleanup(iter->value);
+
+          for (auto iter = thread_specific_data.begin(); iter != thread_specific_data.end(); ++iter)
+            if (iter->cleanup)
+              iter->cleanup(iter->value);
+        }
+
     };
 } // namespace fc

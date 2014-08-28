@@ -11,12 +11,15 @@ namespace fc {
             else {
             //   elog( "%s", boost::system::system_error(ec).what() );
             //   p->set_exception( fc::copy_exception( boost::system::system_error(ec) ) );
+#if 0
                 if( ec == boost::asio::error::operation_aborted )
                 {
                   p->set_exception( fc::exception_ptr( new fc::canceled_exception( 
                           FC_LOG_MESSAGE( error, "${message} ", ("message", boost::system::system_error(ec).what())) ) ) );
                 }
-                else if( ec == boost::asio::error::eof  )
+                else 
+#endif
+                if( ec == boost::asio::error::eof  )
                 {
                   p->set_exception( fc::exception_ptr( new fc::eof_exception( 
                           FC_LOG_MESSAGE( error, "${message} ", ("message", boost::system::system_error(ec).what())) ) ) );
@@ -39,12 +42,15 @@ namespace fc {
               p->set_value();
             else
             {
+#if 0
                 if( ec == boost::asio::error::operation_aborted )
                 {
                   p->set_exception( fc::exception_ptr( new fc::canceled_exception( 
                           FC_LOG_MESSAGE( error, "${message} ", ("message", boost::system::system_error(ec).what())) ) ) );
                 }
-                else if( ec == boost::asio::error::eof  )
+                else 
+#endif
+                if( ec == boost::asio::error::eof  )
                 {
                   p->set_exception( fc::exception_ptr( new fc::eof_exception( 
                           FC_LOG_MESSAGE( error, "${message} ", ("message", boost::system::system_error(ec).what())) ) ) );

@@ -299,11 +299,11 @@ namespace fc
  */
 #define FC_ASSERT( TEST, ... ) \
    FC_EXPAND_MACRO( \
-      do { if( !(TEST) ) { FC_THROW_EXCEPTION( fc::assert_exception, #TEST ": "  __VA_ARGS__ ); } } while(0); \
+      do { if( !(TEST) ) { FC_THROW_EXCEPTION( fc::assert_exception, #TEST ": "  __VA_ARGS__ ); } } while(0) \
    )
 
 #define FC_CAPTURE_AND_THROW( EXCEPTION_TYPE, ... ) \
-   do { throw EXCEPTION_TYPE( FC_LOG_MESSAGE( error, "", FC_FORMAT_ARG_PARAMS(__VA_ARGS__) ) ); } while(false);
+   do { throw EXCEPTION_TYPE( FC_LOG_MESSAGE( error, "", FC_FORMAT_ARG_PARAMS(__VA_ARGS__) ) ); } while(0)
 
 //#define FC_THROW( FORMAT, ... ) 
 // FC_INDIRECT_EXPAND workas around a bug in Visual C++ variadic macro processing that prevents it
@@ -335,7 +335,7 @@ namespace fc
   do { \
      ER.append_log( FC_LOG_MESSAGE( LOG_LEVEL, FORMAT, __VA_ARGS__ ) ); \
      throw;\
-  } while(false)
+  } while(0)
 
 #define FC_LOG_AND_RETHROW( )  \
    catch( fc::exception& er ) { \

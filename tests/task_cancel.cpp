@@ -93,7 +93,7 @@ BOOST_AUTO_TEST_CASE( test_non_preemptable_assertion )
   BOOST_TEST_PASSPOINT();
 }
 
-BOOST_AUTO_TEST_CASE( cancel_an_active_task )
+BOOST_AUTO_TEST_CASE( cancel_an_sleeping_task )
 {
   enum task_result{sleep_completed, sleep_aborted};
   fc::future<task_result> task = fc::async([]() {
@@ -128,6 +128,55 @@ BOOST_AUTO_TEST_CASE( cancel_an_active_task )
   }
 }
 
+BOOST_AUTO_TEST_CASE( cancel_a_task_waiting_on_promise )
+{
+  enum task_result{task_completed, task_aborted};
+
+  fc::promise<void>::ptr promise_to_wait_on(new fc::promise<void>());
+
+  fc::future<task_result> task = fc::async([promise_to_wait_on]() {
+    BOOST_TEST_MESSAGE("Starting async task");
+    try
+    {
+      promise_to_wait_on->wait_until(fc::time_point::now() + fc::seconds(5));
+      return task_completed;
+    }
+    catch (const fc::canceled_exception&)
+    {
+      BOOST_TEST_MESSAGE("Caught canceled_exception inside task-to-be-canceled");
+      throw;
+    }
+    catch (const fc::timeout_exception&)
+    {
+      BOOST_TEST_MESSAGE("Caught timeout_exception inside task-to-be-canceled");
+      throw;
+    }
+    catch (const fc::exception& e)
+    {
+      BOOST_TEST_MESSAGE("Caught unexpected exception inside task-to-be-canceled: " << e.to_detail_string());
+      return task_aborted;
+    }
+  }, "test_task");
+
+  fc::time_point start_time = fc::time_point::now();
+
+  // wait a bit for the task to start running
+  fc::usleep(fc::milliseconds(100));
+
+  BOOST_TEST_MESSAGE("Canceling task");
+  task.cancel("canceling to test if cancel works");
+  //promise_to_wait_on->set_value();
+  try
+  {
+    task_result result = task.wait();
+    BOOST_CHECK_MESSAGE(result != task_completed, "task should have been canceled");
+  }
+  catch (fc::exception& e)
+  {
+    BOOST_TEST_MESSAGE("Caught exception from canceled task: " << e.what());
+    BOOST_CHECK_MESSAGE(fc::time_point::now() - start_time < fc::seconds(4), "Task was not canceled quickly");
+  }
+}
 
 BOOST_AUTO_TEST_CASE( cleanup_cancelled_task )
 {

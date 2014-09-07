@@ -1,7 +1,4 @@
 #pragma once
-namespace boost {
-  template<typename T> class atomic;
-}
 
 namespace fc {
   class microseconds;

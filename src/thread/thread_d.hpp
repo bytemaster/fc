@@ -68,26 +68,26 @@ namespace fc {
             }
            fc::thread&             self;
            boost::thread* boost_thread;
-           bco::stack_allocator              stack_alloc;
+           stack_allocator                  stack_alloc;
            boost::condition_variable        task_ready;
            boost::mutex                     task_ready_mutex;
 
            boost::atomic<task_base*>       task_in_queue;
-           std::vector<task_base*>         task_pqueue;
-           std::vector<task_base*>         task_sch_queue;
-           std::vector<fc::context*>       sleep_pqueue;
-           std::vector<fc::context*>       free_list;
+           std::vector<task_base*>         task_pqueue;    // heap of tasks that have never started, ordered by proirity & scheduling time
+           std::vector<task_base*>         task_sch_queue; // heap of tasks that have never started but are scheduled for a time in the future, ordered by the time they should be run
+           std::vector<fc::context*>       sleep_pqueue;   // heap of running tasks that have sleeped, ordered by the time they should resume
+           std::vector<fc::context*>       free_list;      // list of unused contexts that are ready for deletion
 
            bool                     done;
            fc::string               name;
-           fc::context*             current;
+           fc::context*             current;     // the currently-executing task in this thread
 
-           fc::context*             pt_head;
+           fc::context*             pt_head;     // list of contexts that can be reused for new tasks
 
-           fc::context*             ready_head;
+           fc::context*             ready_head;  // linked list (using 'next') of contexts that are ready to run
            fc::context*             ready_tail;
 
-           fc::context*             blocked;
+           fc::context*             blocked;     // linked list of contexts (using 'next_blocked') blocked on promises via wait()
 
            // values for thread specific data objects for this thread
            std::vector<detail::specific_data_info> thread_specific_data;
@@ -321,8 +321,10 @@ namespace fc {
                 current = next;
                 if( reschedule ) ready_push_back(prev);
           //         slog( "jump to %p from %p", next, prev );
-          //          fc_dlog( logger::get("fc_context"), "from ${from} to ${to}", ( "from", int64_t(prev) )( "to", int64_t(next) ) );
-#if BOOST_VERSION >= 105300
+          //          fc_dlog( logger::get("fc_context"), "from ${from} to ${to}", ( "from", int64_t(prev) )( "to", int64_t(next) ) ); 
+#if BOOST_VERSION >= 105600
+                   bc::jump_fcontext( &prev->my_context, next->my_context, 0 );
+#elif BOOST_VERSION >= 105300
                    bc::jump_fcontext( prev->my_context, next->my_context, 0 );
 #else
                    bc::jump_fcontext( &prev->my_context, &next->my_context, 0 );
@@ -350,7 +352,9 @@ namespace fc {
 
          //       slog( "jump to %p from %p", next, prev );
         //        fc_dlog( logger::get("fc_context"), "from ${from} to ${to}", ( "from", int64_t(prev) )( "to", int64_t(next) ) );
-#if BOOST_VERSION >= 105300
+#if BOOST_VERSION >= 105600
+                bc::jump_fcontext( &prev->my_context, next->my_context, (intptr_t)this );
+#elif BOOST_VERSION >= 105300
                 bc::jump_fcontext( prev->my_context, next->my_context, (intptr_t)this );
 #else
                 bc::jump_fcontext( &prev->my_context, &next->my_context, (intptr_t)this );

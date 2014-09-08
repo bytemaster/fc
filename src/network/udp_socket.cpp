@@ -73,30 +73,36 @@ namespace fc {
   void udp_socket::bind( const fc::ip::endpoint& e ) {
     my->_sock.bind( to_asio_ep(e) );
   }
-  size_t udp_socket::receive_from( char* b, size_t l, fc::ip::endpoint& _from ) {
-    try {
-      boost::asio::ip::udp::endpoint from;
-      size_t r =  my->_sock.receive_from( boost::asio::buffer(b, l), from );
-      _from = to_fc_ep(from);
-      return r;
-    } catch( const boost::system::system_error& e ) {
-        if( e.code() == boost::asio::error::would_block ) {
-            boost::asio::ip::udp::endpoint from;
-            promise<size_t>::ptr p(new promise<size_t>("udp_socket::send_to"));
-            my->_sock.async_receive_from( boost::asio::buffer(b,l), from,
-                [=]( const boost::system::error_code& ec, size_t bytes_transferred ) {
-                    if( !ec ) p->set_value(bytes_transferred);
-                    else p->set_exception( fc::exception_ptr( new fc::exception( 
-                              FC_LOG_MESSAGE( error, "${message} ", 
-                              ("message", boost::system::system_error(ec).what())) ) ) );
-                });
-            auto r =  p->wait();
-            _from = to_fc_ep(from);
-            return r;
-        }
+  size_t udp_socket::receive_from( char* receive_buffer, size_t receive_buffer_length, fc::ip::endpoint& from ) 
+  {
+    try 
+    {
+      boost::asio::ip::udp::endpoint boost_from_endpoint;
+      size_t bytes_read =  my->_sock.receive_from( boost::asio::buffer(receive_buffer, receive_buffer_length), boost_from_endpoint );
+      from = to_fc_ep(boost_from_endpoint);
+      return bytes_read;
+    } 
+    catch( const boost::system::system_error& e ) 
+    {
+      if( e.code() != boost::asio::error::would_block ) 
         throw;
     }
+
+    boost::asio::ip::udp::endpoint boost_from_endpoint;
+    promise<size_t>::ptr completion_promise(new promise<size_t>("udp_socket::receive_from"));
+    my->_sock.async_receive_from( boost::asio::buffer(receive_buffer, receive_buffer_length), boost_from_endpoint,
+                                  [=]( const boost::system::error_code& ec, size_t bytes_transferred ) {
+                                    if( !ec )
+                                      completion_promise->set_value(bytes_transferred);
+                                    else 
+                                      completion_promise->set_exception( fc::exception_ptr( new fc::exception( FC_LOG_MESSAGE( error, "${message} ", 
+                                                                                                                               ("message", boost::system::system_error(ec).what())) ) ) );
+                                  });
+    size_t bytes_read = completion_promise->wait();
+    from = to_fc_ep(boost_from_endpoint);
+    return bytes_read;
   }
+
   void   udp_socket::close() {
     //my->_sock.cancel(); 
     my->_sock.close();

@@ -1,5 +1,6 @@
 #include <fc/network/ip.hpp>
 #include <fc/variant.hpp>
+#include <fc/exception/exception.hpp>
 #include <boost/asio.hpp>
 #include <boost/lexical_cast.hpp>
 #include <string>
@@ -55,12 +56,17 @@ namespace fc { namespace ip {
   uint16_t       endpoint::port()const    { return _port; }
   const address& endpoint::get_address()const { return _ip;   }
 
-  endpoint endpoint::from_string( const string& endpoint_string ) {
-    endpoint ep;
-    auto pos = endpoint_string.find(':');
-    ep._ip   = boost::asio::ip::address_v4::from_string(endpoint_string.substr( 0, pos ) ).to_ulong();
-    ep._port = boost::lexical_cast<uint16_t>( endpoint_string.substr( pos+1, endpoint_string.size() ) );
-    return ep;
+  endpoint endpoint::from_string( const string& endpoint_string )
+  {
+    try
+    {
+      endpoint ep;
+      auto pos = endpoint_string.find(':');
+      ep._ip   = boost::asio::ip::address_v4::from_string(endpoint_string.substr( 0, pos ) ).to_ulong();
+      ep._port = boost::lexical_cast<uint16_t>( endpoint_string.substr( pos+1, endpoint_string.size() ) );
+      return ep;
+    }
+    FC_RETHROW_EXCEPTIONS(warn, "error converting string to IP endpoint")
   }
 
   endpoint::operator string()const {

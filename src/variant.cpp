@@ -535,6 +535,7 @@ void from_variant( const variant& var,  uint32_t& vo )
    vo = static_cast<uint32_t>(var.as_uint64());
 }
 
+void to_variant( const int32_t& var,  variant& vo )  { vo = int64_t(var); }
 void from_variant( const variant& var,  int32_t& vo )
 {
    vo = static_cast<int32_t>(var.as_int64());

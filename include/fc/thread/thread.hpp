@@ -128,6 +128,7 @@ namespace fc {
     private:
       thread( class thread_d* );
       friend class promise_base;
+      friend class task_base;
       friend class thread_d;
       friend class mutex;
       friend void* detail::get_thread_specific_data(unsigned slot);
@@ -154,8 +155,10 @@ namespace fc {
 
       void async_task( task_base* t, const priority& p );
       void async_task( task_base* t, const priority& p, const time_point& tp );
-      class thread_d* my;
 
+      void notify_task_has_been_canceled();
+
+      class thread_d* my;
   };
 
   /** 

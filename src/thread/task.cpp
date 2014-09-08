@@ -69,6 +69,7 @@ namespace fc {
 #ifndef NDEBUG
       _active_context->cancellation_reason = reason;
 #endif
+      _active_context->ctx_thread->notify_task_has_been_canceled();
     }
   }
 

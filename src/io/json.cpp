@@ -44,8 +44,9 @@ namespace fc
    }
 
    template<typename T>
-   void skip_white_space( T& in )
+   bool skip_white_space( T& in )
    {
+       bool skipped = false;
        while( true )
        {
           switch( in.peek() )
@@ -54,10 +55,11 @@ namespace fc
              case '\t':
              case '\n':
              case '\r':
+                skipped = true;
                 in.get();
                 break;
              default:
-                return;
+                return skipped;
           }
        }
    }
@@ -162,8 +164,9 @@ namespace fc
             if( in.peek() == ',' )
             {
                in.get();
+               continue;
             }
-            skip_white_space(in);
+            if( skip_white_space(in) ) continue;
             string key = stringFromStream( in );
             skip_white_space(in);
             if( in.peek() != ':' )
@@ -207,8 +210,12 @@ namespace fc
 
         while( in.peek() != ']' )
         {
-           while( in.peek() == ',' )
+           if( in.peek() == ',' )
+           {
               in.get();
+              continue;
+           }
+           if( skip_white_space(in) ) continue;
            ar.push_back( variant_from_stream(in) );
            skip_white_space(in);
         }
@@ -400,11 +407,8 @@ namespace fc
             case EOF:
               FC_THROW_EXCEPTION( eof_exception, "unexpected end of file" );
             default:
-            //  ilog( "unhandled char '${c}' int ${int}", ("c", fc::string( &c, 1 ) )("int", int(c)) );
-              return stringFromToken(in);
-              in.get(); //
-              ilog( "unhandled char '${c}' int ${int}", ("c", fc::string( &c, 1 ) )("int", int(c)) );
-              return variant();
+              FC_THROW_EXCEPTION( parse_error_exception, "Unexpected char '${c}' in \"${s}\"",
+                                 ("c", c)("s", stringFromToken(in)) );
          }
       }
 	  return variant();

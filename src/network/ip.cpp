@@ -55,12 +55,11 @@ namespace fc { namespace ip {
   uint16_t       endpoint::port()const    { return _port; }
   const address& endpoint::get_address()const { return _ip;   }
 
-  endpoint endpoint::from_string( const string& s ) {
+  endpoint endpoint::from_string( const string& endpoint_string ) {
     endpoint ep;
-    const std::string& st = reinterpret_cast<const std::string&>(s);
-    auto pos = st.find(':');
-    ep._ip   = boost::asio::ip::address_v4::from_string(st.substr( 0, pos ) ).to_ulong();
-    ep._port = boost::lexical_cast<uint16_t>( st.substr( pos+1, s.size() ) );
+    auto pos = endpoint_string.find(':');
+    ep._ip   = boost::asio::ip::address_v4::from_string(endpoint_string.substr( 0, pos ) ).to_ulong();
+    ep._port = boost::lexical_cast<uint16_t>( endpoint_string.substr( pos+1, endpoint_string.size() ) );
     return ep;
   }
 

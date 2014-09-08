@@ -12,9 +12,7 @@ namespace fc {
   promise_base::promise_base( const char* desc )
   :_ready(false),
    _blocked_thread(nullptr),
-#ifndef NDEBUG
    _blocked_fiber_count(0),
-#endif
    _timeout(time_point::maximum()),
    _canceled(false),
 #ifndef NDEBUG
@@ -64,29 +62,35 @@ namespace fc {
       }
       _enqueue_thread();
     }
-    thread::current().wait_until( ptr(this,true), timeout_us );
+    try
+    {
+      thread::current().wait_until( ptr(this,true), timeout_us );
+    }
+    catch (...)
+    {
+      _dequeue_thread();
+      throw;
+    }
     _dequeue_thread();
-    if( _ready ) {
-       if( _exceptp ) _exceptp->dynamic_rethrow_exception();
+    if( _ready ) 
+    {
+       if( _exceptp ) 
+         _exceptp->dynamic_rethrow_exception();
        return; 
     }
     FC_THROW_EXCEPTION( timeout_exception, "" );
   }
   void promise_base::_enqueue_thread(){
-#ifndef NDEBUG
      ++_blocked_fiber_count;
      // only one thread can wait on a promise at any given time
      assert(!_blocked_thread ||
             _blocked_thread == &thread::current());
-#endif
      _blocked_thread = &thread::current();
   }
   void promise_base::_dequeue_thread(){ 
-#ifndef NDEBUG
     synchronized(_spin_yield)
     if (!--_blocked_fiber_count)
       _blocked_thread = nullptr;
-#endif
   }
   void promise_base::_notify(){
     // copy _blocked_thread into a local so that if the thread unblocks (e.g., 
@@ -109,6 +113,8 @@ namespace fc {
  //   slog( "%p == %d", &_ready, int(_ready));
 //    BOOST_ASSERT( !_ready );
     { synchronized(_spin_yield) 
+      if (_ready) //don't allow promise to be set more than once
+        return;
       _ready = true;
     }
     _notify();

@@ -92,9 +92,7 @@ namespace fc {
       bool                        _ready;
       mutable spin_yield_lock     _spin_yield;
       thread*                     _blocked_thread;
-#ifndef NDEBUG
       unsigned                    _blocked_fiber_count;
-#endif
       time_point                  _timeout;
       fc::exception_ptr           _exceptp;
       bool                        _canceled;

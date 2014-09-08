@@ -24,11 +24,24 @@ namespace fc {
   }
 
   udp_socket::udp_socket()
-  :my( new impl() ) {
+  :my( new impl() ) 
+  {
   }
+
   udp_socket::udp_socket( const udp_socket& s )
-  :my(s.my){}
-  udp_socket::~udp_socket() {
+  :my(s.my)
+  {
+  }
+
+  udp_socket::~udp_socket() 
+  {
+    try 
+    {
+      my->_sock.close(); //close boost socket to make any pending reads run their completion handler
+    }
+    catch (...) //avoid destructor throw and likely this is just happening because socket wasn't open.
+    {
+    }
   }
 
   size_t udp_socket::send_to( const char* b, size_t l, const ip::endpoint& to ) {
@@ -71,8 +84,8 @@ namespace fc {
             boost::asio::ip::udp::endpoint from;
             promise<size_t>::ptr p(new promise<size_t>("udp_socket::send_to"));
             my->_sock.async_receive_from( boost::asio::buffer(b,l), from,
-                [=]( const boost::system::error_code& ec, size_t bt ) {
-                    if( !ec ) p->set_value(bt);
+                [=]( const boost::system::error_code& ec, size_t bytes_transferred ) {
+                    if( !ec ) p->set_value(bytes_transferred);
                     else p->set_exception( fc::exception_ptr( new fc::exception( 
                               FC_LOG_MESSAGE( error, "${message} ", 
                               ("message", boost::system::system_error(ec).what())) ) ) );

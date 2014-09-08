@@ -418,6 +418,11 @@ namespace fc {
       return this == &current();
     }
 
+    void thread::notify_task_has_been_canceled()
+    {
+      async( [=](){ my->notify_task_has_been_canceled(); }, "notify_task_has_been_canceled", priority::max() );
+    }
+
 #ifdef _MSC_VER
     /* support for providing a structured exception handler for async tasks */
     namespace detail

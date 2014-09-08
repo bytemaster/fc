@@ -606,5 +606,43 @@ namespace fc {
               iter->cleanup(iter->value);
         }
 
+        void notify_task_has_been_canceled()
+        {
+          for (fc::context** iter = &blocked; *iter;)
+          {
+            if ((*iter)->canceled)
+            {
+              fc::context* next_blocked = (*iter)->next_blocked;
+              (*iter)->next_blocked = nullptr;
+              ready_push_front(*iter);
+              *iter = next_blocked;
+              continue;
+            }
+            iter = &(*iter)->next_blocked;
+          }
+
+          bool task_removed_from_sleep_pqueue = false;
+          for (auto sleep_iter = sleep_pqueue.begin(); sleep_iter != sleep_pqueue.end();)
+          {
+            if ((*sleep_iter)->canceled)
+            {
+              bool already_on_ready_list = false;
+              for (fc::context* ready_iter = ready_head; ready_iter; ready_iter = ready_iter->next)
+                if (ready_iter == *sleep_iter)
+                {
+                  already_on_ready_list = true;
+                  break;
+                }
+              if (!already_on_ready_list)
+                ready_push_front(*sleep_iter);
+              sleep_iter = sleep_pqueue.erase(sleep_iter);
+              task_removed_from_sleep_pqueue = true;
+            }
+            else
+              ++sleep_iter;
+          }
+          if (task_removed_from_sleep_pqueue)
+            std::make_heap(sleep_pqueue.begin(), sleep_pqueue.end(), sleep_priority_less());
+        }
     };
 } // namespace fc

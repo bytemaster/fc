@@ -30,13 +30,11 @@ namespace fc
 
 
            fc::future<void>                                 _request_time_task_done;
-           bool                                             _shutting_down_ntp;
 
            ntp_impl() :
             _ntp_thread("ntp"),
             _request_interval_sec( 60*60 /* 1 hr */),
-            _last_ntp_delta_microseconds(0),
-            _shutting_down_ntp(false)
+            _last_ntp_delta_microseconds(0)
            { 
               _last_ntp_delta_initialized = false;
               _ntp_hosts.push_back( std::make_pair( "pool.ntp.org",123 ) );
@@ -145,16 +143,11 @@ namespace fc
                }
                catch (...)
                {
-                 //don't restart read loop if we're destructing
-                 if (_shutting_down_ntp)
-                   return;
                  //swallow any other exception and restart loop
                  elog("unexpected exception in read_loop, going to restart it.");
                }
                _sock.close();
-               fc::usleep(fc::seconds(1));
-               if (_shutting_down_ntp)
-                 return;
+               fc::usleep(fc::seconds(_request_interval_sec));
              } //outer while loop
           } //end read_loop()
      };
@@ -172,7 +165,6 @@ namespace fc
   ntp::~ntp()
   {
     my->_ntp_thread.async([=](){
-      my->_shutting_down_ntp = true;
       try
       {
         my->_request_time_task_done.cancel_and_wait("ntp object is destructing");
@@ -185,11 +177,7 @@ namespace fc
       {
         wlog( "Exception thrown while shutting down NTP's request_time_task, ignoring" );
       }
-      //instead of canceling task, we close the socket and wait for the task to end because receive_from will throw
-      //if we just canceled the task, the receive_from would likely complete after the recv_buf was gone and we would get a random write into our stack.
-      my->_sock.close(); 
-      my->_read_loop_done.wait(); //wait for socket to close
-#if 0      
+      
       try 
       {
         my->_read_loop_done.cancel_and_wait("ntp object is destructing");
@@ -202,7 +190,7 @@ namespace fc
       {
         wlog( "Exception thrown while shutting down NTP's read_loop, ignoring" );
       }
-#endif
+
     }, "ntp_shutdown_task").wait();
   }
 

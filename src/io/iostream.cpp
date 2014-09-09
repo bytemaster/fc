@@ -352,17 +352,33 @@ namespace fc {
 
   istream& istream::read( char* buf, size_t len )
   {
-      auto pos = buf;
+      char* pos = buf;
       while( size_t(pos-buf) < len )
          pos += readsome( pos, len - (pos - buf) );
       return *this;
   }
 
+  istream& istream::read( const std::shared_ptr<char>& buf, size_t len )
+  {
+      char* pos = buf.get();
+      while( size_t(pos-buf.get()) < len )
+         pos += readsome( pos, len - (pos - buf.get()) );
+      return *this;
+  }
+
   ostream& ostream::write( const char* buf, size_t len )
   {
-      auto pos = buf;
+      const char* pos = buf;
       while( size_t(pos-buf) < len )
          pos += writesome( pos, len - (pos - buf) );
+      return *this;
+  }
+
+  ostream& ostream::write( const std::shared_ptr<const char>& buf, size_t len )
+  {
+      const char* pos = buf.get();
+      while( size_t(pos-buf.get()) < len )
+         pos += writesome( pos, len - (pos - buf.get()) );
       return *this;
   }
 

@@ -19,9 +19,27 @@ namespace asio {
     namespace detail {
         using namespace fc;
 
-        void read_write_handler( const promise<size_t>::ptr& p, 
-                                 const boost::system::error_code& ec, 
-                                size_t bytes_transferred );
+        class read_write_handler
+        {
+        public:
+          read_write_handler(const promise<size_t>::ptr& p);
+          void operator()(const boost::system::error_code& ec, size_t bytes_transferred);
+        private:
+          promise<size_t>::ptr _completion_promise;
+        };
+
+        class read_write_handler_with_buffer : public read_write_handler
+        {
+        public:
+          read_write_handler_with_buffer(const promise<size_t>::ptr& p, 
+                                         const std::shared_ptr<const char>& buffer);
+        private:
+          std::shared_ptr<const char> _buffer;
+        };
+
+        //void read_write_handler( const promise<size_t>::ptr& p, 
+        //                         const boost::system::error_code& ec, 
+        //                         size_t bytes_transferred );
         void read_write_handler_ec( promise<size_t>* p, 
                                     boost::system::error_code* oec, 
                                     const boost::system::error_code& ec, 
@@ -62,7 +80,7 @@ namespace asio {
     template<typename AsyncReadStream, typename MutableBufferSequence>
     size_t read( AsyncReadStream& s, const MutableBufferSequence& buf ) {
         promise<size_t>::ptr p(new promise<size_t>("fc::asio::read"));
-        boost::asio::async_read( s, buf, boost::bind( detail::read_write_handler, p, _1, _2 ) );
+        boost::asio::async_read( s, buf, detail::read_write_handler(p) );
         return p->wait();
     }
     /** 
@@ -81,15 +99,47 @@ namespace asio {
     template<typename AsyncReadStream, typename MutableBufferSequence>
     future<size_t> read_some(AsyncReadStream& s, const MutableBufferSequence& buf)
     {
-      promise<size_t>::ptr p(new promise<size_t>("fc::asio::async_read_some"));
-      s.async_read_some(buf, boost::bind(detail::read_write_handler, p, _1, _2));
-      return p;//->wait();
+      promise<size_t>::ptr completion_promise(new promise<size_t>("fc::asio::async_read_some"));
+      s.async_read_some(buf, detail::read_write_handler(completion_promise));
+      return completion_promise;//->wait();
+    }
+
+    template<typename AsyncReadStream>
+    future<size_t> read_some(AsyncReadStream& s, char* buffer, size_t length)
+    {
+      promise<size_t>::ptr completion_promise(new promise<size_t>("fc::asio::async_read_some"));
+      s.async_read_some(boost::asio::buffer(buffer, length), 
+                        detail::read_write_handler(completion_promise));
+      return completion_promise;//->wait();
+    }
+
+    template<typename AsyncReadStream>
+    future<size_t> read_some(AsyncReadStream& s, const std::shared_ptr<char>& buffer, size_t length)
+    {
+      promise<size_t>::ptr completion_promise(new promise<size_t>("fc::asio::async_read_some"));
+      s.async_read_some(boost::asio::buffer(buffer.get(), length), 
+                        detail::read_write_handler_with_buffer(completion_promise, buffer));
+      return completion_promise;//->wait();
     }
 
     template<typename AsyncReadStream, typename MutableBufferSequence>
     void async_read_some(AsyncReadStream& s, const MutableBufferSequence& buf, promise<size_t>::ptr completion_promise)
     {
-      s.async_read_some(buf, boost::bind(detail::read_write_handler, completion_promise, _1, _2));
+      s.async_read_some(buf, detail::read_write_handler(completion_promise));
+    }
+
+    template<typename AsyncReadStream>
+    void async_read_some(AsyncReadStream& s, char* buffer,
+                         size_t length, promise<size_t>::ptr completion_promise)
+    {
+      s.async_read_some(boost::asio::buffer(buffer, length), detail::read_write_handler(completion_promise));
+    }
+
+    template<typename AsyncReadStream>
+    void async_read_some(AsyncReadStream& s, const std::shared_ptr<char>& buffer,
+                         size_t length, promise<size_t>::ptr completion_promise)
+    {
+      s.async_read_some(boost::asio::buffer(buffer.get(), length), detail::read_write_handler_with_buffer(completion_promise, buffer));
     }
 
     template<typename AsyncReadStream>
@@ -107,7 +157,7 @@ namespace asio {
     template<typename AsyncWriteStream, typename ConstBufferSequence>
     size_t write( AsyncWriteStream& s, const ConstBufferSequence& buf ) {
         promise<size_t>::ptr p(new promise<size_t>("fc::asio::write"));
-        boost::asio::async_write(s, buf, boost::bind( detail::read_write_handler, p, _1, _2 ) );
+        boost::asio::async_write(s, buf, detail::read_write_handler(p));
         return p->wait();
     }
 
@@ -119,7 +169,23 @@ namespace asio {
     template<typename AsyncWriteStream, typename ConstBufferSequence>
     future<size_t> write_some( AsyncWriteStream& s, const ConstBufferSequence& buf ) {
         promise<size_t>::ptr p(new promise<size_t>("fc::asio::write_some"));
-        s.async_write_some( buf, boost::bind( detail::read_write_handler, p, _1, _2 ) );
+        s.async_write_some( buf, detail::read_write_handler(p));
+        return p; //->wait();
+    }
+
+    template<typename AsyncWriteStream>
+    future<size_t> write_some( AsyncWriteStream& s, const char* buffer, 
+                               size_t length ) {
+        promise<size_t>::ptr p(new promise<size_t>("fc::asio::write_some"));
+        s.async_write_some( boost::asio::buffer(buffer, length), detail::read_write_handler(p));
+        return p; //->wait();
+    }
+
+    template<typename AsyncWriteStream>
+    future<size_t> write_some( AsyncWriteStream& s, const std::shared_ptr<const char>& buffer, 
+                               size_t length ) {
+        promise<size_t>::ptr p(new promise<size_t>("fc::asio::write_some"));
+        s.async_write_some( boost::asio::buffer(buffer.get(), length), detail::read_write_handler_with_buffer(p, buffer));
         return p; //->wait();
     }
 
@@ -130,7 +196,21 @@ namespace asio {
     */
     template<typename AsyncWriteStream, typename ConstBufferSequence>
     void async_write_some(AsyncWriteStream& s, const ConstBufferSequence& buf, promise<size_t>::ptr completion_promise) {
-      s.async_write_some(buf, boost::bind(detail::read_write_handler, completion_promise, _1, _2));
+      s.async_write_some(buf, detail::read_write_handler(completion_promise));
+    }
+
+    template<typename AsyncWriteStream>
+    void async_write_some(AsyncWriteStream& s, const char* buffer, 
+                          size_t length, promise<size_t>::ptr completion_promise) {
+      s.async_write_some(boost::asio::buffer(buffer, length), 
+                         detail::read_write_handler(completion_promise));
+    }
+
+    template<typename AsyncWriteStream>
+    void async_write_some(AsyncWriteStream& s, const std::shared_ptr<const char>& buffer, 
+                          size_t length, promise<size_t>::ptr completion_promise) {
+      s.async_write_some(boost::asio::buffer(buffer.get(), length), 
+                         detail::read_write_handler_with_buffer(completion_promise, buffer));
     }
 
     namespace tcp {

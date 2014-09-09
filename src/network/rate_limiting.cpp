@@ -38,7 +38,8 @@ namespace fc
     {
     public:
       boost::asio::ip::tcp::socket& socket;
-      const char*                   buffer;
+      const char*                   raw_buffer;
+      std::shared_ptr<const char>   shared_buffer;
 
       rate_limited_tcp_write_operation(boost::asio::ip::tcp::socket& socket,
                                        const char* buffer,
@@ -46,20 +47,36 @@ namespace fc
                                        promise<size_t>::ptr completion_promise) :
         rate_limited_operation(length, std::move(completion_promise)),
         socket(socket),
-        buffer(buffer)
+        raw_buffer(buffer)
+      {}
+      rate_limited_tcp_write_operation(boost::asio::ip::tcp::socket& socket,
+                                       const std::shared_ptr<const char>& buffer,
+                                       size_t length,
+                                       promise<size_t>::ptr completion_promise) :
+        rate_limited_operation(length, std::move(completion_promise)),
+        socket(socket),
+        raw_buffer(nullptr),
+        shared_buffer(buffer)
       {}
       virtual void perform_operation() override
       {
-        asio::async_write_some(socket,
-                               boost::asio::buffer(buffer, permitted_length),
-                               completion_promise);
+        if (raw_buffer)
+          asio::async_write_some(socket,
+                                 raw_buffer, permitted_length,
+                                 completion_promise);
+        else
+          asio::async_write_some(socket,
+                                 shared_buffer, permitted_length,
+                                 completion_promise);          
       }
     };
+
     class rate_limited_tcp_read_operation : public rate_limited_operation
     {
     public:
       boost::asio::ip::tcp::socket& socket;
-      char*                         buffer;
+      char*                         raw_buffer;
+      std::shared_ptr<char>         shared_buffer;
 
       rate_limited_tcp_read_operation(boost::asio::ip::tcp::socket& socket,
                                       char* buffer,
@@ -67,13 +84,28 @@ namespace fc
                                       promise<size_t>::ptr completion_promise) :
         rate_limited_operation(length, std::move(completion_promise)),
         socket(socket),
-        buffer(buffer)
+        raw_buffer(buffer)
+      {}
+      rate_limited_tcp_read_operation(boost::asio::ip::tcp::socket& socket,
+                                      const std::shared_ptr<char>& buffer,
+                                      size_t length,
+                                      promise<size_t>::ptr completion_promise) :
+        rate_limited_operation(length, std::move(completion_promise)),
+        socket(socket),
+        raw_buffer(nullptr),
+        shared_buffer(buffer)
       {}
       virtual void perform_operation() override
       {
-        asio::async_read_some(socket,
-                              boost::asio::buffer(buffer, permitted_length),
-                              completion_promise);
+        if (raw_buffer)
+          asio::async_read_some(socket,
+                                raw_buffer, permitted_length,
+                                completion_promise);
+        else
+          asio::async_read_some(socket,
+                                shared_buffer, permitted_length,
+                                completion_promise);
+          
       }
     };
 
@@ -177,7 +209,13 @@ namespace fc
                                uint32_t burstiness_in_seconds = 1);
 
       virtual size_t readsome(boost::asio::ip::tcp::socket& socket, char* buffer, size_t length) override;
+      virtual size_t readsome(boost::asio::ip::tcp::socket& socket, const std::shared_ptr<char>& buffer, size_t length) override;
+      template <typename BufferType>
+      size_t readsome_impl(boost::asio::ip::tcp::socket& socket, const BufferType& buffer, size_t length);
       virtual size_t writesome(boost::asio::ip::tcp::socket& socket, const char* buffer, size_t length) override;
+      virtual size_t writesome(boost::asio::ip::tcp::socket& socket, const std::shared_ptr<const char>& buffer, size_t length) override;
+      template <typename BufferType>
+      size_t writesome_impl(boost::asio::ip::tcp::socket& socket, const BufferType& buffer, size_t length);
 
       void process_pending_reads();
       void process_pending_writes();
@@ -202,7 +240,18 @@ namespace fc
     {
     }
 
-    size_t rate_limiting_group_impl::readsome(boost::asio::ip::tcp::socket&  socket, char* buffer, size_t length)
+    size_t rate_limiting_group_impl::readsome(boost::asio::ip::tcp::socket& socket, const std::shared_ptr<char>& buffer, size_t length)
+    {
+      return readsome_impl(socket, buffer, length);
+    }
+
+    size_t rate_limiting_group_impl::readsome(boost::asio::ip::tcp::socket& socket, char* buffer, size_t length)
+    {
+      return readsome_impl(socket, buffer, length);
+    }
+
+    template <typename BufferType>
+    size_t rate_limiting_group_impl::readsome_impl(boost::asio::ip::tcp::socket& socket, const BufferType& buffer, size_t length)
     {
       size_t bytes_read;
       if (_download_bytes_per_second)
@@ -217,17 +266,38 @@ namespace fc
         else if (_new_read_operation_available_promise)
           _new_read_operation_available_promise->set_value();
 
-        bytes_read = completion_promise->wait();
+        try
+        {
+          bytes_read = completion_promise->wait();
+        }
+        catch (...)
+        {
+          _read_operations_for_next_iteration.remove(&read_operation);
+          _read_operations_in_progress.remove(&read_operation);
+          throw;
+        }
         _unused_read_tokens += read_operation.permitted_length - bytes_read;
       }
       else
-        bytes_read = asio::read_some(socket, boost::asio::buffer(buffer, length));
+        bytes_read = asio::read_some(socket, buffer, length);
       
       _actual_download_rate.update(bytes_read);
       
       return bytes_read;
     }
-    size_t rate_limiting_group_impl::writesome(boost::asio::ip::tcp::socket&  socket, const char* buffer, size_t length)
+
+    size_t rate_limiting_group_impl::writesome(boost::asio::ip::tcp::socket& socket, const char* buffer, size_t length)
+    {
+      return writesome_impl(socket, buffer, length);
+    }
+
+    size_t rate_limiting_group_impl::writesome(boost::asio::ip::tcp::socket& socket, const std::shared_ptr<const char>& buffer, size_t length)
+    {
+      return writesome_impl(socket, buffer, length);
+    }
+
+    template <typename BufferType>
+    size_t rate_limiting_group_impl::writesome_impl(boost::asio::ip::tcp::socket& socket, const BufferType& buffer, size_t length)
     {
       size_t bytes_written;
       if (_upload_bytes_per_second)
@@ -242,16 +312,26 @@ namespace fc
         else if (_new_write_operation_available_promise)
           _new_write_operation_available_promise->set_value();
 
-        bytes_written = completion_promise->wait();
+        try
+        {
+          bytes_written = completion_promise->wait();
+        }
+        catch (...)
+        {
+          _write_operations_for_next_iteration.remove(&write_operation);
+          _write_operations_in_progress.remove(&write_operation);
+          throw;
+        }
         _unused_write_tokens += write_operation.permitted_length - bytes_written;
       }
       else
-        bytes_written = asio::write_some(socket, boost::asio::buffer(buffer, length));
+        bytes_written = asio::write_some(socket, buffer, length);
       
       _actual_upload_rate.update(bytes_written);
       
       return bytes_written;
     }
+
     void rate_limiting_group_impl::process_pending_reads()
     {
       for (;;)
@@ -348,8 +428,9 @@ namespace fc
           {
             if ((*iter)->permitted_length > 0)
             {
-              (*iter)->perform_operation();
+              rate_limited_operation* operation_to_perform = *iter;
               iter = operations_in_progress.erase(iter);
+              operation_to_perform->perform_operation();
             }
             else
               ++iter;
@@ -362,13 +443,13 @@ namespace fc
         // the operation immediately without being queued up.  This should only be hit if
         // we change from a limited rate to unlimited
         for (auto iter = operations_in_progress.begin(); 
-             iter != operations_in_progress.end();
-             ++iter)
+             iter != operations_in_progress.end();)
         {
-          (*iter)->permitted_length = (*iter)->length;
-          (*iter)->perform_operation();
+          rate_limited_operation* operation_to_perform = *iter;
+          iter = operations_in_progress.erase(iter);
+          operation_to_perform->permitted_length = operation_to_perform->length;
+          operation_to_perform->perform_operation();
         }
-        operations_in_progress.clear();
       }
       last_iteration_start_time = this_iteration_start_time;
     }

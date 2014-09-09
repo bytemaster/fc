@@ -28,6 +28,7 @@ namespace fc {
        *  @throws fc::eof_exception if len bytes cannot be read
        **/
       istream&   read( char* buf, size_t len ); 
+      istream&   read( const std::shared_ptr<char>& buf, size_t len ); 
       char       get();
   };
   typedef std::shared_ptr<istream> istream_ptr;
@@ -50,6 +51,7 @@ namespace fc {
         * but not flushed. 
         **/
        ostream&   write( const char* buf, size_t len );
+       ostream&   write( const std::shared_ptr<const char>& buf, size_t len );
   };
 
   typedef std::shared_ptr<ostream> ostream_ptr;

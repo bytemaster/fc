@@ -73,6 +73,32 @@ namespace fc {
   void udp_socket::bind( const fc::ip::endpoint& e ) {
     my->_sock.bind( to_asio_ep(e) );
   }
+
+  size_t udp_socket::receive_from( std::shared_ptr<char> receive_buffer, size_t receive_buffer_length, fc::ip::endpoint& from )
+  {
+    try 
+    {
+      boost::asio::ip::udp::endpoint boost_from_endpoint;
+      size_t bytes_read =  my->_sock.receive_from( boost::asio::buffer(receive_buffer.get(), receive_buffer_length), boost_from_endpoint );
+      from = to_fc_ep(boost_from_endpoint);
+      return bytes_read;
+    } 
+    catch( const boost::system::system_error& e ) 
+    {
+      if( e.code() != boost::asio::error::would_block ) 
+        throw;
+    }
+
+    boost::asio::ip::udp::endpoint boost_from_endpoint;
+    promise<size_t>::ptr completion_promise(new promise<size_t>("udp_socket::receive_from"));
+    my->_sock.async_receive_from( boost::asio::buffer(receive_buffer.get(), receive_buffer_length), 
+                                  boost_from_endpoint,
+                                  asio::detail::read_write_handler_with_buffer(completion_promise, receive_buffer) );
+    size_t bytes_read = completion_promise->wait();
+    from = to_fc_ep(boost_from_endpoint);
+    return bytes_read;
+  }
+
   size_t udp_socket::receive_from( char* receive_buffer, size_t receive_buffer_length, fc::ip::endpoint& from ) 
   {
     try 
@@ -91,13 +117,7 @@ namespace fc {
     boost::asio::ip::udp::endpoint boost_from_endpoint;
     promise<size_t>::ptr completion_promise(new promise<size_t>("udp_socket::receive_from"));
     my->_sock.async_receive_from( boost::asio::buffer(receive_buffer, receive_buffer_length), boost_from_endpoint,
-                                  [=]( const boost::system::error_code& ec, size_t bytes_transferred ) {
-                                    if( !ec )
-                                      completion_promise->set_value(bytes_transferred);
-                                    else 
-                                      completion_promise->set_exception( fc::exception_ptr( new fc::exception( FC_LOG_MESSAGE( error, "${message} ", 
-                                                                                                                               ("message", boost::system::system_error(ec).what())) ) ) );
-                                  });
+                                  asio::detail::read_write_handler(completion_promise) );
     size_t bytes_read = completion_promise->wait();
     from = to_fc_ep(boost_from_endpoint);
     return bytes_read;

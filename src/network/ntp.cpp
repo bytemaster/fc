@@ -95,6 +95,10 @@ namespace fc
            {
               assert(_ntp_thread.is_current());
 
+              uint32_t receive_buffer_size = sizeof(uint64_t) * 1024;
+              std::shared_ptr<char> receive_buffer(new char[receive_buffer_size], [](char* p){ delete[] p; });
+              uint64_t* recv_buf = (uint64_t*)receive_buffer.get();
+
               //outer while to restart read-loop if exception is thrown while waiting to receive on socket.
               //while( !_read_loop_done.canceled() )
               {
@@ -108,10 +112,9 @@ namespace fc
                   while( !_read_loop_done.canceled() )
                   {
                      fc::ip::endpoint from;
-                     std::array<uint64_t, 1024> recv_buf;
                      try
                      {
-                       _sock.receive_from( (char*)recv_buf.data(), recv_buf.size(), from );
+                       _sock.receive_from( receive_buffer, receive_buffer_size, from );
                      } FC_RETHROW_EXCEPTIONS(error, "Error reading from NTP socket");
 
                      uint64_t receive_timestamp_net_order = recv_buf[4];

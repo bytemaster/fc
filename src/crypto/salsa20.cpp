@@ -5,7 +5,7 @@ extern "C" {
 
 namespace fc 
 {
-  static bool salsa20_init = [=]() -> bool { ECRYPT_init(); return true; }();
+  static bool salsa20_init = []() -> bool { ECRYPT_init(); return true; }();
 
   void salsa20_encrypt( const fc::sha256& key, uint64_t iv, const char* plain, char* cipher, uint64_t len )
   {

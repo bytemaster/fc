@@ -244,6 +244,11 @@ namespace fc {
       return bytes_read;
    } FC_CAPTURE_AND_RETHROW( (max) ) }
 
+   size_t udt_socket::readsome( const std::shared_ptr<char>& buf, size_t len, size_t offset )
+   {
+     return readsome(buf.get() + offset, len);
+   }
+
    bool     udt_socket::eof()const
    {
       // TODO... 
@@ -273,6 +278,11 @@ namespace fc {
       }
       return bytes_sent;
    } FC_CAPTURE_AND_RETHROW( (len) ) }
+
+   size_t udt_socket::writesome( const std::shared_ptr<const char>& buf, size_t len, size_t offset )
+   {
+     return writesome(buf.get() + offset, len);
+   }
 
    void     udt_socket::flush(){}
 

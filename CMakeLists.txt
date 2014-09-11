@@ -310,7 +310,7 @@ if(WIN32)
       endif()
    endforeach()
 
-   message("openssl_libraries=${OPENSSL_LIBRARIES}")
+   # message(STATUS "openssl_libraries=${OPENSSL_LIBRARIES}")
    foreach(lib ${OPENSSL_LIBRARIES})
       get_filename_component(lib_name ${lib} NAME_WE)
       if (${lib_name} STREQUAL "libeay32")

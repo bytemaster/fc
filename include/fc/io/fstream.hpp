@@ -14,6 +14,7 @@ namespace fc {
 
       void open( const fc::path& file, int m = binary );
       size_t writesome( const char* buf, size_t len );
+      size_t writesome(const std::shared_ptr<const char>& buffer, size_t len, size_t offset);
       void   put( char c );
       void   close();
       void   flush();
@@ -34,6 +35,7 @@ namespace fc {
 
       void      open( const fc::path& file, int m );
       size_t    readsome( char* buf, size_t len );
+      size_t    readsome(const std::shared_ptr<char>& buffer, size_t max, size_t offset);
       ifstream& read( char* buf, size_t len );
       ifstream& seekg( size_t p, seekdir d = beg );
       void      get( char& c ) { read( &c, 1 ); }

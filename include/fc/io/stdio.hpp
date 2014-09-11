@@ -7,6 +7,7 @@ namespace fc
   class cout_t : virtual public ostream { 
      public:
       virtual size_t writesome( const char* buf, size_t len );
+      virtual size_t writesome( const std::shared_ptr<const char>& buf, size_t len, size_t offset );
       virtual void   close();
       virtual void   flush();
   };
@@ -14,6 +15,7 @@ namespace fc
   class cerr_t : virtual public ostream { 
      public:
       virtual size_t writesome( const char* buf, size_t len );
+      virtual size_t writesome( const std::shared_ptr<const char>& buf, size_t len, size_t offset );
       virtual void   close();
       virtual void   flush();
   };
@@ -22,6 +24,7 @@ namespace fc
      public:
       ~cin_t();
       virtual size_t readsome( char* buf, size_t len );
+      virtual size_t readsome( const std::shared_ptr<char>& buf, size_t len, size_t offset );
       virtual istream& read( char* buf, size_t len );
       virtual bool eof()const;
   };

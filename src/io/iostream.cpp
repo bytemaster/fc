@@ -96,10 +96,12 @@ namespace fc {
 
 
   size_t cout_t::writesome( const char* buf, size_t len ) { std::cout.write(buf,len); return len; }
+  size_t cout_t::writesome( const std::shared_ptr<const char>& buf, size_t len, size_t offset ) { return writesome(buf.get() + offset, len); }
   void   cout_t::close() {}
   void   cout_t::flush() { std::cout.flush(); }
 
   size_t cerr_t::writesome( const char* buf, size_t len ) { std::cerr.write(buf,len); return len; }
+  size_t cerr_t::writesome( const std::shared_ptr<const char>& buf, size_t len, size_t offset ) { return writesome(buf.get() + offset, len); }
   void   cerr_t::close() {};
   void   cerr_t::flush() { std::cerr.flush(); }
 
@@ -127,6 +129,7 @@ namespace fc {
     }
     return size_t(u);
   }
+  size_t cin_t::readsome( const std::shared_ptr<char>& buf, size_t len, size_t offset ) { return readsome(buf.get() + offset, len); }
 
   cin_t::~cin_t() {
     /*
@@ -358,12 +361,12 @@ namespace fc {
       return *this;
   }
 
-  istream& istream::read( const std::shared_ptr<char>& buf, size_t len )
+  istream& istream::read( const std::shared_ptr<char>& buf, size_t len, size_t offset )
   {
-      char* pos = buf.get();
-      while( size_t(pos-buf.get()) < len )
-         pos += readsome( pos, len - (pos - buf.get()) );
-      return *this;
+    size_t bytes_read = 0;
+    while( bytes_read < len )
+      bytes_read += readsome(buf, len - bytes_read, bytes_read + offset);
+    return *this;
   }
 
   ostream& ostream::write( const char* buf, size_t len )
@@ -374,12 +377,12 @@ namespace fc {
       return *this;
   }
 
-  ostream& ostream::write( const std::shared_ptr<const char>& buf, size_t len )
+  ostream& ostream::write( const std::shared_ptr<const char>& buf, size_t len, size_t offset )
   {
-      const char* pos = buf.get();
-      while( size_t(pos-buf.get()) < len )
-         pos += writesome( pos, len - (pos - buf.get()) );
-      return *this;
+    size_t bytes_written = 0;
+    while( bytes_written < len )
+      bytes_written += writesome(buf, len - bytes_written, bytes_written + offset);
+    return *this;
   }
 
 } // namespace fc

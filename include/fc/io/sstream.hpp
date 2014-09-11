@@ -18,7 +18,9 @@ namespace fc {
 
       virtual bool     eof()const;
       virtual size_t   writesome( const char* buf, size_t len );
+      virtual size_t   writesome( const std::shared_ptr<const char>& buf, size_t len, size_t offset );
       virtual size_t   readsome( char* buf, size_t len );
+      virtual size_t   readsome( const std::shared_ptr<char>& buf, size_t len, size_t offset );
       virtual void     close();
       virtual void     flush();
               char     peek();

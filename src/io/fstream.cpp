@@ -31,6 +31,11 @@ namespace fc {
         my->ofs.write(buf,len);
         return len;
    }
+   size_t ofstream::writesome(const std::shared_ptr<const char>& buffer, size_t len, size_t offset)
+   {
+     return writesome(buffer.get() + offset, len);
+   }
+
    void   ofstream::put( char c ) {
         my->ofs.put(c);
    }
@@ -62,6 +67,11 @@ namespace fc {
       }
       return s;
    }
+   size_t ifstream::readsome(const std::shared_ptr<char>& buffer, size_t max, size_t offset)
+   {
+     return readsome(buffer.get() + offset, max);
+   }
+
    ifstream& ifstream::read( char* buf, size_t len ) {
       if( eof() ) FC_THROW_EXCEPTION( eof_exception , "");
       my->ifs.read(buf,len);

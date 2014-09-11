@@ -54,6 +54,11 @@ namespace fc {
     }
     return len;
   }
+  size_t stringstream::writesome( const std::shared_ptr<const char>& buf, size_t len, size_t offset )
+  {
+    return writesome(buf.get() + offset, len);
+  }
+
   size_t   stringstream::readsome( char* buf, size_t len ) {
     size_t r = static_cast<size_t>(my->ss.readsome(buf,len));
     if( my->ss.eof() || r == 0 )
@@ -62,6 +67,12 @@ namespace fc {
     }
     return r;
   }
+  size_t   stringstream::readsome( const std::shared_ptr<char>& buf, size_t len, size_t offset )
+  {
+    return readsome(buf.get() + offset, len);
+  }
+
+
   void     stringstream::close(){ my->ss.flush(); };
   void     stringstream::flush(){ my->ss.flush(); };
 

@@ -41,9 +41,9 @@ namespace fc {
           }
       }
       virtual size_t readsome(boost::asio::ip::tcp::socket& socket, char* buffer, size_t length) override;
-      virtual size_t readsome(boost::asio::ip::tcp::socket& socket, const std::shared_ptr<char>& buffer, size_t length) override;
+      virtual size_t readsome(boost::asio::ip::tcp::socket& socket, const std::shared_ptr<char>& buffer, size_t length, size_t offset) override;
       virtual size_t writesome(boost::asio::ip::tcp::socket& socket, const char* buffer, size_t length) override;
-      virtual size_t writesome(boost::asio::ip::tcp::socket& socket, const std::shared_ptr<const char>& buffer, size_t length) override;
+      virtual size_t writesome(boost::asio::ip::tcp::socket& socket, const std::shared_ptr<const char>& buffer, size_t length, size_t offset) override;
 
       fc::future<size_t> _write_in_progress;
       fc::future<size_t> _read_in_progress;
@@ -55,17 +55,17 @@ namespace fc {
   {
     return (_read_in_progress = fc::asio::read_some(socket, buffer, length)).wait();
   }
-  size_t tcp_socket::impl::readsome(boost::asio::ip::tcp::socket& socket, const std::shared_ptr<char>& buffer, size_t length)
+  size_t tcp_socket::impl::readsome(boost::asio::ip::tcp::socket& socket, const std::shared_ptr<char>& buffer, size_t length, size_t offset)
   {
-    return (_read_in_progress = fc::asio::read_some(socket, buffer, length)).wait();
+    return (_read_in_progress = fc::asio::read_some(socket, buffer, length, offset)).wait();
   }
   size_t tcp_socket::impl::writesome(boost::asio::ip::tcp::socket& socket, const char* buffer, size_t length)
   {
     return (_write_in_progress = fc::asio::write_some(socket, buffer, length)).wait();
   }
-  size_t tcp_socket::impl::writesome(boost::asio::ip::tcp::socket& socket, const std::shared_ptr<const char>& buffer, size_t length)
+  size_t tcp_socket::impl::writesome(boost::asio::ip::tcp::socket& socket, const std::shared_ptr<const char>& buffer, size_t length, size_t offset)
   {
-    return (_write_in_progress = fc::asio::write_some(socket, buffer, length)).wait();
+    return (_write_in_progress = fc::asio::write_some(socket, buffer, length, offset)).wait();
   }
 
 
@@ -101,9 +101,9 @@ namespace fc {
     return my->_io_hooks->writesome(my->_sock, buf, len);
   }
 
-  size_t tcp_socket::writesome(const std::shared_ptr<const char>& buf, size_t len) 
+  size_t tcp_socket::writesome(const std::shared_ptr<const char>& buf, size_t len, size_t offset) 
   {
-    return my->_io_hooks->writesome(my->_sock, buf, len);
+    return my->_io_hooks->writesome(my->_sock, buf, len, offset);
   }
 
   fc::ip::endpoint tcp_socket::remote_endpoint()const
@@ -132,8 +132,8 @@ namespace fc {
     return my->_io_hooks->readsome(my->_sock, buf, len);
   }
 
-  size_t tcp_socket::readsome( const std::shared_ptr<char>& buf, size_t len ) {
-    return my->_io_hooks->readsome(my->_sock, buf, len);
+  size_t tcp_socket::readsome( const std::shared_ptr<char>& buf, size_t len, size_t offset ) {
+    return my->_io_hooks->readsome(my->_sock, buf, len, offset);
   }
 
   void tcp_socket::connect_to( const fc::ip::endpoint& remote_endpoint ) {

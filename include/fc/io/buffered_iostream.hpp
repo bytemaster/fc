@@ -32,6 +32,7 @@ namespace fc
          *  @throws fc::eof if at least 1 byte cannot be read
          **/
         virtual std::size_t     readsome( char* buf, std::size_t len );
+        virtual size_t          readsome( const std::shared_ptr<char>& buf, size_t len, size_t offset );
 
         /**
          *  This method may block until at least 1 character is
@@ -61,6 +62,7 @@ namespace fc
          *  is full, in which case it will flush which may block.
          */
         virtual size_t  writesome( const char* buf, size_t len );
+        virtual size_t  writesome( const std::shared_ptr<const char>& buf, size_t len, size_t offset );
 
         virtual void close();
         virtual void flush();

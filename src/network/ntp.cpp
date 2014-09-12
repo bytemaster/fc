@@ -57,9 +57,11 @@ namespace fc
                      for( auto ep : eps )
                      {
                         ilog( "sending request to ${ep}", ("ep",ep) );
-                        std::array<unsigned char, 48> send_buf { {010,0,0,0,0,0,0,0,0} };
+                        std::shared_ptr<char> send_buffer(new char[48], [](char* p){ delete[] p; });
+                        std::array<unsigned char, 48> packet_to_send { {010,0,0,0,0,0,0,0,0} };
+                        memcpy(send_buffer.get(), packet_to_send.data(), packet_to_send.size());
                         _last_request_time = fc::time_point::now();
-                        _sock.send_to( (const char*)send_buf.data(), send_buf.size(), ep );
+                        _sock.send_to( send_buffer, packet_to_send.size(), ep );
                         break;
                      }
                   } 

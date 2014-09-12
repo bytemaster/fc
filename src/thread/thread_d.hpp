@@ -302,7 +302,20 @@ namespace fc {
             *   have it wait for something to do.
             */
            bool start_next_fiber( bool reschedule = false ) {
+              /* If this assert fires, it means you are executing an operation that is causing
+               * the current task to yield, but there is a ASSERT_TASK_NOT_PREEMPTED() in effect
+               * (somewhere up the stack) */
               assert(non_preemptable_scope_count == 0);
+
+              /* If this assert fires, it means you are causing the current task to yield while
+               * in the middle of handling an exception.  The boost::context library's behavior
+               * is not well-defined in this case, and this has the potential to corrupt the
+               * exception stack, often resulting in a crash very soon after this */
+              /* NB: At least on Win64, this only catches a yield while in the body of 
+               * a catch block; it fails to catch a yield while unwinding the stack, which 
+               * is probably just as likely to cause crashes */
+              assert(std::current_exception() == std::exception_ptr());
+
               check_for_timeouts();
               if( !current ) current = new fc::context( &fc::thread::current() );
 

@@ -102,7 +102,7 @@ namespace fc
               uint64_t* recv_buf = (uint64_t*)receive_buffer.get();
 
               //outer while to restart read-loop if exception is thrown while waiting to receive on socket.
-              //while( !_read_loop_done.canceled() )
+              while( !_read_loop_done.canceled() )
               {
                 // if you start the read while loop here, the recieve_from call will throw "invalid argument" on win32,
                 // so instead we start the loop after making our first request
@@ -144,7 +144,7 @@ namespace fc
                } // try
                catch (fc::canceled_exception)
                {
-               throw;
+                 throw;
                }
                catch (...)
                {

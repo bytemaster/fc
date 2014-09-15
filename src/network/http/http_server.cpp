@@ -49,6 +49,7 @@ namespace fc { namespace http {
     public:
       impl(){}
       impl(const fc::ip::endpoint& p ) {
+        tcp_serv.set_reuse_address();
         tcp_serv.listen(p);
         accept_complete = fc::async([this](){ this->accept_loop(); }, "http_server accept_loop");
       }

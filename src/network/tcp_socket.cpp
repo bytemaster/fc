@@ -279,6 +279,7 @@ namespace fc {
       my = new impl;
     try
     {
+      my->_accept.set_option(boost::asio::ip::tcp::acceptor::reuse_address(true));
       my->_accept.bind(boost::asio::ip::tcp::endpoint(boost::asio::ip::address_v4(), port));
       my->_accept.listen();
     } 

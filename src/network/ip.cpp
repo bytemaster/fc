@@ -10,8 +10,13 @@ namespace fc { namespace ip {
   address::address( uint32_t ip )
   :_ip(ip){}
 
-  address::address( const fc::string& s ) {
-    _ip = boost::asio::ip::address_v4::from_string(s.c_str()).to_ulong();
+  address::address( const fc::string& s ) 
+  {
+    try
+    {
+      _ip = boost::asio::ip::address_v4::from_string(s.c_str()).to_ulong();
+    }
+    FC_RETHROW_EXCEPTIONS(error, "Error parsing IP address ${address}", ("address", s))
   }
 
   bool operator==( const address& a, const address& b ) {
@@ -21,13 +26,23 @@ namespace fc { namespace ip {
     return uint32_t(a) != uint32_t(b);
   }
 
-  address& address::operator=( const fc::string& s ) {
-    _ip = boost::asio::ip::address_v4::from_string(s.c_str()).to_ulong();
+  address& address::operator=( const fc::string& s ) 
+  {
+    try
+    {
+      _ip = boost::asio::ip::address_v4::from_string(s.c_str()).to_ulong();
+    }
+    FC_RETHROW_EXCEPTIONS(error, "Error parsing IP address ${address}", ("address", s))
     return *this;
   }
 
-  address::operator fc::string()const {
-    return boost::asio::ip::address_v4(_ip).to_string().c_str();
+  address::operator fc::string()const 
+  {
+    try
+    {
+      return boost::asio::ip::address_v4(_ip).to_string().c_str();
+    }
+    FC_RETHROW_EXCEPTIONS(error, "Error parsing IP address to string")
   }
   address::operator uint32_t()const {
     return _ip;
@@ -69,8 +84,13 @@ namespace fc { namespace ip {
     FC_RETHROW_EXCEPTIONS(warn, "error converting string to IP endpoint")
   }
 
-  endpoint::operator string()const {
-    return string(_ip) + ':' + fc::string(boost::lexical_cast<std::string>(_port).c_str());
+  endpoint::operator string()const 
+  {
+    try
+    {
+      return string(_ip) + ':' + fc::string(boost::lexical_cast<std::string>(_port).c_str());
+    }
+    FC_RETHROW_EXCEPTIONS(warn, "error converting IP endpoint to string")
   }
 
   /**

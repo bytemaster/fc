@@ -172,7 +172,7 @@ http::request    connection::read_request()const {
 
 fc::string request::get_header( const fc::string& key )const {
   for( auto itr = headers.begin(); itr != headers.end(); ++itr ) {
-    if( itr->key == key ) { return itr->val; } 
+    if( boost::iequals(itr->key, key) ) { return itr->val; } 
   }
   return fc::string();
 }

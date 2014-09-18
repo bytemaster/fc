@@ -117,7 +117,7 @@ namespace fc { namespace raw {
     template<typename Stream> 
     inline void pack( Stream& s, const variant_object& v ) 
     {
-       unsigned_int vs = v.size();
+       unsigned_int vs = (uint32_t)v.size();
        pack( s, vs );
        for( auto itr = v.begin(); itr != v.end(); ++itr )
        {

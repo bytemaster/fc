@@ -319,7 +319,7 @@ unsigned aes_cfb_decrypt(unsigned char *ciphertext, int ciphertext_len, unsigned
 std::vector<char> aes_encrypt( const fc::sha512& key, const std::vector<char>& plain_text  )
 {
     std::vector<char> cipher_text(plain_text.size()+16);
-    auto cipher_len = aes_encrypt( (unsigned char*)plain_text.data(), plain_text.size(),  
+    auto cipher_len = aes_encrypt( (unsigned char*)plain_text.data(), (int)plain_text.size(),  
                                    (unsigned char*)&key, ((unsigned char*)&key)+32,
                                    (unsigned char*)cipher_text.data() );
     FC_ASSERT( cipher_len <= cipher_text.size() );
@@ -330,7 +330,7 @@ std::vector<char> aes_encrypt( const fc::sha512& key, const std::vector<char>& p
 std::vector<char> aes_decrypt( const fc::sha512& key, const std::vector<char>& cipher_text )
 {
     std::vector<char> plain_text( cipher_text.size() );
-    auto plain_len = aes_decrypt( (unsigned char*)cipher_text.data(), cipher_text.size(),  
+    auto plain_len = aes_decrypt( (unsigned char*)cipher_text.data(), (int)cipher_text.size(),  
                                  (unsigned char*)&key, ((unsigned char*)&key)+32,
                                  (unsigned char*)plain_text.data() );
     plain_text.resize(plain_len);

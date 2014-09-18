@@ -145,9 +145,12 @@ iprocess& process::exec( const fc::path& exe,
                                   ("message", boost::system::system_error(ec).what())) ) ) );
        }
     });
-  my->_in     = std::make_shared<buffered_ostream>(std::make_shared<fc::asio::ostream<bp::pipe>>(my->_inp));
-  my->_out    = std::make_shared<buffered_istream>(std::make_shared<fc::asio::istream<bp::pipe>>(my->_outp));
-  my->_err    = std::make_shared<buffered_istream>(std::make_shared<fc::asio::istream<bp::pipe>>(my->_errp));
+  if( opt & open_stdin )
+    my->_in     = std::make_shared<buffered_ostream>(std::make_shared<fc::asio::ostream<bp::pipe>>(my->_inp));
+  if( opt & open_stdout )
+    my->_out    = std::make_shared<buffered_istream>(std::make_shared<fc::asio::istream<bp::pipe>>(my->_outp));
+  if( opt & open_stderr )
+    my->_err    = std::make_shared<buffered_istream>(std::make_shared<fc::asio::istream<bp::pipe>>(my->_errp));
   my->_exited = p;
   return *this;
 }

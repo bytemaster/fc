@@ -66,10 +66,10 @@ class sha256
 
     uint32_t pop_count()
     {
-       return __builtin_popcountll(_hash[0]) +
-              __builtin_popcountll(_hash[1]) +
-              __builtin_popcountll(_hash[2]) +
-              __builtin_popcountll(_hash[3]); 
+       return (uint32_t)(__builtin_popcountll(_hash[0]) +
+                         __builtin_popcountll(_hash[1]) +
+                         __builtin_popcountll(_hash[2]) +
+                         __builtin_popcountll(_hash[3])); 
     }
                              
     uint64_t _hash[4]; 

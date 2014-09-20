@@ -12,7 +12,9 @@
 #include <boost/filesystem.hpp>
 
 #ifdef WIN32
-  #include <windows.h>
+# include <Windows.h>
+# include <UserEnv.h>
+# include <ShlObj.h>
 #else
   #include <sys/types.h>
   #include <pwd.h>
@@ -379,14 +381,18 @@ namespace fc {
    {
       static fc::path p = []()
       {
-        #ifdef WIN32
-          char* home = getenv( "USERPROFILE" );
-          if( nullptr == home )
-          {
-             FC_ASSERT( home != nullptr, "The USERPROFILE environment variable is not set" );
-          }
-          return fc::path( home );
-        #else
+#ifdef WIN32
+          HANDLE access_token;
+          if (!OpenProcessToken(GetCurrentProcess(), TOKEN_READ, &access_token))
+            FC_ASSERT(false, "Unable to open an access token for the current process");
+          wchar_t user_profile_dir[MAX_PATH];
+          DWORD user_profile_dir_len = sizeof(user_profile_dir);
+          BOOL success = GetUserProfileDirectoryW(access_token, user_profile_dir, &user_profile_dir_len);
+          CloseHandle(access_token);
+          if (!success)
+            FC_ASSERT(false, "Unable to get the user profile directory");
+          return fc::path(std::wstring(user_profile_dir));
+#else
           char* home = getenv( "HOME" );
           if( nullptr == home )
           {
@@ -398,27 +404,26 @@ namespace fc {
              FC_ASSERT( home != nullptr, "The HOME environment variable is not set" );
           }
           return fc::path( std::string(home) );
-        #endif
+#endif
       }();
       return p;
    }
 
    const fc::path& app_path()
    {
-      #ifdef __APPLE__
+#ifdef __APPLE__
          static fc::path appdir = [](){  return home_path() / "Library" / "Application Support"; }();  
-      #elif defined( WIN32 )
-         static fc::path appdir = [](){  
-          char* appdata = getenv( "APPDATA" );
-          if( nullptr == appdata )
-          {
-             FC_ASSERT( appdata != nullptr, "The APPDATA environment variable is not set" );
-          }
-          return fc::path( std::string(appdata) );
+#elif defined( WIN32 )
+         static fc::path appdir = [](){
+           wchar_t app_data_dir[MAX_PATH];
+
+           if (!SUCCEEDED(SHGetFolderPathW(NULL, CSIDL_APPDATA | CSIDL_FLAG_CREATE, NULL, 0, app_data_dir)))
+             FC_ASSERT(false, "Unable to get the current AppData directory");
+           return fc::path(std::wstring(app_data_dir));
          }();
-      #else
+#else
         static fc::path appdir = home_path();
-      #endif
+#endif
       return appdir;
    }
 

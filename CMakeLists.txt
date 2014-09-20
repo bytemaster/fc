@@ -56,7 +56,7 @@ IF( WIN32 )
     SET(Boost_LIBRARIES ${BOOST_LIBRARIES_TEMP} ${Boost_LIBRARIES})
   ENDIF()
 
-  set( PLATFORM_SPECIFIC_LIBS WS2_32.lib )
+  set( PLATFORM_SPECIFIC_LIBS WS2_32.lib Userenv.lib)
   # iphlpapi.lib
 
 ELSE(WIN32)

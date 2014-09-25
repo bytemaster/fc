@@ -91,6 +91,11 @@ namespace fc {
     return _p->generic_string();
    }
 
+   fc::string path::preferred_string() const
+   {
+     return boost::filesystem::path(*_p).make_preferred().string();
+   }
+
   std::wstring path::wstring() const
     {
     return _p->wstring();
@@ -100,6 +105,11 @@ namespace fc {
     {
     return _p->generic_wstring();
     }
+
+  std::wstring path::preferred_wstring() const
+  {
+    return boost::filesystem::path(*_p).make_preferred().wstring();
+  }
 
   std::string path::to_native_ansi_path() const
     {

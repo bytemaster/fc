@@ -4,8 +4,14 @@
 namespace fc {
    class path;
    struct appender_config {
-      appender_config(const fc::string& n="",const fc::string& t="", variant a=variant())
-      :name(n),type(t),args(fc::move(a)),enabled(true){}
+      appender_config(const string& name = "",
+                      const string& type = "", 
+                      variant args = variant()) :
+        name(name),
+        type(type),
+        args(fc::move(args)),
+        enabled(true)
+      {}
       string   name;
       string   type;
       variant  args;
@@ -13,7 +19,7 @@ namespace fc {
    };
 
    struct logger_config {
-      logger_config(const fc::string& n=""):name(n),enabled(true),additivity(false){}
+      logger_config(const fc::string& name = ""):name(name),enabled(true),additivity(false){}
       string                           name;
       ostring                          parent;
       /// if not set, then parents level is used.

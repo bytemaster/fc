@@ -54,9 +54,14 @@ namespace fc {
       fc::path     parent_path()const;
       fc::string   string()const;
       fc::string   generic_string()const;
+      /** On windows, returns a path where all path separators are '\' suitable for displaying
+       * to users.  On other platforms, it does the same as generic_string()
+       */
+      fc::string   preferred_string() const;
 
       std::wstring wstring() const;
       std::wstring generic_wstring() const;
+      std::wstring preferred_wstring() const;
 
       /** Retrieves native string path representation and next converts it into
           ANSI UTF-8 representation.

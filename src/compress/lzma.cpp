@@ -124,7 +124,7 @@ void lzma_compress_file( const path& src_path,
     FC_ASSERT( !exists( dst_path ) );
 
     boost::iostreams::mapped_file_source src_file;
-    src_file.open( src_path.string() );
+    src_file.open( src_path.to_native_ansi_path() );
     FC_ASSERT( src_file.is_open() );
 
     elzma_compress_handle handle = NULL;
@@ -174,7 +174,7 @@ void lzma_decompress_file( const path& src_path,
     FC_ASSERT( !exists( dst_path ) );
 
     boost::iostreams::mapped_file_source src_file;
-    src_file.open( src_path.string() );
+    src_file.open( src_path.to_native_ansi_path() );
     FC_ASSERT( src_file.is_open() );
 
     elzma_decompress_handle handle = NULL;

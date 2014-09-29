@@ -52,7 +52,7 @@ namespace fc
                {
                   try 
                   {
-                     ilog( "resolving... ${r}", ("r", item) );
+                     wlog( "resolving... ${r}", ("r", item) );
                      auto eps = resolve( item.first, item.second );
                      for( auto ep : eps )
                      {
@@ -136,6 +136,8 @@ namespace fc
                         {
                            _last_ntp_delta_microseconds = (ntp_time - fc::time_point::now()).count();
                            _last_ntp_delta_initialized = true;
+                           fc::microseconds ntp_delta_time = fc::microseconds(_last_ntp_delta_microseconds);
+                           wlog("ntp_delta_time updated to ${delta_time}", ("delta_time",ntp_delta_time) );
                         }
                         else
                            elog( "NTP time is way off ${time}", ("time",ntp_time)("local",fc::time_point::now()) );
@@ -154,8 +156,9 @@ namespace fc
                _sock.close();
                fc::usleep(fc::seconds(_request_interval_sec));
              } //outer while loop
+             wlog("exiting ntp read_loop");
           } //end read_loop()
-     };
+     }; //ntp_impl
 
   } // namespace detail
 

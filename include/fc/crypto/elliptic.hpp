@@ -6,13 +6,13 @@
 #include <fc/array.hpp>
 #include <fc/io/raw_fwd.hpp>
 
-namespace fc { 
+namespace fc {
 
   namespace ecc {
-    namespace detail 
-    { 
-      class public_key_impl; 
-      class private_key_impl; 
+    namespace detail
+    {
+      class public_key_impl;
+      class private_key_impl;
     }
 
     typedef fc::array<char,33>          public_key_data;
@@ -72,7 +72,7 @@ namespace fc {
      *  @class private_key
      *  @brief an elliptic curve private key.
      */
-    class private_key 
+    class private_key
     {
         public:
            private_key();
@@ -88,7 +88,7 @@ namespace fc {
 
            /**
             *  This method of generation enables creating a new private key in a deterministic manner relative to
-            *  an initial seed.   A public_key created from the seed can be multiplied by the offset to calculate 
+            *  an initial seed.   A public_key created from the seed can be multiplied by the offset to calculate
             *  the new public key without having to know the private key.
             */
            static private_key generate_from_seed( const fc::sha256& seed, const fc::sha256& offset = fc::sha256() );
@@ -99,7 +99,7 @@ namespace fc {
 
            /**
             *  Given a public key, calculatse a 512 bit shared secret between that
-            *  key and this private key.  
+            *  key and this private key.
             */
            fc::sha512 get_shared_secret( const public_key& pub )const;
 
@@ -109,11 +109,19 @@ namespace fc {
 
            public_key get_public_key()const;
 
-
            inline friend bool operator==( const private_key& a, const private_key& b )
            {
             return a.get_secret() == b.get_secret();
            }
+           inline friend bool operator!=( const private_key& a, const private_key& b )
+           {
+            return a.get_secret() != b.get_secret();
+           }
+           inline friend bool operator<( const private_key& a, const private_key& b )
+           {
+            return a.get_secret() < b.get_secret();
+           }
+
         private:
            fc::fwd<detail::private_key_impl,8> my;
     };
@@ -155,7 +163,7 @@ namespace fc {
 
   } // namespace raw
 
-} // namespace fc 
+} // namespace fc
 #include <fc/reflect/reflect.hpp>
 
 FC_REFLECT_TYPENAME( fc::ecc::private_key )

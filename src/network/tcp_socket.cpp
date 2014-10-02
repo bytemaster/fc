@@ -13,6 +13,11 @@
 
 namespace fc {
 
+  namespace detail
+  {
+    bool have_so_reuseport = true;
+  }
+
   class tcp_socket::impl : public tcp_socket_io_hooks {
     public:
       impl() :
@@ -205,13 +210,24 @@ namespace fc {
     FC_ASSERT(my->_sock.is_open());
     boost::asio::socket_base::reuse_address option(enable);
     my->_sock.set_option(option);
-#if defined(__APPLE__) || (defined(__linux__) && defined(SO_REUSEPORT))
+#if defined(__APPLE__) || defined(__linux__)
+# ifndef SO_REUSEPORT
+#  define SO_REUSEPORT 15
+# endif
     // OSX needs SO_REUSEPORT in addition to SO_REUSEADDR.
     // This probably needs to be set for any BSD
-    int reuseport_value = 1;
-    if (setsockopt(my->_sock.native(), SOL_SOCKET, SO_REUSEPORT, 
-                   (char*)&reuseport_value, sizeof(reuseport_value)) < 0)
-        wlog("Error setting SO_REUSEPORT");
+    if (detail::have_so_reuseport)
+    {
+      int reuseport_value = 1;
+      if (setsockopt(my->_sock.native(), SOL_SOCKET, SO_REUSEPORT, 
+                     (char*)&reuseport_value, sizeof(reuseport_value)) < 0)
+      {
+        if (errno == ENOPROTOOPT)
+          detail::have_so_reuseport = false;
+        else
+          wlog("Error setting SO_REUSEPORT");
+      }
+    }
 #endif // __APPLE__
   }
 
@@ -267,10 +283,18 @@ namespace fc {
 #if defined(__APPLE__) || (defined(__linux__) && defined(SO_REUSEPORT))
     // OSX needs SO_REUSEPORT in addition to SO_REUSEADDR.
     // This probably needs to be set for any BSD
-    int reuseport_value = 1;
-    if (setsockopt(my->_accept.native(), SOL_SOCKET, SO_REUSEPORT, 
-                   (char*)&reuseport_value, sizeof(reuseport_value)) < 0)
-        wlog("Error setting SO_REUSEPORT");
+    if (detail::have_so_reuseport)
+    {
+      int reuseport_value = 1;
+      if (setsockopt(my->_accept.native(), SOL_SOCKET, SO_REUSEPORT, 
+                     (char*)&reuseport_value, sizeof(reuseport_value)) < 0)
+      {
+        if (errno == ENOPROTOOPT)
+          detail::have_so_reuseport = false;
+        else
+          wlog("Error setting SO_REUSEPORT");
+      }
+    }
 #endif // __APPLE__
   }
   void tcp_server::listen( uint16_t port ) 

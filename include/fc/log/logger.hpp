@@ -159,3 +159,18 @@ namespace fc
 #define edump( SEQ ) \
     elog( FC_FORMAT(SEQ), FC_FORMAT_ARG_PARAMS(SEQ) )  
 
+// this disables all normal logging statements -- not something you'd normally want to do,
+// but it's useful if you're benchmarking something and suspect logging is causing
+// a slowdown.
+#ifdef FC_DISABLE_LOGGING
+# undef ulog
+# define ulog(...) do {} while(0)
+# undef elog
+# define elog(...) do {} while(0)
+# undef wlog
+# define wlog(...) do {} while(0)
+# undef ilog
+# define ilog(...) do {} while(0)
+# undef dlog
+# define dlog(...) do {} while(0)
+#endif

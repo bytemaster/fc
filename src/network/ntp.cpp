@@ -110,7 +110,7 @@ namespace fc
         assert(_ntp_thread.is_current());
         if (_last_valid_ntp_reply_received_time <= fc::time_point::now() - fc::seconds(_request_interval_sec - 5))
           request_now();
-        if (!_request_time_task_done.canceled())
+        if (!_request_time_task_done.valid() || !_request_time_task_done.canceled())
           _request_time_task_done = schedule( [=](){ request_time_task(); }, 
                                               fc::time_point::now() + fc::seconds(_retry_failed_request_interval_sec), 
                                               "request_time_task" );

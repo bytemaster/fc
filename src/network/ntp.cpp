@@ -23,7 +23,6 @@ namespace fc
       fc::future<void>                                 _read_loop_done;
       udp_socket                                       _sock;
       uint32_t                                         _request_interval_sec;
-      fc::time_point                                   _last_request_time;
 
       std::atomic_bool                                 _last_ntp_delta_initialized;
       std::atomic<int64_t>                             _last_ntp_delta_microseconds;
@@ -45,6 +44,27 @@ namespace fc
         _ntp_thread.quit(); //TODO: this can be removed once fc::threads call quit during destruction
       }
 
+      fc::time_point ntp_timestamp_to_fc_time_point(uint64_t ntp_timestamp_net_order)
+      {
+        uint64_t ntp_timestamp_host = bswap_64(ntp_timestamp_net_order);
+        uint32_t fractional_seconds = ntp_timestamp_host & 0xffffffff;
+        uint32_t microseconds = (uint32_t)((((uint64_t)fractional_seconds * 1000000) + (UINT64_C(1) << 31)) >> 32);
+        uint32_t seconds_since_1900 = ntp_timestamp_host >> 32;
+        uint32_t seconds_since_epoch = seconds_since_1900 - 2208988800;
+        return fc::time_point() + fc::seconds(seconds_since_epoch) + fc::microseconds(microseconds);
+      }
+
+      uint64_t fc_time_point_to_ntp_timestamp(const fc::time_point& fc_timestamp)
+      {
+        uint64_t microseconds_since_epoch = (uint64_t)fc_timestamp.time_since_epoch().count();
+        uint32_t seconds_since_epoch = (uint32_t)(microseconds_since_epoch / 1000000);
+        uint32_t seconds_since_1900 = seconds_since_epoch + 2208988800;
+        uint32_t microseconds = microseconds_since_epoch % 1000000;
+        uint32_t fractional_seconds = (uint32_t)((((uint64_t)microseconds << 32) + (UINT64_C(1) << 31)) / 1000000);
+        uint64_t ntp_timestamp_net_order = ((uint64_t)seconds_since_1900 << 32) + fractional_seconds;
+        return bswap_64(ntp_timestamp_net_order);
+      }
+
       void request_now()
       {
         assert(_ntp_thread.is_current());
@@ -60,8 +80,9 @@ namespace fc
               std::shared_ptr<char> send_buffer(new char[48], [](char* p){ delete[] p; });
               std::array<unsigned char, 48> packet_to_send { {010,0,0,0,0,0,0,0,0} };
               memcpy(send_buffer.get(), packet_to_send.data(), packet_to_send.size());
-              _last_request_time = fc::time_point::now();
-              _sock.send_to( send_buffer, packet_to_send.size(), ep );
+              uint64_t* send_buf_as_64_array = (uint64_t*)send_buffer.get();
+              send_buf_as_64_array[5] = fc_time_point_to_ntp_timestamp(fc::time_point::now()); // 5 = Transmit Timestamp
+              _sock.send_to(send_buffer, packet_to_send.size(), ep);
               break;
             }
           } 
@@ -120,32 +141,37 @@ namespace fc
                 wlog("received ntp reply from ${from}",("from",from) );
               } FC_RETHROW_EXCEPTIONS(error, "Error reading from NTP socket");
 
-              uint64_t receive_timestamp_net_order = recv_buf[4];
-              uint64_t receive_timestamp_host = bswap_64(receive_timestamp_net_order);
-              uint32_t fractional_seconds = receive_timestamp_host & 0xffffffff;
-              uint32_t microseconds = (uint32_t)(((((uint64_t)fractional_seconds) * 1000000) + (UINT64_C(1)<<31)) >> 32);
-              uint32_t seconds_since_1900 = receive_timestamp_host >> 32;
-              uint32_t seconds_since_epoch = seconds_since_1900 - 2208988800;
+              fc::time_point receive_time = fc::time_point::now();
+              fc::time_point origin_time = ntp_timestamp_to_fc_time_point(recv_buf[3]);
+              fc::time_point server_receive_time = ntp_timestamp_to_fc_time_point(recv_buf[4]);
+              fc::time_point server_transmit_time = ntp_timestamp_to_fc_time_point(recv_buf[5]);
+
+              fc::microseconds offset(((server_receive_time - origin_time) +
+                                       (server_transmit_time - receive_time)).count() / 2);
+              fc::microseconds round_trip_delay((receive_time - origin_time) -
+                                                (server_transmit_time - server_receive_time));
+              //wlog("origin_time = ${origin_time}, server_receive_time = ${server_receive_time}, server_transmit_time = ${server_transmit_time}, receive_time = ${receive_time}",
+              //     ("origin_time", origin_time)("server_receive_time", server_receive_time)("server_transmit_time", server_transmit_time)("receive_time", receive_time));
+              wlog("ntp offset: ${offset}, round_trip_delay ${delay}", ("offset", offset)("delay", round_trip_delay));
 
               //if the reply we just received has occurred more than a second after our last time request (it was more than a second ago since our last request)
-              if( fc::time_point::now() - _last_request_time > fc::seconds(1) )
+              if( round_trip_delay > fc::seconds(1) )
               {
-                wlog("received stale ntp reply requested at ${request_time}, send a new time request",("request_time",_last_request_time));
+                wlog("received stale ntp reply requested at ${request_time}, send a new time request", ("request_time", origin_time));
                 request_now(); //request another reply and ignore this one
               }
               else //we think we have a timely reply, process it
               {
-                auto ntp_time = (fc::time_point() + fc::seconds(seconds_since_epoch) + fc::microseconds(microseconds));
-                if( ntp_time - fc::time_point::now() < fc::seconds(60*60*24) &&
-                    fc::time_point::now() - ntp_time < fc::seconds(60*60*24) )
+                if( offset < fc::seconds(60*60*24) && offset > fc::seconds(-60*60*24) )
                 {
-                  _last_ntp_delta_microseconds = (ntp_time - fc::time_point::now()).count();
+                  _last_ntp_delta_microseconds = offset.count();
                   _last_ntp_delta_initialized = true;
                   fc::microseconds ntp_delta_time = fc::microseconds(_last_ntp_delta_microseconds);
                   wlog("ntp_delta_time updated to ${delta_time}", ("delta_time",ntp_delta_time) );
                 }
                 else
-                  elog( "NTP time and local time vary by more than a day! ntp:${ntp_time} local:${local}", ("ntp_time",ntp_time)("local",fc::time_point::now()) );
+                  elog( "NTP time and local time vary by more than a day! ntp:${ntp_time} local:${local}", 
+                       ("ntp_time", receive_time + offset)("local", fc::time_point::now()) );
               }
             }
           } // try

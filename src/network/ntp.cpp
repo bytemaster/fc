@@ -23,6 +23,8 @@ namespace fc
       fc::future<void>                                 _read_loop_done;
       udp_socket                                       _sock;
       uint32_t                                         _request_interval_sec;
+      uint32_t                                         _retry_failed_request_interval_sec;
+      fc::time_point                                   _last_valid_ntp_reply_received_time;
 
       std::atomic_bool                                 _last_ntp_delta_initialized;
       std::atomic<int64_t>                             _last_ntp_delta_microseconds;
@@ -33,6 +35,7 @@ namespace fc
       ntp_impl() :
       _ntp_thread("ntp"),
       _request_interval_sec( 60*60 /* 1 hr */),
+      _retry_failed_request_interval_sec(60 * 5),
       _last_ntp_delta_microseconds(0)
       { 
         _last_ntp_delta_initialized = false;
@@ -98,14 +101,18 @@ namespace fc
         }
       } // request_now
 
-      //started for first time in ntp() constructor, canceled in ~ntp() destructor
+      // started for first time in ntp() constructor, canceled in ~ntp() destructor
+      // this task gets invoked every _retry_failed_request_interval_sec (currently 5 min), and if
+      // _request_interval_sec (currently 1 hour) has passed since the last successful update, 
+      // it sends a new request
       void request_time_task()
       {
         assert(_ntp_thread.is_current());
-        request_now();
+        if (_last_valid_ntp_reply_received_time <= fc::time_point::now() - fc::seconds(_request_interval_sec - 5))
+          request_now();
         if (!_request_time_task_done.canceled())
           _request_time_task_done = schedule( [=](){ request_time_task(); }, 
-                                              fc::time_point::now() + fc::seconds(_request_interval_sec), 
+                                              fc::time_point::now() + fc::seconds(_retry_failed_request_interval_sec), 
                                               "request_time_task" );
       } // request_loop
 
@@ -167,6 +174,7 @@ namespace fc
                   _last_ntp_delta_microseconds = offset.count();
                   _last_ntp_delta_initialized = true;
                   fc::microseconds ntp_delta_time = fc::microseconds(_last_ntp_delta_microseconds);
+                  _last_valid_ntp_reply_received_time = receive_time;
                   wlog("ntp_delta_time updated to ${delta_time}", ("delta_time",ntp_delta_time) );
                 }
                 else
@@ -190,7 +198,7 @@ namespace fc
             elog("unknown exception in read_loop, going to restart it.");
           }
           _sock.close();
-          fc::usleep(fc::seconds(_request_interval_sec));
+          fc::usleep(fc::seconds(_retry_failed_request_interval_sec));
         } //outer while loop
         wlog("exiting ntp read_loop");
       } //end read_loop()
@@ -247,6 +255,7 @@ namespace fc
   void ntp::set_request_interval( uint32_t interval_sec )
   {
     my->_request_interval_sec = interval_sec;
+    my->_retry_failed_request_interval_sec = std::min(my->_retry_failed_request_interval_sec, interval_sec);
   }
 
   void ntp::request_now()

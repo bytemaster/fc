@@ -21,19 +21,24 @@
 #endif
 
 namespace fc {
-  void to_variant( const fc::path& t, variant& v ) {
-    std::string path = t.to_native_ansi_path();
-    for(auto& c : path)
-    {
-      if(c == '\\')
-        c = '/';
-    }
+  // when converting to and from a variant, store utf-8 in the variant
+  void to_variant( const fc::path& path_to_convert, variant& variant_output ) 
+  {
+    std::wstring wide_string = path_to_convert.generic_wstring();
+    std::string utf8_string;
+    fc::encodeUtf8(wide_string, &utf8_string);
+    variant_output = utf8_string;
 
-    v = path;
+    //std::string path = t.to_native_ansi_path();
+    //std::replace(path.begin(), path.end(), '\\', '/');
+    //v = path;
   }
 
-  void from_variant( const fc::variant& v, fc::path& t ) {
-    t = fc::path(v.as_string());
+  void from_variant( const fc::variant& variant_to_convert, fc::path& path_output ) 
+  {
+    std::wstring wide_string;
+    fc::decodeUtf8(variant_to_convert.as_string(), &wide_string);
+    path_output = path(wide_string);
   }
 
    // Note: we can do this cast because the separator should be an ASCII character
@@ -135,11 +140,9 @@ namespace fc {
     *  faster performance
     */
    fc::string path::windows_string()const {
-     auto gs = _p->generic_string();
-     for( size_t i =0 ; i < gs.size(); ++i ) {
-       if( gs[i] == '/' ) gs[i] = '\\';
-     }
-     return gs;
+     std::string result = _p->generic_string();
+     std::replace(result.begin(), result.end(), '/', '\\');
+     return result;
    }
 
    fc::string path::string()const {

@@ -1,3 +1,4 @@
+#include <boost/filesystem/path.hpp>
 #include <boost/iostreams/device/mapped_file.hpp>
 #include <fc/compress/lzma.hpp>
 #include <fc/exception/exception.hpp>
@@ -104,7 +105,7 @@ static size_t lzma_file_output_callback( void* output_ctx, const void* output_bu
         resize_file( ctx->dst_path, dst_len + output_len );
 
         boost::iostreams::mapped_file_sink dst_file;
-        dst_file.open( ctx->dst_path.string() );
+        dst_file.open( (boost::filesystem::path)ctx->dst_path );
         FC_ASSERT( dst_file.is_open() );
 
         memcpy( ( void* )(dst_file.data() + dst_len), output_buf, output_len);
@@ -124,7 +125,7 @@ void lzma_compress_file( const path& src_path,
     FC_ASSERT( !exists( dst_path ) );
 
     boost::iostreams::mapped_file_source src_file;
-    src_file.open( src_path.to_native_ansi_path() );
+    src_file.open( (boost::filesystem::path)src_path );
     FC_ASSERT( src_file.is_open() );
 
     elzma_compress_handle handle = NULL;
@@ -174,7 +175,7 @@ void lzma_decompress_file( const path& src_path,
     FC_ASSERT( !exists( dst_path ) );
 
     boost::iostreams::mapped_file_source src_file;
-    src_file.open( src_path.to_native_ansi_path() );
+    src_file.open( (boost::filesystem::path)src_path );
     FC_ASSERT( src_file.is_open() );
 
     elzma_decompress_handle handle = NULL;

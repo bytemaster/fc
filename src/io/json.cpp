@@ -10,6 +10,8 @@
 #include <fstream>
 #include <sstream>
 
+#include <boost/filesystem/fstream.hpp>
+
 namespace fc
 {
    template<typename T>
@@ -645,12 +647,12 @@ namespace fc
 
 
 
-   fc::string   json::to_pretty_string( const variant& v )
+   fc::string json::to_pretty_string( const variant& v )
    {
 	   return pretty_print(to_string(v), 2);
    }
 
-   void          json::save_to_file( const variant& v, const fc::path& fi, bool pretty )
+   void json::save_to_file( const variant& v, const fc::path& fi, bool pretty )
    {
       if( pretty )
       {
@@ -669,8 +671,8 @@ namespace fc
       //auto tmp = std::make_shared<fc::ifstream>( p, ifstream::binary );
       //auto tmp = std::make_shared<std::ifstream>( p.generic_string().c_str(), std::ios::binary );
       //buffered_istream bi( tmp );
-      std::ifstream bi( p.generic_string().c_str(), std::ios::binary );
-      return variant_from_stream( bi  );
+      boost::filesystem::ifstream bi( p, std::ios::binary );
+      return variant_from_stream( bi );
    }
    variant json::from_stream( buffered_istream& in )
    {
@@ -693,7 +695,7 @@ namespace fc
       return out;
    }
 
-   bool     json::is_valid( const std::string& utf8_str )
+   bool json::is_valid( const std::string& utf8_str )
    {
       if( utf8_str.size() == 0 ) return false;
       fc::stringstream in( utf8_str );

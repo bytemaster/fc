@@ -125,14 +125,14 @@ namespace fc {
                    out.close();
                }
 
-               out.open( log_filename.to_native_ansi_path() );
+               out.open( log_filename );
              }
              remove_all( link_filename );
              create_hard_link( log_filename, link_filename );
 
              /* Delete old log files */
              fc::time_point limit_time = now - cfg.rotation_limit;
-             string link_filename_string = link_filename.filename().to_native_ansi_path();
+             string link_filename_string = link_filename.filename().string();
              directory_iterator itr(link_filename.parent_path());
              for( ; itr != directory_iterator(); itr++ )
              {
@@ -189,11 +189,11 @@ namespace fc {
          fc::create_directories(my->cfg.filename.parent_path());
 
          if(!my->cfg.rotate) 
-           my->out.open(my->cfg.filename.to_native_ansi_path().c_str());
+           my->out.open(my->cfg.filename);
       }
       catch( ... )
       {
-         std::cerr << "error opening log file: " << my->cfg.filename.string() << "\n";
+         std::cerr << "error opening log file: " << my->cfg.filename.preferred_string() << "\n";
       }
    }
    

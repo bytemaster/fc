@@ -7,8 +7,10 @@
 
 namespace fc {
 
-  mutex::mutex()
-  :m_blist(0){}
+  mutex::mutex() :
+    m_blist(0),
+    recursive_lock_count(0)
+  {}
 
   mutex::~mutex() {
     if( m_blist ) 
@@ -134,6 +136,8 @@ namespace fc {
       { 
         // nobody else owns the mutex, so we get it; add our context as the last and only element on the mutex's list
         m_blist = current_context;
+        assert(recursive_lock_count == 0);
+        recursive_lock_count = 1;
         assert(!current_context->next_blocked_mutex);
         return;
       }
@@ -141,18 +145,14 @@ namespace fc {
       // allow recusive locks
       fc::context* dummy_context_to_unblock  = 0;
       if ( get_tail( m_blist, dummy_context_to_unblock ) == current_context ) {
-        // if we already have the lock (meaning we're on the tail of the list) then
-        // we shouldn't be trying to grab the lock again
-        assert(false);
-        // EMF: I think recursive locks are currently broken -- we need to 
-	// keep track of how many times this mutex has been locked by the
-	// current context.  Unlocking should decrement this count and unblock
-	// the next context only if the count drops to zero
+        assert(recursive_lock_count > 0);
+        ++recursive_lock_count;
         return;
       }
       // add ourselves to the head of the list
       current_context->next_blocked_mutex = m_blist;
       m_blist = current_context;
+      ++recursive_lock_count;
 
 #if 0
       int cnt = 0;
@@ -185,17 +185,24 @@ namespace fc {
     }
   }
 
-  void mutex::unlock() {
+  void mutex::unlock() 
+  {
     fc::context* context_to_unblock = 0;
-    { fc::unique_lock<fc::spin_yield_lock> lock(m_blist_lock);
-      get_tail(m_blist, context_to_unblock);
-      if( context_to_unblock ) {
-        context_to_unblock->next_blocked_mutex = 0;
-        context_to_unblock->ctx_thread->my->unblock( context_to_unblock );
-      } else {
-        m_blist   = 0;
-      }
-    }
+
+    fc::unique_lock<fc::spin_yield_lock> lock(m_blist_lock);
+    assert(recursive_lock_count > 0);
+    --recursive_lock_count;
+    if (recursive_lock_count != 0)
+      return;
+
+    get_tail(m_blist, context_to_unblock);
+    if( context_to_unblock ) 
+    {
+      context_to_unblock->next_blocked_mutex = 0;
+      context_to_unblock->ctx_thread->my->unblock( context_to_unblock );
+    } 
+    else
+      m_blist = 0;
   }
 
 } // fc

@@ -217,6 +217,26 @@ namespace fc {
   bool is_directory( const path& p ) { return boost::filesystem::is_directory(p); }
   bool is_regular_file( const path& p ) { return boost::filesystem::is_regular_file(p); }
   uint64_t file_size( const path& p ) { return boost::filesystem::file_size(p); }
+
+  uint64_t directory_size(const path& p)
+  {
+    try {
+      FC_ASSERT( is_directory( p ) );
+
+      recursive_directory_iterator end;
+      uint64_t size = 0;
+      for( recursive_directory_iterator itr( p ); itr != end; ++itr )
+      {
+        if( is_regular_file( *itr ) )
+          size += file_size( *itr );
+      }
+
+      return size;
+    } catch ( ... ) {
+      FC_THROW( "Unable to calculate size of directory ${path}", ("path", p )("inner", fc::except_str() ) );
+    }
+  }
+
   void remove_all( const path& p ) { boost::filesystem::remove_all(p); }
   void copy( const path& f, const path& t ) { 
      try {
@@ -445,4 +465,5 @@ namespace fc {
      static fc::path appCurrentPath = boost::filesystem::current_path();
      return appCurrentPath;
    }
+
 }

@@ -152,6 +152,7 @@ namespace fc {
   path     make_relative(const path& from, const path& to);
   path     canonical( const path& p );
   uint64_t file_size( const path& p );
+  uint64_t directory_size( const path& p );
   bool     remove( const path& p );
   void     copy( const path& from, const path& to );
   void     rename( const path& from, const path& to );

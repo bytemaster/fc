@@ -54,6 +54,10 @@ static void set_thread_name(const char* threadName)
 #endif
 
 namespace fc {
+#ifdef ENABLE_FC_THREAD_DEBUG_LOG
+  FILE* thread_debug_log = fopen("C:/thread_debug.log", "w");
+#endif
+
   const char* thread_name() {
     return thread::current().name().c_str();
   }
@@ -173,7 +177,7 @@ namespace fc {
       
       // move all sleep tasks to ready
       for( uint32_t i = 0; i < my->sleep_pqueue.size(); ++i ) {
-        my->ready_push_front( my->sleep_pqueue[i] );
+        my->add_context_to_ready_list( my->sleep_pqueue[i] );
       }
       my->sleep_pqueue.clear();
 
@@ -182,7 +186,7 @@ namespace fc {
       while( cur ) {
         fc::context* n = cur->next;
         cur->next = 0;
-        my->ready_push_front( cur );
+        my->add_context_to_ready_list( cur );
         cur = n;
       }
 
@@ -287,7 +291,7 @@ namespace fc {
    }
 
    void thread::async_task( task_base* t, const priority& p ) {
-      async_task( t, p, time_point::min() );
+     async_task( t, p, time_point::min() );
    }
 
    void thread::poke() {
@@ -407,7 +411,7 @@ namespace fc {
               cur_blocked = my->blocked;
           }
           cur->next_blocked = 0;
-          my->ready_push_front( cur );
+          my->add_context_to_ready_list( cur );
         } else { // goto the next blocked task
           prev_blocked  = cur_blocked;
           cur_blocked   = cur_blocked->next_blocked;

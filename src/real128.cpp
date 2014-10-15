@@ -55,7 +55,7 @@ namespace fc
          ++c;
          digit = *c - '0';
        }
-       fixed = fc::uint128(int_part);
+       fixed = fc::uint128(int_part, 0);
      }
      else
      {
@@ -92,8 +92,7 @@ namespace fc
       std::stringstream ss;
       ss << to_uint64();
       ss << '.';
-      auto frac = *this * real128( uint128(-1,0) );
-      frac += real128(1);
+      real128 frac(fixed.low_bits());
 
       ss << std::string( frac.fixed ).substr(1);
 

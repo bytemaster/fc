@@ -10,7 +10,7 @@ namespace fc {
    class real128
    {
       public:
-         real128( uint64_t integer = 0):fixed(integer){}
+         real128( uint64_t integer = 0):fixed(integer,0){}
          real128( const std::string& str );
          operator std::string()const;
 

@@ -235,6 +235,9 @@ target_link_libraries( ntp_test fc )
 add_executable( task_cancel_test tests/task_cancel.cpp )
 target_link_libraries( task_cancel_test fc )
 
+add_executable( real128_test tests/real128_test.cpp )
+target_link_libraries( real128_test fc )
+
 #include_directories( vendor/udt4/src )
 
 add_executable( udt_server tests/udts.cpp )

@@ -17,5 +17,6 @@ BOOST_AUTO_TEST_CASE(real128_test)
    BOOST_CHECK_EQUAL(string(real128(0)), string(real128("0")));
 
    BOOST_CHECK_EQUAL(real128("12345.6789").to_uint64(), 12345);
+   BOOST_CHECK_EQUAL((real128("12345.6789")*10000).to_uint64(), 123456789);
    BOOST_CHECK_EQUAL(string(real128("12345.6789")), string("12345.6789"));
 }

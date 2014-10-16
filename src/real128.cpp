@@ -2,8 +2,9 @@
 #include <fc/crypto/bigint.hpp>
 #include <fc/exception/exception.hpp>
 #include <sstream>
+#include <stdint.h>
 
-#define PRECISION (1000000ll * 1000000ll * 1000000ll)
+#define PRECISION (UINT64_C(1000000) * UINT64_C(1000000) * UINT64_C(1000000))
 
 namespace fc
 {

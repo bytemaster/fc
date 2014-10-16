@@ -534,6 +534,9 @@ namespace fc
          case variant::string_type:
               escape_string( v.get_string(), os );
               return;
+         case variant::blob_type:
+              escape_string( v.as_string(), os );
+              return;
          case variant::array_type:
            {
               const variants&  a = v.get_array();

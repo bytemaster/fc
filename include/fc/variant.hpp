@@ -31,6 +31,11 @@ namespace fc
    class time_point_sec;
    class microseconds;
 
+   struct blob { std::vector<char> data; };
+
+   void to_variant( const blob& var,  variant& vo );
+   void from_variant( const variant& var,  blob& vo );
+
    void to_variant( const uint8_t& var,  variant& vo );
    void from_variant( const variant& var,  uint8_t& vo );
    void to_variant( const int8_t& var,  variant& vo );
@@ -105,6 +110,7 @@ namespace fc
    template<typename A, typename B>
    void from_variant( const variant& v, std::pair<A,B>& p );
 
+
    /**
     * @brief stores null, int64, uint64, double, bool, string, std::vector<variant>,
     *        and variant_object's.  
@@ -126,7 +132,8 @@ namespace fc
            bool_type   = 4,
            string_type = 5,
            array_type  = 6,
-           object_type = 7
+           object_type = 7,
+           blob_type   = 8
         };
 
         /// Constructs a null_type variant
@@ -150,6 +157,7 @@ namespace fc
         variant( int64_t val );
         variant( double val );
         variant( bool val );
+        variant( blob val );
         variant( fc::string val );
         variant( variant_object );
         variant( mutable_variant_object );
@@ -188,15 +196,24 @@ namespace fc
         bool                        is_double()const;
         bool                        is_object()const;
         bool                        is_array()const;
+        bool                        is_blob()const;
         /**
          *   int64, uint64, double,bool
          */
         bool                        is_numeric()const;
+        /**
+         *   int64, uint64, bool
+         */
+        bool                        is_integer()const;
                                     
         int64_t                     as_int64()const;
         uint64_t                    as_uint64()const;
         bool                        as_bool()const;
         double                      as_double()const;
+
+        blob&                       get_blob();
+        const blob&                 get_blob()const;
+        blob                        as_blob()const;
 
         /** Convert's double, ints, bools, etc to a string
          * @throw if get_type() == array_type | get_type() == object_type 
@@ -464,8 +481,18 @@ namespace fc
       }
    }
 
+   variant operator + ( const variant& a, const variant& b );
+   variant operator - ( const variant& a, const variant& b );
+   variant operator * ( const variant& a, const variant& b );
+   variant operator / ( const variant& a, const variant& b );
+   variant operator == ( const variant& a, const variant& b );
+   variant operator != ( const variant& a, const variant& b );
+   variant operator < ( const variant& a, const variant& b );
+   variant operator > ( const variant& a, const variant& b );
+   variant operator ! ( const variant& a );
 } // namespace fc
 
 #include <fc/reflect/reflect.hpp>
 FC_REFLECT_TYPENAME( fc::variant )
-FC_REFLECT_ENUM( fc::variant::type_id, (null_type)(int64_type)(uint64_type)(double_type)(bool_type)(string_type)(array_type)(object_type) )
+FC_REFLECT_ENUM( fc::variant::type_id, (null_type)(int64_type)(uint64_type)(double_type)(bool_type)(string_type)(array_type)(object_type)(blob_type) )
+FC_REFLECT( fc::blob, (data) );

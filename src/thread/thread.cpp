@@ -187,33 +187,17 @@ namespace fc {
       }
 
       // mark all ready tasks (should be everyone)... as canceled 
-#ifdef READY_LIST_IS_HEAP
       for (fc::context* ready_context : my->ready_heap)
         ready_context->canceled = true;
-#else
-      cur = my->ready_head;
-      while( cur ) {
-        cur->canceled = true;
-        cur = cur->next;
-      }
-#endif
       my->done = true;
 
       // now that we have poked all fibers... switch to the next one and
       // let them all quit.
-#ifdef READY_LIST_IS_HEAP
       while (!my->ready_heap.empty())
       {
         my->start_next_fiber(true); 
         my->check_for_timeouts();
       }
-#else
-      while (my->ready_head)
-      {
-        my->start_next_fiber(true); 
-        my->check_for_timeouts();
-      }
-#endif
       my->clear_free_list();
       my->cleanup_thread_specific_data();
    }

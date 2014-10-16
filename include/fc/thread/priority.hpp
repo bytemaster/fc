@@ -15,6 +15,7 @@ namespace fc {
     }
     static priority max() { return priority(10000); }
     static priority min() { return priority(-10000); }
+    static priority _internal__priority_for_short_sleeps() { return priority(-100000); }
     int value;
   };
 }

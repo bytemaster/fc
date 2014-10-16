@@ -8,17 +8,9 @@
 #include <boost/atomic.hpp>
 #include <vector>
 //#include <fc/logger.hpp>
-
-//#define ENABLE_FC_THREAD_DEBUG_LOG
-#ifdef ENABLE_FC_THREAD_DEBUG_LOG
-# define thread_debug_msg(x) do { fprintf x; } while (0)
-#else
-# define thread_debug_msg(x) do {} while (0)
-#endif
+#define READY_LIST_IS_HEAP
 
 namespace fc {
-    extern FILE* thread_debug_log;
-
     struct sleep_priority_less {
         bool operator()( const context::ptr& a, const context::ptr& b ) {
             return a->resume_time > b->resume_time;
@@ -34,8 +26,10 @@ namespace fc {
              done(false),
              current(0),
              pt_head(0),
+#ifndef READY_LIST_IS_HEAP
              ready_head(0),
              ready_tail(0),
+#endif
              blocked(0),
              next_unused_task_storage_slot(0)
 #ifndef NDEBUG
@@ -51,12 +45,18 @@ namespace fc {
             {
               delete current;
               fc::context* temp;
+#ifdef READY_LIST_IS_HEAP
+              for (fc::context* ready_context : ready_heap)
+                delete ready_context;
+              ready_heap.clear();
+#else     
               while (ready_head)
               {
                 temp = ready_head->next;
                 delete ready_head;
                 ready_head = temp;
               }
+#endif
               while (blocked)
               {
                 temp = blocked->next;
@@ -98,8 +98,12 @@ namespace fc {
 
            fc::context*             pt_head;     // list of contexts that can be reused for new tasks
 
+#ifdef READY_LIST_IS_HEAP
+           std::vector<fc::context*> ready_heap;
+#else
            fc::context*             ready_head;  // linked list (using 'next') of contexts that are ready to run
            fc::context*             ready_tail;
+#endif
 
            fc::context*             blocked;     // linked list of contexts (using 'next_blocked') blocked on promises via wait()
 
@@ -182,68 +186,96 @@ namespace fc {
               */
            }
 
-           fc::context::ptr ready_pop_front() 
-           {
-                fc::context::ptr tmp = nullptr;
-                if( ready_head ) 
-                {
-                    tmp        = ready_head;
-                    ready_head = tmp->next;
-                    if( !ready_head )   
-                        ready_tail = nullptr;
-                    tmp->next = nullptr;
-                }
-                return tmp;
-           }
-           
-           void add_context_to_ready_list(context* context_to_add)
-           {
-             if (!ready_tail)
-               ready_head = context_to_add;
-             else
-             {
-               context_to_add->context_posted_num = ++next_posted_num;
-               ready_tail->next = context_to_add;
-             }
-             ready_tail = context_to_add;
-           }
-
-#if 0
-          void ready_push_front(const fc::context::ptr& context_to_push)
+          fc::context::ptr ready_pop_front() 
           {
-            BOOST_ASSERT(context_to_push->next == nullptr);
-            BOOST_ASSERT(context_to_push != current);
-
-            context** iter = &ready_head;
-            while (*iter && (*iter)->resume_time > context_to_push->resume_time)
-              iter = &((*iter)->next);
-            context_to_push->next = *iter;
-            *iter = context_to_push;
-            if (!context_to_push->next)
-              ready_tail = context_to_push;
-          }
-
-          void ready_push_back(const fc::context::ptr& context_to_push)
-          {
-            BOOST_ASSERT(context_to_push->next == nullptr);
-            BOOST_ASSERT(context_to_push != current);
-
-            if (!ready_tail)
-              ready_head = context_to_push;
-            else
+#ifdef READY_LIST_IS_HEAP
+            fc::context* highest_priority_context = ready_heap.front();
+            std::pop_heap(ready_heap.begin(), ready_heap.end(), task_priority_less());
+            ready_heap.pop_back();
+            return highest_priority_context;
+#else
+            fc::context::ptr tmp = nullptr;
+            if( ready_head ) 
             {
-              if (context_to_push->resume_time <= ready_tail->resume_time)
-                context_to_push->resume_time = ready_tail->resume_time + fc::microseconds(1);
-              ready_tail->next = context_to_push;
+                tmp        = ready_head;
+                ready_head = tmp->next;
+                if( !ready_head )   
+                    ready_tail = nullptr;
+                tmp->next = nullptr;
             }
-            ready_tail = context_to_push;
-          }
+            return tmp;
 #endif
+          }
+           
+           void add_context_to_ready_list(context* context_to_add, bool at_end = false)
+           {
+
+#ifdef READY_LIST_IS_HEAP
+             context_to_add->context_posted_num = next_posted_num++;
+             ready_heap.push_back(context_to_add);
+             std::push_heap(ready_heap.begin(), ready_heap.end(), task_priority_less());
+#else
+# if 1
+               if (at_end)
+               {
+                 if (!ready_tail)
+                 {
+                   ready_head = context_to_add;
+                   context_to_add->context_posted_num = next_posted_num + 100000;
+                 }
+                 else
+                 {
+                   context_to_add->context_posted_num = next_posted_num++;
+                   ready_tail->next = context_to_add;
+                 }
+                 ready_tail = context_to_add;
+               }
+               else
+               {
+                 context_to_add->context_posted_num = next_posted_num++;
+                 context_to_add->next = ready_head;
+                 ready_head = context_to_add;
+                 if (!ready_tail)
+                   ready_tail = context_to_add;
+               }
+# else
+               if (!ready_tail)
+                 ready_head = context_to_add;
+               else
+               {
+                 context_to_add->context_posted_num = next_posted_num++;
+                 ready_tail->next = context_to_add;
+               }
+               ready_tail = context_to_add;
+# endif
+#endif
+           }
+
           struct task_priority_less 
           {
-            bool operator()( task_base* a, task_base* b ) 
+            bool operator()(const task_base* a, const task_base* b) const
             {
-              return a->_prio.value < b->_prio.value ? true : (a->_prio.value > b->_prio.value ? false : a->_posted_num > b->_posted_num);
+              return a->_prio.value < b->_prio.value ? true : 
+                                                       (a->_prio.value > b->_prio.value ? false : 
+                                                                                          a->_posted_num > b->_posted_num);
+            }
+            bool operator()(const task_base* a, const context* b) const
+            {
+              return a->_prio.value < b->prio.value ? true : 
+                                                      (a->_prio.value > b->prio.value ? false : 
+                                                                                        a->_posted_num > b->context_posted_num);
+            }
+            bool operator()(const context* a, const task_base* b) const
+            {
+              return a->prio.value < b->_prio.value ? true : 
+                                                      (a->prio.value > b->_prio.value ? false : 
+                                                                                        a->context_posted_num > b->_posted_num);
+            }
+            bool operator()(const context* a, const context* b) const
+            {
+              return a->prio.value < b->prio.value ? true : 
+                                                     (a->prio.value > b->prio.value ? false : 
+                                                                                      a->context_posted_num > b->context_posted_num);
             }
           };
 
@@ -406,29 +438,34 @@ namespace fc {
               if( !current ) 
                 current = new fc::context( &fc::thread::current() );
 
+              priority original_priority = current->prio;
+
               // check to see if any other contexts are ready
-              if( ready_head ) 
+#ifdef READY_LIST_IS_HEAP
+              if (!ready_heap.empty())
+#else
+              if (ready_head)
+#endif
               {
                 fc::context* next = ready_pop_front();
-                if( next == current ) 
+                if (next == current)
                 {
                   // elog( "next == current... something went wrong" );
                   assert(next != current);
                   return false;
                 }
-                BOOST_ASSERT( next != current ); 
+                BOOST_ASSERT(next != current);
 
                 // jump to next context, saving current context
                 fc::context* prev = current;
                 current = next;
                 if (reschedule)
-                  add_context_to_ready_list(prev);
+                {
+                  current->prio = priority::_internal__priority_for_short_sleeps();
+                  add_context_to_ready_list(prev, true);
+                }
                 // slog( "jump to %p from %p", next, prev );
                 // fc_dlog( logger::get("fc_context"), "from ${from} to ${to}", ( "from", int64_t(prev) )( "to", int64_t(next) ) ); 
-                thread_debug_msg((thread_debug_log, "EMF: [%s] \"%s\" -> \"%s\"\n",
-                                  name.c_str(), 
-                                  prev->cur_task ? prev->cur_task->get_desc() : "unknown", 
-                                  next->cur_task ? next->cur_task->get_desc() : "unknown"));
 #if BOOST_VERSION >= 105600
                 bc::jump_fcontext( &prev->my_context, next->my_context, 0 );
 #elif BOOST_VERSION >= 105300
@@ -464,14 +501,13 @@ namespace fc {
 
                 current = next;
                 if( reschedule )  
-                  add_context_to_ready_list(prev);
+                {
+                  current->prio = priority::_internal__priority_for_short_sleeps();
+                  add_context_to_ready_list(prev, true);
+                }
 
                 // slog( "jump to %p from %p", next, prev );
                 // fc_dlog( logger::get("fc_context"), "from ${from} to ${to}", ( "from", int64_t(prev) )( "to", int64_t(next) ) );
-                thread_debug_msg((thread_debug_log, "EMF: [%s] \"%s\" -> \"%s\"\n",
-                                  name.c_str(), 
-                                  prev->cur_task ? prev->cur_task->get_desc() : "unknown", 
-                                  next->cur_task ? next->cur_task->get_desc() : "unknown"));
 #if BOOST_VERSION >= 105600
                 bc::jump_fcontext( &prev->my_context, next->my_context, (intptr_t)this );
 #elif BOOST_VERSION >= 105300
@@ -483,6 +519,9 @@ namespace fc {
                 BOOST_ASSERT( current == prev );
                 //current = prev;
               }
+
+              if (reschedule)
+                current->prio = original_priority;
 
               if( current->canceled ) 
               {
@@ -525,9 +564,6 @@ namespace fc {
 
               next->_set_active_context( current );
               current->cur_task = next;
-
-              thread_debug_msg((thread_debug_log, "EMF: [%s] starting task \"%s\"\n", name.c_str(), next->get_desc()));
-
               next->run();
               current->cur_task = 0;
               next->_set_active_context(0);
@@ -563,10 +599,20 @@ namespace fc {
 
                 if (!task_pqueue.empty())
                 {
-                  if (ready_head)
+#if 1
+                  if (task_pqueue.front()->_prio.value != priority::max().value &&
+#ifdef READY_LIST_IS_HEAP
+                      !ready_heap.empty())
+#else
+                      ready_head)
+#endif
                   {
                     // a new task and an existing task are both ready to go
+#ifdef READY_LIST_IS_HEAP
+                    if (task_priority_less()(ready_heap.front(), task_pqueue.front()))
+#else
                     if (ready_head->context_posted_num < task_pqueue.front()->_posted_num)
+#endif
                     {
                       // run the existing task first
                       pt_push_back(current);
@@ -574,16 +620,21 @@ namespace fc {
                       continue;
                     }
                   }
+#endif
 
                   // if we made it here, either there's no ready context, or the ready context is
-                  // scheduled after the ready task, so we shoudl run the task first
+                  // scheduled after the ready task, so we should run the task first
                   run_next_task();
                   continue;
                 }
 
                 // if I have something else to do other than
                 // process tasks... do it.
-                if( ready_head ) 
+#ifdef READY_LIST_IS_HEAP
+                if (!ready_heap.empty())
+#else
+                if (ready_head)
+#endif
                 { 
                    pt_push_back( current ); 
                    start_next_fiber(false);  
@@ -597,14 +648,14 @@ namespace fc {
 
                 { // lock scope
                   boost::unique_lock<boost::mutex> lock(task_ready_mutex);
-                  if( has_next_task() ) continue;
+                  if( has_next_task() ) 
+                    continue;
                   time_point timeout_time = check_for_timeouts();
                   
-                  if( done ) return;
+                  if( done ) 
+                    return;
                   if( timeout_time == time_point::maximum() ) 
-                  {
                     task_ready.wait( lock );
-                  } 
                   else if( timeout_time != time_point::min() ) 
                   {
                      // there may be tasks that have been canceled we should filter them out now
@@ -647,9 +698,9 @@ namespace fc {
         }
 
         time_point next = time_point::maximum();
-        if( sleep_pqueue.size() && next > sleep_pqueue.front()->resume_time )
+        if( !sleep_pqueue.empty() && next > sleep_pqueue.front()->resume_time )
           next = sleep_pqueue.front()->resume_time;
-        if( task_sch_queue.size() && next > task_sch_queue.front()->_when )
+        if( !task_sch_queue.empty() && next > task_sch_queue.front()->_when )
           next = task_sch_queue.front()->_when;
 
         time_point now = time_point::now();
@@ -795,6 +846,10 @@ namespace fc {
           {
             if ((*sleep_iter)->canceled)
             {
+#ifdef READY_LIST_IS_HEAP
+              bool already_on_ready_list = std::find(ready_heap.begin(), ready_heap.end(), 
+                                                     *sleep_iter) != ready_heap.end();
+#else
               bool already_on_ready_list = false;
               for (fc::context* ready_iter = ready_head; ready_iter; ready_iter = ready_iter->next)
                 if (ready_iter == *sleep_iter)
@@ -802,6 +857,7 @@ namespace fc {
                   already_on_ready_list = true;
                   break;
                 }
+#endif
               if (!already_on_ready_list)
                 add_context_to_ready_list(*sleep_iter);
               sleep_iter = sleep_pqueue.erase(sleep_iter);

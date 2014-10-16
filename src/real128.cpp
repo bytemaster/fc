@@ -3,8 +3,19 @@
 #include <fc/exception/exception.hpp>
 #include <sstream>
 
+#define PRECISION (1000000ll * 1000000ll * 1000000ll)
+
 namespace fc
 {
+   uint64_t real128::to_uint64()const
+   { 
+      return (fixed/PRECISION).to_uint64(); 
+   }
+
+   real128::real128( uint64_t integer )
+   {
+      fixed = uint128(integer)  * PRECISION;
+   }
    real128& real128::operator += ( const real128& o )
    {
       fixed += o.fixed;
@@ -22,7 +33,7 @@ namespace fc
        
       fc::bigint self(fixed);
       fc::bigint other(o.fixed);
-      self *= fc::bigint(uint128(0,-1));
+      self *= PRECISION;
       self /= other;
       fixed = self;
 
@@ -34,7 +45,7 @@ namespace fc
       fc::bigint self(fixed);
       fc::bigint other(o.fixed);
       self *= other;
-      self /= fc::bigint(uint128(0,-1));
+      self /= PRECISION;
       fixed = self;
       return *this;
    } FC_CAPTURE_AND_RETHROW( (*this)(o) ) }
@@ -55,7 +66,7 @@ namespace fc
          ++c;
          digit = *c - '0';
        }
-       fixed = fc::uint128(int_part, 0);
+       *this = real128(int_part);
      }
      else
      {
@@ -90,11 +101,10 @@ namespace fc
    real128::operator std::string()const
    {
       std::stringstream ss;
-      ss << to_uint64();
+      ss << std::string(fixed / PRECISION);
       ss << '.';
-      real128 frac(fixed.low_bits());
-
-      ss << std::string( frac.fixed ).substr(1);
+      auto frac = (fixed % PRECISION) + PRECISION;
+      ss << std::string( frac ).substr(1);
 
       auto number = ss.str();
       while(  number.back() == '0' ) number.pop_back();

@@ -10,8 +10,8 @@ namespace fc {
    class real128
    {
       public:
-         real128( uint64_t integer = 0):fixed(integer,0){}
-         real128( const std::string& str );
+         real128( uint64_t integer = 0);
+         explicit real128( const std::string& str );
          operator std::string()const;
 
          friend real128 operator * ( real128 a, const real128& b ) { a *= b; return a; }
@@ -24,7 +24,7 @@ namespace fc {
          real128& operator /= ( const real128& o );
          real128& operator *= ( const real128& o );
 
-         uint64_t to_uint64()const{ return fixed.high_bits(); }
+         uint64_t to_uint64()const;
 
       private:
          uint128  fixed;

@@ -1,6 +1,7 @@
 #include <fc/real128.hpp>
 #define BOOST_TEST_MODULE Real128Test
 #include <boost/test/unit_test.hpp>
+#include <fc/log/logger.hpp>
 
 using fc::real128;
 using std::string;
@@ -16,7 +17,22 @@ BOOST_AUTO_TEST_CASE(real128_test)
    BOOST_CHECK_EQUAL(string(real128(12345)), string("12345."));
    BOOST_CHECK_EQUAL(string(real128(0)), string(real128("0")));
 
+   real128 ten(10);
+   real128 two(2);
+   real128 twenty(20);
+
+   BOOST_CHECK_EQUAL( string(ten),  "10." );
+   BOOST_CHECK_EQUAL( string(two),  "2." );
+   BOOST_CHECK_EQUAL( string(ten+two),  "12." );
+   BOOST_CHECK_EQUAL( string(ten-two),  "8." );
+   BOOST_CHECK_EQUAL( string(ten*two),  "20." );
+   BOOST_CHECK_EQUAL( string(ten/two),  "5." );
+
    BOOST_CHECK_EQUAL(real128("12345.6789").to_uint64(), 12345);
    BOOST_CHECK_EQUAL((real128("12345.6789")*10000).to_uint64(), 123456789);
    BOOST_CHECK_EQUAL(string(real128("12345.6789")), string("12345.6789"));
+
+   wdump( (ten)(two)(twenty) );
+   wdump( (real128(uint64_t(-1)))(uint64_t(-1)) );
+   wdump((real128("12345.6789")) );
 }

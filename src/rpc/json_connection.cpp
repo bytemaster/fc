@@ -73,6 +73,7 @@ namespace fc { namespace rpc {
                   auto i = obj.find("id");
                   if( m != obj.end() )
                   {
+                     fc::exception except;
                      try
                      {
                         auto p = obj.find("params");
@@ -135,13 +136,15 @@ namespace fc { namespace rpc {
                      {
                         if( i != obj.end() )
                         {
-                           send_error( i->value(), e );
+                           except = e;
                         }
                         else
                         {
                            fc_wlog( _logger, "json rpc exception: ${exception}", ("exception",e) );
                         }
                      }
+                     if( i != obj.end() )
+                        send_error( i->value(), except );
                   }
                   else if( i != obj.end() ) //handle any received JSON response
                   {

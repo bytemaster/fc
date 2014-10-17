@@ -60,7 +60,8 @@ namespace fc {
       cancellation_reason(nullptr),
 #endif
       complete(false),
-      cur_task(0)
+      cur_task(0),
+      context_posted_num(0)
     {
 #if BOOST_VERSION >= 105600
      size_t stack_size =  stack_allocator::traits_type::default_size() * 4;
@@ -99,7 +100,8 @@ namespace fc {
      cancellation_reason(nullptr),
 #endif
      complete(false),
-     cur_task(0)
+     cur_task(0),
+     context_posted_num(0)
     {}
 
     ~context() {
@@ -229,6 +231,7 @@ namespace fc {
 #endif
     bool                         complete;
     task_base*                   cur_task;
+    uint64_t                     context_posted_num; // serial number set each tiem the context is added to the ready list
   };
 
 } // naemspace fc 

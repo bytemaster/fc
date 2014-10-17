@@ -9,6 +9,7 @@
 #include <fc/crypto/hex.hpp>
 #include <boost/scoped_array.hpp>
 #include <fc/reflect/variant.hpp>
+#include <algorithm>
 
 namespace fc
 {

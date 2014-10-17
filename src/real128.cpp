@@ -4,7 +4,7 @@
 #include <sstream>
 #include <stdint.h>
 
-#define PRECISION (UINT64_C(1000000) * UINT64_C(1000000) * UINT64_C(1000000))
+#define PRECISION (uint64_t(1000000) * uint64_t(1000000) * uint64_t(1000000))
 
 namespace fc
 {

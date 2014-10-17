@@ -51,7 +51,7 @@ namespace fc
       {
         uint64_t ntp_timestamp_host = bswap_64(ntp_timestamp_net_order);
         uint32_t fractional_seconds = ntp_timestamp_host & 0xffffffff;
-        uint32_t microseconds = (uint32_t)((((uint64_t)fractional_seconds * 1000000) + (UINT64_C(1) << 31)) >> 32);
+        uint32_t microseconds = (uint32_t)((((uint64_t)fractional_seconds * 1000000) + (uint64_t(1) << 31)) >> 32);
         uint32_t seconds_since_1900 = ntp_timestamp_host >> 32;
         uint32_t seconds_since_epoch = seconds_since_1900 - 2208988800;
         return fc::time_point() + fc::seconds(seconds_since_epoch) + fc::microseconds(microseconds);
@@ -63,7 +63,7 @@ namespace fc
         uint32_t seconds_since_epoch = (uint32_t)(microseconds_since_epoch / 1000000);
         uint32_t seconds_since_1900 = seconds_since_epoch + 2208988800;
         uint32_t microseconds = microseconds_since_epoch % 1000000;
-        uint32_t fractional_seconds = (uint32_t)((((uint64_t)microseconds << 32) + (UINT64_C(1) << 31)) / 1000000);
+        uint32_t fractional_seconds = (uint32_t)((((uint64_t)microseconds << 32) + (uint64_t(1) << 31)) / 1000000);
         uint64_t ntp_timestamp_net_order = ((uint64_t)seconds_since_1900 << 32) + fractional_seconds;
         return bswap_64(ntp_timestamp_net_order);
       }

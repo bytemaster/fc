@@ -15,7 +15,7 @@ namespace fc {
 
    static const string compression_extension( ".lzma" );
 
-   class file_appender::impl : public fc::retainable 
+   class file_appender::impl : public fc::retainable
    {
       public:
          config                     cfg;
@@ -32,16 +32,6 @@ namespace fc {
              int64_t interval_seconds = interval.to_seconds();
              int64_t file_number = timestamp.sec_since_epoch() / interval_seconds;
              return time_point_sec( (uint32_t)(file_number * interval_seconds) );
-         }
-
-         string timestamp_to_string( const time_point_sec& timestamp )
-         {
-             return timestamp.to_iso_string();
-         }
-
-         time_point_sec string_to_timestamp( const string& str )
-         {
-             return time_point::from_iso_string( str );
          }
 
          void compress_file( const fc::path& filename )
@@ -95,7 +85,7 @@ namespace fc {
              FC_ASSERT( cfg.rotate );
              fc::time_point now = time_point::now();
              fc::time_point_sec start_time = get_file_start_time( now, cfg.rotation_interval );
-             string timestamp_string = timestamp_to_string( start_time );
+             string timestamp_string = start_time.to_non_delimited_iso_string();
              fc::path link_filename = cfg.filename;
              fc::path log_filename = link_filename.parent_path() / (link_filename.filename().string() + "." + timestamp_string);
 
@@ -106,8 +96,8 @@ namespace fc {
                {
                    if( start_time <= _current_file_start_time )
                    {
-                       _rotation_task = schedule( [this]() { rotate_files(); }, 
-                                                  _current_file_start_time + cfg.rotation_interval.to_seconds(), 
+                       _rotation_task = schedule( [this]() { rotate_files(); },
+                                                  _current_file_start_time + cfg.rotation_interval.to_seconds(),
                                                   "rotate_files(2)" );
                        return;
                    }
@@ -134,7 +124,7 @@ namespace fc {
                        continue;
                      string current_timestamp_str = current_filename.substr(link_filename_string.size() + 1,
                                                                             timestamp_string.size());
-                     fc::time_point_sec current_timestamp = string_to_timestamp( current_timestamp_str );
+                     fc::time_point_sec current_timestamp = fc::time_point_sec::from_iso_string( current_timestamp_str );
                      if( current_timestamp < start_time )
                      {
                          if( current_timestamp < limit_time || file_size( current_filename ) <= 0 )
@@ -143,9 +133,9 @@ namespace fc {
                              continue;
                          }
 
-                         if( !cfg.rotation_compression ) 
+                         if( !cfg.rotation_compression )
                            continue;
-                         if( current_filename.find( compression_extension ) != string::npos ) 
+                         if( current_filename.find( compression_extension ) != string::npos )
                            continue;
                          compress_file( *itr );
                      }
@@ -160,8 +150,8 @@ namespace fc {
              }
 
              _current_file_start_time = start_time;
-             _rotation_task = schedule( [this]() { rotate_files(); }, 
-                                        _current_file_start_time + cfg.rotation_interval.to_seconds(), 
+             _rotation_task = schedule( [this]() { rotate_files(); },
+                                        _current_file_start_time + cfg.rotation_interval.to_seconds(),
                                         "rotate_files(3)" );
          }
    };
@@ -182,7 +172,7 @@ namespace fc {
       {
          fc::create_directories(my->cfg.filename.parent_path());
 
-         if(!my->cfg.rotate) 
+         if(!my->cfg.rotate)
            my->out.open(my->cfg.filename);
       }
       catch( ... )
@@ -190,7 +180,7 @@ namespace fc {
          std::cerr << "error opening log file: " << my->cfg.filename.preferred_string() << "\n";
       }
    }
-   
+
    file_appender::~file_appender(){}
 
    // MS THREAD METHOD  MESSAGE \t\t\t File:Line
@@ -211,7 +201,7 @@ namespace fc {
              if( method_name[i] == ':' ) p = i;
          }
 
-         if( method_name[p] == ':' ) 
+         if( method_name[p] == ':' )
            ++p;
          line << std::setw( 20 ) << m.get_context().get_method().substr(p,20).c_str() <<" ";
       }
@@ -227,7 +217,7 @@ namespace fc {
       {
         fc::scoped_lock<boost::mutex> lock( my->slock );
         my->out << line.str() << "\t\t\t" << m.get_context().get_file() << ":" << m.get_context().get_line_number() << "\n";
-        if( my->cfg.flush ) 
+        if( my->cfg.flush )
           my->out.flush();
       }
    }

@@ -8,58 +8,70 @@
 #include <fc/exception/exception.hpp>
 
 namespace fc {
+
   namespace bch = boost::chrono;
-  time_point time_point::now() {
-     return time_point(microseconds(bch::duration_cast<bch::microseconds>(bch::system_clock::now().time_since_epoch()).count()));
-  }
-  time_point::operator fc::string()const {
-      bch::system_clock::time_point tp; 
-      tp += bch::microseconds( elapsed._count);
-      time_t tt = bch::system_clock::to_time_t(tp);
-      
-      return boost::posix_time::to_iso_string( boost::posix_time::from_time_t(tt) + boost::posix_time::microseconds( elapsed._count % 1000000 ) ); 
-  }
-  time_point time_point::from_iso_string( const fc::string& s ) 
+
+  time_point time_point::now()
   {
-    try
-    {
-      auto pt = boost::posix_time::from_iso_string(s);
-      //return fc::time_point(fc::seconds( (pt - boost::posix_time::from_time_t(0)).total_seconds() ));
-      return fc::time_point(fc::microseconds( (pt - boost::posix_time::from_time_t(0)).total_microseconds() ));
-    }
-    FC_RETHROW_EXCEPTIONS(warn, "unable to convert ISO-formatted string to fc::time_point")
+     return time_point( microseconds( bch::duration_cast<bch::microseconds>( bch::system_clock::now().time_since_epoch() ).count() ) );
+  }
+
+  fc::string time_point_sec::to_non_delimited_iso_string()const
+  {
+    const auto ptime = boost::posix_time::from_time_t( time_t( sec_since_epoch() ) );
+    return boost::posix_time::to_iso_string( ptime );
   }
 
   fc::string time_point_sec::to_iso_string()const
   {
-    const auto ptime = boost::posix_time::from_time_t( time_t ( sec_since_epoch() ) );
-    return boost::posix_time::to_iso_string( ptime );
-  }
-
-  fc::string time_point_sec::to_iso_extended_string()const
-  {
-    const auto ptime = boost::posix_time::from_time_t( time_t ( sec_since_epoch() ) );
+    const auto ptime = boost::posix_time::from_time_t( time_t( sec_since_epoch() ) );
     return boost::posix_time::to_iso_extended_string( ptime );
   }
 
+  time_point_sec::operator fc::string()const
+  {
+      return this->to_iso_string();
+  }
+
+  time_point_sec time_point_sec::from_iso_string( const fc::string& s )
+  { try {
+      static boost::posix_time::ptime epoch = boost::posix_time::from_time_t( 0 );
+      boost::posix_time::ptime pt;
+      if( s.size() >= 5 && s.at( 4 ) == '-' ) // http://en.wikipedia.org/wiki/ISO_8601
+          pt = boost::date_time::parse_delimited_time<boost::posix_time::ptime>( s, 'T' );
+      else
+          pt = boost::posix_time::from_iso_string( s );
+      return fc::time_point_sec( (pt - epoch).total_seconds() );
+  } FC_RETHROW_EXCEPTIONS( warn, "unable to convert ISO-formatted string to fc::time_point_sec" ) }
+
+  time_point::operator fc::string()const
+  {
+      return fc::string( time_point_sec( *this ) );
+  }
+
+  time_point time_point::from_iso_string( const fc::string& s )
+  { try {
+      return time_point( time_point_sec::from_iso_string( s ) );
+  } FC_RETHROW_EXCEPTIONS( warn, "unable to convert ISO-formatted string to fc::time_point" ) }
+
   void to_variant( const fc::time_point& t, variant& v ) {
-    v = fc::string(t);
+    v = fc::string( t );
   }
   void from_variant( const fc::variant& v, fc::time_point& t ) {
-    t = fc::time_point::from_iso_string(v.as_string());
+    t = fc::time_point::from_iso_string( v.as_string() );
   }
   void to_variant( const fc::time_point_sec& t, variant& v ) {
-    v = fc::string(fc::time_point(t));
+    v = fc::string( t );
   }
   void from_variant( const fc::variant& v, fc::time_point_sec& t ) {
-    t = fc::time_point::from_iso_string(v.as_string());
+    t = fc::time_point_sec::from_iso_string( v.as_string() );
   }
 
   // inspired by show_date_relative() in git's date.c
-  string get_approximate_relative_time_string(const time_point_sec& event_time, 
-                                              const time_point_sec& relative_to_time /* = fc::time_point::now() */, 
+  string get_approximate_relative_time_string(const time_point_sec& event_time,
+                                              const time_point_sec& relative_to_time /* = fc::time_point::now() */,
                                               const std::string& default_ago /* = " ago" */) {
-    
+
 
     string ago = default_ago;
     int32_t seconds_ago = relative_to_time.sec_since_epoch() - event_time.sec_since_epoch();
@@ -116,8 +128,8 @@ namespace fc {
     result << ago;
     return result.str();
   }
-  string get_approximate_relative_time_string(const time_point& event_time, 
-                                              const time_point& relative_to_time /* = fc::time_point::now() */, 
+  string get_approximate_relative_time_string(const time_point& event_time,
+                                              const time_point& relative_to_time /* = fc::time_point::now() */,
                                               const std::string& ago /* = " ago" */) {
     return get_approximate_relative_time_string(time_point_sec(event_time), time_point_sec(relative_to_time), ago);
   }

@@ -527,11 +527,10 @@ namespace fc {
 
                 if (!task_pqueue.empty())
                 {
-                  if (task_pqueue.front()->_prio.value != priority::max().value &&
-                      !ready_heap.empty())
+                  if (!ready_heap.empty())
                   {
                     // a new task and an existing task are both ready to go
-                    if (task_priority_less()(ready_heap.front(), task_pqueue.front()))
+                    if (task_priority_less()(task_pqueue.front(), ready_heap.front()))
                     {
                       // run the existing task first
                       pt_push_back(current);

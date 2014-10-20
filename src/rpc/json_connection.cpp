@@ -74,6 +74,7 @@ namespace fc { namespace rpc {
                   if( m != obj.end() )
                   {
                      fc::exception except;
+                     bool exception_caught = false;
                      try
                      {
                         auto p = obj.find("params");
@@ -134,17 +135,13 @@ namespace fc { namespace rpc {
                      }
                      catch ( fc::exception& e )
                      {
-                        if( i != obj.end() )
-                        {
-                           except = e;
-                        }
-                        else
-                        {
-                           fc_wlog( _logger, "json rpc exception: ${exception}", ("exception",e) );
-                        }
+                        exception_caught = true;
+                        except = e;
                      }
-                     if( i != obj.end() )
+                     if( exception_caught && i != obj.end() )
                         send_error( i->value(), except );
+                     else
+                        fc_wlog( _logger, "json rpc exception: ${exception}", ("exception",except) );
                   }
                   else if( i != obj.end() ) //handle any received JSON response
                   {

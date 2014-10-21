@@ -74,7 +74,7 @@ namespace fc {
       promise<void>::ptr p(new promise<void>("thread start"));
       boost::thread* t = new boost::thread( [this,p,name]() {
           try {
-		    set_thread_name(name.c_str()); // set thread's name for the debugger to display
+            set_thread_name(name.c_str()); // set thread's name for the debugger to display
             this->my = new thread_d(*this);
             current_thread() = this;
             p->set_value();
@@ -91,7 +91,7 @@ namespace fc {
       } );
       p->wait();
       my->boost_thread = t;
-      set_name(name);
+      my->name = name;
    }
    thread::thread( thread_d* ) {
      my = new thread_d(*this);
@@ -109,20 +109,34 @@ namespace fc {
 
    thread::~thread() {
       //wlog( "my ${n}", ("n",name()) );
-      if( is_current() )
+      if( my )
       {
-        wlog( "delete my" );
-        delete my;
+        wlog( "calling quit()" );
+        quit(); // deletes `my`
       }
-      my = 0;
    }
 
    thread& thread::current() {
-     if( !current_thread() ) current_thread() = new thread((thread_d*)0);
+     if( !current_thread() ) 
+       current_thread() = new thread((thread_d*)0);
      return *current_thread();
    }
-   const string& thread::name()const { return my->name; }
-   void          thread::set_name( const fc::string& n ) { my->name = n; }
+
+   const string& thread::name()const 
+   { 
+     return my->name; 
+   }
+
+   void thread::set_name( const fc::string& n )
+   { 
+     if (!is_current())
+     {
+       async([=](){ set_name(n); }, "set_name").wait();
+       return;
+     }
+     my->name = n; 
+     set_thread_name(my->name.c_str()); // set thread's name for the debugger to display
+   }
 
    const char* thread::current_task_desc() const
    {
@@ -133,74 +147,88 @@ namespace fc {
    
    void          thread::debug( const fc::string& d ) { /*my->debug(d);*/ }
 
-   void thread::quit() {
-     //if quitting from a different thread, start quit task on thread.
-     //If we have and know our attached boost thread, wait for it to finish, then return.
-      if( &current() != this ) {
-          async( [=](){quit();}, "thread::quit" );//.wait();
-          if( my->boost_thread ) {
-            auto n = name();
-            my->boost_thread->join();
-            delete my;
-            my = nullptr;
-          }
-          return;
+  void thread::quit() 
+  {
+    //if quitting from a different thread, start quit task on thread.
+    //If we have and know our attached boost thread, wait for it to finish, then return.
+    if( &current() != this ) 
+    {
+      async( [=](){quit();}, "thread::quit" );//.wait();
+      if( my->boost_thread ) 
+      {
+        my->boost_thread->join();
+        delete my;
+        my = nullptr;
       }
+      return;
+    }
 
-//      wlog( "${s}", ("s",name()) );
-      // We are quiting from our own thread...
+    my->done = true;
+    //      wlog( "${s}", ("s",name()) );
+    // We are quiting from our own thread...
 
-      // break all promises, thread quit!
-      while( my->blocked ) {
-        fc::context* cur  = my->blocked;
-        while( cur ) {
-            fc::context* n = cur->next;
-            // this will move the context into the ready list.
-            //cur->prom->set_exception( boost::copy_exception( error::thread_quit() ) );
-            //cur->set_exception_on_blocking_promises( thread_quit() );
-            cur->set_exception_on_blocking_promises( std::make_shared<canceled_exception>(FC_LOG_MESSAGE(error, "cancellation reason: thread quitting")) );
-               
-            cur = n;
-        }
-        if( my->blocked ) { 
-          //wlog( "still blocking... whats up with that?");
-          debug( "on quit" ); 
-        }
-      }
-      BOOST_ASSERT( my->blocked == 0 );
-      //my->blocked = 0;
-      
-      
-      // move all sleep tasks to ready
-      for( uint32_t i = 0; i < my->sleep_pqueue.size(); ++i ) {
-        my->add_context_to_ready_list( my->sleep_pqueue[i] );
-      }
-      my->sleep_pqueue.clear();
-
-      // move all idle tasks to ready
-      fc::context* cur = my->pt_head;
-      while( cur ) {
+    // break all promises, thread quit!
+    while( my->blocked ) 
+    {
+      fc::context* cur  = my->blocked;
+      while( cur ) 
+      {
         fc::context* n = cur->next;
-        cur->next = 0;
-        my->add_context_to_ready_list( cur );
+        // this will move the context into the ready list.
+        //cur->prom->set_exception( boost::copy_exception( error::thread_quit() ) );
+        //cur->set_exception_on_blocking_promises( thread_quit() );
+        cur->set_exception_on_blocking_promises( std::make_shared<canceled_exception>(FC_LOG_MESSAGE(error, "cancellation reason: thread quitting")) );
+               
         cur = n;
       }
-
-      // mark all ready tasks (should be everyone)... as canceled 
-      for (fc::context* ready_context : my->ready_heap)
-        ready_context->canceled = true;
-      my->done = true;
-
-      // now that we have poked all fibers... switch to the next one and
-      // let them all quit.
-      while (!my->ready_heap.empty())
-      {
-        my->start_next_fiber(true); 
-        my->check_for_timeouts();
+      if( my->blocked ) 
+      { 
+        //wlog( "still blocking... whats up with that?");
+        debug( "on quit" ); 
       }
-      my->clear_free_list();
-      my->cleanup_thread_specific_data();
-   }
+    }
+    BOOST_ASSERT( my->blocked == 0 );
+    //my->blocked = 0;
+
+    for (task_base* unstarted_task : my->task_pqueue)
+      unstarted_task->set_exception(std::make_shared<canceled_exception>(FC_LOG_MESSAGE(error, "cancellation reason: thread quitting")));
+    my->task_pqueue.clear();
+
+    for (task_base* scheduled_task : my->task_sch_queue)
+      scheduled_task->set_exception(std::make_shared<canceled_exception>(FC_LOG_MESSAGE(error, "cancellation reason: thread quitting")));
+    my->task_sch_queue.clear();
+
+    
+
+    // move all sleep tasks to ready
+    for( uint32_t i = 0; i < my->sleep_pqueue.size(); ++i )
+      my->add_context_to_ready_list( my->sleep_pqueue[i] );
+    my->sleep_pqueue.clear();
+
+    // move all idle tasks to ready
+    fc::context* cur = my->pt_head;
+    while( cur ) 
+    {
+      fc::context* n = cur->next;
+      cur->next = 0;
+      my->add_context_to_ready_list( cur );
+      cur = n;
+    }
+
+    // mark all ready tasks (should be everyone)... as canceled 
+    for (fc::context* ready_context : my->ready_heap)
+      ready_context->canceled = true;
+
+    // now that we have poked all fibers... switch to the next one and
+    // let them all quit.
+    while (!my->ready_heap.empty())
+    {
+      my->start_next_fiber(true); 
+      my->check_for_timeouts();
+    }
+    my->clear_free_list();
+    my->cleanup_thread_specific_data();
+  }
      
    void thread::exec() 
    {
@@ -449,6 +477,12 @@ namespace fc {
     {
       async( [=](){ my->notify_task_has_been_canceled(); }, "notify_task_has_been_canceled", priority::max() );
     }
+
+    void thread::unblock(fc::context* c)
+    {
+      my->unblock(c);
+    }
+
 
 #ifdef _MSC_VER
     /* support for providing a structured exception handler for async tasks */

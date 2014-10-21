@@ -157,6 +157,7 @@ namespace fc {
       void async_task( task_base* t, const priority& p, const time_point& tp );
 
       void notify_task_has_been_canceled();
+      void unblock(fc::context* c);
 
       class thread_d* my;
   };

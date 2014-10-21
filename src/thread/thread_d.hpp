@@ -332,13 +332,16 @@ namespace fc {
             */
            void check_fiber_exceptions() 
            {
-              if( current && current->canceled ) {
+              if( current && current->canceled ) 
+              {
 #ifdef NDEBUG
                 FC_THROW_EXCEPTION( canceled_exception, "" );
 #else
                 FC_THROW_EXCEPTION( canceled_exception, "cancellation reason: ${reason}", ("reason", current->cancellation_reason ? current->cancellation_reason : "[none given]"));
 #endif
-              } else if( done )  {
+              } 
+              else if( done )  
+              {
                 ilog( "throwing canceled exception" );
                 FC_THROW_EXCEPTION( canceled_exception, "cancellation reason: thread quitting" ); 
                 // BOOST_THROW_EXCEPTION( thread_quit() );

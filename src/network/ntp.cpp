@@ -44,7 +44,6 @@ namespace fc
 
       ~ntp_impl() 
       { 
-        _ntp_thread.quit(); //TODO: this can be removed once fc::threads call quit during destruction
       }
 
       fc::time_point ntp_timestamp_to_fc_time_point(uint64_t ntp_timestamp_net_order)

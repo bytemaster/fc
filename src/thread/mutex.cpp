@@ -80,6 +80,7 @@ namespace fc {
    *  the current context is the tail in the wait queue.
    */
   bool mutex::try_lock() {
+    assert(false); // this is currently broken re: recursive mutexes
     fc::thread* ct = &fc::thread::current();
     fc::context* cc = ct->my->current;
     fc::context* n  = 0;
@@ -97,6 +98,7 @@ namespace fc {
   }
 
   bool mutex::try_lock_until( const fc::time_point& abs_time ) {
+    assert(false); // this is currently broken re: recursive mutexes
     fc::context* n  = 0;
     fc::context* cc = fc::thread::current().my->current;
 
@@ -152,7 +154,6 @@ namespace fc {
       // add ourselves to the head of the list
       current_context->next_blocked_mutex = m_blist;
       m_blist = current_context;
-      ++recursive_lock_count;
 
 #if 0
       int cnt = 0;
@@ -170,6 +171,8 @@ namespace fc {
       fc::thread::current().yield(false);
       // if yield() returned normally, we should now own the lock (we should be at the tail of the list)
       BOOST_ASSERT( current_context->next_blocked_mutex == 0 );
+      assert(recursive_lock_count == 0);
+      recursive_lock_count = 1;
     }
     catch ( exception& e )
     {

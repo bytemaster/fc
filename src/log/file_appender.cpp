@@ -88,15 +88,6 @@ namespace fc {
             catch( ... )
             {
             }
-
-            try
-            {
-              if( _compression_thread ) 
-                _compression_thread->quit();
-            }
-            catch( ... )
-            {
-            }
          }
 
          void rotate_files( bool initializing = false )
@@ -124,11 +115,10 @@ namespace fc {
                    out.flush();
                    out.close();
                }
-
+               remove_all(link_filename);  // on windows, you can't delete the link while the underlying file is opened for writing
                out.open( log_filename );
              }
-             remove_all( link_filename );
-             create_hard_link( log_filename, link_filename );
+             create_hard_link(log_filename, link_filename);
 
              /* Delete old log files */
              fc::time_point limit_time = now - cfg.rotation_limit;
@@ -159,6 +149,10 @@ namespace fc {
                            continue;
                          compress_file( *itr );
                      }
+                 }
+                 catch (const fc::canceled_exception&)
+                 {
+                   throw;
                  }
                  catch( ... )
                  {

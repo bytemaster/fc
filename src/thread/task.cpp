@@ -65,6 +65,11 @@ namespace fc {
     promise_base::cancel(reason);
     if (_active_context)
     {
+      if (_active_context->next_blocked_mutex)
+      {
+        // this task is blocked on a mutex, we probably don't handle this correctly
+        _active_context->ctx_thread->unblock(_active_context);
+      }
       _active_context->canceled = true;
 #ifndef NDEBUG
       _active_context->cancellation_reason = reason;

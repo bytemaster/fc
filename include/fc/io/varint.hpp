@@ -46,7 +46,7 @@ struct signed_int {
     operator int32_t()const { return value; }
     template<typename T>
     signed_int& operator=( const T& v ) { value = v; return *this; }
-    signed_int& operator++(int){ ++value; return *this; }
+    signed_int operator++(int) { return value++; }
     signed_int& operator++(){ ++value; return *this; }
 
     int32_t value;

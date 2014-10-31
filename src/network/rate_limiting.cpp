@@ -216,6 +216,7 @@ namespace fc
 
       rate_limiting_group_impl(uint32_t upload_bytes_per_second, uint32_t download_bytes_per_second,
                                uint32_t burstiness_in_seconds = 1);
+      ~rate_limiting_group_impl();
 
       virtual size_t readsome(boost::asio::ip::tcp::socket& socket, char* buffer, size_t length) override;
       virtual size_t readsome(boost::asio::ip::tcp::socket& socket, const std::shared_ptr<char>& buffer, size_t length, size_t offset) override;
@@ -247,6 +248,24 @@ namespace fc
       _write_tokens(_upload_bytes_per_second),
       _unused_write_tokens(0)
     {
+    }
+
+    rate_limiting_group_impl::~rate_limiting_group_impl()
+    {
+      try
+      {
+        _process_pending_reads_loop_complete.cancel_and_wait();
+      }
+      catch (...)
+      {
+      }
+      try
+      {
+        _process_pending_writes_loop_complete.cancel_and_wait();
+      }
+      catch (...)
+      {
+      }
     }
 
     size_t rate_limiting_group_impl::readsome(boost::asio::ip::tcp::socket& socket, const std::shared_ptr<char>& buffer, size_t length, size_t offset)

@@ -70,7 +70,7 @@ namespace fc
        template<typename T>
        static inline void to_variant( const T& o, fc::variant& v ) 
        { 
-           v = fc::reflector<T>::to_string(o);
+           v = fc::reflector<T>::to_fc_string(o);
        }
        template<typename T>
        static inline void from_variant( const fc::variant& v, T& o ) 
@@ -78,8 +78,7 @@ namespace fc
            if( v.is_string() )
               o = fc::reflector<T>::from_string( v.get_string().c_str() );
            else 
-              // throw if invalid int, by attempting to convert to string
-              fc::reflector<T>::to_string( o = static_cast<T>(v.as_int64()) );
+              o = static_cast<T>(v.as_int64());
        }
     };
 

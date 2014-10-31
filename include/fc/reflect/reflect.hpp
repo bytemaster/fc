@@ -114,6 +114,8 @@ void fc::reflector<TYPE>::visit( const Visitor& v ) { \
   v.TEMPLATE operator()<enum_type::elem>(BOOST_PP_STRINGIZE(elem));
 #define FC_REFLECT_ENUM_TO_STRING( r, enum_type, elem ) \
    case enum_type::elem: return BOOST_PP_STRINGIZE(elem);
+#define FC_REFLECT_ENUM_TO_FC_STRING( r, enum_type, elem ) \
+   case enum_type::elem: return fc::string(BOOST_PP_STRINGIZE(elem));
 
 #define FC_REFLECT_ENUM_FROM_STRING( r, enum_type, elem ) \
   if( strcmp( s, BOOST_PP_STRINGIZE(elem)  ) == 0 ) return enum_type::elem;
@@ -124,14 +126,6 @@ namespace fc { \
 template<> struct reflector<ENUM> { \
     typedef fc::true_type is_defined; \
     typedef fc::true_type is_enum; \
-    static const char* to_string(int64_t i) { \
-      switch( ENUM(i) ) { \
-        BOOST_PP_SEQ_FOR_EACH( FC_REFLECT_ENUM_TO_STRING, ENUM, FIELDS ) \
-        default: \
-           fc::throw_bad_enum_cast( i, BOOST_PP_STRINGIZE(ENUM) ); \
-      }\
-      return nullptr; \
-    } \
     static const char* to_string(ENUM elem) { \
       switch( elem ) { \
         BOOST_PP_SEQ_FOR_EACH( FC_REFLECT_ENUM_TO_STRING, ENUM, FIELDS ) \
@@ -140,10 +134,21 @@ template<> struct reflector<ENUM> { \
       }\
       return nullptr; \
     } \
+    static const char* to_string(int64_t i) { \
+      return to_string(ENUM(i)); \
+    } \
+    static fc::string to_fc_string(ENUM elem) { \
+      switch( elem ) { \
+        BOOST_PP_SEQ_FOR_EACH( FC_REFLECT_ENUM_TO_FC_STRING, ENUM, FIELDS ) \
+      } \
+      return fc::to_string(int64_t(elem)); \
+    } \
+    static fc::string to_fc_string(int64_t i) { \
+      return to_fc_string(ENUM(i)); \
+    } \
     static ENUM from_string( const char* s ) { \
         BOOST_PP_SEQ_FOR_EACH( FC_REFLECT_ENUM_FROM_STRING, ENUM, FIELDS ) \
-        fc::throw_bad_enum_cast( s, BOOST_PP_STRINGIZE(ENUM) ); \
-        return ENUM();\
+        return ENUM(atoi(s));\
     } \
 };  \
 }

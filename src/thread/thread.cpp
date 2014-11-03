@@ -92,6 +92,7 @@ namespace fc {
       p->wait();
       my->boost_thread = t;
       my->name = name;
+      wlog("name:${n} tid:${tid}", ("n", name)("tid", (uintptr_t)my->boost_thread->native_handle()) );
    }
    thread::thread( thread_d* ) {
      my = new thread_d(*this);
@@ -111,7 +112,7 @@ namespace fc {
       //wlog( "my ${n}", ("n",name()) );
       if( my )
       {
-        wlog( "calling quit()" );
+        wlog( "calling quit() on ${n}",("n",my->name) );
         quit(); // deletes `my`
       }
    }
@@ -156,6 +157,7 @@ namespace fc {
       async( [=](){quit();}, "thread::quit" );//.wait();
       if( my->boost_thread ) 
       {
+        wlog("destroying boost thread ${tid}",("tid",(uintptr_t)my->boost_thread->native_handle()));
         my->boost_thread->join();
         delete my;
         my = nullptr;

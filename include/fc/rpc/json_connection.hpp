@@ -117,6 +117,29 @@ namespace fc { namespace rpc  {
                                      const variant& a7, 
                                      const variant& a8 
                                      );
+         future<variant> async_call( const fc::string& method, 
+                                     const variant& a1, 
+                                     const variant& a2, 
+                                     const variant& a3, 
+                                     const variant& a4, 
+                                     const variant& a5, 
+                                     const variant& a6,
+                                     const variant& a7, 
+                                     const variant& a8, 
+                                     const variant& a9
+                                     );
+         future<variant> async_call( const fc::string& method, 
+                                     const variant& a1, 
+                                     const variant& a2, 
+                                     const variant& a3, 
+                                     const variant& a4, 
+                                     const variant& a5, 
+                                     const variant& a6,
+                                     const variant& a7, 
+                                     const variant& a8, 
+                                     const variant& a9, 
+                                     const variant& a10 
+                                     );
 
          template<typename Result>
          Result call( const fc::string& method,

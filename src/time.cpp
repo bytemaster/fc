@@ -30,7 +30,7 @@ namespace fc {
 
   time_point_sec::operator fc::string()const
   {
-      return this->to_non_delimited_iso_string();
+      return this->to_iso_string();
   }
 
   time_point_sec time_point_sec::from_iso_string( const fc::string& s )

@@ -149,7 +149,7 @@ set( fc_sources
      src/crypto/elliptic.cpp
      src/crypto/rand.cpp
      src/crypto/salsa20.cpp
-     src/crypto/scrypt.cpp
+     #src/crypto/scrypt.cpp
      src/crypto/romix.cpp
      src/network/tcp_socket.cpp
      src/network/udp_socket.cpp
@@ -166,7 +166,7 @@ set( fc_sources
      src/compress/lzma.cpp
      vendor/cyoencode-1.0.2/src/CyoDecode.c
      vendor/cyoencode-1.0.2/src/CyoEncode.c
-#     vendor/salsa20/ecrypt.c
+     #vendor/salsa20/ecrypt.c
      ${SALSA_SRC}
      )
 
@@ -186,7 +186,7 @@ list(APPEND sources "${CMAKE_CURRENT_BINARY_DIR}/git_revision.cpp")
 list(APPEND sources ${fc_headers})
 
 add_subdirectory( vendor/easylzma )
-add_subdirectory( vendor/scrypt-jane )
+#add_subdirectory( vendor/scrypt-jane )
 add_subdirectory( vendor/udt4 )
 
 setup_library( fc SOURCES ${sources} LIBRARY_TYPE STATIC DONT_INSTALL_LIBRARY )
@@ -219,7 +219,7 @@ target_include_directories(fc
     ${OPENSSL_INCLUDE_DIR}
 
   PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_CURRENT_SOURCE_DIR}/vendor/scrypt-jane
+  #${CMAKE_CURRENT_SOURCE_DIR}/vendor/scrypt-jane
     ${CMAKE_CURRENT_SOURCE_DIR}/vendor/cyoencode-1.0.2/src
     ${CMAKE_CURRENT_SOURCE_DIR}/vendor/boost_1.51/include
     ${CMAKE_CURRENT_SOURCE_DIR}/vendor/salsa20
@@ -227,7 +227,8 @@ target_include_directories(fc
     ${CMAKE_CURRENT_SOURCE_DIR}/vendor/udt4/src
   )
 
-target_link_libraries( fc PUBLIC easylzma_static scrypt udt ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} ${ZLIB_LIBRARIES} ${PLATFORM_SPECIFIC_LIBS} ${RPCRT4} ${CMAKE_DL_LIBS} ${rt_library})
+#target_link_libraries( fc PUBLIC easylzma_static scrypt udt ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} ${ZLIB_LIBRARIES} ${PLATFORM_SPECIFIC_LIBS} ${RPCRT4} ${CMAKE_DL_LIBS} ${rt_library})
+target_link_libraries( fc PUBLIC easylzma_static udt ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} ${ZLIB_LIBRARIES} ${PLATFORM_SPECIFIC_LIBS} ${RPCRT4} ${CMAKE_DL_LIBS} ${rt_library})
 
 add_executable( ntp_test ntp_test.cpp )
 target_link_libraries( ntp_test fc )

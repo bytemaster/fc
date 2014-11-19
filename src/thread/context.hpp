@@ -64,19 +64,19 @@ namespace fc {
       context_posted_num(0)
     {
 #if BOOST_VERSION >= 105600
-     size_t stack_size =  stack_allocator::traits_type::default_size() * 4;
+     size_t stack_size = FC_CONTEXT_STACK_SIZE;
      alloc.allocate(stack_ctx, stack_size);
      my_context = bc::make_fcontext( stack_ctx.sp, stack_ctx.size, sf); 
 #elif BOOST_VERSION >= 105400
-     size_t stack_size =  bco::stack_allocator::default_stacksize() * 4;
+     size_t stack_size = FC_CONTEXT_STACK_SIZE;
      alloc.allocate(stack_ctx, stack_size);
      my_context = bc::make_fcontext( stack_ctx.sp, stack_ctx.size, sf);
 #elif BOOST_VERSION >= 105300
-     size_t stack_size =  bco::stack_allocator::default_stacksize() * 4;
+     size_t stack_size = FC_CONTEXT_STACK_SIZE;
      void*  stackptr = alloc.allocate(stack_size);
      my_context = bc::make_fcontext( stackptr, stack_size, sf);
 #else
-     size_t stack_size = bc::default_stacksize() * 4;
+     size_t stack_size = FC_CONTEXT_STACK_SIZE;
      my_context.fc_stack.base = alloc.allocate( stack_size );
      my_context.fc_stack.limit = static_cast<char*>( my_context.fc_stack.base) - stack_size;
      make_fcontext( &my_context, sf );
@@ -115,12 +115,12 @@ namespace fc {
         delete my_context;
 #elif BOOST_VERSION >= 105300
       if(stack_alloc)
-        stack_alloc->deallocate( my_context->fc_stack.sp, stack_allocator::default_stacksize() * 4);
+        stack_alloc->deallocate( my_context->fc_stack.sp, FC_CONTEXT_STACK_SIZE);
       else
         delete my_context;
 #else
       if(stack_alloc)
-        stack_alloc->deallocate( my_context.fc_stack.base, bc::default_stacksize() );
+        stack_alloc->deallocate( my_context.fc_stack.base, FC_CONTEXT_STACK_SIZE );
 #endif
     }
 

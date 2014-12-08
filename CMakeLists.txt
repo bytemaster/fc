@@ -69,8 +69,8 @@ ELSE(WIN32)
 
   SET(CMAKE_FIND_LIBRARY_SUFFIXES ".a;.so")
 
-  IF(NOT APPLE ) # then unix
-    # Unix build:
+  IF(NOT APPLE)
+    # Linux or other unix
     SET(SALSA_SRC vendor/salsa20/salsa20.s)
     SET(rt_library rt )
     SET(pthread_library pthread)
@@ -85,6 +85,15 @@ ENDIF()
 
 
 find_package(OpenSSL)
+
+IF(APPLE)
+  # As of 10.10 yosemite, the OpenSSL static libraries shipped with os x have a dependency
+  # on zlib, so any time you link in openssl you also need to link zlib.  .  We really want to detect whether openssl was configured with the --no-zlib
+  # option or not when it was built, but that's difficult to do in practice, so we
+  # just always try to link it in on mac.
+  find_package( ZLIB REQUIRED )
+ENDIF(APPLE)
+
 
 set( CMAKE_FIND_LIBRARY_SUFFIXES ${ORIGINAL_LIB_SUFFIXES} )
 
@@ -343,13 +352,6 @@ if(WIN32)
    set_property(TARGET fc PROPERTY SHARED_LIBRARIES_RELEASE ${SHARED_LIBRARIES_RELEASE})
 
 endif(WIN32)
-
-if(APPLE)
-  find_package( ZLIB REQUIRED )
-  if ( ZLIB_FOUND )
-      target_link_libraries( fc PUBLIC ${ZLIB_LIBRARIES} )
-  endif()
-endif()
 
 SET(OPENSSL_CONF_TARGET )
 IF(DEFINED CMAKE_RUNTIME_OUTPUT_DIRECTORY)

@@ -206,6 +206,22 @@ namespace fc {
       return fc::thread::current().schedule( fc::forward<Functor>(f), t, desc, prio );
    }
 
+  /**
+   * Call f() in thread t and block the current thread until it returns.
+   * 
+   * If t is null, simply execute f in the current thread.
+   */
+  template<typename Functor>
+  auto sync_call( thread* t, Functor&& f, const char* desc FC_TASK_NAME_DEFAULT_ARG, priority prio = priority()) -> decltype(f())
+  {
+     if( t == nullptr )
+         return f();
+
+     typedef decltype(f()) Result;
+     future<Result> r = t->async( f, desc, prio );
+     return r.wait();
+  }
+
 } // end namespace fc
 
 #ifdef _MSC_VER

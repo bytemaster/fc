@@ -1,4 +1,5 @@
 #pragma once
+#include <fc/exception/exception.hpp>
 #include <fc/io/raw_fwd.hpp>
 #include <fc/variant_object.hpp>
 #include <fc/variant.hpp>

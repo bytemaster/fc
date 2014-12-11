@@ -40,7 +40,7 @@ namespace fc {
 
            public_key( const public_key_data& v );
            public_key( const public_key_point_data& v );
-           public_key( const compact_signature& c, const fc::sha256& digest );
+           public_key( const compact_signature& c, const fc::sha256& digest, bool check_cannonical = true );
 
            bool valid()const;
            public_key mult( const fc::sha256& offset );

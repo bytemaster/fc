@@ -249,6 +249,9 @@ target_link_libraries( udt_client fc udt )
 add_executable( lzma_test tests/lzma_test.cpp )
 target_link_libraries( lzma_test fc )
 
+add_executable( ecc_test tests/ecc_test.cpp )
+target_link_libraries( ecc_test fc )
+
 #add_executable( test_compress tests/compress.cpp )
 #target_link_libraries( test_compress fc )
 #add_executable( test_aes tests/aes_test.cpp )

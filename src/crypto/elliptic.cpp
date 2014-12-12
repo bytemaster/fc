@@ -10,8 +10,8 @@
 #include <assert.h>
 
 namespace fc { namespace ecc {
-    namespace detail 
-    { 
+    namespace detail
+    {
       class public_key_impl
       {
         public:
@@ -56,7 +56,7 @@ namespace fc { namespace ecc {
           EC_KEY* _key;
       };
     }
-    void * ecies_key_derivation(const void *input, size_t ilen, void *output, size_t *olen) 
+    void * ecies_key_derivation(const void *input, size_t ilen, void *output, size_t *olen)
     {
         if (*olen < SHA512_DIGEST_LENGTH) {
           return NULL;
@@ -249,7 +249,7 @@ namespace fc { namespace ecc {
         ec_point result(EC_POINT_new(group));
         EC_POINT_add(group, result, digest_point, master_pub, ctx);
 
-        if (EC_POINT_is_at_infinity(group, result)) 
+        if (EC_POINT_is_at_infinity(group, result))
         {
           FC_THROW_EXCEPTION( exception, "point at  infinity" );
         }
@@ -317,7 +317,7 @@ namespace fc { namespace ecc {
        private_key self;
        self.my->_key = EC_KEY_new_by_curve_name( NID_secp256k1 );
        if( !self.my->_key ) FC_THROW_EXCEPTION( exception, "Unable to generate EC key" );
-      
+
        ssl_bignum bn;
        BN_bin2bn( (const unsigned char*)&secret, 32, bn );
 
@@ -331,7 +331,7 @@ namespace fc { namespace ecc {
     fc::sha256 private_key::get_secret()const
     {
        if( !my->_key )
-       { 
+       {
           return fc::sha256();
        }
 
@@ -378,8 +378,8 @@ namespace fc { namespace ecc {
         signature sig;
         assert( buf_len == sizeof(sig) );
 
-        if( !ECDSA_sign( 0, 
-                    (const unsigned char*)&digest, sizeof(digest), 
+        if( !ECDSA_sign( 0,
+                    (const unsigned char*)&digest, sizeof(digest),
                     (unsigned char*)&sig, &buf_len, my->_key ) )
         {
             FC_THROW_EXCEPTION( exception, "signing error" );
@@ -390,7 +390,7 @@ namespace fc { namespace ecc {
     }
     bool       public_key::verify( const fc::sha256& digest, const fc::ecc::signature& sig )
     {
-      return 1 == ECDSA_verify( 0, (unsigned char*)&digest, sizeof(digest), (unsigned char*)&sig, sizeof(sig), my->_key ); 
+      return 1 == ECDSA_verify( 0, (unsigned char*)&digest, sizeof(digest), (unsigned char*)&sig, sizeof(sig), my->_key );
     }
 
     public_key_data public_key::serialize()const
@@ -433,7 +433,7 @@ namespace fc { namespace ecc {
       {
          /*my->_key = EC_KEY_new_by_curve_name( NID_secp256k1 ); */
          my->_key = o2i_ECPublicKey( &my->_key, (const unsigned char**)&front, sizeof(dat)  );
-         if( !my->_key ) 
+         if( !my->_key )
          {
            FC_THROW_EXCEPTION( exception, "error decoding public key", ("s", ERR_error_string( ERR_get_error(), nullptr) ) );
          }
@@ -447,7 +447,7 @@ namespace fc { namespace ecc {
       {
          my->_key = EC_KEY_new_by_curve_name( NID_secp256k1 );
          my->_key = o2i_ECPublicKey( &my->_key, (const unsigned char**)&front, sizeof(public_key_data) );
-         if( !my->_key ) 
+         if( !my->_key )
          {
            FC_THROW_EXCEPTION( exception, "error decoding public key", ("s", ERR_error_string( ERR_get_error(), nullptr) ) );
          }
@@ -456,12 +456,12 @@ namespace fc { namespace ecc {
 
     bool       private_key::verify( const fc::sha256& digest, const fc::ecc::signature& sig )
     {
-      return 1 == ECDSA_verify( 0, (unsigned char*)&digest, sizeof(digest), (unsigned char*)&sig, sizeof(sig), my->_key ); 
+      return 1 == ECDSA_verify( 0, (unsigned char*)&digest, sizeof(digest), (unsigned char*)&sig, sizeof(sig), my->_key );
     }
 
     public_key private_key::get_public_key()const
     {
-       public_key pub;  
+       public_key pub;
        pub.my->_key = EC_KEY_new_by_curve_name( NID_secp256k1 );
        EC_KEY_set_public_key( pub.my->_key, EC_KEY_get0_public_key( my->_key ) );
        return pub;
@@ -481,7 +481,7 @@ namespace fc { namespace ecc {
     {
     }
 
-    public_key::public_key( const compact_signature& c, const fc::sha256& digest, bool check_cannonical )
+    public_key::public_key( const compact_signature& c, const fc::sha256& digest, bool check_canonical )
     {
         int nV = c.data[0];
         if (nV<27 || nV>=35)
@@ -491,12 +491,12 @@ namespace fc { namespace ecc {
         BN_bin2bn(&c.data[1],32,sig->r);
         BN_bin2bn(&c.data[33],32,sig->s);
 
-        if( check_cannonical )
+        if( check_canonical )
         {
-           FC_ASSERT( !(c.data[1] & 0x80), "signature is not cannonical" );
-           FC_ASSERT( !(c.data[1] == 0 && !(c.data[2] & 0x80)), "signature is not cannonical" );
-           FC_ASSERT( !(c.data[33] & 0x80), "signature is not cannonical" );
-           FC_ASSERT( !(c.data[33] == 0 && !(c.data[34] & 0x80)), "signature is not cannonical" );
+           FC_ASSERT( !(c.data[1] & 0x80), "signature is not canonical" );
+           FC_ASSERT( !(c.data[1] == 0 && !(c.data[2] & 0x80)), "signature is not canonical" );
+           FC_ASSERT( !(c.data[33] & 0x80), "signature is not canonical" );
+           FC_ASSERT( !(c.data[33] == 0 && !(c.data[34] & 0x80)), "signature is not canonical" );
         }
 
         my->_key = EC_KEY_new_by_curve_name(NID_secp256k1);
@@ -527,7 +527,7 @@ namespace fc { namespace ecc {
         {
            ecdsa_sig sig = ECDSA_do_sign((unsigned char*)&digest, sizeof(digest), my->_key);
 
-           if (sig==nullptr) 
+           if (sig==nullptr)
              FC_THROW_EXCEPTION( exception, "Unable to sign" );
 
            compact_signature csig;
@@ -563,8 +563,8 @@ namespace fc { namespace ecc {
                //idump( (result[0])(result[1])(result[2])(result[3])(result[3+lenR])(result[4+lenR])(bytes)(lenR)(lenS) );
                if( lenR != 32 ) { free(result); continue; }
                if( lenS != 32 ) { free(result); continue; }
-               //idump( (33-(nBitsR+7)/8) ); 
-               //idump( (65-(nBitsS+7)/8) ); 
+               //idump( (33-(nBitsR+7)/8) );
+               //idump( (65-(nBitsS+7)/8) );
                //idump( (sizeof(csig) ) );
                memcpy( &csig.data[1], &result[4], lenR );
                memcpy( &csig.data[33], &result[6+lenR], lenS );
@@ -659,7 +659,7 @@ namespace fc { namespace ecc {
   }
   void from_variant( const variant& var,  ecc::public_key& vo )
   {
-    ecc::public_key_data dat; 
+    ecc::public_key_data dat;
     from_variant( var, dat );
     vo = ecc::public_key(dat);
   }

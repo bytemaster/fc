@@ -725,7 +725,7 @@ string      format_string( const string& format, const variant_object& args )
    #ifdef __APPLE__
    #elif !defined(_MSC_VER)
    void to_variant( long long int s, variant& v ) { v = variant( int64_t(s) ); }
-   void to_variant( unsigned long long int s, variant& v ) { v = variant( uint16_t(s)); }
+   void to_variant( unsigned long long int s, variant& v ) { v = variant( uint64_t(s)); }
    #endif
 
    variant operator == ( const variant& a, const variant& b )

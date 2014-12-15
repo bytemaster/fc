@@ -89,19 +89,43 @@ namespace fc  {
 
 
   int64_t    to_int64( const fc::string& i )
-  { try {
-    return boost::lexical_cast<int64_t>(i.c_str());
-  } FC_RETHROW_EXCEPTIONS( warn, "${i} => int64_t", ("i",i) ) }
+  {
+    try
+    {
+      return boost::lexical_cast<int64_t>(i.c_str());
+    }
+    catch( const boost::bad_lexical_cast& e )
+    {
+      FC_THROW_EXCEPTION( parse_error_exception, "Couldn't parse int64_t" );
+    }
+    FC_RETHROW_EXCEPTIONS( warn, "${i} => int64_t", ("i",i) )
+  }
 
   uint64_t   to_uint64( const fc::string& i )
-  { try {
-    return boost::lexical_cast<uint64_t>(i.c_str());
-  } FC_RETHROW_EXCEPTIONS( warn, "${i} => uint64_t", ("i",i) ) }
+  {
+    try
+    {
+      return boost::lexical_cast<uint64_t>(i.c_str());
+    }
+    catch( const boost::bad_lexical_cast& e )
+    {
+      FC_THROW_EXCEPTION( parse_error_exception, "Couldn't parse uint64_t" );
+    }
+    FC_RETHROW_EXCEPTIONS( warn, "${i} => uint64_t", ("i",i) )
+  }
 
   double     to_double( const fc::string& i)
-  { try {
-    return boost::lexical_cast<double>(i.c_str());
-  } FC_RETHROW_EXCEPTIONS( warn, "${i} => double", ("i",i) ) }
+  {
+    try
+    {
+      return boost::lexical_cast<double>(i.c_str());
+    }
+    catch( const boost::bad_lexical_cast& e )
+    {
+      FC_THROW_EXCEPTION( parse_error_exception, "Couldn't parse double" );
+    }
+    FC_RETHROW_EXCEPTIONS( warn, "${i} => double", ("i",i) )
+  }
 
   fc::string to_string( double d)
   {

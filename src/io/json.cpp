@@ -14,8 +14,28 @@
 
 namespace fc
 {
-   template<typename T>
-   variant variant_from_stream( T& in );
+    // forward declarations of provided functions
+    template<typename T> variant variant_from_stream( T& in );
+    template<typename T> char parseEscape( T& in );
+    template<typename T> fc::string stringFromStream( T& in );
+    template<typename T> bool skip_white_space( T& in );
+    template<typename T> fc::string stringFromToken( T& in );
+    template<typename T> variant_object objectFromStream( T& in );
+    template<typename T> variants arrayFromStream( T& in );
+    template<typename T> variant number_from_stream( T& in );
+    template<typename T> variant token_from_stream( T& in );
+    template<typename T> variant variant_from_stream( T& in );
+    void escape_string( const string& str, ostream& os );
+    template<typename T> void to_stream( T& os, const variants& a );
+    template<typename T> void to_stream( T& os, const variant_object& o );
+    template<typename T> void to_stream( T& os, const variant& v );
+    fc::string pretty_print( const fc::string& v, uint8_t indent );
+}
+
+#include <fc/io/json_relaxed.hpp>
+
+namespace fc
+{
    template<typename T>
    char parseEscape( T& in )
    {
@@ -415,11 +435,22 @@ namespace fc
       }
 	  return variant();
    }
-   variant json::from_string( const std::string& utf8_str )
+   
+   variant json::from_string( const std::string& utf8_str, parse_type ptype )
    { try {
       fc::stringstream in( utf8_str );
       //in.exceptions( std::ifstream::eofbit );
-      return variant_from_stream( in );
+      switch( ptype )
+      {
+          case legacy_parser:
+              return variant_from_stream( in );
+          case strict_parser:
+              return json_relaxed::variant_from_stream<fc::stringstream, true>( in );
+          case relaxed_parser:
+              return json_relaxed::variant_from_stream<fc::stringstream, false>( in );
+          default:
+              FC_ASSERT( false, "Unknown JSON parser type {ptype}", ("ptype", ptype) );
+      }
    } FC_RETHROW_EXCEPTIONS( warn, "", ("str",utf8_str) ) }
 
    /*
@@ -669,17 +700,37 @@ namespace fc
        fc::to_stream( o, v );
       }
    }
-   variant json::from_file( const fc::path& p )
+   variant json::from_file( const fc::path& p, parse_type ptype )
    {
       //auto tmp = std::make_shared<fc::ifstream>( p, ifstream::binary );
       //auto tmp = std::make_shared<std::ifstream>( p.generic_string().c_str(), std::ios::binary );
       //buffered_istream bi( tmp );
       boost::filesystem::ifstream bi( p, std::ios::binary );
-      return variant_from_stream( bi );
+      switch( ptype )
+      {
+          case legacy_parser:
+              return variant_from_stream( bi );
+          case strict_parser:
+              return json_relaxed::variant_from_stream<boost::filesystem::ifstream, true>( bi );
+          case relaxed_parser:
+              return json_relaxed::variant_from_stream<boost::filesystem::ifstream, false>( bi );
+          default:
+              FC_ASSERT( false, "Unknown JSON parser type {ptype}", ("ptype", ptype) );
+      }
    }
-   variant json::from_stream( buffered_istream& in )
+   variant json::from_stream( buffered_istream& in, parse_type ptype )
    {
-      return variant_from_stream( in  );
+      switch( ptype )
+      {
+          case legacy_parser:
+              return variant_from_stream( in );
+          case strict_parser:
+              return json_relaxed::variant_from_stream<buffered_istream, true>( in );
+          case relaxed_parser:
+              return json_relaxed::variant_from_stream<buffered_istream, false>( in );
+          default:
+              FC_ASSERT( false, "Unknown JSON parser type {ptype}", ("ptype", ptype) );
+      }
    }
 
    ostream& json::to_stream( ostream& out, const variant& v )
@@ -698,14 +749,26 @@ namespace fc
       return out;
    }
 
-   bool json::is_valid( const std::string& utf8_str )
+   bool json::is_valid( const std::string& utf8_str, parse_type ptype )
    {
       if( utf8_str.size() == 0 ) return false;
       fc::stringstream in( utf8_str );
-      variant_from_stream( in );
+      switch( ptype )
+      {
+          case legacy_parser:
+              variant_from_stream( in );
+              break;
+          case strict_parser:
+              json_relaxed::variant_from_stream<fc::stringstream, true>( in );
+              break;
+          case relaxed_parser:
+              json_relaxed::variant_from_stream<fc::stringstream, false>( in );
+              break;
+          default:
+              FC_ASSERT( false, "Unknown JSON parser type {ptype}", ("ptype", ptype) );
+      }
       try { in.peek(); } catch ( const eof_exception& e ) { return true; }
       return false;
    }
-
 
 } // fc

@@ -38,7 +38,7 @@ namespace fc
          *  This method may block until at least 1 character is
          *  available.
          */
-        char               peek()const;
+        virtual char            peek() const;
 
       private:
         std::unique_ptr<detail::buffered_istream_impl> my;

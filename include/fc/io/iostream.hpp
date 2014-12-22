@@ -30,7 +30,7 @@ namespace fc {
        **/
       istream&   read( char* buf, size_t len ); 
       istream&   read( const std::shared_ptr<char>& buf, size_t len, size_t offset = 0 ); 
-      char       get();
+      virtual char get();
   };
   typedef std::shared_ptr<istream> istream_ptr;
 

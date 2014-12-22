@@ -74,7 +74,8 @@ namespace fc {
    }
 
    ifstream& ifstream::read( char* buf, size_t len ) {
-      if( eof() ) FC_THROW_EXCEPTION( eof_exception , "");
+      if (eof())
+        FC_THROW_EXCEPTION( eof_exception , "");
       my->ifs.read(buf,len);
       if (my->ifs.gcount() < int64_t(len))
         FC_THROW_EXCEPTION( eof_exception , "");

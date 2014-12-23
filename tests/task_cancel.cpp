@@ -224,7 +224,7 @@ void simple_task()
 
 BOOST_AUTO_TEST_CASE( cancel_scheduled_task )
 {
-  bool task_executed = false;
+  //bool task_executed = false;
   try 
   {
     simple_task();

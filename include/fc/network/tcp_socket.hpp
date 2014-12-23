@@ -5,11 +5,11 @@
 #include <fc/time.hpp>
 
 namespace fc {
-  namespace ip { class endpoint; } 
+  namespace ip { class endpoint; }
 
   class tcp_socket_io_hooks;
 
-  class tcp_socket : public virtual iostream 
+  class tcp_socket : public virtual iostream
   {
     public:
       tcp_socket();
@@ -23,6 +23,7 @@ namespace fc {
       fc::ip::endpoint remote_endpoint() const;
       fc::ip::endpoint local_endpoint() const;
 
+      using istream::get;
       void get( char& c )
       {
           read( &c, 1 );
@@ -58,8 +59,8 @@ namespace fc {
   };
   typedef std::shared_ptr<tcp_socket> tcp_socket_ptr;
 
-  
-  class tcp_server 
+
+  class tcp_server
   {
     public:
       tcp_server();
@@ -74,7 +75,7 @@ namespace fc {
       uint16_t get_port()const;
     private:
       // non copyable
-      tcp_server( const tcp_server& ); 
+      tcp_server( const tcp_server& );
       tcp_server& operator=(const tcp_server& s );
 
       class impl;

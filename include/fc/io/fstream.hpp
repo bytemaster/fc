@@ -1,4 +1,4 @@
-#pragma once 
+#pragma once
 #include <fc/shared_ptr.hpp>
 #include <fc/filesystem.hpp>
 #include <fc/io/iostream.hpp>
@@ -38,6 +38,7 @@ namespace fc {
       size_t    readsome(const std::shared_ptr<char>& buffer, size_t max, size_t offset);
       ifstream& read( char* buf, size_t len );
       ifstream& seekg( size_t p, seekdir d = beg );
+      using istream::get;
       void      get( char& c ) { read( &c, 1 ); }
       void      close();
       bool      eof()const;
@@ -45,5 +46,5 @@ namespace fc {
       class impl;
       fc::shared_ptr<impl> my;
   };
-  
-} // namespace fc 
+
+} // namespace fc

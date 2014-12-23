@@ -9,7 +9,7 @@ namespace fc {
    *  Provides a fc::thread friendly cooperatively multi-tasked stream that
    *  will block 'cooperatively' instead of hard blocking.
    */
-  class istream 
+  class istream
   {
     public:
       virtual ~istream(){};
@@ -28,8 +28,8 @@ namespace fc {
        *
        *  @throws fc::eof_exception if len bytes cannot be read
        **/
-      istream&   read( char* buf, size_t len ); 
-      istream&   read( const std::shared_ptr<char>& buf, size_t len, size_t offset = 0 ); 
+      istream&   read( char* buf, size_t len );
+      istream&   read( const std::shared_ptr<char>& buf, size_t len, size_t offset = 0 );
       virtual char get();
   };
   typedef std::shared_ptr<istream> istream_ptr;
@@ -38,7 +38,7 @@ namespace fc {
    *  Provides a fc::thread friendly cooperatively multi-tasked stream that
    *  will block 'cooperatively' instead of hard blocking.
    */
-  class ostream 
+  class ostream
   {
      public:
        virtual ~ostream(){};
@@ -48,9 +48,9 @@ namespace fc {
        virtual void       flush() = 0;
 
        void put( char c ) { write(&c,1); }
-       
+
        /** implemented in terms of writesome, guarantees len bytes are sent
-        * but not flushed. 
+        * but not flushed.
         **/
        ostream&   write( const char* buf, size_t len );
        ostream&   write( const std::shared_ptr<const char>& buf, size_t len, size_t offset = 0 );
@@ -63,9 +63,9 @@ namespace fc {
   fc::istream& getline( fc::istream&, fc::string&, char delim = '\n' );
 
   template<size_t N>
-  ostream& operator<<( ostream& o, char (&array)[N] ) 
-  { 
-     return o.write( array, N ); 
+  ostream& operator<<( ostream& o, char (&array)[N] )
+  {
+     return o.write( array, N );
   }
 
   ostream& operator<<( ostream& o, char );

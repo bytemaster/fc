@@ -157,6 +157,11 @@ namespace fc {
   void     copy( const path& from, const path& to );
   void     rename( const path& from, const path& to );
   void     resize_file( const path& file, size_t s );
+  
+  // setuid, setgid not implemented.
+  // translates octal permission like 0755 to S_ stuff defined in sys/stat.h
+  // no-op on Windows.
+  void     chmod( const path& p, int perm );
 
   void     create_hard_link( const path& from, const path& to );
 

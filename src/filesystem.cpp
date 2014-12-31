@@ -17,6 +17,7 @@
 # include <ShlObj.h>
 #else
   #include <sys/types.h>
+  #include <sys/stat.h>
   #include <pwd.h>
 #endif
 
@@ -265,6 +266,34 @@ namespace fc {
                 ("f",f)("s",t)( "reason", fc::except_str() ) );
     }
   }
+
+  // setuid, setgid not implemented.
+  // translates octal permission like 0755 to S_ stuff defined in sys/stat.h
+  // no-op on Windows.
+  void chmod( const path& p, int perm )
+  {
+#ifndef WIN32
+    mode_t actual_perm = 
+      ((perm & 0400) ? S_IRUSR : 0)
+    | ((perm & 0200) ? S_IWUSR : 0)
+    | ((perm & 0100) ? S_IXUSR : 0)
+    
+    | ((perm & 0040) ? S_IRGRP : 0)
+    | ((perm & 0020) ? S_IWGRP : 0)
+    | ((perm & 0010) ? S_IXGRP : 0)
+    
+    | ((perm & 0004) ? S_IROTH : 0)
+    | ((perm & 0002) ? S_IWOTH : 0)
+    | ((perm & 0001) ? S_IXOTH : 0)
+    ;
+
+    int result = ::chmod( p.string().c_str(), actual_perm );
+    if( result != 0 )
+        FC_THROW( "chmod operation failed on ${p}", ("p",p) );
+#endif
+    return;
+  }
+
   void rename( const path& f, const path& t ) { 
      try {
   	    boost::filesystem::rename( boost::filesystem::path(f), boost::filesystem::path(t) ); 

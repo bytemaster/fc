@@ -259,6 +259,61 @@ namespace fc
       
         return *this;
    }
+   
+   void uint128::full_product( const uint128& a, const uint128& b, uint128& result_hi, uint128& result_lo )
+   {
+       //   (ah * 2**64 + al) * (bh * 2**64 + bl)
+       // = (ah * bh * 2**128 + al * bh * 2**64 + ah * bl * 2**64 + al * bl
+       // =  P * 2**128 + (Q + R) * 2**64 + S
+       // = Ph * 2**192 + Pl * 2**128
+       // + Qh * 2**128 + Ql * 2**64
+       // + Rh * 2**128 + Rl * 2**64
+       // + Sh * 2**64  + Sl
+       //
+       
+       uint64_t ah = a.hi;
+       uint64_t al = a.lo;
+       uint64_t bh = b.hi;
+       uint64_t bl = b.lo;
+
+       uint128 s = al;
+       s *= bl;
+       uint128 r = ah;
+       r *= bl;
+       uint128 q = al;
+       q *= bh;
+       uint128 p = ah;
+       p *= bh;
+       
+       uint64_t sl = s.lo;
+       uint64_t sh = s.hi;
+       uint64_t rl = r.lo;
+       uint64_t rh = r.hi;
+       uint64_t ql = q.lo;
+       uint64_t qh = q.hi;
+       uint64_t pl = p.lo;
+       uint64_t ph = p.hi;
+
+       uint64_t y[4];    // final result
+       y[0] = sl;
+       
+       uint128_t acc = sh;
+       acc += ql;
+       acc += rl;
+       y[1] = acc.lo;
+       acc = acc.hi;
+       acc += qh;
+       acc += rh;
+       acc += pl;
+       y[2] = acc.lo;
+       y[3] = acc.hi + ph;
+       
+       result_hi = uint128( y[3], y[2] );
+       result_lo = uint128( y[1], y[0] );
+       
+       return;
+   }
+   
    void to_variant( const uint128& var,  variant& vo )  { vo = std::string(var);         }
    void from_variant( const variant& var,  uint128& vo ){ vo = uint128(var.as_string()); }
 

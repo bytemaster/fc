@@ -1,4 +1,5 @@
 #pragma once
+#include <limits>
 #include <stdint.h>
 #include <string>
 
@@ -77,6 +78,13 @@ namespace fc
       uint64_t to_uint64()const { return lo; }
       uint64_t low_bits()const  { return lo; }
       uint64_t high_bits()const { return hi; }
+
+      static uint128 max_value() {
+          const uint64_t max64 = std::numeric_limits<uint64_t>::max();
+          return uint128( max64, max64 );
+      }
+
+      static void full_product( const uint128& a, const uint128& b, uint128& result_hi, uint128& result_lo );
 
       private:
           uint64_t hi;

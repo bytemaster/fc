@@ -233,30 +233,41 @@ namespace fc
 
     uint128& uint128::operator*=(const uint128 &b) 
     {
-      // check for multiply by 0
-      // result is always 0 :-P
-      if(b == 0) {
-        hi = 0;
-        lo = 0;
-      } else if(b != 1) {
-      
-        // check we aren't multiplying by 1
-      
-          uint128 a(*this);
-          uint128 t = b;
-      
-          lo = 0;
-          hi = 0;
-      
-          for (unsigned int i = 0; i < 128; ++i) {
-              if((t & 1) != 0) {
-                  *this += (a << i);
-          }
-      
-              t >>= 1;
-          }
-      }
-      
+        uint64_t a0 = (uint32_t) (this->lo        );
+        uint64_t a1 = (uint32_t) (this->lo >> 0x20);
+        uint64_t a2 = (uint32_t) (this->hi        );
+        uint64_t a3 = (uint32_t) (this->hi >> 0x20);
+
+        uint64_t b0 = (uint32_t) (b.lo        );
+        uint64_t b1 = (uint32_t) (b.lo >> 0x20);
+        uint64_t b2 = (uint32_t) (b.hi        );
+        uint64_t b3 = (uint32_t) (b.hi >> 0x20);
+
+        // (a0 + (a1 << 0x20) + (a2 << 0x40) + (a3 << 0x60)) *
+        // (b0 + (b1 << 0x20) + (b2 << 0x40) + (b3 << 0x60)) =
+        //  a0 * b0
+        //
+        // (a1 * b0 + a0 * b1) << 0x20
+        // (a2 * b0 + a1 * b1 + a0 * b2) << 0x40
+        // (a3 * b0 + a2 * b1 + a1 * b2 + a0 * b3) << 0x60
+        //
+        // all other cross terms are << 0x80 or higher, thus do not appear in result
+        
+        this->hi = 0;
+        this->lo = a3*b0;
+        (*this) += a2*b1;
+        (*this) += a1*b2;
+        (*this) += a0*b3;
+        (*this) <<= 0x20;
+        (*this) += a2*b0;
+        (*this) += a1*b1;
+        (*this) += a0*b2;
+        (*this) <<= 0x20;
+        (*this) += a1*b0;
+        (*this) += a0*b1;
+        (*this) <<= 0x20;
+        (*this) += a0*b0;
+
         return *this;
    }
    

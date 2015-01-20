@@ -298,21 +298,26 @@ namespace fc
  *  @brief Checks a condition and throws an assert_exception if the test is FALSE
  */
 #define FC_ASSERT( TEST, ... ) \
-   FC_EXPAND_MACRO( \
-      do { if( !(TEST) ) { FC_THROW_EXCEPTION( fc::assert_exception, #TEST ": "  __VA_ARGS__ ); } } while(0) \
-   )
+  FC_EXPAND_MACRO( \
+    FC_MULTILINE_MACRO_BEGIN \
+      if( !(TEST) ) \
+        FC_THROW_EXCEPTION( fc::assert_exception, #TEST ": "  __VA_ARGS__ ); \
+    FC_MULTILINE_MACRO_END \
+  )
 
 #define FC_CAPTURE_AND_THROW( EXCEPTION_TYPE, ... ) \
-   do { throw EXCEPTION_TYPE( FC_LOG_MESSAGE( error, "", FC_FORMAT_ARG_PARAMS(__VA_ARGS__) ) ); } while(0)
+  FC_MULTILINE_MACRO_BEGIN \
+    throw EXCEPTION_TYPE( FC_LOG_MESSAGE( error, "", FC_FORMAT_ARG_PARAMS(__VA_ARGS__) ) ); \
+  FC_MULTILINE_MACRO_END
 
 //#define FC_THROW( FORMAT, ... ) 
 // FC_INDIRECT_EXPAND workas around a bug in Visual C++ variadic macro processing that prevents it
 // from separating __VA_ARGS__ into separate tokens
 #define FC_INDIRECT_EXPAND(MACRO, ARGS) MACRO ARGS
 #define FC_THROW(  ... ) \
-   do { \
-   throw fc::exception( FC_INDIRECT_EXPAND(FC_LOG_MESSAGE, ( error, __VA_ARGS__ )) );  \
-   } while(0)
+  FC_MULTILINE_MACRO_BEGIN \
+    throw fc::exception( FC_INDIRECT_EXPAND(FC_LOG_MESSAGE, ( error, __VA_ARGS__ )) );  \
+  FC_MULTILINE_MACRO_END
 
 #define FC_EXCEPTION( EXCEPTION_TYPE, FORMAT, ... ) \
     EXCEPTION_TYPE( FC_LOG_MESSAGE( error, FORMAT, __VA_ARGS__ ) )  
@@ -322,9 +327,9 @@ namespace fc
  *  @param format - a const char* string with "${keys}"
  */
 #define FC_THROW_EXCEPTION( EXCEPTION, FORMAT, ... ) \
-   do { \
-   throw EXCEPTION( FC_LOG_MESSAGE( error, FORMAT, __VA_ARGS__ ) ); \
-   } while(0)
+  FC_MULTILINE_MACRO_BEGIN \
+    throw EXCEPTION( FC_LOG_MESSAGE( error, FORMAT, __VA_ARGS__ ) ); \
+  FC_MULTILINE_MACRO_END
 
 
 /**
@@ -332,10 +337,10 @@ namespace fc
  *  @brief Appends a log_message to the exception ER and rethrows it.
  */
 #define FC_RETHROW_EXCEPTION( ER, LOG_LEVEL, FORMAT, ... ) \
-  do { \
-     ER.append_log( FC_LOG_MESSAGE( LOG_LEVEL, FORMAT, __VA_ARGS__ ) ); \
-     throw;\
-  } while(0)
+  FC_MULTILINE_MACRO_BEGIN \
+    ER.append_log( FC_LOG_MESSAGE( LOG_LEVEL, FORMAT, __VA_ARGS__ ) ); \
+    throw; \
+  FC_MULTILINE_MACRO_END
 
 #define FC_LOG_AND_RETHROW( )  \
    catch( fc::exception& er ) { \

@@ -61,74 +61,77 @@ namespace fc
 #define DEFAULT_LOGGER
 #endif
 
-   
+// suppress warning "conditional expression is constant" in the while(0) for visual c++
+// http://cnicholson.net/2009/03/stupid-c-tricks-dowhile0-and-c4127/
+#define FC_MULTILINE_MACRO_BEGIN do {
+#ifdef _MSC_VER
+# define FC_MULTILINE_MACRO_END \
+    __pragma(warning(push)) \
+    __pragma(warning(disable:4127)) \
+    } while (0) \
+    __pragma(warning(pop))
+#else
+# define FC_MULTILINE_MACRO_END  } while (0)
+#endif
+
 #define fc_dlog( LOGGER, FORMAT, ... ) \
-  do { \
-   if( (LOGGER).is_enabled( fc::log_level::debug ) ) { \
+  FC_MULTILINE_MACRO_BEGIN \
+   if( (LOGGER).is_enabled( fc::log_level::debug ) ) \
       (LOGGER).log( FC_LOG_MESSAGE( debug, FORMAT, __VA_ARGS__ ) ); \
-   } \
-  } while (0)
+  FC_MULTILINE_MACRO_END
 
 #define fc_ilog( LOGGER, FORMAT, ... ) \
-  do { \
-   if( (LOGGER).is_enabled( fc::log_level::info ) ) { \
+  FC_MULTILINE_MACRO_BEGIN \
+   if( (LOGGER).is_enabled( fc::log_level::info ) ) \
       (LOGGER).log( FC_LOG_MESSAGE( info, FORMAT, __VA_ARGS__ ) ); \
-   } \
-  } while (0)
+  FC_MULTILINE_MACRO_END
 
 #define fc_wlog( LOGGER, FORMAT, ... ) \
-  do { \
-   if( (LOGGER).is_enabled( fc::log_level::warn ) ) { \
+  FC_MULTILINE_MACRO_BEGIN \
+   if( (LOGGER).is_enabled( fc::log_level::warn ) ) \
       (LOGGER).log( FC_LOG_MESSAGE( warn, FORMAT, __VA_ARGS__ ) ); \
-   } \
-  } while (0)
+  FC_MULTILINE_MACRO_END
 
 #define fc_elog( LOGGER, FORMAT, ... ) \
-  do { \
-   if( (LOGGER).is_enabled( fc::log_level::error ) ) { \
+  FC_MULTILINE_MACRO_BEGIN \
+   if( (LOGGER).is_enabled( fc::log_level::error ) ) \
       (LOGGER).log( FC_LOG_MESSAGE( error, FORMAT, __VA_ARGS__ ) ); \
-   } \
-  } while (0)
+  FC_MULTILINE_MACRO_END
 
 #define dlog( FORMAT, ... ) \
-  do { \
-   if( (fc::logger::get(DEFAULT_LOGGER)).is_enabled( fc::log_level::debug ) ) { \
+  FC_MULTILINE_MACRO_BEGIN \
+   if( (fc::logger::get(DEFAULT_LOGGER)).is_enabled( fc::log_level::debug ) ) \
       (fc::logger::get(DEFAULT_LOGGER)).log( FC_LOG_MESSAGE( debug, FORMAT, __VA_ARGS__ ) ); \
-   } \
-  } while (0)
+  FC_MULTILINE_MACRO_END
 
 /**
  * Sends the log message to a special 'user' log stream designed for messages that
  * the end user may like to see.
  */
 #define ulog( FORMAT, ... ) \
-  do { \
-   if( (fc::logger::get("user")).is_enabled( fc::log_level::debug ) ) { \
+  FC_MULTILINE_MACRO_BEGIN \
+   if( (fc::logger::get("user")).is_enabled( fc::log_level::debug ) ) \
       (fc::logger::get("user")).log( FC_LOG_MESSAGE( debug, FORMAT, __VA_ARGS__ ) ); \
-   } \
-  } while (0)
+  FC_MULTILINE_MACRO_END
 
 
 #define ilog( FORMAT, ... ) \
-  do { \
-   if( (fc::logger::get(DEFAULT_LOGGER)).is_enabled( fc::log_level::info ) ) { \
+  FC_MULTILINE_MACRO_BEGIN \
+   if( (fc::logger::get(DEFAULT_LOGGER)).is_enabled( fc::log_level::info ) ) \
       (fc::logger::get(DEFAULT_LOGGER)).log( FC_LOG_MESSAGE( info, FORMAT, __VA_ARGS__ ) ); \
-   } \
-  } while (0)
+  FC_MULTILINE_MACRO_END
 
 #define wlog( FORMAT, ... ) \
-  do { \
-   if( (fc::logger::get(DEFAULT_LOGGER)).is_enabled( fc::log_level::warn ) ) { \
+  FC_MULTILINE_MACRO_BEGIN \
+   if( (fc::logger::get(DEFAULT_LOGGER)).is_enabled( fc::log_level::warn ) ) \
       (fc::logger::get(DEFAULT_LOGGER)).log( FC_LOG_MESSAGE( warn, FORMAT, __VA_ARGS__ ) ); \
-   } \
-  } while (0)
+  FC_MULTILINE_MACRO_END
 
 #define elog( FORMAT, ... ) \
-  do { \
-   if( (fc::logger::get(DEFAULT_LOGGER)).is_enabled( fc::log_level::error ) ) { \
+  FC_MULTILINE_MACRO_BEGIN \
+   if( (fc::logger::get(DEFAULT_LOGGER)).is_enabled( fc::log_level::error ) ) \
       (fc::logger::get(DEFAULT_LOGGER)).log( FC_LOG_MESSAGE( error, FORMAT, __VA_ARGS__ ) ); \
-   } \
-  } while (0)
+  FC_MULTILINE_MACRO_END
 
 #include <boost/preprocessor/seq/for_each.hpp>
 #include <boost/preprocessor/seq/enum.hpp>
@@ -164,13 +167,13 @@ namespace fc
 // a slowdown.
 #ifdef FC_DISABLE_LOGGING
 # undef ulog
-# define ulog(...) do {} while(0)
+# define ulog(...) FC_MULTILINE_MACRO_BEGIN FC_MULTILINE_MACRO_END
 # undef elog
-# define elog(...) do {} while(0)
+# define elog(...) FC_MULTILINE_MACRO_BEGIN FC_MULTILINE_MACRO_END
 # undef wlog
-# define wlog(...) do {} while(0)
+# define wlog(...) FC_MULTILINE_MACRO_BEGIN FC_MULTILINE_MACRO_END
 # undef ilog
-# define ilog(...) do {} while(0)
+# define ilog(...) FC_MULTILINE_MACRO_BEGIN FC_MULTILINE_MACRO_END
 # undef dlog
-# define dlog(...) do {} while(0)
+# define dlog(...) FC_MULTILINE_MACRO_BEGIN FC_MULTILINE_MACRO_END
 #endif

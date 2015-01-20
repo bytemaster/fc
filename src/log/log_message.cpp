@@ -158,6 +158,7 @@ namespace fc
    string     log_context::get_host_name()const   { return my->hostname; }
    time_point  log_context::get_timestamp()const  { return my->timestamp; }
    log_level  log_context::get_log_level()const{ return my->level;   }
+   string     log_context::get_context()const   { return my->context; }
 
 
    variant log_context::to_variant()const

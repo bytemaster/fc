@@ -7,6 +7,7 @@
 #include <fc/thread/scoped_lock.hpp>
 #include <fc/log/console_appender.hpp>
 #include <fc/log/file_appender.hpp>
+#include <fc/log/gelf_appender.hpp>
 #include <fc/variant.hpp>
 #include "console_defines.h"
 
@@ -45,4 +46,6 @@ namespace fc {
    
    static bool reg_console_appender = appender::register_appender<console_appender>( "console" );
    static bool reg_file_appender = appender::register_appender<file_appender>( "file" );
+   static bool reg_gelf_appender = appender::register_appender<gelf_appender>( "gelf" );
+
 } // namespace fc

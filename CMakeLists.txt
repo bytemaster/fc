@@ -137,6 +137,7 @@ set( fc_sources
      src/log/appender.cpp
      src/log/console_appender.cpp
      src/log/file_appender.cpp
+     src/log/gelf_appender.cpp
      src/log/logger_config.cpp
      src/crypto/openssl.cpp
      src/crypto/aes.cpp

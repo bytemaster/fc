@@ -618,7 +618,7 @@ std::string to_base58( const std::vector<char>& d )
 std::vector<char> from_base58( const std::string& base58_str ) {
    std::vector<unsigned char> out;
    if( !DecodeBase58( base58_str.c_str(), out ) ) {
-     FC_THROW_EXCEPTION( exception, "Unable to decode base58 string ${base58_str}", ("base58_str",base58_str) );
+     FC_THROW_EXCEPTION( parse_error_exception, "Unable to decode base58 string ${base58_str}", ("base58_str",base58_str) );
    }
    return std::vector<char>((const char*)out.data(), ((const char*)out.data())+out.size() );
 }
@@ -629,7 +629,7 @@ size_t from_base58( const std::string& base58_str, char* out_data, size_t out_da
   //slog( "%s", base58_str.c_str() );
   std::vector<unsigned char> out;
   if( !DecodeBase58( base58_str.c_str(), out ) ) {
-    FC_THROW_EXCEPTION( exception, "Unable to decode base58 string ${base58_str}", ("base58_str",base58_str) );
+    FC_THROW_EXCEPTION( parse_error_exception, "Unable to decode base58 string ${base58_str}", ("base58_str",base58_str) );
   }
   
   memcpy( out_data, out.data(), out.size() );

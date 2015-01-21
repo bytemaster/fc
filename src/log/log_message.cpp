@@ -83,7 +83,9 @@ namespace fc
 
    void log_context::append_context( const fc::string& s )
    {
-        my->context += "->" + s;
+        if (!my->context.empty())
+          my->context += " -> ";
+        my->context += s;
    }
 
    log_context::~log_context(){}

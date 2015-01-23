@@ -86,15 +86,6 @@ ENDIF()
 
 find_package(OpenSSL)
 
-IF(APPLE)
-  # As of 10.10 yosemite, the OpenSSL static libraries shipped with os x have a dependency
-  # on zlib, so any time you link in openssl you also need to link zlib.  .  We really want to detect whether openssl was configured with the --no-zlib
-  # option or not when it was built, but that's difficult to do in practice, so we
-  # just always try to link it in on mac.
-  find_package( ZLIB REQUIRED )
-ENDIF(APPLE)
-
-
 set( CMAKE_FIND_LIBRARY_SUFFIXES ${ORIGINAL_LIB_SUFFIXES} )
 
 option( UNITY_BUILD OFF )
@@ -353,6 +344,14 @@ if(WIN32)
    set_property(TARGET fc PROPERTY SHARED_LIBRARIES_RELEASE ${SHARED_LIBRARIES_RELEASE})
 
 endif(WIN32)
+
+IF(APPLE)
+  # As of 10.10 yosemite, the OpenSSL static libraries shipped with os x have a dependency
+  # on zlib, so any time you link in openssl you also need to link zlib.  .  We really want to detect whether openssl was configured with the --no-zlib
+  # option or not when it was built, but that's difficult to do in practice, so we
+  # just always try to link it in on mac.
+  find_package( ZLIB REQUIRED )
+ENDIF(APPLE)
 
 SET(OPENSSL_CONF_TARGET )
 IF(DEFINED CMAKE_RUNTIME_OUTPUT_DIRECTORY)

@@ -209,6 +209,17 @@ namespace fc {
         return *this;
       }
 
+      friend bool operator < ( const optional a, optional b )
+      {
+         if( a.valid() && b.valid() ) return *a < *b;
+         return a.valid() < b.valid();
+      }
+      friend bool operator == ( const optional a, optional b )
+      {
+         if( a.valid() && b.valid() ) return *a == *b;
+         return a.valid() == b.valid();
+      }
+
       void     reset()    
       { 
           if( _valid ) 

@@ -25,7 +25,7 @@ namespace fc { namespace http {
             case fc::http::reply::RecordCreated: ss << "Record Created\r\n"; break;
             case fc::http::reply::NotFound: ss << "Not Found\r\n"; break;
             case fc::http::reply::Found: ss << "Found\r\n"; break;
-            case fc::http::reply::InternalServerError: ss << "Internal Server Error\r\n"; break;
+            default: ss << "Internal Server Error\r\n"; break;
          }
          for( uint32_t i = 0; i < rep.headers.size(); ++i ) {
             ss << rep.headers[i].key <<": "<<rep.headers[i].val <<"\r\n";

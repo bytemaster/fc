@@ -83,7 +83,9 @@ namespace fc
 
    void log_context::append_context( const fc::string& s )
    {
-        my->context += "->" + s;
+        if (!my->context.empty())
+          my->context += " -> ";
+        my->context += s;
    }
 
    log_context::~log_context(){}
@@ -158,6 +160,7 @@ namespace fc
    string     log_context::get_host_name()const   { return my->hostname; }
    time_point  log_context::get_timestamp()const  { return my->timestamp; }
    log_level  log_context::get_log_level()const{ return my->level;   }
+   string     log_context::get_context()const   { return my->context; }
 
 
    variant log_context::to_variant()const

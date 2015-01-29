@@ -43,8 +43,8 @@ namespace fc { namespace rpc {
                  *_out << ",\"result\":";
                  json::to_stream( *_out, result);
                  *_out << "}\n";
+                 _out->flush();
                }
-               _out->flush();
             }
             void send_error( variant id, fc::exception& e )
             {
@@ -59,9 +59,9 @@ namespace fc { namespace rpc {
                  *_out <<",\"code\":0,\"data\":";
                  json::to_stream( *_out, variant(e));
                  *_out << "}}\n";
+                 _out->flush();
                }
                //wlog(  "exception: ${except}", ("except", variant(e)) );
-               _out->flush();
             }
 
             void handle_message( const variant_object& obj )
@@ -306,8 +306,8 @@ namespace fc { namespace rpc {
         *my->_out << ",\"params\":";
         fc::json::to_stream( *my->_out, named_args );
         *my->_out << "}\n";
+        my->_out->flush();
       }
-      my->_out->flush();
    }
    void json_connection::notice( const fc::string& method )
    {
@@ -316,8 +316,8 @@ namespace fc { namespace rpc {
         *my->_out << "{\"method\":";
         json::to_stream( *my->_out, method );
         *my->_out << "}\n";
+        my->_out->flush();
       }
-      my->_out->flush();
    }
 
 
@@ -342,8 +342,8 @@ namespace fc { namespace rpc {
          {
             *my->_out << ",\"params\":[]}\n";
          }
+         my->_out->flush();
       }
-      my->_out->flush();
       return my->_awaiting[id];
    }
 
@@ -361,8 +361,8 @@ namespace fc { namespace rpc {
          *my->_out << ",\"params\":[";
          fc::json::to_stream( *my->_out, a1 );
          *my->_out << "]}\n";
+         my->_out->flush();
       }
-      my->_out->flush();
       return my->_awaiting[id];
    }
    future<variant> json_connection::async_call( const fc::string& method, const variant& a1, const variant& a2 )
@@ -381,8 +381,8 @@ namespace fc { namespace rpc {
          *my->_out << ",";
          fc::json::to_stream( *my->_out, a2 );
          *my->_out << "]}\n";
+         my->_out->flush();
       }
-      my->_out->flush();
       return my->_awaiting[id];
    }
    future<variant> json_connection::async_call( const fc::string& method, const variant& a1, const variant& a2, const variant& a3 )
@@ -403,8 +403,8 @@ namespace fc { namespace rpc {
          *my->_out << ",";
          fc::json::to_stream( *my->_out, a3 );
          *my->_out << "]}\n";
+         my->_out->flush();
       }
-      my->_out->flush();
       return my->_awaiting[id];
    }
 
@@ -428,8 +428,8 @@ namespace fc { namespace rpc {
          *my->_out << ",";
          fc::json::to_stream( *my->_out, a4 );
          *my->_out << "]}\n";
+         my->_out->flush();
       }
-      my->_out->flush();
       return my->_awaiting[id];
    }
 
@@ -455,8 +455,8 @@ namespace fc { namespace rpc {
          *my->_out << ",";
          fc::json::to_stream( *my->_out, a5 );
          *my->_out << "]}\n";
+         my->_out->flush();
       }
-      my->_out->flush();
       return my->_awaiting[id];
    }
 
@@ -484,8 +484,8 @@ namespace fc { namespace rpc {
          *my->_out << ",";
          fc::json::to_stream( *my->_out, a6 );
          *my->_out << "]}\n";
+         my->_out->flush();
       }
-      my->_out->flush();
       return my->_awaiting[id];
    }
    future<variant> json_connection::async_call( const fc::string& method, const variant& a1, const variant& a2, const variant& a3, const variant& a4, const variant& a5, const variant& a6, const variant& a7 )
@@ -514,8 +514,8 @@ namespace fc { namespace rpc {
          *my->_out << ",";
          fc::json::to_stream( *my->_out, a7 );
          *my->_out << "]}\n";
+         my->_out->flush();
       }
-      my->_out->flush();
       return my->_awaiting[id];
    }
    future<variant> json_connection::async_call( const fc::string& method, 
@@ -554,8 +554,8 @@ namespace fc { namespace rpc {
          *my->_out << ",";
          fc::json::to_stream( *my->_out, a8 );
          *my->_out << "]}\n";
+         my->_out->flush();
       }
-      my->_out->flush();
       return my->_awaiting[id];
    }
    future<variant> json_connection::async_call( const fc::string& method, 
@@ -597,8 +597,8 @@ namespace fc { namespace rpc {
          *my->_out << ",";
          fc::json::to_stream( *my->_out, a9 );
          *my->_out << "]}\n";
+         my->_out->flush();
       }
-      my->_out->flush();
       return my->_awaiting[id];
    }
    future<variant> json_connection::async_call( const fc::string& method, 
@@ -643,8 +643,8 @@ namespace fc { namespace rpc {
          *my->_out << ",";
          fc::json::to_stream( *my->_out, a10 );
          *my->_out << "]}\n";
+         my->_out->flush();
       }
-      my->_out->flush();
       return my->_awaiting[id];
    }
 
@@ -665,8 +665,8 @@ namespace fc { namespace rpc {
          *my->_out << ",\"params\":";
          fc::json::to_stream( *my->_out, named_args );
          *my->_out << "}\n";
+         my->_out->flush();
       }
-      my->_out->flush();
       return my->_awaiting[id];
    }
    future<variant> json_connection::async_call( const fc::string& method )
@@ -680,8 +680,8 @@ namespace fc { namespace rpc {
         *my->_out << ",\"method\":";
          json::to_stream( *my->_out, method );
         *my->_out << "}\n";
+         my->_out->flush();
       }
-      my->_out->flush();
       return my->_awaiting[id];
    }
 

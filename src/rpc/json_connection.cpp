@@ -21,6 +21,7 @@ namespace fc { namespace rpc {
             fc::buffered_ostream_ptr                                              _out;
 
             fc::future<void>                                                      _done;
+            fc::future<void>                                                      _handle_message_future;
             bool                                                                  _eof;
 
             uint64_t                                                              _next_id;
@@ -204,7 +205,7 @@ namespace fc { namespace rpc {
                       variant v = json::from_stream(*_in);
                       ///ilog( "input: ${in}", ("in", v ) );
                       //wlog(  "recv: ${line}", ("line", line) );
-                      fc::async([=](){ handle_message(v.get_object()); }, "json_connection handle_message");
+                      _handle_message_future = fc::async([=](){ handle_message(v.get_object()); }, "json_connection handle_message");
                   } 
                } 
                catch ( eof_exception& eof ) 
@@ -241,6 +242,8 @@ namespace fc { namespace rpc {
    {
       try
       {
+         if( my->_handle_message_future.valid() && !my->_handle_message_future.ready() )
+            my->_handle_message_future.cancel_and_wait(__FUNCTION__);
          if( my->_done.valid() && !my->_done.ready() )
          {
             my->_done.cancel("json_connection is destructing");

@@ -150,15 +150,14 @@ namespace fc
 
     uint128& uint128::operator<<=(const uint128& rhs) 
     {
-        unsigned int n = rhs.to_integer();
-        
-        if(n >= 128) 
+        if(rhs >= 128) 
         {
           hi = 0;
           lo = 0;
         } 
         else 
         {
+          unsigned int n = rhs.to_integer();
           const unsigned int halfsize = 128 / 2;
         
             if(n >= halfsize){
@@ -181,17 +180,19 @@ namespace fc
             }
        }
 
-        return *this;
+       return *this;
     }
 
     uint128 & uint128::operator>>=(const uint128& rhs) 
     {
-       unsigned int n = rhs.to_integer();
-       
-       if(n >= 128) {
+       if(rhs >= 128)
+       {
          hi = 0;
          lo = 0;
-       } else {
+       }
+       else
+       {
+         unsigned int n = rhs.to_integer();
          const unsigned int halfsize = 128 / 2;
        
            if(n >= halfsize) {

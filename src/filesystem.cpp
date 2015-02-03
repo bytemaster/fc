@@ -520,13 +520,13 @@ namespace fc {
   };
   
   simple_lock_file::impl::impl(const path& lock_file_path) :
-    is_locked(false),
-    lock_file_path(lock_file_path),
 #ifdef _WIN32
-    file_handle(INVALID_HANDLE_VALUE)
+    file_handle(INVALID_HANDLE_VALUE),
 #else
-    file_handle(-1)
+    file_handle(-1),
 #endif
+    is_locked(false),
+    lock_file_path(lock_file_path)
   {}
    
   simple_lock_file::impl::~impl()

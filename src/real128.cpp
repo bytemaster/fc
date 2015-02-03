@@ -4,18 +4,16 @@
 #include <sstream>
 #include <stdint.h>
 
-#define PRECISION (uint64_t(1000000) * uint64_t(1000000) * uint64_t(1000000))
-
 namespace fc
 {
    uint64_t real128::to_uint64()const
    { 
-      return (fixed/PRECISION).to_uint64(); 
+      return (fixed/ FC_REAL128_PRECISION).to_uint64(); 
    }
 
    real128::real128( uint64_t integer )
    {
-      fixed = uint128(integer)  * PRECISION;
+      fixed = uint128(integer) * FC_REAL128_PRECISION;
    }
    real128& real128::operator += ( const real128& o )
    {
@@ -34,7 +32,7 @@ namespace fc
        
       fc::bigint self(fixed);
       fc::bigint other(o.fixed);
-      self *= PRECISION;
+      self *= FC_REAL128_PRECISION;
       self /= other;
       fixed = self;
 
@@ -46,7 +44,7 @@ namespace fc
       fc::bigint self(fixed);
       fc::bigint other(o.fixed);
       self *= other;
-      self /= PRECISION;
+      self /= FC_REAL128_PRECISION;
       fixed = self;
       return *this;
    } FC_CAPTURE_AND_RETHROW( (*this)(o) ) }
@@ -102,9 +100,9 @@ namespace fc
    real128::operator std::string()const
    {
       std::stringstream ss;
-      ss << std::string(fixed / PRECISION);
+      ss << std::string(fixed / FC_REAL128_PRECISION);
       ss << '.';
-      auto frac = (fixed % PRECISION) + PRECISION;
+      auto frac = (fixed % FC_REAL128_PRECISION) + FC_REAL128_PRECISION;
       ss << std::string( frac ).substr(1);
 
       auto number = ss.str();

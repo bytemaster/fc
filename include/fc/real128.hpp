@@ -1,5 +1,7 @@
 #include <fc/uint128.hpp>   
 
+#define FC_REAL128_PRECISION (uint64_t(1000000) * uint64_t(1000000) * uint64_t(1000000))
+
 namespace fc {
    class variant;
 

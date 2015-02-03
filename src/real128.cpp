@@ -112,6 +112,13 @@ namespace fc
 
       return number;
    }
+   
+   real128 real128::from_fixed( const uint128& fixed )
+   {
+       real128 result;
+       result.fixed = fixed;
+       return result;
+   }
 
    void to_variant( const real128& var,  variant& vo )
    {

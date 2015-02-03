@@ -24,6 +24,8 @@ namespace fc {
          real128& operator -= ( const real128& o );
          real128& operator /= ( const real128& o );
          real128& operator *= ( const real128& o );
+         
+         static real128 from_fixed( const uint128& fixed );
 
          uint64_t to_uint64()const;
 

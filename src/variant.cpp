@@ -693,7 +693,7 @@ string      format_string( const string& format, const variant_object& args )
            {
               if( val->value().is_object() || val->value().is_array() )
               {
-                ss << '\n' << json::to_pretty_string( val->value() );
+                ss << json::to_string( val->value() );
               } 
               else 
               {

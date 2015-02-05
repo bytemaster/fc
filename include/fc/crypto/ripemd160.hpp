@@ -1,14 +1,15 @@
 #pragma once
-#include <fc/fwd.hpp>
-#include <fc/string.hpp>
-#include <fc/reflect/typename.hpp>
 
+#include <fc/fwd.hpp>
+#include <fc/io/raw_fwd.hpp>
+#include <fc/reflect/typename.hpp>
+#include <fc/string.hpp>
 
 namespace fc{
 class sha512;
 class sha256;
 
-class ripemd160 
+class ripemd160
 {
   public:
     ripemd160();
@@ -25,14 +26,14 @@ class ripemd160
     static ripemd160 hash( const string& );
 
     template<typename T>
-    static ripemd160 hash( const T& t ) 
-    { 
-      ripemd160::encoder e; 
-      e << t; 
-      return e.result(); 
-    } 
+    static ripemd160 hash( const T& t )
+    {
+      ripemd160::encoder e;
+      fc::raw::pack( e, t );
+      return e.result();
+    }
 
-    class encoder 
+    class encoder
     {
       public:
         encoder();
@@ -64,10 +65,10 @@ class ripemd160
     friend bool      operator != ( const ripemd160& h1, const ripemd160& h2 );
     friend ripemd160 operator ^  ( const ripemd160& h1, const ripemd160& h2 );
     friend bool      operator >= ( const ripemd160& h1, const ripemd160& h2 );
-    friend bool      operator >  ( const ripemd160& h1, const ripemd160& h2 ); 
-    friend bool      operator <  ( const ripemd160& h1, const ripemd160& h2 ); 
-                             
-    uint32_t _hash[5]; 
+    friend bool      operator >  ( const ripemd160& h1, const ripemd160& h2 );
+    friend bool      operator <  ( const ripemd160& h1, const ripemd160& h2 );
+
+    uint32_t _hash[5];
 };
 
   class variant;

@@ -3,12 +3,6 @@
 #include <fc/fwd.hpp>
 #include <fc/io/raw_fwd.hpp>
 #include <fc/reflect/typename.hpp>
-<<<<<<< HEAD
-#include <fc/io/raw_fwd.hpp>
-
-=======
-#include <fc/string.hpp>
->>>>>>> 13430fce127bb3fdba53d218dd840aea8e46408c
 
 namespace fc{
 class sha512;

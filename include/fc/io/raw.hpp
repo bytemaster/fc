@@ -487,6 +487,15 @@ namespace fc {
     } FC_RETHROW_EXCEPTIONS( warn, "error unpacking ${type}", ("type",fc::get_typename<T>::name() ) ) }
 
     template<typename T>
+    inline void unpack( const std::vector<char>& s, T& tmp ) 
+    { try  {
+      if( s.size() ) {
+        datastream<const char*>  ds( s.data(), size_t(s.size()) ); 
+        raw::unpack(ds,tmp);
+      }
+    } FC_RETHROW_EXCEPTIONS( warn, "error unpacking ${type}", ("type",fc::get_typename<T>::name() ) ) }
+
+    template<typename T>
     inline void pack( char* d, uint32_t s, const T& v ) {
       datastream<char*> ds(d,s); 
       raw::pack(ds,v );

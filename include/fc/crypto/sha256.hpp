@@ -2,6 +2,7 @@
 #include <fc/fwd.hpp>
 #include <fc/string.hpp>
 #include <fc/platform_independence.hpp>
+#include <fc/io/raw_fwd.hpp>
 
 namespace fc
 {
@@ -25,7 +26,7 @@ class sha256
     static sha256 hash( const T& t ) 
     { 
       sha256::encoder e; 
-      e << t; 
+      fc::raw::pack(e,t);
       return e.result(); 
     } 
 

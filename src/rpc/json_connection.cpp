@@ -16,14 +16,6 @@ namespace fc { namespace rpc {
          public:
             json_connection_impl( fc::buffered_istream_ptr&& in, fc::buffered_ostream_ptr&& out )
             :_in(fc::move(in)),_out(fc::move(out)),_eof(false),_next_id(0),_logger("json_connection"){}
-            ~json_connection_impl() {
-               _done.cancel_and_wait(__FUNCTION__);
-               _out->close();
-               _handle_message_future.cancel_and_wait(__FUNCTION__);
-               //Work around crash because _done.cancel_and_wait didn't work, and read_loop() is going to resume
-               //and crash us in just a moment if we allow ourselves to destroy now.
-               fc::usleep(fc::milliseconds(100));
-            }
 
             fc::buffered_istream_ptr                                              _in;
             fc::buffered_ostream_ptr                                              _out;
@@ -38,7 +30,7 @@ namespace fc { namespace rpc {
             boost::unordered_map<std::string, json_connection::named_param_method> _named_param_methods;
 
             fc::mutex                                                             _write_mutex;
-            std::function<void(fc::exception_ptr)>                                _on_close;
+            //std::function<void(fc::exception_ptr)>                                _on_close;
 
             logger                                                                _logger;
 
@@ -233,9 +225,6 @@ namespace fc { namespace rpc {
 
             void close( fc::exception_ptr e )
             {
-               e = fc::exception_ptr(new FC_EXCEPTION( unhandled_exception, "json connection closed" ));
-               if( _on_close )
-                  _on_close(e);
                wlog( "close ${reason}", ("reason", e->to_detail_string() ) );
                for( auto itr = _awaiting.begin(); itr != _awaiting.end(); ++itr )
                {
@@ -251,6 +240,24 @@ namespace fc { namespace rpc {
 
    json_connection::~json_connection()
    {
+      try
+      {
+         if( my->_handle_message_future.valid() && !my->_handle_message_future.ready() )
+            my->_handle_message_future.cancel_and_wait(__FUNCTION__);
+         if( my->_done.valid() && !my->_done.ready() )
+         {
+            my->_done.cancel("json_connection is destructing");
+            my->_out->close();
+            my->_done.wait();
+         }
+      } 
+      catch ( fc::canceled_exception& ){} // expected exception
+      catch ( fc::eof_exception& ){} // expected exception
+      catch ( fc::exception& e )
+      {
+         // unhandled, unexpected exception cannot throw from destructor, so log it.
+         wlog( "${exception}", ("exception",e.to_detail_string()) );
+      }
    }
 
    fc::future<void> json_connection::exec()
@@ -689,11 +696,6 @@ namespace fc { namespace rpc {
    void   json_connection::set_logger( const logger& l )
    {
       my->_logger = l;
-   }
-
-   void json_connection::set_close_callback(std::function<void (exception_ptr)> callback)
-   {
-      my->_on_close = callback;
    }
 
 }}

@@ -32,8 +32,6 @@ namespace fc { namespace rpc  {
          logger get_logger()const;
          void   set_logger( const logger& l );
 
-         void set_close_callback(std::function<void(fc::exception_ptr e)> callback);
-
          /**
           * @name server interface
           *

@@ -1,15 +1,20 @@
 #pragma once
+
 #include <fc/fwd.hpp>
-#include <fc/string.hpp>
+#include <fc/io/raw_fwd.hpp>
 #include <fc/reflect/typename.hpp>
+<<<<<<< HEAD
 #include <fc/io/raw_fwd.hpp>
 
+=======
+#include <fc/string.hpp>
+>>>>>>> 13430fce127bb3fdba53d218dd840aea8e46408c
 
 namespace fc{
 class sha512;
 class sha256;
 
-class ripemd160 
+class ripemd160
 {
   public:
     ripemd160();
@@ -65,10 +70,10 @@ class ripemd160
     friend bool      operator != ( const ripemd160& h1, const ripemd160& h2 );
     friend ripemd160 operator ^  ( const ripemd160& h1, const ripemd160& h2 );
     friend bool      operator >= ( const ripemd160& h1, const ripemd160& h2 );
-    friend bool      operator >  ( const ripemd160& h1, const ripemd160& h2 ); 
-    friend bool      operator <  ( const ripemd160& h1, const ripemd160& h2 ); 
-                             
-    uint32_t _hash[5]; 
+    friend bool      operator >  ( const ripemd160& h1, const ripemd160& h2 );
+    friend bool      operator <  ( const ripemd160& h1, const ripemd160& h2 );
+
+    uint32_t _hash[5];
 };
 
   class variant;

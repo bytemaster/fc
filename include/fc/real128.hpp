@@ -1,3 +1,4 @@
+#pragma once
 #include <fc/uint128.hpp>   
 
 #define FC_REAL128_PRECISION (uint64_t(1000000) * uint64_t(1000000) * uint64_t(1000000))
@@ -37,5 +38,15 @@ namespace fc {
 
    void to_variant( const real128& var,  variant& vo );
    void from_variant( const variant& var,  real128& vo );
+
+  namespace raw  
+  {
+    template<typename Stream>
+    inline void pack( Stream& s, const real128& value_to_pack ) { s.write( (char*)&value_to_pack, sizeof(value_to_pack) ); }
+    template<typename Stream>
+    inline void unpack( Stream& s, real128& value_to_unpack ) { s.read( (char*)&value_to_unpack, sizeof(value_to_unpack) ); }
+  }
+
+
 
 } // namespace fc

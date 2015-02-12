@@ -3,7 +3,6 @@
 #include <fc/fwd.hpp>
 #include <fc/io/raw_fwd.hpp>
 #include <fc/reflect/typename.hpp>
-#include <fc/string.hpp>
 
 namespace fc{
 class sha512;
@@ -26,14 +25,14 @@ class ripemd160
     static ripemd160 hash( const string& );
 
     template<typename T>
-    static ripemd160 hash( const T& t )
-    {
-      ripemd160::encoder e;
-      fc::raw::pack( e, t );
-      return e.result();
-    }
+    static ripemd160 hash( const T& t ) 
+    { 
+      ripemd160::encoder e; 
+      fc::raw::pack(e,t);
+      return e.result(); 
+    } 
 
-    class encoder
+    class encoder 
     {
       public:
         encoder();

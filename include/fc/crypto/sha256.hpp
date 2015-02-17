@@ -21,6 +21,7 @@ class sha256
 
     static sha256 hash( const char* d, uint32_t dlen );
     static sha256 hash( const string& );
+    static sha256 hash( const sha256& );
 
     template<typename T>
     static sha256 hash( const T& t ) 

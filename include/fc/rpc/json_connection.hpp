@@ -29,6 +29,11 @@ namespace fc { namespace rpc  {
           */
          future<void> exec();
 
+         bool is_open();
+         void close();
+
+         void set_on_disconnected_callback(std::function<void(fc::exception_ptr)> callback);
+
          logger get_logger()const;
          void   set_logger( const logger& l );
 

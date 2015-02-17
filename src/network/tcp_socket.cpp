@@ -27,7 +27,12 @@ namespace fc {
       ~impl()
       {
         if( _sock.is_open() ) 
-          _sock.close();
+          try
+          {
+            _sock.close();
+          }
+          catch( ... )
+          {}
         if( _read_in_progress.valid() )
           try 
           { 

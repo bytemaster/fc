@@ -30,7 +30,7 @@ namespace fc { namespace rpc {
             boost::unordered_map<std::string, json_connection::named_param_method> _named_param_methods;
 
             fc::mutex                                                             _write_mutex;
-            //std::function<void(fc::exception_ptr)>                                _on_close;
+            std::function<void(fc::exception_ptr)>                                _on_close;
 
             logger                                                                _logger;
 
@@ -226,6 +226,8 @@ namespace fc { namespace rpc {
             void close( fc::exception_ptr e )
             {
                wlog( "close ${reason}", ("reason", e->to_detail_string() ) );
+               if( _on_close )
+                  _on_close(e);
                for( auto itr = _awaiting.begin(); itr != _awaiting.end(); ++itr )
                {
                   itr->second->set_exception( e->dynamic_copy_exception() );
@@ -240,6 +242,20 @@ namespace fc { namespace rpc {
 
    json_connection::~json_connection()
    {
+      close();
+   }
+
+   fc::future<void> json_connection::exec()
+   {
+      if( my->_done.valid() )
+      {
+         FC_THROW_EXCEPTION( assert_exception, "start should only be called once" );
+      }
+      return my->_done = fc::async( [=](){ my->read_loop(); }, "json_connection read_loop" );
+   }
+
+   void json_connection::close()
+   {
       try
       {
          if( my->_handle_message_future.valid() && !my->_handle_message_future.ready() )
@@ -250,7 +266,7 @@ namespace fc { namespace rpc {
             my->_out->close();
             my->_done.wait();
          }
-      } 
+      }
       catch ( fc::canceled_exception& ){} // expected exception
       catch ( fc::eof_exception& ){} // expected exception
       catch ( fc::exception& e )
@@ -260,13 +276,9 @@ namespace fc { namespace rpc {
       }
    }
 
-   fc::future<void> json_connection::exec()
+   void json_connection::set_on_disconnected_callback(std::function<void (exception_ptr)> callback)
    {
-      if( my->_done.valid() )
-      {
-         FC_THROW_EXCEPTION( assert_exception, "start should only be called once" );
-      }
-      return my->_done = fc::async( [=](){ my->read_loop(); }, "json_connection read_loop" );
+      my->_on_close = callback;
    }
 
    void json_connection::add_method( const fc::string& name, method m )

@@ -8,6 +8,8 @@
 namespace fc
 {
 
+bool is_utf8( const std::string& str );
+
 /** Decodes utf 8 std::string into unicode string.
     @param input   - input string to be decoded and stored in 'storage'
     @param storage - buffer for converted text. Cannot be nullptr.

@@ -17,7 +17,7 @@ namespace fc
       
       enum_type(){}
       
-      operator IntType()const     { return static_cast<IntType>(value);    }
+      explicit operator IntType()const     { return static_cast<IntType>(value);    }
       operator EnumType()const    { return value;                          }
       operator std::string()const { return fc::reflector<EnumType>::to_string(value); }
       

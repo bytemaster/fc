@@ -1,6 +1,7 @@
 #pragma once
 #include <fc/io/varint.hpp>
 #include <fc/array.hpp>
+#include <fc/safe.hpp>
 #include <vector>
 #include <string>
 #include <unordered_set>
@@ -48,7 +49,10 @@ namespace fc {
 
 
     template<typename Stream, typename T> void unpack( Stream& s, fc::optional<T>& v ); 
+    template<typename Stream, typename T> void unpack( Stream& s, const T& v ); 
     template<typename Stream, typename T> void pack( Stream& s, const fc::optional<T>& v );
+    template<typename Stream, typename T> void pack( Stream& s, const safe<T>& v );
+    template<typename Stream, typename T> void unpack( Stream& s, fc::safe<T>& v );
 
     template<typename Stream> void unpack( Stream& s, time_point& ); 
     template<typename Stream> void pack( Stream& s, const time_point& );

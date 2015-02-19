@@ -9,6 +9,7 @@
 #include <fc/time.hpp>
 #include <fc/filesystem.hpp>
 #include <fc/exception/exception.hpp>
+#include <fc/safe.hpp>
 #include <map>
 
 #define MAX_ARRAY_ALLOC_SIZE (1024*1024*10) 
@@ -162,11 +163,24 @@ namespace fc {
       vi.value = static_cast<uint32_t>(v);
     }
 
+    template<typename Stream, typename T> inline void unpack( Stream& s, const T& vi ) 
+    {
+       T tmp;
+       unpack( s, tmp );
+       FC_ASSERT( vi == tmp );
+    }
+
     template<typename Stream> inline void pack( Stream& s, const char* v ) { pack( s, fc::string(v) ); }
+
+    template<typename Stream, typename T> 
+    void pack( Stream& s, const safe<T>& v ) { pack( s, v.value ); }
+
+    template<typename Stream, typename T>
+    void unpack( Stream& s, fc::safe<T>& v ) { unpack( s, v.value ); }
 
     // optional
     template<typename Stream, typename T> 
-    inline void pack( Stream& s, const fc::optional<T>& v ) {
+    void pack( Stream& s, const fc::optional<T>& v ) {
       pack( s, bool(!!v) );
       if( !!v ) pack( s, *v );
     }

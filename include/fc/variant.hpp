@@ -30,11 +30,14 @@ namespace fc
    class time_point;
    class time_point_sec;
    class microseconds;
+   template<typename T> struct safe;
 
    struct blob { std::vector<char> data; };
 
    void to_variant( const blob& var,  variant& vo );
    void from_variant( const variant& var,  blob& vo );
+   template<typename T> void to_variant( const safe<T>& s, variant& v );
+   template<typename T> void from_variant( const variant& v, safe<T>& s );
 
    void to_variant( const uint8_t& var,  variant& vo );
    void from_variant( const variant& var,  uint8_t& vo );
@@ -109,6 +112,7 @@ namespace fc
    void to_variant( const std::pair<A,B>& t, variant& v );
    template<typename A, typename B>
    void from_variant( const variant& v, std::pair<A,B>& p );
+
 
 
    /**
@@ -480,6 +484,11 @@ namespace fc
           from_variant( var, *vo );
       }
    }
+   template<typename T>
+   void to_variant( const safe<T>& s, variant& v ) { v = s.value; }
+
+   template<typename T>
+   void from_variant( const variant& v, safe<T>& s ) { s.value = v.as_uint64(); }
 
    variant operator + ( const variant& a, const variant& b );
    variant operator - ( const variant& a, const variant& b );

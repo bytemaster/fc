@@ -33,7 +33,9 @@ namespace fc
        unknown_host_exception_code       = 15,
        null_optional_code                = 16,
        udt_error_code                    = 17,
-       aes_error_code                    = 18
+       aes_error_code                    = 18,
+       overflow_code                     = 19,
+       underflow_code                    = 20
    };
 
    /**
@@ -285,6 +287,8 @@ namespace fc
   FC_DECLARE_EXCEPTION( null_optional, null_optional_code, "null optional" );
   FC_DECLARE_EXCEPTION( udt_exception, udt_error_code, "UDT error" );
   FC_DECLARE_EXCEPTION( aes_exception, aes_error_code, "AES error" );
+  FC_DECLARE_EXCEPTION( overflow_exception, overflow_code, "Integer Overflow" );
+  FC_DECLARE_EXCEPTION( underflow_exception, underflow_code, "Integer Underflow" );
 
   std::string except_str();
 

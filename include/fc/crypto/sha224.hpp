@@ -84,3 +84,5 @@ namespace std
        }
     };
 }
+#include <fc/reflect/reflect.hpp>
+FC_REFLECT_TYPENAME( fc::sha224 )

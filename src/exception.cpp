@@ -21,6 +21,8 @@ namespace fc
                            (null_optional)
                            (udt_exception)
                            (aes_exception)
+                           (overflow_exception)
+                           (underflow_exception)
                          )
 
    namespace detail

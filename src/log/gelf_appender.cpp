@@ -4,14 +4,12 @@
 #include <fc/exception/exception.hpp>
 #include <fc/log/gelf_appender.hpp>
 #include <fc/reflect/variant.hpp>
-#include <fc/thread/scoped_lock.hpp>
 #include <fc/thread/thread.hpp>
 #include <fc/variant.hpp>
 #include <fc/io/json.hpp>
 #include <fc/crypto/city.hpp>
 #include <fc/compress/zlib.hpp>
 
-#include <boost/thread/mutex.hpp>
 #include <boost/lexical_cast.hpp>
 #include <iomanip>
 #include <queue>
@@ -26,7 +24,6 @@ namespace fc
     config                     cfg;
     optional<ip::endpoint>     gelf_endpoint;
     udp_socket                 gelf_socket;
-    boost::mutex               socket_mutex;
 
     impl(const config& c) : 
       cfg(c)
@@ -159,11 +156,8 @@ namespace fc
       memcpy(send_buffer.get(), gelf_message_as_string.c_str(), 
              gelf_message_as_string.size());
 
-      {
-        scoped_lock<boost::mutex> lock(my->socket_mutex);
-        my->gelf_socket.send_to(send_buffer, gelf_message_as_string.size(), 
-                                *my->gelf_endpoint);
-      }
+      my->gelf_socket.send_to(send_buffer, gelf_message_as_string.size(), 
+                              *my->gelf_endpoint);
     }
     else
     {
@@ -196,11 +190,8 @@ namespace fc
         *(unsigned char*)(ptr++) = total_number_of_packets;
         memcpy(ptr, gelf_message_as_string.c_str() + bytes_sent, 
                bytes_to_send);
-        {
-          scoped_lock<boost::mutex> lock(my->socket_mutex);
-          my->gelf_socket.send_to(send_buffer, header_length + bytes_to_send, 
-                                  *my->gelf_endpoint);
-        }
+        my->gelf_socket.send_to(send_buffer, header_length + bytes_to_send, 
+                                *my->gelf_endpoint);
         ++number_of_packets_sent;
         bytes_sent += bytes_to_send;
       }

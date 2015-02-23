@@ -12,6 +12,7 @@
 
 #include <boost/lexical_cast.hpp>
 #include <iomanip>
+#include <iostream>
 #include <queue>
 #include <sstream>
 
@@ -127,7 +128,7 @@ namespace fc
       gelf_message["_task_name"] = context.get_task_name();
 
     string gelf_message_as_string = json::to_string(gelf_message);
-    unsigned uncompressed_size = gelf_message_as_string.size();
+    //unsigned uncompressed_size = gelf_message_as_string.size();
     gelf_message_as_string = zlib_compress(gelf_message_as_string);
     
     // graylog2 expects the zlib header to be 0x78 0x9c

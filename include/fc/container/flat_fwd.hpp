@@ -1,23 +1,21 @@
 #pragma once 
-namespace boost { namespace container {
-   template<typename Key, 
-            typename Compare, 
-            typename Allocator > 
-   class flat_set;
-
-
-   template<typename Key, 
-            typename T, 
-            typename Compare, 
-            typename Allocator > 
-   class flat_map;
-} } // boost::container
+#include <boost/container/flat_map.hpp>
+#include <boost/container/flat_set.hpp>
 
 namespace fc {
 
-   template<typename K, typename V>
-   using flat_map = boost::container::flat_map<K,V,std::less<K>,std::allocator<std::pair<K,V>> >;
-   template<typename V>
-   using flat_set = boost::container::flat_set<V,std::less<V>, std::allocator<V> >;
+   using boost::container::flat_map;
+   using boost::container::flat_set;
+
+   namespace raw {
+       template<typename Stream, typename T>
+       void pack( Stream& s, const flat_set<T>& value );
+       template<typename Stream, typename T>
+       void unpack( Stream& s, flat_set<T>& value );
+       template<typename Stream, typename K, typename V>
+       void pack( Stream& s, const flat_map<K,V>& value );
+       template<typename Stream, typename K, typename V>
+       void unpack( Stream& s, flat_map<K,V>& value ) ;
+   } // namespace raw
 
 } // fc

@@ -1,4 +1,5 @@
 #pragma once
+#include <fc/container/flat_fwd.hpp>
 #include <fc/io/varint.hpp>
 #include <fc/array.hpp>
 #include <fc/safe.hpp>
@@ -7,7 +8,8 @@
 #include <unordered_set>
 #include <unordered_map>
 #include <set>
-#include <fc/container/flat_fwd.hpp>
+
+#define MAX_ARRAY_ALLOC_SIZE (1024*1024*10) 
 
 namespace fc { 
    class time_point;

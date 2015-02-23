@@ -10,9 +10,8 @@
 #include <fc/filesystem.hpp>
 #include <fc/exception/exception.hpp>
 #include <fc/safe.hpp>
+#include <fc/io/raw_fwd.hpp>
 #include <map>
-
-#define MAX_ARRAY_ALLOC_SIZE (1024*1024*10) 
 
 namespace fc { 
     namespace raw {

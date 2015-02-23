@@ -1,7 +1,9 @@
 #pragma once
 #include <fc/variant.hpp>
+#include <fc/container/flat_fwd.hpp>
 #include <boost/container/flat_map.hpp>
 #include <boost/container/flat_set.hpp>
+#include <fc/io/raw_fwd.hpp>
 
 namespace fc {
    namespace raw {

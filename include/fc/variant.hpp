@@ -8,6 +8,7 @@
 #include <unordered_map>
 #include <map>
 #include <set>
+#include <fc/container/flat_fwd.hpp>
 
 namespace fc
 {
@@ -65,6 +66,12 @@ namespace fc
    void to_variant( const std::unordered_map<K,T>& var,  variant& vo );
    template<typename K, typename T>
    void from_variant( const variant& var,  std::unordered_map<K,T>& vo );
+
+   template<typename K, typename T>
+   void to_variant( const flat_map<K,T>& var,  variant& vo );
+   template<typename K, typename T>
+   void from_variant( const variant& var, flat_map<K,T>& vo );
+
    template<typename K, typename T>
    void to_variant( const std::map<K,T>& var,  variant& vo );
    template<typename K, typename T>
@@ -79,6 +86,12 @@ namespace fc
    void to_variant( const std::unordered_set<T>& var,  variant& vo );
    template<typename T>
    void from_variant( const variant& var,  std::unordered_set<T>& vo );
+
+   template<typename T>
+   void to_variant( const flat_set<T>& var,  variant& vo );
+   template<typename T>
+   void from_variant( const variant& var, flat_set<T>& vo );
+
    template<typename T>
    void to_variant( const std::set<T>& var,  variant& vo );
    template<typename T>

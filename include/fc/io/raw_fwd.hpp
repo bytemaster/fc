@@ -7,6 +7,7 @@
 #include <unordered_set>
 #include <unordered_map>
 #include <set>
+#include <fc/container/flat_fwd.hpp>
 
 namespace fc { 
    class time_point;
@@ -29,10 +30,17 @@ namespace fc {
     template<typename Stream, typename T> inline void pack( Stream& s, const std::unordered_set<T>& value );
     template<typename Stream, typename T> inline void unpack( Stream& s, std::unordered_set<T>& value );
 
+    template<typename Stream, typename T> inline void pack( Stream& s, const flat_set<T>& value );
+    template<typename Stream, typename T> inline void unpack( Stream& s, flat_set<T>& value );
+
     template<typename Stream, typename K, typename V> inline void pack( Stream& s, const std::unordered_map<K,V>& value );
     template<typename Stream, typename K, typename V> inline void unpack( Stream& s, std::unordered_map<K,V>& value );
+
     template<typename Stream, typename K, typename V> inline void pack( Stream& s, const std::map<K,V>& value );
     template<typename Stream, typename K, typename V> inline void unpack( Stream& s, std::map<K,V>& value );
+
+    template<typename Stream, typename K, typename V> inline void pack( Stream& s, const flat_map<K,V>& value );
+    template<typename Stream, typename K, typename V> inline void unpack( Stream& s, flat_map<K,V>& value );
 
     template<typename Stream, typename K, typename V> inline void pack( Stream& s, const std::pair<K,V>& value );
     template<typename Stream, typename K, typename V> inline void unpack( Stream& s, std::pair<K,V>& value );

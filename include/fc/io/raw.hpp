@@ -538,7 +538,7 @@ namespace fc {
       pack_static_variant( Stream& s ):stream(s){}
 
       typedef void result_type;
-      template<typename T> void operator()( const T& v )
+      template<typename T> void operator()( const T& v )const
       {
          pack( stream, v );
       }
@@ -551,7 +551,7 @@ namespace fc {
       unpack_static_variant( Stream& s ):stream(s){}
 
       typedef void result_type;
-      template<typename T> void operator()( T& v )
+      template<typename T> void operator()( T& v )const
       {
          unpack( stream, v );
       }
@@ -561,8 +561,8 @@ namespace fc {
     template<typename Stream, typename... T> 
     void pack( Stream& s, const static_variant<T...>& sv )
     {
-       pack( sv, unsigned_int(s.which()) );
-       s.visit( pack_static_variant<Stream>(sv) );
+       pack( s, unsigned_int(sv.which()) );
+       sv.visit( pack_static_variant<Stream>(s) );
     }
 
     template<typename Stream, typename... T> void unpack( Stream& s, static_variant<T...>& sv )

@@ -508,7 +508,7 @@ namespace fc
       from_static_variant( variant& dv ):var(dv){}
 
       typedef void result_type;
-      template<typename T> void operator()( const T& v )
+      template<typename T> void operator()( const T& v )const
       {
          to_variant( v, var );
       }
@@ -520,7 +520,7 @@ namespace fc
       to_static_variant( const variant& dv ):var(dv){}
 
       typedef void result_type;
-      template<typename T> void operator()( T& v )
+      template<typename T> void operator()( T& v )const
       {
          to_variant( var, v ); 
       }

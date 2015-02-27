@@ -9,6 +9,7 @@
 #include <map>
 #include <set>
 #include <fc/container/flat_fwd.hpp>
+#include <fc/static_variant.hpp>
 
 namespace fc
 {
@@ -39,6 +40,9 @@ namespace fc
    void from_variant( const variant& var,  blob& vo );
    template<typename T> void to_variant( const safe<T>& s, variant& v );
    template<typename T> void from_variant( const variant& v, safe<T>& s );
+
+   template<typename... T> void to_variant( const static_variant<T...>& s, variant& v );
+   template<typename... T> void from_variant( const variant& v, static_variant<T...>& s );
 
    void to_variant( const uint8_t& var,  variant& vo );
    void from_variant( const variant& var,  uint8_t& vo );
@@ -497,6 +501,49 @@ namespace fc
           from_variant( var, *vo );
       }
    }
+
+   struct from_static_variant 
+   {
+      variant& var;
+      from_static_variant( variant& dv ):var(dv){}
+
+      typedef void result_type;
+      template<typename T> void operator()( const T& v )
+      {
+         to_variant( v, var );
+      }
+   };
+
+   struct to_static_variant
+   {
+      const variant& var;
+      to_static_variant( const variant& dv ):var(dv){}
+
+      typedef void result_type;
+      template<typename T> void operator()( T& v )
+      {
+         to_variant( var, v ); 
+      }
+   };
+
+
+   template<typename... T> void to_variant( const fc::static_variant<T...>& s, fc::variant& v )
+   {
+      variant tmp;
+      variants vars(2);
+      vars[0] = s.which();
+      s.visit( from_static_variant(vars[1]) );
+      v = std::move(vars);
+   }
+   template<typename... T> void from_variant( const fc::variant& v, fc::static_variant<T...>& s )
+   {
+      auto ar = v.get_array();
+      if( ar.size() ) return;
+      s.set_which( ar[0].as_uint64() );
+      if( ar.size() < 1 ) return;
+      s.visit( to_static_variant(ar[1]) );
+   }
+
    template<typename T>
    void to_variant( const safe<T>& s, variant& v ) { v = s.value; }
 

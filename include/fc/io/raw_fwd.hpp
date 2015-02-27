@@ -17,6 +17,8 @@ namespace fc {
    class variant;
    class variant_object;
    class path;
+   template<typename... Types> class static_variant;
+
    template<typename IntType, typename EnumType> class enum_type;
    namespace ip { class endpoint; }
 
@@ -31,6 +33,9 @@ namespace fc {
     template<typename Stream, typename T> inline void unpack( Stream& s, std::set<T>& value );
     template<typename Stream, typename T> inline void pack( Stream& s, const std::unordered_set<T>& value );
     template<typename Stream, typename T> inline void unpack( Stream& s, std::unordered_set<T>& value );
+
+    template<typename Stream, typename... T> void pack( Stream& s, const static_variant<T...>& sv );
+    template<typename Stream, typename... T> void unpack( Stream& s, static_variant<T...>& sv );
 
     template<typename Stream, typename T> inline void pack( Stream& s, const flat_set<T>& value );
     template<typename Stream, typename T> inline void unpack( Stream& s, flat_set<T>& value );

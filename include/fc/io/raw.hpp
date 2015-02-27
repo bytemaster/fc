@@ -530,6 +530,48 @@ namespace fc {
       raw::unpack(ds,v);
       return v;
     } FC_RETHROW_EXCEPTIONS( warn, "error unpacking ${type}", ("type",fc::get_typename<T>::name() ) ) }
+
+   template<typename Stream>
+   struct pack_static_variant 
+   {
+      Stream& stream;
+      pack_static_variant( Stream& s ):stream(s){}
+
+      typedef void result_type;
+      template<typename T> void operator()( const T& v )
+      {
+         pack( stream, v );
+      }
+   };
+
+   template<typename Stream>
+   struct unpack_static_variant
+   {
+      Stream& stream;
+      unpack_static_variant( Stream& s ):stream(s){}
+
+      typedef void result_type;
+      template<typename T> void operator()( T& v )
+      {
+         unpack( stream, v );
+      }
+   };
+
+
+    template<typename Stream, typename... T> 
+    void pack( Stream& s, const static_variant<T...>& sv )
+    {
+       pack( sv, unsigned_int(s.which()) );
+       s.visit( pack_static_variant<Stream>(sv) );
+    }
+
+    template<typename Stream, typename... T> void unpack( Stream& s, static_variant<T...>& sv )
+    {
+       unsigned_int w;
+       unpack( s, w );
+       sv.set_which(w.value);
+       sv.visit( unpack_static_variant<Stream>(s) );
+    }
     
 } } // namespace fc::raw
 

@@ -197,6 +197,7 @@ public:
     };
     static_variant()
     {
+       _tag = 0;
        impl::storage_ops<0, Types...>::con(0, storage);
     }
 

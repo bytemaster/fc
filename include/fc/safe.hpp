@@ -1,5 +1,6 @@
 #pragma once
 #include <fc/exception/exception.hpp>
+#include <fc/reflect/reflect.hpp>
 
 namespace fc {
 
@@ -62,3 +63,5 @@ namespace fc {
    };
 
 } 
+
+FC_REFLECT_TEMPLATE( (typename T), safe<T>, (value) )

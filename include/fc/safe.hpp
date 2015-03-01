@@ -31,6 +31,7 @@ namespace fc {
          if( b.value < 0 && a.value < std::numeric_limits<T>::min() - b.value ) FC_CAPTURE_AND_THROW( underflow_exception, (a)(b) );
          return safe(a.value+b.value);
       }
+      safe& operator *= ( T v ) { value *= v; return *this; }
       safe& operator -= (  const safe& b ) { return *this += safe(-b.value); }
       safe operator -()const{ return safe(-value); }
 

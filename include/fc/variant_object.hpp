@@ -173,7 +173,7 @@ namespace fc
       template<typename T>
       mutable_variant_object& operator()( string key, T&& var )
       {
-         set(std::move(key), variant( forward<T>(var) ) );
+         set(std::move(key), variant( fc::forward<T>(var) ) );
          return *this;
       }
       ///@}

@@ -10,7 +10,7 @@ namespace fc {
     *  throw an exception on overflow conditions.
     */
    template<typename T>
-   struct safe 
+   struct safe
    {
       template<typename O>
       safe( O o ):value(o){}
@@ -33,7 +33,12 @@ namespace fc {
       }
       safe& operator *= ( T v ) { value *= v; return *this; }
       safe& operator -= (  const safe& b ) { return *this += safe(-b.value); }
-      safe operator -()const{ return safe(-value); }
+      safe operator -()const
+      {
+         if( value == std::numeric_limits<T>::min() )
+            FC_CAPTURE_AND_THROW( overflow_exception, (value) );
+         return safe(-value);
+      }
 
       friend safe operator - ( const safe& a, const safe& b )
       {
@@ -63,6 +68,6 @@ namespace fc {
       T value = 0;
    };
 
-} 
+}
 
 FC_REFLECT_TEMPLATE( (typename T), safe<T>, (value) )

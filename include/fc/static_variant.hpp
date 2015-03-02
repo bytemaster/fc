@@ -1,4 +1,4 @@
-/** This source adapted from https://github.com/kmicklas/variadic-static_variant 
+/** This source adapted from https://github.com/kmicklas/variadic-static_variant
  *
  * Copyright (C) 2013 Kenneth Micklas
  *
@@ -29,6 +29,7 @@ struct type_info;
 template<typename StaticVariant>
 struct copy_construct
 {
+   typedef void result_type;
    StaticVariant& sv;
    copy_construct( StaticVariant& s ):sv(s){}
    template<typename T>
@@ -38,11 +39,24 @@ struct copy_construct
    }
 };
 
+template<typename StaticVariant>
+struct move_construct
+{
+   typedef void result_type;
+   StaticVariant& sv;
+   move_construct( StaticVariant& s ):sv(s){}
+   template<typename T>
+   void operator()( T& v )const
+   {
+      sv.init( std::move(v) );
+   }
+};
+
 template<int N, typename T, typename... Ts>
 struct storage_ops<N, T&, Ts...> {
     static void del(int n, void *data) {}
     static void con(int n, void *data) {}
-    
+
     template<typename visitor>
     static typename visitor::result_type apply(int n, void *data, visitor& v) {}
 
@@ -173,18 +187,26 @@ template<typename... Types>
 class static_variant {
     static_assert(impl::type_info<Types...>::no_reference_types, "Reference types are not permitted in static_variant.");
     static_assert(impl::type_info<Types...>::no_duplicates, "static_variant type arguments contain duplicate types.");
-    
+
     int _tag;
     char storage[impl::type_info<Types...>::size];
-    
+
     template<typename X>
     void init(const X& x) {
         _tag = impl::position<X, Types...>::pos;
         new(storage) X(x);
     }
 
+    template<typename X>
+    void init(X&& x) {
+        _tag = impl::position<X, Types...>::pos;
+        new(storage) X( std::move(x) );
+    }
+
     template<typename StaticVariant>
-    friend struct copy_construct;
+    friend struct impl::copy_construct;
+    template<typename StaticVariant>
+    friend struct impl::move_construct;
 public:
     template<typename X>
     struct tag
@@ -204,7 +226,16 @@ public:
     template<typename... Other>
     static_variant( const static_variant<Other...>& cpy )
     {
-       cpy.apply( impl::copy_construct<static_variant<Types...>>(*this) );
+       cpy.visit( impl::copy_construct<static_variant>(*this) );
+    }
+    static_variant( const static_variant& cpy )
+    {
+       cpy.visit( impl::copy_construct<static_variant>(*this) );
+    }
+
+    static_variant( static_variant&& mv )
+    {
+       mv.visit( impl::move_construct<static_variant>(*this) );
     }
 
     template<typename X>
@@ -216,17 +247,35 @@ public:
         init(v);
     }
     ~static_variant() {
-        impl::storage_ops<0, Types...>::del(_tag, storage);
+       impl::storage_ops<0, Types...>::del(_tag, storage);
     }
+
+
     template<typename X>
-    void operator=(const X& v) {
+    static_variant& operator=(const X& v) {
         static_assert(
             impl::position<X, Types...>::pos != -1,
             "Type not in static_variant."
         );
         this->~static_variant();
         init(v);
+        return *this;
     }
+    static_variant& operator=( const static_variant& v )
+    {
+       if( this == &v ) return *this;
+       this->~static_variant();
+       v.visit( impl::copy_construct<static_variant>(*this) );
+       return *this;
+    }
+    static_variant& operator=( static_variant&& v )
+    {
+       if( this == &v ) return *this;
+       this->~static_variant();
+       v.visit( impl::move_construct<static_variant>(*this) );
+       return *this;
+    }
+
     template<typename X>
     X& get() {
         static_assert(
@@ -274,8 +323,8 @@ public:
     typename visitor::result_type visit(const visitor& v)const {
         return impl::storage_ops<0, Types...>::apply(_tag, storage, v);
     }
-    
-     void set_which( int w ) { 
+
+     void set_which( int w ) {
        this->~static_variant();
            impl::storage_ops<0, Types...>::con(_tag, storage);
      }

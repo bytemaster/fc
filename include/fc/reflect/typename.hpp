@@ -24,6 +24,13 @@ namespace fc {
   template<> struct get_typename<value>    { static const char* name()   { return "value";   } };
   template<> struct get_typename<fc::exception>   { static const char* name()   { return "fc::exception";   } };
   template<> struct get_typename<std::vector<char>>   { static const char* name()   { return "std::vector<char>";   } };
+  template<typename T> struct get_typename<std::vector<T>>   
+  { 
+     static const char* name()  { 
+         static std::string n = std::string("std::vector<") + get_typename<T>::name() + ">"; 
+         return n.c_str();  
+     } 
+  };
 
   struct signed_int;
   struct unsigned_int;

@@ -348,7 +348,7 @@ struct visitor {
       typedef void result_type;
       template<typename T> void operator()( T& v )const
       {
-         to_variant( var, v ); 
+         from_variant( var, v ); 
       }
    };
 
@@ -364,9 +364,8 @@ struct visitor {
    template<typename... T> void from_variant( const fc::variant& v, fc::static_variant<T...>& s )
    {
       auto ar = v.get_array();
-      if( ar.size() ) return;
+      if( ar.size() < 2 ) return;
       s.set_which( ar[0].as_uint64() );
-      if( ar.size() < 1 ) return;
       s.visit( to_static_variant(ar[1]) );
    }
 

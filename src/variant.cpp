@@ -384,7 +384,7 @@ int64_t variant::as_int64()const
 }
 
 uint64_t variant::as_uint64()const
-{
+{ try {
    switch( get_type() )
    {
       case string_type:
@@ -402,7 +402,7 @@ uint64_t variant::as_uint64()const
       default:
          FC_THROW_EXCEPTION( bad_cast_exception,"Invalid cast from ${type} to uint64", ("type",get_type()));
    }
-}
+} FC_CAPTURE_AND_RETHROW( (*this) ) }
 
 
 double  variant::as_double()const

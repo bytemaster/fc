@@ -80,7 +80,7 @@ struct storage_ops<N, T, Ts...> {
     }
     static void con(int n, void *data) {
         if(n == N) new(reinterpret_cast<T*>(data)) T();
-        else storage_ops<N + 1, Ts...>::del(n, data);
+        else storage_ops<N + 1, Ts...>::con(n, data);
     }
 
     template<typename visitor>
@@ -316,7 +316,8 @@ public:
 
      void set_which( int w ) {
        this->~static_variant();
-           impl::storage_ops<0, Types...>::con(_tag, storage);
+       _tag = w;
+       impl::storage_ops<0, Types...>::con(_tag, storage);
      }
 
      int which() const {return _tag;}

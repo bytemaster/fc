@@ -9,7 +9,6 @@
 #include <map>
 #include <set>
 #include <fc/container/flat_fwd.hpp>
-#include <fc/static_variant.hpp>
 
 namespace fc
 {
@@ -33,6 +32,8 @@ namespace fc
    class time_point_sec;
    class microseconds;
    template<typename T> struct safe;
+   template<typename... Types>
+   class static_variant;
 
    struct blob { std::vector<char> data; };
 
@@ -502,47 +503,6 @@ namespace fc
       }
    }
 
-   struct from_static_variant 
-   {
-      variant& var;
-      from_static_variant( variant& dv ):var(dv){}
-
-      typedef void result_type;
-      template<typename T> void operator()( const T& v )const
-      {
-         to_variant( v, var );
-      }
-   };
-
-   struct to_static_variant
-   {
-      const variant& var;
-      to_static_variant( const variant& dv ):var(dv){}
-
-      typedef void result_type;
-      template<typename T> void operator()( T& v )const
-      {
-         to_variant( var, v ); 
-      }
-   };
-
-
-   template<typename... T> void to_variant( const fc::static_variant<T...>& s, fc::variant& v )
-   {
-      variant tmp;
-      variants vars(2);
-      vars[0] = s.which();
-      s.visit( from_static_variant(vars[1]) );
-      v = std::move(vars);
-   }
-   template<typename... T> void from_variant( const fc::variant& v, fc::static_variant<T...>& s )
-   {
-      auto ar = v.get_array();
-      if( ar.size() ) return;
-      s.set_which( ar[0].as_uint64() );
-      if( ar.size() < 1 ) return;
-      s.visit( to_static_variant(ar[1]) );
-   }
 
    template<typename T>
    void to_variant( const safe<T>& s, variant& v ) { v = s.value; }

@@ -9,8 +9,10 @@
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  **/
+#pragma once
 #include <stdexcept>
 #include <typeinfo>
+#include <fc/exception/exception.hpp>
 
 namespace fc {
 
@@ -109,39 +111,27 @@ struct storage_ops<N, T, Ts...> {
 template<int N>
 struct storage_ops<N> {
     static void del(int n, void *data) {
-        throw std::runtime_error(
-            "Internal error: static_variant tag is invalid."
-        );
+        FC_ASSERT( !"Internal error: static_variant tag is invalid.");
     }
     static void con(int n, void *data) {
-        throw std::runtime_error(
-            "Internal error: static_variant tag is invalid."
-        );
+       FC_ASSERT( !"Internal error: static_variant tag is invalid." );
     }
 
     template<typename visitor>
     static typename visitor::result_type apply(int n, void *data, visitor& v) {
-        throw std::runtime_error(
-            "Internal error: static_variant tag is invalid."
-        );
+       FC_ASSERT( !"Internal error: static_variant tag is invalid." );
     }
     template<typename visitor>
     static typename visitor::result_type apply(int n, void *data, const visitor& v) {
-        throw std::runtime_error(
-            "Internal error: static_variant tag is invalid."
-        );
+       FC_ASSERT( !"Internal error: static_variant tag is invalid." );
     }
     template<typename visitor>
     static typename visitor::result_type apply(int n, const void *data, visitor& v) {
-        throw std::runtime_error(
-            "Internal error: static_variant tag is invalid."
-        );
+       FC_ASSERT( !"Internal error: static_variant tag is invalid." );
     }
     template<typename visitor>
     static typename visitor::result_type apply(int n, const void *data, const visitor& v) {
-        throw std::runtime_error(
-            "Internal error: static_variant tag is invalid."
-        );
+       FC_ASSERT( !"Internal error: static_variant tag is invalid." );
     }
 };
 
@@ -285,9 +275,10 @@ public:
         if(_tag == impl::position<X, Types...>::pos) {
             return *reinterpret_cast<X*>(storage);
         } else {
-            throw std::runtime_error(
-                std::string("static_variant does not contain value of type ") + typeid(X).name()
-            );
+            FC_ASSERT( !"static_variant does not contain a value of type",
+                       "type ${t}", ("t",fc::get_typename<X>::name()) );
+           //     std::string("static_variant does not contain value of type ") + typeid(X).name()
+           // );
         }
     }
     template<typename X>
@@ -299,9 +290,8 @@ public:
         if(_tag == impl::position<X, Types...>::pos) {
             return *reinterpret_cast<const X*>(storage);
         } else {
-            throw std::runtime_error(
-                std::string("static_variant does not contain value of type ") + typeid(X).name()
-            );
+            FC_ASSERT( !"static_variant does not contain a value of type",
+                       "type ${t}", ("t",fc::get_typename<X>::name()) );
         }
     }
     template<typename visitor>
@@ -336,5 +326,47 @@ template<typename Result>
 struct visitor {
     typedef Result result_type;
 };
+
+   struct from_static_variant 
+   {
+      variant& var;
+      from_static_variant( variant& dv ):var(dv){}
+
+      typedef void result_type;
+      template<typename T> void operator()( const T& v )const
+      {
+         to_variant( v, var );
+      }
+   };
+
+   struct to_static_variant
+   {
+      const variant& var;
+      to_static_variant( const variant& dv ):var(dv){}
+
+      typedef void result_type;
+      template<typename T> void operator()( T& v )const
+      {
+         to_variant( var, v ); 
+      }
+   };
+
+
+   template<typename... T> void to_variant( const fc::static_variant<T...>& s, fc::variant& v )
+   {
+      variant tmp;
+      variants vars(2);
+      vars[0] = s.which();
+      s.visit( from_static_variant(vars[1]) );
+      v = std::move(vars);
+   }
+   template<typename... T> void from_variant( const fc::variant& v, fc::static_variant<T...>& s )
+   {
+      auto ar = v.get_array();
+      if( ar.size() ) return;
+      s.set_which( ar[0].as_uint64() );
+      if( ar.size() < 1 ) return;
+      s.visit( to_static_variant(ar[1]) );
+   }
 
 } // namespace fc

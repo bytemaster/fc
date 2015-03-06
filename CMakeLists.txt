@@ -24,6 +24,7 @@ SET( DEFAULT_LIBRARY_INSTALL_DIR lib/ )
 SET( DEFAULT_EXECUTABLE_INSTALL_DIR bin/ )
 SET( CMAKE_DEBUG_POSTFIX _debug )
 SET( BUILD_SHARED_LIBS NO )
+SET( ECC_IMPL openssl ) # openssl or secp256k1
 
 set(platformBitness 32)
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
@@ -150,7 +151,7 @@ set( fc_sources
      src/crypto/sha512.cpp
      src/crypto/dh.cpp
      src/crypto/blowfish.cpp
-     src/crypto/elliptic.cpp
+     src/crypto/elliptic_${ECC_IMPL}.cpp
      src/crypto/rand.cpp
      src/crypto/salsa20.cpp
      #src/crypto/scrypt.cpp

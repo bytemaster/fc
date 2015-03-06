@@ -44,10 +44,12 @@
 #include <stdlib.h>  // for size_t.
 #include <stdint.h>
 #include <utility>
-#include <fc/uint128.hpp>
-#include <fc/array.hpp>
 
 namespace fc {
+
+class uint128;
+template<typename T, size_t N>
+class array;
 
 // Hash function for a byte array.
 uint64_t city_hash64(const char *buf, size_t len);

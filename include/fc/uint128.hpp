@@ -4,25 +4,26 @@
 #include <string>
 
 #include <fc/exception/exception.hpp>
+#include <fc/crypto/city.hpp>
 
 #ifdef _MSC_VER
   #pragma warning (push)
   #pragma warning (disable : 4244)
 #endif //// _MSC_VER
 
-namespace fc 
+namespace fc
 {
   class bigint;
   /**
    *  @brief an implementation of 128 bit unsigned integer
    *
    */
-  class uint128 
+  class uint128
   {
 
 
      public:
-      uint128():hi(0),lo(0){};
+      uint128():hi(0),lo(0){}
       uint128( uint32_t l ):hi(0),lo(l){}
       uint128( int32_t l ):hi( -(l<0) ),lo(l){}
       uint128( int64_t l ):hi( -(l<0) ),lo(l){}
@@ -44,7 +45,7 @@ namespace fc
 
       uint128& operator++()    {  hi += (++lo == 0); return *this; }
       uint128& operator--()    {  hi -= (lo-- == 0); return *this; }
-      uint128  operator++(int) { auto tmp = *this; ++(*this); return tmp; } 
+      uint128  operator++(int) { auto tmp = *this; ++(*this); return tmp; }
       uint128  operator--(int) { auto tmp = *this; --(*this); return tmp; }
 
       uint128& operator |= ( const uint128& u ) { hi |= u.hi; lo |= u.lo; return *this; }
@@ -76,6 +77,8 @@ namespace fc
       friend bool    operator >=  ( const uint128& l, const uint128& r ) { return l == r || l > r; }
       friend bool    operator <=  ( const uint128& l, const uint128& r ) { return l == r || l < r; }
 
+      friend std::size_t hash_value( const uint128& v ) { return city_hash_size_t((const char*)&v, sizeof(v)); }
+
       uint32_t to_integer()const
       {
           FC_ASSERT( hi == 0 );
@@ -102,7 +105,7 @@ namespace fc
       private:
           uint64_t hi;
           uint64_t lo;
-      
+
   };
   static_assert( sizeof(uint128) == 2*sizeof(uint64_t), "validate packing assumptions" );
 
@@ -113,7 +116,7 @@ namespace fc
   void to_variant( const uint128& var,  variant& vo );
   void from_variant( const variant& var,  uint128& vo );
 
-  namespace raw  
+  namespace raw
   {
     template<typename Stream>
     inline void pack( Stream& s, const uint128& u ) { s.write( (char*)&u, sizeof(u) ); }

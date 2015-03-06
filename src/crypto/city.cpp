@@ -33,6 +33,8 @@
 #include <algorithm>
 #include <string.h>  // for memcpy and memset
 #include <fc/crypto/city.hpp>
+#include <fc/uint128.hpp>
+#include <fc/array.hpp>
 
 #if defined(__SSE4_2__) && defined(__x86_64__)
 #include <nmmintrin.h>

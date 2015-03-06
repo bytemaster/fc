@@ -56,7 +56,7 @@ namespace fc { namespace ecc {
           EC_KEY* _key;
       };
     }
-    void * ecies_key_derivation(const void *input, size_t ilen, void *output, size_t *olen)
+    static void * ecies_key_derivation(const void *input, size_t ilen, void *output, size_t *olen)
     {
         if (*olen < SHA512_DIGEST_LENGTH) {
           return NULL;
@@ -68,7 +68,7 @@ namespace fc { namespace ecc {
     // Perform ECDSA key recovery (see SEC1 4.1.6) for curves over (mod p)-fields
     // recid selects which key is recovered
     // if check is non-zero, additional checks are performed
-    int ECDSA_SIG_recover_key_GFp(EC_KEY *eckey, ECDSA_SIG *ecsig, const unsigned char *msg, int msglen, int recid, int check)
+    static int ECDSA_SIG_recover_key_GFp(EC_KEY *eckey, ECDSA_SIG *ecsig, const unsigned char *msg, int msglen, int recid, int check)
     {
         if (!eckey) FC_THROW_EXCEPTION( exception, "null key" );
 

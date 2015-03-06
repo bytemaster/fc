@@ -64,6 +64,7 @@ class sha224
     friend bool   operator >= ( const sha224& h1, const sha224& h2 );
     friend bool   operator >  ( const sha224& h1, const sha224& h2 ); 
     friend bool   operator <  ( const sha224& h1, const sha224& h2 ); 
+    friend std::size_t hash_value( const sha224& v ) { return ((std::size_t*)v._hash)[1]; }
                              
     uint32_t _hash[7]; 
 };

@@ -1,5 +1,6 @@
 #pragma once
 #include <fc/crypto/bigint.hpp>
+#include <fc/crypto/openssl.hpp>
 #include <fc/crypto/sha256.hpp>
 #include <fc/crypto/sha512.hpp>
 #include <fc/fwd.hpp>
@@ -43,7 +44,7 @@ namespace fc {
            public_key( const compact_signature& c, const fc::sha256& digest, bool check_canonical = true );
 
            bool valid()const;
-           public_key mult( const fc::sha256& offset );
+           public_key mult( const fc::sha256& offset )const;
            public_key add( const fc::sha256& offset )const;
 
            public_key( public_key&& pk );
@@ -61,10 +62,13 @@ namespace fc {
 
            /// Allows to convert current public key object into base58 number.
            std::string to_base58() const;
+           static std::string to_base58( const public_key_data &key );
            static public_key from_base58( const std::string& b58 );
 
         private:
           friend class private_key;
+          static public_key from_key_data( const public_key_data& v );
+          static void is_canonical( const compact_signature& c );
           fc::fwd<detail::public_key_impl,8> my;
     };
 
@@ -123,6 +127,8 @@ namespace fc {
            }
 
         private:
+           private_key( EC_KEY* k );
+           static fc::sha256 get_secret( const EC_KEY * const k );
            fc::fwd<detail::private_key_impl,8> my;
     };
   } // namespace ecc

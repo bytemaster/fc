@@ -24,7 +24,7 @@ SET( DEFAULT_LIBRARY_INSTALL_DIR lib/ )
 SET( DEFAULT_EXECUTABLE_INSTALL_DIR bin/ )
 SET( CMAKE_DEBUG_POSTFIX _debug )
 SET( BUILD_SHARED_LIBS NO )
-SET( ECC_IMPL openssl ) # openssl or secp256k1
+SET( ECC_IMPL secp256k1 ) # openssl or secp256k1
 
 set(platformBitness 32)
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
@@ -36,6 +36,10 @@ SET (ORIGINAL_LIB_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES})
 SET(BOOST_COMPONENTS)
 LIST(APPEND BOOST_COMPONENTS thread date_time system filesystem program_options signals serialization chrono unit_test_framework context locale iostreams)
 SET( Boost_USE_STATIC_LIBS ON CACHE STRING "ON or OFF" )
+
+IF( ECC_IMPL STREQUAL secp256k1 )
+SET( ECC_LIB secp256k1 )
+ENDIF( ECC_IMPL STREQUAL secp256k1 )
 
 IF( WIN32 )
   MESSAGE(STATUS "Configuring fc to build on Win32")
@@ -151,6 +155,7 @@ set( fc_sources
      src/crypto/sha512.cpp
      src/crypto/dh.cpp
      src/crypto/blowfish.cpp
+     src/crypto/elliptic_common.cpp
      src/crypto/elliptic_${ECC_IMPL}.cpp
      src/crypto/rand.cpp
      src/crypto/salsa20.cpp
@@ -257,7 +262,7 @@ target_include_directories(fc
   )
 
 #target_link_libraries( fc PUBLIC easylzma_static scrypt udt ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} ${ZLIB_LIBRARIES} ${PLATFORM_SPECIFIC_LIBS} ${RPCRT4} ${CMAKE_DL_LIBS} ${rt_library})
-target_link_libraries( fc PUBLIC easylzma_static udt ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} ${ZLIB_LIBRARIES} ${PLATFORM_SPECIFIC_LIBS} ${RPCRT4} ${CMAKE_DL_LIBS} ${rt_library} ${readline_libraries})
+target_link_libraries( fc PUBLIC easylzma_static udt ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} ${ZLIB_LIBRARIES} ${PLATFORM_SPECIFIC_LIBS} ${RPCRT4} ${CMAKE_DL_LIBS} ${rt_library} ${readline_libraries} ${ECC_LIB})
 
 IF(NOT Boost_UNIT_TEST_FRAMEWORK_LIBRARY MATCHES "\\.(a|lib)$")
 IF(WIN32)

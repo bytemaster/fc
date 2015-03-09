@@ -27,29 +27,124 @@ namespace fc { namespace ecc {
       class public_key_impl
       {
         public:
-          public_key_impl()
+          public_key_impl() : _key(nullptr)
           {
               init_lib();
           }
 
           public_key_impl( const public_key_impl& cpy )
           {
-            _key = cpy._key;
+              init_lib();
+              _key = nullptr;
+              *this = cpy;
           }
-          public_key_data _key;
+
+          public_key_impl( public_key_impl&& cpy )
+          {
+              init_lib();
+              _key = nullptr;
+              *this = cpy;
+          }
+
+          ~public_key_impl()
+          {
+            if( _key != nullptr )
+            {
+              delete _key;
+              _key = nullptr;
+            }
+          }
+
+          public_key_impl& operator=( const public_key_impl& pk )
+          {
+              if (pk._key == nullptr)
+              {
+                  if (_key != nullptr)
+                  {
+                      delete _key;
+                      _key = nullptr;
+                  }
+              } else if ( _key == nullptr ) {
+                  _key = new public_key_data(*pk._key);
+              } else {
+                  *_key = *pk._key;
+              }
+              return *this;
+          }
+
+          public_key_impl& operator=( public_key_impl&& pk )
+          {
+              if (_key != nullptr)
+              {
+                  delete _key;
+              }
+              _key = pk._key;
+              pk._key = nullptr;
+              return *this;
+          }
+
+          public_key_data *_key;
       };
       class private_key_impl
       {
         public:
-          private_key_impl()
+          private_key_impl() : _key(nullptr)
           {
               init_lib();
           }
+
           private_key_impl( const private_key_impl& cpy )
           {
-            _key = cpy._key;
+              init_lib();
+              _key = nullptr;
+              *this = cpy;
           }
-          private_key_secret _key;
+
+          private_key_impl( private_key_impl&& cpy )
+          {
+              init_lib();
+              _key = nullptr;
+              *this = cpy;
+          }
+
+          ~private_key_impl()
+          {
+            if( _key != nullptr )
+            {
+               delete _key;
+              _key = nullptr;
+            }
+          }
+
+          private_key_impl& operator=( const private_key_impl& pk )
+          {
+              if (pk._key == nullptr)
+              {
+                  if (_key != nullptr)
+                  {
+                      delete _key;
+                      _key = nullptr;
+                  }
+              } else if ( _key == nullptr ) {
+                  _key = new private_key_secret(*pk._key);
+              } else {
+                  *_key = *pk._key;
+              }
+              return *this;
+          }
+
+          private_key_impl& operator=( private_key_impl&& pk )
+          {
+              if (_key != nullptr)
+              {
+                  delete _key;
+              }
+              _key = pk._key;
+              pk._key = nullptr;
+              return *this;
+          }
+
+          private_key_secret *_key;
       };
     }
 //    static void * ecies_key_derivation(const void *input, size_t ilen, void *output, size_t *olen)
@@ -174,30 +269,33 @@ namespace fc { namespace ecc {
         return public_key(data);
     }
 
-    public_key public_key::mult( const fc::sha256& digest )const
-    {
-        public_key_data new_key;
-        memcpy( new_key.begin(), my->_key.begin(), new_key.size() );
-        FC_ASSERT( secp256k1_ec_pubkey_tweak_mul( (unsigned char*) new_key.begin(), new_key.size(), (unsigned char*) digest.data() ) );
-        return public_key( new_key );
-    }
+//    public_key public_key::mult( const fc::sha256& digest )const
+//    {
+//        FC_ASSERT( my->_key != nullptr );
+//        public_key_data new_key;
+//        memcpy( new_key.begin(), my->_key->begin(), new_key.size() );
+//        FC_ASSERT( secp256k1_ec_pubkey_tweak_mul( (unsigned char*) new_key.begin(), new_key.size(), (unsigned char*) digest.data() ) );
+//        return public_key( new_key );
+//    }
 
     bool       public_key::valid()const
     {
-      return my->_key != detail::empty_key;
+      return my->_key != nullptr;
     }
 
     public_key public_key::add( const fc::sha256& digest )const
     {
+        FC_ASSERT( my->_key != nullptr );
         public_key_data new_key;
-        memcpy( new_key.begin(), my->_key.begin(), new_key.size() );
+        memcpy( new_key.begin(), my->_key->begin(), new_key.size() );
         FC_ASSERT( secp256k1_ec_pubkey_tweak_add( (unsigned char*) new_key.begin(), new_key.size(), (unsigned char*) digest.data() ) );
         return public_key( new_key );
     }
 
     std::string public_key::to_base58() const
     {
-      return to_base58( my->_key );
+        FC_ASSERT( my->_key != nullptr );
+        return to_base58( *my->_key );
     }
 
     private_key::private_key()
@@ -206,30 +304,33 @@ namespace fc { namespace ecc {
     private_key private_key::regenerate( const fc::sha256& secret )
     {
        private_key self;
-       self.my->_key = secret;
+       self.my->_key = new private_key_secret(secret);
        return self;
     }
 
     fc::sha256 private_key::get_secret()const
     {
-       return my->_key;
+        FC_ASSERT( my->_key != nullptr );
+        return *my->_key;
     }
 
     private_key::private_key( EC_KEY* k )
     {
-       my->_key = get_secret( k );
+       my->_key = new private_key_secret( get_secret( k ) );
        EC_KEY_free(k);
     }
 
     public_key_data public_key::serialize()const
     {
-        return my->_key;
+        FC_ASSERT( my->_key != nullptr );
+        return *my->_key;
     }
     public_key_point_data public_key::serialize_ecc_point()const
     {
+      FC_ASSERT( my->_key != nullptr );
       public_key_point_data dat;
-      memcpy( dat.begin(), my->_key.begin(), my->_key.size() );
-      unsigned int pk_len = my->_key.size();
+      unsigned int pk_len = my->_key->size();
+      memcpy( dat.begin(), my->_key->begin(), pk_len );
       FC_ASSERT( secp256k1_ec_pubkey_decompress( (unsigned char *) dat.begin(), (int*) &pk_len ) );
       FC_ASSERT( pk_len == dat.size() );
       return dat;
@@ -243,43 +344,44 @@ namespace fc { namespace ecc {
     {
     }
 
-    // FIXME
     public_key::public_key( const public_key_point_data& dat )
     {
       const char* front = &dat.data[0];
       if( *front == 0 ){}
       else
       {
-//         my->_key = o2i_ECPublicKey( &my->_key, (const unsigned char**)&front, sizeof(dat)  );
-//         if( !my->_key )
-//         {
-//           FC_THROW_EXCEPTION( exception, "error decoding public key", ("s", ERR_error_string( ERR_get_error(), nullptr) ) );
-//         }
+         EC_KEY *key = o2i_ECPublicKey( nullptr, (const unsigned char**)&front, sizeof(dat) );
+         FC_ASSERT( key );
+         EC_KEY_set_conv_form( key, POINT_CONVERSION_COMPRESSED );
+         my->_key = new public_key_data();
+         i2o_ECPublicKey( key, (unsigned char**)&my->_key->data );
+         EC_KEY_free( key );
       }
     }
 
     public_key::public_key( const public_key_data& dat )
     {
-        my->_key = dat;
+        my->_key = new public_key_data(dat);
     }
 
     public_key private_key::get_public_key()const
     {
-       public_key pub;
+       FC_ASSERT( my->_key != nullptr );
+       public_key_data pub;
        unsigned int pk_len;
-       FC_ASSERT( secp256k1_ec_pubkey_create( (unsigned char*) pub.my->_key.begin(), (int*) &pk_len, (unsigned char*) my->_key.data(), 1 ) );
-       FC_ASSERT( pk_len == pub.my->_key.size() );
-       return pub;
+       FC_ASSERT( secp256k1_ec_pubkey_create( (unsigned char*) pub.begin(), (int*) &pk_len, (unsigned char*) my->_key->data(), 1 ) );
+       FC_ASSERT( pk_len == pub.size() );
+       return public_key(pub);
     }
 
-    // FIXME
     fc::sha512 private_key::get_shared_secret( const public_key& other )const
     {
-//      FC_ASSERT( my->_key != nullptr );
-//      FC_ASSERT( other.my->_key != nullptr );
-      fc::sha512 buf;
+      FC_ASSERT( my->_key != nullptr );
+      FC_ASSERT( other.my->_key != nullptr );
+      public_key_data pub(*other.my->_key);
+      FC_ASSERT( secp256k1_ec_pubkey_tweak_mul( (unsigned char*) pub.begin(), pub.size(), (unsigned char*) my->_key->data() ) );
 //      ECDH_compute_key( (unsigned char*)&buf, sizeof(buf), EC_KEY_get0_public_key(other.my->_key), my->_key, ecies_key_derivation );
-      return buf;
+      return fc::sha512::hash( pub.begin() + 1, pub.size() - 1 );
     }
 
     private_key::~private_key()
@@ -294,24 +396,31 @@ namespace fc { namespace ecc {
 
         if( check_canonical )
         {
-            is_canonical( c );
+            FC_ASSERT( is_canonical( c ), "signature is not canonical" );
         }
 
+        my->_key = new public_key_data();
         unsigned int pk_len;
-        FC_ASSERT( secp256k1_ecdsa_recover_compact( (unsigned char*) digest.data(), (unsigned char*) c.begin() + 1, (unsigned char*) my->_key.begin(), (int*) &pk_len, 1, (*c.begin() - 27) & 3 ) );
-        FC_ASSERT( pk_len == my->_key.size() );
+        FC_ASSERT( secp256k1_ecdsa_recover_compact( (unsigned char*) digest.data(), (unsigned char*) c.begin() + 1, (unsigned char*) my->_key->begin(), (int*) &pk_len, 1, (*c.begin() - 27) & 3 ) );
+        FC_ASSERT( pk_len == my->_key->size() );
     }
 
     compact_signature private_key::sign_compact( const fc::sha256& digest )const
     {
+        FC_ASSERT( my->_key != nullptr );
         compact_signature result;
-        FC_ASSERT( secp256k1_ecdsa_sign_compact( (unsigned char*) digest.data(), (unsigned char*) result.begin(), (unsigned char*) my->_key.data(), NULL, NULL, NULL ));
+        int recid;
+        do
+        {
+            FC_ASSERT( secp256k1_ecdsa_sign_compact( (unsigned char*) digest.data(), (unsigned char*) result.begin() + 1, (unsigned char*) my->_key->data(), NULL, NULL, &recid ));
+        } while( !public_key::is_canonical( result ) );
+        result.begin()[0] = 27 + 4 + recid;
         return result;
     }
 
-   private_key& private_key::operator=( private_key&& pk )
+    private_key& private_key::operator=( private_key&& pk )
    {
-     my->_key = pk.my->_key;
+     my = std::move(pk.my);
      return *this;
    }
    public_key::public_key( const public_key& pk )
@@ -319,7 +428,7 @@ namespace fc { namespace ecc {
    {
    }
    public_key::public_key( public_key&& pk )
-   :my( fc::move( pk.my) )
+   :my( std::move(pk.my) )
    {
    }
    private_key::private_key( const private_key& pk )
@@ -327,23 +436,23 @@ namespace fc { namespace ecc {
    {
    }
    private_key::private_key( private_key&& pk )
-   :my( fc::move( pk.my) )
+   :my( std::move( pk.my) )
    {
    }
 
    public_key& public_key::operator=( public_key&& pk )
    {
-     my->_key = pk.my->_key;
+     my = std::move(pk.my);
      return *this;
    }
    public_key& public_key::operator=( const public_key& pk )
    {
-     my->_key = pk.my->_key;
+     my = pk.my;
      return *this;
    }
    private_key& private_key::operator=( const private_key& pk )
    {
-     my->_key = pk.my->_key;
+     my = pk.my;
      return *this;
    }
 }

@@ -178,29 +178,32 @@ namespace fc { namespace ecc {
         return public_key(data);
     }
 
-    public_key public_key::mult( const fc::sha256& digest ) const
-    {
-        // get point from this public key
-        const EC_POINT* master_pub   = EC_KEY_get0_public_key( my->_key );
-        ec_group group(EC_GROUP_new_by_curve_name(NID_secp256k1));
-
-        ssl_bignum z;
-        BN_bin2bn((unsigned char*)&digest, sizeof(digest), z);
-
-        // multiply by digest
-        ssl_bignum one;
-        BN_one(one);
-        bn_ctx ctx(BN_CTX_new());
-
-        ec_point result(EC_POINT_new(group));
-        EC_POINT_mul(group, result, z, master_pub, one, ctx);
-
-        public_key rtn;
-        rtn.my->_key = EC_KEY_new_by_curve_name( NID_secp256k1 );
-        EC_KEY_set_public_key(rtn.my->_key,result);
-
-        return rtn;
-    }
+    /* WARNING! This implementation is broken, it is actually equivalent to
+     * public_key::add()!
+     */
+//    public_key public_key::mult( const fc::sha256& digest ) const
+//    {
+//        // get point from this public key
+//        const EC_POINT* master_pub   = EC_KEY_get0_public_key( my->_key );
+//        ec_group group(EC_GROUP_new_by_curve_name(NID_secp256k1));
+//
+//        ssl_bignum z;
+//        BN_bin2bn((unsigned char*)&digest, sizeof(digest), z);
+//
+//        // multiply by digest
+//        ssl_bignum one;
+//        BN_one(one);
+//        bn_ctx ctx(BN_CTX_new());
+//
+//        ec_point result(EC_POINT_new(group));
+//        EC_POINT_mul(group, result, z, master_pub, one, ctx);
+//
+//        public_key rtn;
+//        rtn.my->_key = EC_KEY_new_by_curve_name( NID_secp256k1 );
+//        EC_KEY_set_public_key(rtn.my->_key,result);
+//
+//        return rtn;
+//    }
     bool       public_key::valid()const
     {
       return my->_key != nullptr;
@@ -227,12 +230,12 @@ namespace fc { namespace ecc {
         // get point from this public key
         const EC_POINT* master_pub   = EC_KEY_get0_public_key( my->_key );
 
-        ssl_bignum z;
-        BN_bin2bn((unsigned char*)&digest, sizeof(digest), z);
+//        ssl_bignum z;
+//        BN_bin2bn((unsigned char*)&digest, sizeof(digest), z);
 
         // multiply by digest
-        ssl_bignum one;
-        BN_one(one);
+//        ssl_bignum one;
+//        BN_one(one);
 
         ec_point result(EC_POINT_new(group));
         EC_POINT_add(group, result, digest_point, master_pub, ctx);
@@ -409,7 +412,7 @@ namespace fc { namespace ecc {
 
         if( check_canonical )
         {
-            is_canonical( c );
+            FC_ASSERT( is_canonical( c ), "signature is not canonical" );
         }
 
         my->_key = EC_KEY_new_by_curve_name(NID_secp256k1);

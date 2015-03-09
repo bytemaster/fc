@@ -33,11 +33,11 @@ namespace fc { namespace ecc {
         return from_key_data(key);
     }
 
-    void public_key::is_canonical( const compact_signature& c ) {
-        FC_ASSERT( !(c.data[1] & 0x80), "signature is not canonical" );
-        FC_ASSERT( !(c.data[1] == 0 && !(c.data[2] & 0x80)), "signature is not canonical" );
-        FC_ASSERT( !(c.data[33] & 0x80), "signature is not canonical" );
-        FC_ASSERT( !(c.data[33] == 0 && !(c.data[34] & 0x80)), "signature is not canonical" );
+    bool public_key::is_canonical( const compact_signature& c ) {
+        return !(c.data[1] & 0x80)
+               && !(c.data[1] == 0 && !(c.data[2] & 0x80))
+               && !(c.data[33] & 0x80)
+               && !(c.data[33] == 0 && !(c.data[34] & 0x80));
     }
 
     private_key private_key::generate_from_seed( const fc::sha256& seed, const fc::sha256& offset )

@@ -34,9 +34,13 @@ static void interop_do(const fc::ecc::public_key_point_data &data) {
     interop_do(data.begin(), data.size());
 }
 
-//static void interop_do(const fc::ecc::signature &data) {
-//    interop_do(data.begin(), data.size());
-//}
+static void interop_do(const std::string &data) {
+    interop_do(data.c_str(), data.length());
+}
+
+static void interop_do(const fc::sha512 &data) {
+    interop_do(data.data(), 64);
+}
 
 static void interop_do(fc::ecc::compact_signature &data) {
     if (write_mode) {
@@ -79,11 +83,19 @@ int main( int argc, char** argv )
 
    pass += "1";
    fc::sha256   h2            = fc::sha256::hash( pass.c_str(), pass.size() );
-   fc::ecc::public_key  pub1  = pub.mult( h2 );
+   fc::ecc::public_key  pub1  = pub.add( h2 );
    interop_do(pub1.serialize());
    interop_do(pub1.serialize_ecc_point());
    fc::ecc::private_key priv1 = fc::ecc::private_key::generate_from_seed(h, h2);
    interop_do(priv1.get_secret());
+
+   std::string b58 = pub1.to_base58();
+   interop_do(b58);
+   fc::ecc::public_key pub2 = fc::ecc::public_key::from_base58(b58);
+   FC_ASSERT( pub1 == pub2 );
+
+   fc::sha512 shared = priv1.get_shared_secret( pub );
+   interop_do(shared);
 
    auto sig = priv.sign_compact( h );
    interop_do(sig);

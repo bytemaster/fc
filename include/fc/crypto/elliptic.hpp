@@ -44,7 +44,10 @@ namespace fc {
            public_key( const compact_signature& c, const fc::sha256& digest, bool check_canonical = true );
 
            bool valid()const;
-           public_key mult( const fc::sha256& offset )const;
+           /** Computes new pubkey = generator * offset + old pubkey ?! */
+//           public_key mult( const fc::sha256& offset )const;
+           /** Computes new pubkey = regenerate(offset).pubkey + old pubkey
+            *                      = offset * G + 1 * old pubkey ?! */
            public_key add( const fc::sha256& offset )const;
 
            public_key( public_key&& pk );
@@ -68,7 +71,7 @@ namespace fc {
         private:
           friend class private_key;
           static public_key from_key_data( const public_key_data& v );
-          static void is_canonical( const compact_signature& c );
+          static bool is_canonical( const compact_signature& c );
           fc::fwd<detail::public_key_impl,8> my;
     };
 

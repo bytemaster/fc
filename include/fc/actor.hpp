@@ -1,5 +1,5 @@
 #pragma once
-#include <fc/ptr.hpp>
+#include <fc/api.hpp>
 #include <fc/thread/thread.hpp>
 
 namespace fc {
@@ -50,7 +50,7 @@ namespace fc {
    *  returns a future.
    */
   template<typename Interface>
-  class actor : public ptr<Interface, detail::actor_member> {
+  class actor : public api<Interface, detail::actor_member> {
     public:
       actor(){}
 

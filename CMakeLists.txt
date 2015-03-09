@@ -232,11 +232,15 @@ target_include_directories(fc
 #target_link_libraries( fc PUBLIC easylzma_static scrypt udt ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} ${ZLIB_LIBRARIES} ${PLATFORM_SPECIFIC_LIBS} ${RPCRT4} ${CMAKE_DL_LIBS} ${rt_library})
 target_link_libraries( fc PUBLIC easylzma_static udt ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} ${ZLIB_LIBRARIES} ${PLATFORM_SPECIFIC_LIBS} ${RPCRT4} ${CMAKE_DL_LIBS} ${rt_library})
 
+add_executable( api tests/api.cpp )
+target_link_libraries( api fc )
+
 add_executable( ntp_test ntp_test.cpp )
 target_link_libraries( ntp_test fc )
 
 add_executable( task_cancel_test tests/task_cancel.cpp )
 target_link_libraries( task_cancel_test fc )
+
 
 add_executable( real128_test tests/real128_test.cpp )
 target_link_libraries( real128_test fc )

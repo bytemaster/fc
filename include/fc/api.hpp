@@ -12,17 +12,6 @@ namespace fc {
   
   namespace detail {
     struct identity_member { 
-       #ifdef BOOST_NO_VARIADIC_TEMPLATES
-         #define RPC_MEMBER_FUNCTOR(z,n,IS_CONST) \
-         template<typename R, typename C, typename P BOOST_PP_ENUM_TRAILING_PARAMS( n, typename A)> \
-         static std::function<R( BOOST_PP_ENUM_PARAMS(n,A) ) > \
-             functor( P p, R (C::*mem_func)(BOOST_PP_ENUM_PARAMS(n,A)) IS_CONST ){  \
-           return [=](BOOST_PP_ENUM_BINARY_PARAMS(n,A,a)){ return (p->*mem_func)(BOOST_PP_ENUM_PARAMS(n,a)); }; \
-         } 
-         BOOST_PP_REPEAT( 8, RPC_MEMBER_FUNCTOR, const )
-         BOOST_PP_REPEAT( 8, RPC_MEMBER_FUNCTOR, BOOST_PP_EMPTY() )
-         #undef RPC_MEMBER_FUNCTOR
-       #else
          template<typename R, typename C, typename P, typename... Args>
          static std::function<R(Args...)> functor( P&& p, R (C::*mem_func)(Args...) ) {
            return std::function<R(Args...)>([=](Args... args){ return (p->*mem_func)(args...); });
@@ -31,7 +20,6 @@ namespace fc {
          static std::function<R(Args...)> functor( P&& p, R (C::*mem_func)(Args...)const ) {
            return std::function<R(Args...)>([=](Args... args){ return (p->*mem_func)(args...); });
          }
-       #endif
     };
 
     template< typename Interface, typename Transform = detail::identity_member >
@@ -51,20 +39,20 @@ namespace fc {
   } // namespace detail
 
   template<typename Interface, typename Transform = detail::identity_member >
-  class ptr {
+  class api {
     public:
       typedef detail::vtable<Interface,Transform> vtable_type;
 
-      ptr(){}
+      api(){}
 
       template<typename InterfaceType>
-      ptr( InterfaceType* p )
+      api( InterfaceType* p )
       :_vtable( new vtable_type() ) {
           _vtable->template visit_other<InterfaceType>( detail::vtable_visitor<InterfaceType*>(p) );
       }
 
       template<typename InterfaceType>
-      ptr( const fc::shared_ptr<InterfaceType>& p )
+      api( const fc::shared_ptr<InterfaceType>& p )
       :_vtable( new vtable_type() ),_self(p){ 
           _vtable->template visit_other<InterfaceType>( detail::vtable_visitor<InterfaceType*>(p.get()) );
       }
@@ -86,28 +74,28 @@ namespace fc {
 #include <boost/preprocessor/seq/for_each.hpp>
 #include <boost/preprocessor/stringize.hpp>
 
-#define FC_STUB_VTABLE_DEFINE_MEMBER( r, data, elem ) \
+#define FC_API_VTABLE_DEFINE_MEMBER( r, data, elem ) \
       decltype(Transform::functor( (data*)nullptr, &data::elem)) elem; 
-#define FC_STUB_VTABLE_DEFINE_VISIT_OTHER( r, data, elem ) \
+#define FC_API_VTABLE_DEFINE_VISIT_OTHER( r, data, elem ) \
         v( BOOST_PP_STRINGIZE(elem), elem, &T::elem ); 
-#define FC_STUB_VTABLE_DEFINE_VISIT( r, data, elem ) \
+#define FC_API_VTABLE_DEFINE_VISIT( r, data, elem ) \
         v( BOOST_PP_STRINGIZE(elem), elem ); 
 
-#define FC_STUB( CLASS, METHODS ) \
+#define FC_API( CLASS, METHODS ) \
 namespace fc { namespace detail { \
   template<typename Transform> \
   struct vtable<CLASS,Transform> : public fc::retainable { \
      vtable(){} \
-    BOOST_PP_SEQ_FOR_EACH( FC_STUB_VTABLE_DEFINE_MEMBER, CLASS, METHODS ) \
+    BOOST_PP_SEQ_FOR_EACH( FC_API_VTABLE_DEFINE_MEMBER, CLASS, METHODS ) \
       template<typename T, typename Visitor> \
       void visit_other( Visitor&& v ){ \
-        BOOST_PP_SEQ_FOR_EACH( FC_STUB_VTABLE_DEFINE_VISIT_OTHER, CLASS, METHODS ) \
+        BOOST_PP_SEQ_FOR_EACH( FC_API_VTABLE_DEFINE_VISIT_OTHER, CLASS, METHODS ) \
       } \
       template<typename Visitor> \
       void visit( Visitor&& v ){ \
-        BOOST_PP_SEQ_FOR_EACH( FC_STUB_VTABLE_DEFINE_VISIT, CLASS, METHODS ) \
+        BOOST_PP_SEQ_FOR_EACH( FC_API_VTABLE_DEFINE_VISIT, CLASS, METHODS ) \
       } \
   }; \
-} } 
-//#undef FC_STUB_VTABLE_DEFINE_MEMBER
-//#undef FC_STUB_VTABLE_DEFINE_VISIT
+} }  
+//#undef FC_API_VTABLE_DEFINE_MEMBER
+//#undef FC_API_VTABLE_DEFINE_VISIT

@@ -253,8 +253,6 @@ namespace fc { namespace ecc {
         ECDSA_SIG_free(sig);
         FC_THROW_EXCEPTION( exception, "unable to reconstruct public key from signature" );
     }
-
-    #include "_elliptic_mixed_openssl.cpp"
 } }
 
 #include "_elliptic_common.cpp"

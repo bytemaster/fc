@@ -13,7 +13,7 @@
 namespace fc { namespace ecc {
     namespace detail
     {
-        static void init_lib(); {
+        static void init_lib();
 
         typedef public_key_data pub_data_type;
         typedef EC_KEY priv_data_type;

@@ -22,8 +22,6 @@ namespace fc { namespace ecc {
           }
       }
 
-      static public_key_data empty_key;
-
       class public_key_impl
       {
         public:
@@ -457,3 +455,5 @@ namespace fc { namespace ecc {
    }
 }
 }
+
+#include "_elliptic_common.cpp"

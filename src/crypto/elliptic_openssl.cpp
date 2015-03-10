@@ -562,3 +562,5 @@ namespace fc { namespace ecc {
    }
 }
 }
+
+#include "_elliptic_common.cpp"

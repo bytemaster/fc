@@ -155,7 +155,6 @@ set( fc_sources
      src/crypto/sha512.cpp
      src/crypto/dh.cpp
      src/crypto/blowfish.cpp
-     src/crypto/elliptic_common.cpp
      src/crypto/elliptic_${ECC_IMPL}.cpp
      src/crypto/rand.cpp
      src/crypto/salsa20.cpp

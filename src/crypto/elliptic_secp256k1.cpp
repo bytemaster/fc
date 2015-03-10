@@ -66,10 +66,6 @@ namespace fc { namespace ecc {
         }
     }
 
-    public_key public_key::from_key_data( const public_key_data &data ) {
-        return public_key(data);
-    }
-
     public_key public_key::add( const fc::sha256& digest )const
     {
         FC_ASSERT( my->_key != nullptr );
@@ -126,11 +122,13 @@ namespace fc { namespace ecc {
       if( *front == 0 ){}
       else
       {
-         EC_KEY *key = o2i_ECPublicKey( nullptr, (const unsigned char**)&front, sizeof(dat) );
+         EC_KEY *key = EC_KEY_new_by_curve_name( NID_secp256k1 );
+         key = o2i_ECPublicKey( &key, (const unsigned char**)&front, sizeof(dat) );
          FC_ASSERT( key );
          EC_KEY_set_conv_form( key, POINT_CONVERSION_COMPRESSED );
          my->_key = new public_key_data();
-         i2o_ECPublicKey( key, (unsigned char**)&my->_key->data );
+         unsigned char* buffer = (unsigned char*) my->_key->begin();
+         i2o_ECPublicKey( key, &buffer ); // FIXME: questionable memory handling
          EC_KEY_free( key );
       }
     }

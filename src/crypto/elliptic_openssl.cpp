@@ -38,9 +38,7 @@ namespace fc { namespace ecc {
 
         void public_key_impl::copy_key( EC_KEY* to, const EC_KEY* from )
         {
-            // Group parameters etc. never change
-            EC_KEY_set_public_key( to, EC_KEY_get0_public_key( from ) );
-            EC_KEY_set_private_key( to, EC_KEY_get0_private_key( from ) );
+            EC_KEY_copy( to, from );
         }
 
         void private_key_impl::free_key()
@@ -59,9 +57,7 @@ namespace fc { namespace ecc {
 
         void private_key_impl::copy_key( EC_KEY* to, const EC_KEY* from )
         {
-            // Group parameters etc. never change
-            EC_KEY_set_public_key( to, EC_KEY_get0_public_key( from ) );
-            EC_KEY_set_private_key( to, EC_KEY_get0_private_key( from ) );
+            EC_KEY_copy( to, from );
         }
     }
 
@@ -181,10 +177,6 @@ namespace fc { namespace ecc {
         if (ctx != NULL) BN_CTX_free(ctx);
 
         return(ok);
-    }
-
-    public_key public_key::from_key_data( const public_key_data &data ) {
-        return public_key(data);
     }
 
     /* WARNING! This implementation is broken, it is actually equivalent to
@@ -320,7 +312,7 @@ namespace fc { namespace ecc {
       /*size_t nbytes = i2o_ECPublicKey( my->_key, nullptr ); */
       /*assert( nbytes == 33 )*/
       char* front = &dat.data[0];
-      i2o_ECPublicKey( my->_key, (unsigned char**)&front  );
+      i2o_ECPublicKey( my->_key, (unsigned char**)&front ); // FIXME: questionable memory handling
       return dat;
       /*
        EC_POINT* pub   = EC_KEY_get0_public_key( my->_key );
@@ -334,7 +326,7 @@ namespace fc { namespace ecc {
       if( !my->_key ) return dat;
       EC_KEY_set_conv_form( my->_key, POINT_CONVERSION_UNCOMPRESSED );
       char* front = &dat.data[0];
-      i2o_ECPublicKey( my->_key, (unsigned char**)&front  );
+      i2o_ECPublicKey( my->_key, (unsigned char**)&front ); // FIXME: questionable memory handling
       return dat;
     }
 
@@ -344,7 +336,7 @@ namespace fc { namespace ecc {
       if( *front == 0 ){}
       else
       {
-         /*my->_key = EC_KEY_new_by_curve_name( NID_secp256k1 ); */
+         my->_key = EC_KEY_new_by_curve_name( NID_secp256k1 );
          my->_key = o2i_ECPublicKey( &my->_key, (const unsigned char**)&front, sizeof(dat)  );
          if( !my->_key )
          {

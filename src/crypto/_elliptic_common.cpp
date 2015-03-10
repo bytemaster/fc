@@ -7,6 +7,10 @@ namespace fc { namespace ecc {
 
     public_key::public_key( public_key&& pk ) : my( std::move(pk.my) ) {}
 
+    public_key public_key::from_key_data( const public_key_data &data ) {
+        return public_key(data);
+    }
+
     bool public_key::valid()const
     {
       return my->_key != nullptr;

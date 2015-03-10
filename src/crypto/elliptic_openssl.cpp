@@ -12,50 +12,59 @@
 namespace fc { namespace ecc {
     namespace detail
     {
-      class public_key_impl
-      {
-        public:
-          public_key_impl()
-          :_key(nullptr)
-          {
-          static int init = init_openssl();
-          }
+        static void init_lib()
+        {
+            static int init = init_openssl();
+        }
 
-          ~public_key_impl()
-          {
+        typedef EC_KEY pub_data_type;
+        typedef EC_KEY priv_data_type;
+
+        #include "_elliptic_impl.cpp"
+
+        void public_key_impl::free_key()
+        {
             if( _key != nullptr )
             {
-              EC_KEY_free(_key);
+                EC_KEY_free(_key);
+                _key = nullptr;
             }
-          }
-          public_key_impl( const public_key_impl& cpy )
-          {
-            _key = cpy._key ? EC_KEY_dup( cpy._key ) : nullptr;
-          }
-          EC_KEY* _key;
-      };
-      class private_key_impl
-      {
-        public:
-          private_key_impl()
-          :_key(nullptr)
-          {
-          static int init = init_openssl();
-          }
-          ~private_key_impl()
-          {
+        }
+
+        EC_KEY* public_key_impl::dup_key( const EC_KEY* cpy )
+        {
+            return EC_KEY_dup( cpy );
+        }
+
+        void public_key_impl::copy_key( EC_KEY* to, const EC_KEY* from )
+        {
+            // Group parameters etc. never change
+            EC_KEY_set_public_key( to, EC_KEY_get0_public_key( from ) );
+            EC_KEY_set_private_key( to, EC_KEY_get0_private_key( from ) );
+        }
+
+        void private_key_impl::free_key()
+        {
             if( _key != nullptr )
             {
-              EC_KEY_free(_key);
+                EC_KEY_free(_key);
+                _key = nullptr;
             }
-          }
-          private_key_impl( const private_key_impl& cpy )
-          {
-            _key = cpy._key ? EC_KEY_dup( cpy._key ) : nullptr;
-          }
-          EC_KEY* _key;
-      };
+        }
+
+        EC_KEY* private_key_impl::dup_key( const EC_KEY* cpy )
+        {
+            return EC_KEY_dup( cpy );
+        }
+
+        void private_key_impl::copy_key( EC_KEY* to, const EC_KEY* from )
+        {
+            // Group parameters etc. never change
+            EC_KEY_set_public_key( to, EC_KEY_get0_public_key( from ) );
+            EC_KEY_set_private_key( to, EC_KEY_get0_private_key( from ) );
+        }
     }
+
     static void * ecies_key_derivation(const void *input, size_t ilen, void *output, size_t *olen)
     {
         if (*olen < SHA512_DIGEST_LENGTH) {
@@ -204,10 +213,6 @@ namespace fc { namespace ecc {
 //
 //        return rtn;
 //    }
-    bool       public_key::valid()const
-    {
-      return my->_key != nullptr;
-    }
     public_key public_key::add( const fc::sha256& digest )const
     {
       try {
@@ -258,9 +263,6 @@ namespace fc { namespace ecc {
       public_key_data key = serialize();
       return to_base58( key );
     }
-
-    private_key::private_key()
-    {}
 
     private_key private_key::regenerate( const fc::sha256& secret )
     {
@@ -336,14 +338,6 @@ namespace fc { namespace ecc {
       return dat;
     }
 
-    public_key::public_key()
-    {
-    }
-
-    public_key::~public_key()
-    {
-    }
-
     public_key::public_key( const public_key_point_data& dat )
     {
       const char* front = &dat.data[0];
@@ -394,10 +388,6 @@ namespace fc { namespace ecc {
       fc::sha512 buf;
       ECDH_compute_key( (unsigned char*)&buf, sizeof(buf), EC_KEY_get0_public_key(other.my->_key), my->_key, ecies_key_derivation );
       return buf;
-    }
-
-    private_key::~private_key()
-    {
     }
 
     public_key::public_key( const compact_signature& c, const fc::sha256& digest, bool check_canonical )
@@ -500,66 +490,6 @@ namespace fc { namespace ecc {
         } // while true
       } FC_RETHROW_EXCEPTIONS( warn, "sign ${digest}", ("digest", digest)("private_key",*this) );
     }
-
-   private_key& private_key::operator=( private_key&& pk )
-   {
-     if( my->_key )
-     {
-       EC_KEY_free(my->_key);
-     }
-     my->_key = pk.my->_key;
-     pk.my->_key = nullptr;
-     return *this;
-   }
-
-   public_key::public_key( const public_key& pk )
-   :my(pk.my)
-   {
-   }
-
-   public_key::public_key( public_key&& pk )
-   :my( fc::move( pk.my) )
-   {
-   }
-
-   private_key::private_key( const private_key& pk )
-   :my(pk.my)
-   {
-   }
-
-   private_key::private_key( private_key&& pk )
-   :my( fc::move( pk.my) )
-   {
-   }
-
-   public_key& public_key::operator=( public_key&& pk )
-   {
-     if( my->_key )
-     {
-       EC_KEY_free(my->_key);
-     }
-     my->_key = pk.my->_key;
-     pk.my->_key = nullptr;
-     return *this;
-   }
-   public_key& public_key::operator=( const public_key& pk )
-   {
-     if( my->_key )
-     {
-       EC_KEY_free(my->_key);
-     }
-     my->_key = EC_KEY_dup(pk.my->_key);
-     return *this;
-   }
-   private_key& private_key::operator=( const private_key& pk )
-   {
-     if( my->_key )
-     {
-       EC_KEY_free(my->_key);
-     }
-     my->_key = EC_KEY_dup(pk.my->_key);
-     return *this;
-   }
 }
 }
 

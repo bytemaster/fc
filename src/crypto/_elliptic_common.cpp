@@ -1,15 +1,17 @@
-#include <fc/crypto/elliptic.hpp>
-
-#include <fc/crypto/base58.hpp>
-#include <fc/crypto/openssl.hpp>
-
-#include <fc/fwd_impl.hpp>
-#include <fc/exception/exception.hpp>
-#include <fc/log/logger.hpp>
-
-#include <assert.h>
-
 namespace fc { namespace ecc {
+    public_key::public_key() {}
+
+    public_key::~public_key() {}
+
+    public_key::public_key( const public_key& pk ) : my( pk.my ) {}
+
+    public_key::public_key( public_key&& pk ) : my( std::move(pk.my) ) {}
+
+    bool public_key::valid()const
+    {
+      return my->_key != nullptr;
+    }
+
     std::string public_key::to_base58( const public_key_data &key )
     {
       uint32_t check = (uint32_t)sha256::hash(key.data, sizeof(key))._hash[0];
@@ -39,6 +41,14 @@ namespace fc { namespace ecc {
                && !(c.data[33] & 0x80)
                && !(c.data[33] == 0 && !(c.data[34] & 0x80));
     }
+
+    private_key::private_key() {}
+
+    private_key::~private_key() {}
+
+    private_key::private_key( const private_key& pk ) : my(pk.my) {}
+
+    private_key::private_key( private_key&& pk ) : my( std::move( pk.my) ) {}
 
     private_key private_key::generate_from_seed( const fc::sha256& seed, const fc::sha256& offset )
     {
@@ -93,26 +103,53 @@ namespace fc { namespace ecc {
 
        return private_key( k );
     }
+
+    private_key& private_key::operator=( private_key&& pk )
+    {
+        my = std::move(pk.my);
+        return *this;
+    }
+
+    public_key& public_key::operator=( public_key&& pk )
+    {
+        my = std::move(pk.my);
+        return *this;
+    }
+
+    public_key& public_key::operator=( const public_key& pk )
+    {
+        my = pk.my;
+        return *this;
+    }
+
+    private_key& private_key::operator=( const private_key& pk )
+    {
+        my = pk.my;
+        return *this;
+    }
 }
-  void to_variant( const ecc::private_key& var,  variant& vo )
-  {
+
+void to_variant( const ecc::private_key& var,  variant& vo )
+{
     vo = var.get_secret();
-  }
-  void from_variant( const variant& var,  ecc::private_key& vo )
-  {
+}
+
+void from_variant( const variant& var,  ecc::private_key& vo )
+{
     fc::sha256 sec;
     from_variant( var, sec );
     vo = ecc::private_key::regenerate(sec);
-  }
+}
 
-  void to_variant( const ecc::public_key& var,  variant& vo )
-  {
+void to_variant( const ecc::public_key& var,  variant& vo )
+{
     vo = var.serialize();
-  }
-  void from_variant( const variant& var,  ecc::public_key& vo )
-  {
+}
+
+void from_variant( const variant& var,  ecc::public_key& vo )
+{
     ecc::public_key_data dat;
     from_variant( var, dat );
     vo = ecc::public_key(dat);
-  }
+}
 }

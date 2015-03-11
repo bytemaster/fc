@@ -54,15 +54,6 @@ namespace fc {
                   return f();
                }
 
-               /*
-               template<typename R, typename Arg0>
-               R call_generic( const std::function<R(Arg0)>& f, variants::const_iterator a0, variants::const_iterator e )const
-               {
-                  FC_ASSERT( a0 != e );
-                  return f(a0->as<Arg0>());
-               }
-               */
-
                template<typename R, typename Arg0, typename ... Args>
                R call_generic( const std::function<R(Arg0,Args...)>& f, variants::const_iterator a0, variants::const_iterator e )const
                {

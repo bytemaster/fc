@@ -4,8 +4,8 @@ ECC Support
 include/fc/crypto/elliptic.hpp defines an interface for some cryptographic
 wrapper classes handling elliptic curve cryptography.
 
-Two implementations of this interface exist. One is based on OpenSSL, the
-other is based on libsecp256k1 (see https://github.com/bitcoin/secp256k1 ).
+Three implementations of this interface exist. One is based on OpenSSL, the
+others are based on libsecp256k1 (see https://github.com/bitcoin/secp256k1 ).
 The implementation to be used is selected at compile time using the
 cmake variable "ECC_IMPL". It can take one of three values, openssl or
 secp256k1 or mixed .

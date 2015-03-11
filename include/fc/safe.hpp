@@ -50,6 +50,10 @@ namespace fc {
       {
          return a.value == b.value;
       }
+      friend bool operator != ( const safe& a, const safe& b )
+      {
+         return a.value != b.value;
+      }
       friend bool operator < ( const safe& a, const safe& b )
       {
          return a.value < b.value;

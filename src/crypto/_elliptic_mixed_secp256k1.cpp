@@ -1,12 +1,13 @@
 namespace detail
 {
+    static int init_secp256k1() {
+        secp256k1_start(SECP256K1_START_VERIFY | SECP256K1_START_SIGN);
+        return 1;
+    }
+
     static void init_lib() {
-        static int init_s = 0;
+        static int init_s = init_secp256k1();
         static int init_o = init_openssl();
-        if (!init_s) {
-            secp256k1_start(SECP256K1_START_VERIFY | SECP256K1_START_SIGN);
-            init_s = 1;
-        }
     }
 
     void public_key_impl::free_key()

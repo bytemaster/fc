@@ -68,21 +68,13 @@ namespace fc {
          _vtable->template visit_other( vtable_copy_visitor<source_vtable_type>(pointed_at) );
       }
 
-      template<typename T >
-      api( const std::shared_ptr< api<T> >& p )
-      :_vtable( std::make_shared<vtable_type>() )
-      {
-         _data = std::make_shared<fc::any>(p);
-         auto& ptr = *boost::any_cast< decltype(p) >(*_data);
-         auto& pointed_at = *ptr;
-         typedef typename std::remove_reference<decltype(pointed_at)>::type source_vtable_type;
-         _vtable->template visit_other( vtable_copy_visitor<source_vtable_type>(pointed_at) );
-      }
-
       api( const api& cpy )
       :_vtable(cpy._vtable),_data(cpy._data)
       {
       }
+
+      friend bool operator == ( const api& a, const api& b ) { return a._data == b._data && a._vtable == b._vtable;    }
+      friend bool operator != ( const api& a, const api& b ) { return !(a._data == b._data && a._vtable == b._vtable); }
 
       vtable_type& operator*()const  { wdump((uint64_t(this))); assert(_vtable); FC_ASSERT( _vtable ); return *_vtable; }
       vtable_type* operator->()const {  

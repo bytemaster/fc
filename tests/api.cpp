@@ -1,7 +1,6 @@
 #include <fc/api.hpp>
 #include <fc/log/logger.hpp>
-#include <fc/rpc/api_server.hpp>
-#include <fc/rpc/api_client.hpp>
+#include <fc/rpc/api_connection.hpp>
 
 class calculator
 {
@@ -76,7 +75,6 @@ int main( int argc, char** argv )
    {
       elog( "${e}", ("e",e.to_detail_string() ) );
    }
-   */
 
    ilog( "------------------ NESTED TEST --------------" );
    try {
@@ -99,6 +97,31 @@ int main( int argc, char** argv )
 
       fc::api<nested_api> remote_api = apic;
 
+
+      auto remote_calc = remote_api->get_calc();
+      int r = remote_calc->add( 4, 5 );
+      idump( (r) );
+
+   } catch ( const fc::exception& e )
+   {
+      elog( "${e}", ("e",e.to_detail_string() ) );
+   }
+   */
+
+   ilog( "------------------ NESTED TEST --------------" );
+   try {
+      nested_api napi_impl;
+      napi_impl.calc = api_calc;
+      fc::api<nested_api>  napi(&napi_impl);
+
+
+      auto client_side = std::make_shared<api_connection>();
+      auto server_side = std::make_shared<api_connection>();
+      server_side->set_remote_connection( client_side );
+
+      server_side->register_api( napi );
+
+      fc::api<nested_api> remote_api = client_side->get_remote_api<nested_api>();
 
       auto remote_calc = remote_api->get_calc();
       int r = remote_calc->add( 4, 5 );

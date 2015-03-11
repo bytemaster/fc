@@ -49,7 +49,10 @@ namespace fc { namespace ecc {
 
     fc::sha256 private_key::get_secret()const
     {
-        FC_ASSERT( my->_key != nullptr );
+        if( !my->_key )
+        {
+            return fc::sha256();
+        }
         return *my->_key;
     }
 

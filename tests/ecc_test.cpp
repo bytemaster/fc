@@ -68,6 +68,8 @@ int main( int argc, char** argv )
         interop_file(argv[2]);
     }
 
+    fc::ecc::private_key nullkey;
+
    for( uint32_t i = 0; i < 3000; ++ i )
    {
    try {
@@ -76,6 +78,7 @@ int main( int argc, char** argv )
    std::string  pass(argv[1]);
    fc::sha256   h = fc::sha256::hash( pass.c_str(), pass.size() );
    fc::ecc::private_key priv = fc::ecc::private_key::generate_from_seed(h);
+   FC_ASSERT( nullkey != priv );
    interop_do(priv.get_secret());
    fc::ecc::public_key  pub  = priv.get_public_key();
    interop_do(pub.serialize());

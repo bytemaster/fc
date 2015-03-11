@@ -82,14 +82,23 @@ namespace fc { namespace ecc {
       return fc::sha512::hash( pub.begin() + 1, pub.size() - 1 );
     }
 
+    static int extended_nonce_function( unsigned char *nonce32, const unsigned char *msg32,
+                                        const unsigned char *key32, unsigned int attempt,
+                                        const void *data ) {
+        unsigned int* extra = (unsigned int*) data;
+        (*extra)++;
+        return secp256k1_nonce_function_default( nonce32, msg32, key32, *extra, nullptr );
+    }
+
     compact_signature private_key::sign_compact( const fc::sha256& digest )const
     {
         FC_ASSERT( my->_key != nullptr );
         compact_signature result;
         int recid;
+        unsigned int counter = 0;
         do
         {
-            FC_ASSERT( secp256k1_ecdsa_sign_compact( (unsigned char*) digest.data(), (unsigned char*) result.begin() + 1, (unsigned char*) my->_key->data(), NULL, NULL, &recid ));
+            FC_ASSERT( secp256k1_ecdsa_sign_compact( (unsigned char*) digest.data(), (unsigned char*) result.begin() + 1, (unsigned char*) my->_key->data(), extended_nonce_function, &counter, &recid ));
         } while( !public_key::is_canonical( result ) );
         result.begin()[0] = 27 + 4 + recid;
         return result;

@@ -56,9 +56,13 @@ namespace fc { namespace ecc {
     }
 
 
-    public_key::~public_key() {}
+    public_key::public_key() {}
+
+    public_key::public_key( const public_key &pk ) : my( pk.my ) {}
 
     public_key::public_key( public_key &&pk ) : my( std::move( pk.my ) ) {}
+
+    public_key::~public_key() {}
 
     public_key& public_key::operator=( const public_key& pk )
     {
@@ -70,6 +74,11 @@ namespace fc { namespace ecc {
     {
         my = pk.my;
         return *this;
+    }
+
+    bool public_key::valid()const
+    {
+      return my->_key != empty_pub;
     }
 
     public_key public_key::add( const fc::sha256& digest )const

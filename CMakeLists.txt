@@ -38,8 +38,14 @@ LIST(APPEND BOOST_COMPONENTS thread date_time system filesystem program_options 
 SET( Boost_USE_STATIC_LIBS ON CACHE STRING "ON or OFF" )
 
 IF( ECC_IMPL STREQUAL openssl )
+SET( ECC_REST src/crypto/elliptic_impl_pub.cpp )
 ELSE( ECC_IMPL STREQUAL openssl )
 SET( ECC_LIB secp256k1 )
+IF( ECC_IMPL STREQUAL mixed )
+SET( ECC_REST src/crypto/elliptic_impl_priv.cpp src/crypto/elliptic_impl_pub.cpp )
+ELSE( ECC_IMPL STREQUAL mixed )
+SET( ECC_REST src/crypto/elliptic_impl_priv.cpp )
+ENDIF( ECC_IMPL STREQUAL mixed )
 ENDIF( ECC_IMPL STREQUAL openssl )
 
 IF( WIN32 )
@@ -156,6 +162,8 @@ set( fc_sources
      src/crypto/sha512.cpp
      src/crypto/dh.cpp
      src/crypto/blowfish.cpp
+     src/crypto/elliptic_common.cpp
+     ${ECC_REST}
      src/crypto/elliptic_${ECC_IMPL}.cpp
      src/crypto/rand.cpp
      src/crypto/salsa20.cpp

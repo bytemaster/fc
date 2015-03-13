@@ -9,199 +9,164 @@
 
 #include <assert.h>
 
+#include "_elliptic_impl_pub.hpp"
+
 namespace fc { namespace ecc {
     namespace detail
     {
-        static void init_lib()
-        {
-            static int init = init_openssl();
+        void _init_lib() {
+            static int init_o = init_openssl();
         }
 
-        typedef EC_KEY pub_data_type;
-        typedef EC_KEY priv_data_type;
-
-        #include "_elliptic_impl.cpp"
-
-        void public_key_impl::free_key()
+        class private_key_impl
         {
-            if( _key != nullptr )
-            {
-                EC_KEY_free(_key);
-                _key = nullptr;
-            }
-        }
+            public:
+                private_key_impl() noexcept
+                {
+                    _init_lib();
+                }
 
-        EC_KEY* public_key_impl::dup_key( const EC_KEY* cpy )
+                private_key_impl( const private_key_impl& cpy ) noexcept
+                {
+                    _init_lib();
+                    *this = cpy;
+                }
+
+                private_key_impl( private_key_impl&& cpy ) noexcept
+                {
+                    _init_lib();
+                    *this = cpy;
+                }
+
+                ~private_key_impl() noexcept
+                {
+                    free_key();
+                }
+
+                private_key_impl& operator=( const private_key_impl& pk ) noexcept
+                {
+                    if (pk._key == nullptr)
+                    {
+                        free_key();
+                    } else if ( _key == nullptr ) {
+                        _key = EC_KEY_dup( pk._key );
+                    } else {
+                        EC_KEY_copy( _key, pk._key );
+                    }
+                    return *this;
+                }
+
+                private_key_impl& operator=( private_key_impl&& pk ) noexcept
+                {
+                    if ( this != &pk ) {
+                        free_key();
+                        _key = pk._key;
+                        pk._key = nullptr;
+                    }
+                    return *this;
+                }
+
+                EC_KEY* _key = nullptr;
+
+            private:
+                void free_key() noexcept
+                {
+                    if( _key != nullptr )
+                    {
+                        EC_KEY_free(_key);
+                        _key = nullptr;
+                    }
+                }
+        };
+    }
+
+    private_key::private_key() {}
+
+    private_key::private_key( const private_key& pk ) : my( pk.my ) {}
+
+    private_key::private_key( private_key&& pk ) : my( std::move( pk.my ) ) {}
+
+    private_key::~private_key() {}
+
+    private_key& private_key::operator=( private_key&& pk )
+    {
+        my = std::move(pk.my);
+        return *this;
+    }
+
+    private_key& private_key::operator=( const private_key& pk )
+    {
+        my = pk.my;
+        return *this;
+    }
+    static void * ecies_key_derivation(const void *input, size_t ilen, void *output, size_t *olen)
+    {
+        if (*olen < SHA512_DIGEST_LENGTH) {
+            return NULL;
+        }
+        *olen = SHA512_DIGEST_LENGTH;
+        return (void*)SHA512((const unsigned char*)input, ilen, (unsigned char*)output);
+    }
+
+    int static inline EC_KEY_regenerate_key(EC_KEY *eckey, const BIGNUM *priv_key)
+    {
+        int ok = 0;
+        BN_CTX *ctx = NULL;
+        EC_POINT *pub_key = NULL;
+
+        if (!eckey) return 0;
+
+        const EC_GROUP *group = EC_KEY_get0_group(eckey);
+
+        if ((ctx = BN_CTX_new()) == NULL)
+        goto err;
+
+        pub_key = EC_POINT_new(group);
+
+        if (pub_key == NULL)
+        goto err;
+
+        if (!EC_POINT_mul(group, pub_key, priv_key, NULL, NULL, ctx))
+        goto err;
+
+        EC_KEY_set_private_key(eckey,priv_key);
+        EC_KEY_set_public_key(eckey,pub_key);
+
+        ok = 1;
+
+        err:
+
+        if (pub_key) EC_POINT_free(pub_key);
+        if (ctx != NULL) BN_CTX_free(ctx);
+
+        return(ok);
+    }
+
+    private_key private_key::regenerate( const fc::sha256& secret )
+    {
+        private_key self;
+        self.my->_key = EC_KEY_new_by_curve_name( NID_secp256k1 );
+        if( !self.my->_key ) FC_THROW_EXCEPTION( exception, "Unable to generate EC key" );
+
+        ssl_bignum bn;
+        BN_bin2bn( (const unsigned char*)&secret, 32, bn );
+
+        if( !EC_KEY_regenerate_key(self.my->_key,bn) )
         {
-            return EC_KEY_dup( cpy );
+            FC_THROW_EXCEPTION( exception, "unable to regenerate key" );
         }
-
-        void public_key_impl::copy_key( EC_KEY* to, const EC_KEY* from )
-        {
-            EC_KEY_copy( to, from );
-        }
+        return self;
     }
 
-    #include "_elliptic_mixed_openssl.cpp"
-
-    /* WARNING! This implementation is broken, it is actually equivalent to
-     * public_key::add()!
-     */
-//    public_key public_key::mult( const fc::sha256& digest ) const
-//    {
-//        // get point from this public key
-//        const EC_POINT* master_pub   = EC_KEY_get0_public_key( my->_key );
-//        ec_group group(EC_GROUP_new_by_curve_name(NID_secp256k1));
-//
-//        ssl_bignum z;
-//        BN_bin2bn((unsigned char*)&digest, sizeof(digest), z);
-//
-//        // multiply by digest
-//        ssl_bignum one;
-//        BN_one(one);
-//        bn_ctx ctx(BN_CTX_new());
-//
-//        ec_point result(EC_POINT_new(group));
-//        EC_POINT_mul(group, result, z, master_pub, one, ctx);
-//
-//        public_key rtn;
-//        rtn.my->_key = EC_KEY_new_by_curve_name( NID_secp256k1 );
-//        EC_KEY_set_public_key(rtn.my->_key,result);
-//
-//        return rtn;
-//    }
-    public_key public_key::add( const fc::sha256& digest )const
+    fc::sha256 private_key::get_secret()const
     {
-      try {
-        ec_group group(EC_GROUP_new_by_curve_name(NID_secp256k1));
-        bn_ctx ctx(BN_CTX_new());
-
-        fc::bigint digest_bi( (char*)&digest, sizeof(digest) );
-
-        ssl_bignum order;
-        EC_GROUP_get_order(group, order, ctx);
-        if( digest_bi > fc::bigint(order) )
-        {
-          FC_THROW_EXCEPTION( exception, "digest > group order" );
-        }
-
-
-        public_key digest_key = private_key::regenerate(digest).get_public_key();
-        const EC_POINT* digest_point   = EC_KEY_get0_public_key( digest_key.my->_key );
-
-        // get point from this public key
-        const EC_POINT* master_pub   = EC_KEY_get0_public_key( my->_key );
-
-//        ssl_bignum z;
-//        BN_bin2bn((unsigned char*)&digest, sizeof(digest), z);
-
-        // multiply by digest
-//        ssl_bignum one;
-//        BN_one(one);
-
-        ec_point result(EC_POINT_new(group));
-        EC_POINT_add(group, result, digest_point, master_pub, ctx);
-
-        if (EC_POINT_is_at_infinity(group, result))
-        {
-          FC_THROW_EXCEPTION( exception, "point at  infinity" );
-        }
-
-
-        public_key rtn;
-        rtn.my->_key = EC_KEY_new_by_curve_name( NID_secp256k1 );
-        EC_KEY_set_public_key(rtn.my->_key,result);
-        return rtn;
-      } FC_RETHROW_EXCEPTIONS( debug, "digest: ${digest}", ("digest",digest) );
+        return get_secret( my->_key );
     }
 
-    std::string public_key::to_base58() const
+    private_key::private_key( EC_KEY* k )
     {
-      public_key_data key = serialize();
-      return to_base58( key );
+        my->_key = k;
     }
-
-//    signature private_key::sign( const fc::sha256& digest )const
-//    {
-//        unsigned int buf_len = ECDSA_size(my->_key);
-////        fprintf( stderr, "%d  %d\n", buf_len, sizeof(sha256) );
-//        signature sig;
-//        assert( buf_len == sizeof(sig) );
-//
-//        if( !ECDSA_sign( 0,
-//                    (const unsigned char*)&digest, sizeof(digest),
-//                    (unsigned char*)&sig, &buf_len, my->_key ) )
-//        {
-//            FC_THROW_EXCEPTION( exception, "signing error" );
-//        }
-//
-//
-//        return sig;
-//    }
-//    bool       public_key::verify( const fc::sha256& digest, const fc::ecc::signature& sig )
-//    {
-//      return 1 == ECDSA_verify( 0, (unsigned char*)&digest, sizeof(digest), (unsigned char*)&sig, sizeof(sig), my->_key );
-//    }
-
-    public_key_data public_key::serialize()const
-    {
-      public_key_data dat;
-      if( !my->_key ) return dat;
-      EC_KEY_set_conv_form( my->_key, POINT_CONVERSION_COMPRESSED );
-      /*size_t nbytes = i2o_ECPublicKey( my->_key, nullptr ); */
-      /*assert( nbytes == 33 )*/
-      char* front = &dat.data[0];
-      i2o_ECPublicKey( my->_key, (unsigned char**)&front ); // FIXME: questionable memory handling
-      return dat;
-      /*
-       EC_POINT* pub   = EC_KEY_get0_public_key( my->_key );
-       EC_GROUP* group = EC_KEY_get0_group( my->_key );
-       EC_POINT_get_affine_coordinates_GFp( group, pub, self.my->_pub_x.get(), self.my->_pub_y.get(), nullptr );
-       */
-    }
-    public_key_point_data public_key::serialize_ecc_point()const
-    {
-      public_key_point_data dat;
-      if( !my->_key ) return dat;
-      EC_KEY_set_conv_form( my->_key, POINT_CONVERSION_UNCOMPRESSED );
-      char* front = &dat.data[0];
-      i2o_ECPublicKey( my->_key, (unsigned char**)&front ); // FIXME: questionable memory handling
-      return dat;
-    }
-
-    public_key::public_key( const public_key_point_data& dat )
-    {
-      const char* front = &dat.data[0];
-      if( *front == 0 ){}
-      else
-      {
-         my->_key = EC_KEY_new_by_curve_name( NID_secp256k1 );
-         my->_key = o2i_ECPublicKey( &my->_key, (const unsigned char**)&front, sizeof(dat)  );
-         if( !my->_key )
-         {
-           FC_THROW_EXCEPTION( exception, "error decoding public key", ("s", ERR_error_string( ERR_get_error(), nullptr) ) );
-         }
-      }
-    }
-    public_key::public_key( const public_key_data& dat )
-    {
-      const char* front = &dat.data[0];
-      if( *front == 0 ){}
-      else
-      {
-         my->_key = EC_KEY_new_by_curve_name( NID_secp256k1 );
-         my->_key = o2i_ECPublicKey( &my->_key, (const unsigned char**)&front, sizeof(public_key_data) );
-         if( !my->_key )
-         {
-           FC_THROW_EXCEPTION( exception, "error decoding public key", ("s", ERR_error_string( ERR_get_error(), nullptr) ) );
-         }
-      }
-    }
-
-//    bool       private_key::verify( const fc::sha256& digest, const fc::ecc::signature& sig )
-//    {
-//      return 1 == ECDSA_verify( 0, (unsigned char*)&digest, sizeof(digest), (unsigned char*)&sig, sizeof(sig), my->_key );
-//    }
 
     public_key private_key::get_public_key()const
     {
@@ -221,38 +186,76 @@ namespace fc { namespace ecc {
       return buf;
     }
 
-    public_key::public_key( const compact_signature& c, const fc::sha256& digest, bool check_canonical )
+    compact_signature private_key::sign_compact( const fc::sha256& digest )const
     {
-        int nV = c.data[0];
-        if (nV<27 || nV>=35)
-            FC_THROW_EXCEPTION( exception, "unable to reconstruct public key from signature" );
+        try {
+            FC_ASSERT( my->_key != nullptr );
+            auto my_pub_key = get_public_key().serialize(); // just for good measure
+            //ECDSA_SIG *sig = ECDSA_do_sign((unsigned char*)&digest, sizeof(digest), my->_key);
+            public_key_data key_data;
+            while( true )
+            {
+                ecdsa_sig sig = ECDSA_do_sign((unsigned char*)&digest, sizeof(digest), my->_key);
 
-        ECDSA_SIG *sig = ECDSA_SIG_new();
-        BN_bin2bn(&c.data[1],32,sig->r);
-        BN_bin2bn(&c.data[33],32,sig->s);
+                if (sig==nullptr)
+                    FC_THROW_EXCEPTION( exception, "Unable to sign" );
 
-        if( check_canonical )
-        {
-            FC_ASSERT( is_canonical( c ), "signature is not canonical" );
-        }
+                compact_signature csig;
+                // memset( csig.data, 0, sizeof(csig) );
 
-        my->_key = EC_KEY_new_by_curve_name(NID_secp256k1);
+                int nBitsR = BN_num_bits(sig->r);
+                int nBitsS = BN_num_bits(sig->s);
+                if (nBitsR <= 256 && nBitsS <= 256)
+                {
+                    int nRecId = -1;
+                    EC_KEY* key = EC_KEY_new_by_curve_name( NID_secp256k1 );
+                    FC_ASSERT( key );
+                    EC_KEY_set_conv_form( key, POINT_CONVERSION_COMPRESSED );
+                    for (int i=0; i<4; i++)
+                    {
+                        if (detail::public_key_impl::ECDSA_SIG_recover_key_GFp(key, sig, (unsigned char*)&digest, sizeof(digest), i, 1) == 1)
+                        {
+                            unsigned char* buffer = (unsigned char*) key_data.begin();
+                            i2o_ECPublicKey( key, &buffer ); // FIXME: questionable memory handling
+                            if ( key_data == my_pub_key )
+                            {
+                                nRecId = i;
+                                break;
+                            }
+                        }
+                    }
+                    EC_KEY_free( key );
 
-        if (nV >= 31)
-        {
-            EC_KEY_set_conv_form( my->_key, POINT_CONVERSION_COMPRESSED );
-            nV -= 4;
-//            fprintf( stderr, "compressed\n" );
-        }
-
-        if (ECDSA_SIG_recover_key_GFp(my->_key, sig, (unsigned char*)&digest, sizeof(digest), nV - 27, 0) == 1)
-        {
-            ECDSA_SIG_free(sig);
-            return;
-        }
-        ECDSA_SIG_free(sig);
-        FC_THROW_EXCEPTION( exception, "unable to reconstruct public key from signature" );
+                    if (nRecId == -1)
+                    {
+                        FC_THROW_EXCEPTION( exception, "unable to construct recoverable key");
+                    }
+                    unsigned char* result = nullptr;
+                    auto bytes = i2d_ECDSA_SIG( sig, &result );
+                    auto lenR = result[3];
+                    auto lenS = result[5+lenR];
+                    //idump( (result[0])(result[1])(result[2])(result[3])(result[3+lenR])(result[4+lenR])(bytes)(lenR)(lenS) );
+                    if( lenR != 32 ) { free(result); continue; }
+                    if( lenS != 32 ) { free(result); continue; }
+                    //idump( (33-(nBitsR+7)/8) );
+                    //idump( (65-(nBitsS+7)/8) );
+                    //idump( (sizeof(csig) ) );
+                    memcpy( &csig.data[1], &result[4], lenR );
+                    memcpy( &csig.data[33], &result[6+lenR], lenS );
+                    //idump( (csig.data[33]) );
+                    //idump( (csig.data[1]) );
+                    free(result);
+                    //idump( (nRecId) );
+                    csig.data[0] = nRecId+27+4;//(fCompressedPubKey ? 4 : 0);
+                    /*
+                    idump( (csig) );
+                    auto rlen = BN_bn2bin(sig->r,&csig.data[33-(nBitsR+7)/8]);
+                    auto slen = BN_bn2bin(sig->s,&csig.data[65-(nBitsS+7)/8]);
+                    idump( (rlen)(slen) );
+                    */
+                }
+                return csig;
+            } // while true
+        } FC_RETHROW_EXCEPTIONS( warn, "sign ${digest}", ("digest", digest)("private_key",*this) );
     }
 } }
-
-#include "_elliptic_common.cpp"

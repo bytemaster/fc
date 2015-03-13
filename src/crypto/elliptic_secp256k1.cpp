@@ -10,102 +10,134 @@
 #include <assert.h>
 #include <secp256k1.h>
 
+#include "_elliptic_impl_priv.hpp"
+
 namespace fc { namespace ecc {
     namespace detail
     {
-        static void init_lib();
-
-        typedef public_key_data pub_data_type;
-        typedef private_key_secret priv_data_type;
-
-        #include "_elliptic_impl.cpp"
-
-        void private_key_impl::free_key()
-        {
-            if( _key != nullptr )
-            {
-                delete _key;
-                _key = nullptr;
-            }
+        static int init_secp256k1() {
+            secp256k1_start(SECP256K1_START_VERIFY | SECP256K1_START_SIGN);
+            return 1;
         }
 
-        private_key_secret* private_key_impl::dup_key( const private_key_secret* cpy )
-        {
-            return new private_key_secret( *cpy );
+        void _init_lib() {
+            static int init_s = init_secp256k1();
+            static int init_o = init_openssl();
         }
 
-        void private_key_impl::copy_key( private_key_secret* to, const private_key_secret* from )
+        class public_key_impl
         {
-            *to = *from;
-        }
+            public:
+                public_key_impl() noexcept
+                {
+                    _init_lib();
+                }
+
+                public_key_impl( const public_key_impl& cpy ) noexcept
+                    : _key( cpy._key )
+                {
+                    _init_lib();
+                }
+
+                public_key_data _key;
+        };
     }
 
-    private_key private_key::regenerate( const fc::sha256& secret )
-    {
-       private_key self;
-       self.my->_key = new private_key_secret(secret);
-       return self;
-    }
-
-    fc::sha256 private_key::get_secret()const
-    {
-        if( !my->_key )
-        {
-            return fc::sha256();
-        }
-        return *my->_key;
-    }
-
-    private_key::private_key( EC_KEY* k )
-    {
-       my->_key = new private_key_secret( get_secret( k ) );
-       EC_KEY_free(k);
-    }
-
-    public_key private_key::get_public_key()const
-    {
-       FC_ASSERT( my->_key != nullptr );
-       public_key_data pub;
-       unsigned int pk_len;
-       FC_ASSERT( secp256k1_ec_pubkey_create( (unsigned char*) pub.begin(), (int*) &pk_len, (unsigned char*) my->_key->data(), 1 ) );
-       FC_ASSERT( pk_len == pub.size() );
-       return public_key(pub);
-    }
+    static const public_key_data empty_pub;
+    static const private_key_secret empty_priv;
 
     fc::sha512 private_key::get_shared_secret( const public_key& other )const
     {
-      FC_ASSERT( my->_key != nullptr );
-      FC_ASSERT( other.my->_key != nullptr );
-      public_key_data pub(*other.my->_key);
-      FC_ASSERT( secp256k1_ec_pubkey_tweak_mul( (unsigned char*) pub.begin(), pub.size(), (unsigned char*) my->_key->data() ) );
-//      ECDH_compute_key( (unsigned char*)&buf, sizeof(buf), EC_KEY_get0_public_key(other.my->_key), my->_key, ecies_key_derivation );
+      FC_ASSERT( my->_key != empty_priv );
+      FC_ASSERT( other.my->_key != empty_pub );
+      public_key_data pub(other.my->_key);
+      FC_ASSERT( secp256k1_ec_pubkey_tweak_mul( (unsigned char*) pub.begin(), pub.size(), (unsigned char*) my->_key.data() ) );
       return fc::sha512::hash( pub.begin() + 1, pub.size() - 1 );
     }
 
-    static int extended_nonce_function( unsigned char *nonce32, const unsigned char *msg32,
-                                        const unsigned char *key32, unsigned int attempt,
-                                        const void *data ) {
-        unsigned int* extra = (unsigned int*) data;
-        (*extra)++;
-        return secp256k1_nonce_function_default( nonce32, msg32, key32, *extra, nullptr );
-    }
 
-    compact_signature private_key::sign_compact( const fc::sha256& digest )const
+    public_key::~public_key() {}
+
+    public_key::public_key( public_key &&pk ) : my( std::move( pk.my ) ) {}
+
+    public_key& public_key::operator=( const public_key& pk )
     {
-        FC_ASSERT( my->_key != nullptr );
-        compact_signature result;
-        int recid;
-        unsigned int counter = 0;
-        do
-        {
-            FC_ASSERT( secp256k1_ecdsa_sign_compact( (unsigned char*) digest.data(), (unsigned char*) result.begin() + 1, (unsigned char*) my->_key->data(), extended_nonce_function, &counter, &recid ));
-        } while( !public_key::is_canonical( result ) );
-        result.begin()[0] = 27 + 4 + recid;
-        return result;
+        my = pk.my;
+        return *this;
     }
 
-    #include "_elliptic_mixed_secp256k1.cpp"
+    public_key& public_key::operator=( public_key&& pk )
+    {
+        my = pk.my;
+        return *this;
+    }
 
+    public_key public_key::add( const fc::sha256& digest )const
+    {
+        FC_ASSERT( my->_key != empty_pub );
+        public_key_data new_key;
+        memcpy( new_key.begin(), my->_key.begin(), new_key.size() );
+        FC_ASSERT( secp256k1_ec_pubkey_tweak_add( (unsigned char*) new_key.begin(), new_key.size(), (unsigned char*) digest.data() ) );
+        return public_key( new_key );
+    }
+
+    std::string public_key::to_base58() const
+    {
+        FC_ASSERT( my->_key != empty_pub );
+        return to_base58( my->_key );
+    }
+
+    public_key_data public_key::serialize()const
+    {
+        FC_ASSERT( my->_key != empty_pub );
+        return my->_key;
+    }
+
+    public_key_point_data public_key::serialize_ecc_point()const
+    {
+        FC_ASSERT( my->_key != empty_pub );
+        public_key_point_data dat;
+        unsigned int pk_len = my->_key.size();
+        memcpy( dat.begin(), my->_key.begin(), pk_len );
+        FC_ASSERT( secp256k1_ec_pubkey_decompress( (unsigned char *) dat.begin(), (int*) &pk_len ) );
+        FC_ASSERT( pk_len == dat.size() );
+        return dat;
+    }
+
+    public_key::public_key( const public_key_point_data& dat )
+    {
+        const char* front = &dat.data[0];
+        if( *front == 0 ){}
+        else
+        {
+            EC_KEY *key = EC_KEY_new_by_curve_name( NID_secp256k1 );
+            key = o2i_ECPublicKey( &key, (const unsigned char**)&front, sizeof(dat) );
+            FC_ASSERT( key );
+            EC_KEY_set_conv_form( key, POINT_CONVERSION_COMPRESSED );
+            unsigned char* buffer = (unsigned char*) my->_key.begin();
+            i2o_ECPublicKey( key, &buffer ); // FIXME: questionable memory handling
+            EC_KEY_free( key );
+        }
+    }
+
+    public_key::public_key( const public_key_data& dat )
+    {
+        my->_key = dat;
+    }
+
+    public_key::public_key( const compact_signature& c, const fc::sha256& digest, bool check_canonical )
+    {
+        int nV = c.data[0];
+        if (nV<27 || nV>=35)
+            FC_THROW_EXCEPTION( exception, "unable to reconstruct public key from signature" );
+
+        if( check_canonical )
+        {
+            FC_ASSERT( is_canonical( c ), "signature is not canonical" );
+        }
+
+        unsigned int pk_len;
+        FC_ASSERT( secp256k1_ecdsa_recover_compact( (unsigned char*) digest.data(), (unsigned char*) c.begin() + 1, (unsigned char*) my->_key.begin(), (int*) &pk_len, 1, (*c.begin() - 27) & 3 ) );
+        FC_ASSERT( pk_len == my->_key.size() );
+    }
 } }
-
-#include "_elliptic_common.cpp"

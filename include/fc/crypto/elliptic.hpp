@@ -72,7 +72,7 @@ namespace fc {
           friend class private_key;
           static public_key from_key_data( const public_key_data& v );
           static bool is_canonical( const compact_signature& c );
-          fc::fwd<detail::public_key_impl,8> my;
+          fc::fwd<detail::public_key_impl,33> my;
     };
 
     /**
@@ -132,7 +132,7 @@ namespace fc {
         private:
            private_key( EC_KEY* k );
            static fc::sha256 get_secret( const EC_KEY * const k );
-           fc::fwd<detail::private_key_impl,8> my;
+           fc::fwd<detail::private_key_impl,32> my;
     };
   } // namespace ecc
   void to_variant( const ecc::private_key& var,  variant& vo );

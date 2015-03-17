@@ -4,6 +4,14 @@
 #include <functional>
 #include <boost/config.hpp>
 
+// ms visual c++ (as of 2013) doesn't accept the standard syntax for calling a 
+// templated member function (foo->template bar();)
+#ifdef _MSC_VER
+# define FC_CALL_MEMBER_TEMPLATE_KEYWORD
+#else
+# define FC_CALL_MEMBER_TEMPLATE_KEYWORD template
+#endif
+
 namespace fc {
   struct identity_member { 
        template<typename R, typename C, typename P, typename... Args>
@@ -46,7 +54,7 @@ namespace fc {
          T& ptr = boost::any_cast<T&>(*_data);
          auto& pointed_at = *ptr;
          typedef typename std::remove_reference<decltype(pointed_at)>::type source_vtable_type;
-         _vtable->template visit_other( vtable_copy_visitor<source_vtable_type>(pointed_at) );
+         _vtable->FC_CALL_MEMBER_TEMPLATE_KEYWORD visit_other( vtable_copy_visitor<source_vtable_type>(pointed_at) );
       }
 
       api( const api& cpy ):_vtable(cpy._vtable),_data(cpy._data) {}

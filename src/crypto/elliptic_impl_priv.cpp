@@ -33,13 +33,13 @@ namespace fc { namespace ecc {
 
     private_key::private_key( const private_key& pk ) : my( pk.my ) {}
 
-    private_key::private_key( private_key&& pk ) : my( pk.my ) {}
+    private_key::private_key( private_key&& pk ) : my( std::move( pk.my ) ) {}
 
     private_key::~private_key() {}
 
     private_key& private_key::operator=( private_key&& pk )
     {
-        my = pk.my;
+        my = std::move( pk.my );
         return *this;
     }
 

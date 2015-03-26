@@ -84,7 +84,7 @@ IF(NOT "$ENV{OPENSSL_ROOT_DIR}" STREQUAL "")
 ENDIF()
 
 
-find_package(OpenSSL)
+find_package(OpenSSL REQUIRED)
 
 set( CMAKE_FIND_LIBRARY_SUFFIXES ${ORIGINAL_LIB_SUFFIXES} )
 
@@ -157,6 +157,7 @@ set( fc_sources
      src/network/udt_socket.cpp
      src/network/http/http_connection.cpp
      src/network/http/http_server.cpp
+     src/network/http/websocket.cpp
      src/network/ntp.cpp
      src/network/ip.cpp
      src/network/rate_limiting.cpp
@@ -188,6 +189,7 @@ list(APPEND sources "${CMAKE_CURRENT_BINARY_DIR}/git_revision.cpp")
 list(APPEND sources ${fc_headers})
 
 add_subdirectory( vendor/easylzma )
+add_subdirectory( vendor/websocketpp )
 #add_subdirectory( vendor/scrypt-jane )
 add_subdirectory( vendor/udt4 )
 
@@ -227,6 +229,7 @@ target_include_directories(fc
     ${CMAKE_CURRENT_SOURCE_DIR}/vendor/salsa20
     ${CMAKE_CURRENT_SOURCE_DIR}/vendor/easylzma/src
     ${CMAKE_CURRENT_SOURCE_DIR}/vendor/udt4/src
+    ${CMAKE_CURRENT_SOURCE_DIR}/vendor/websocketpp
   )
 
 #target_link_libraries( fc PUBLIC easylzma_static scrypt udt ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} ${ZLIB_LIBRARIES} ${PLATFORM_SPECIFIC_LIBS} ${RPCRT4} ${CMAKE_DL_LIBS} ${rt_library})
@@ -234,6 +237,10 @@ target_link_libraries( fc PUBLIC easylzma_static udt ${Boost_LIBRARIES} ${OPENSS
 
 add_executable( api tests/api.cpp )
 target_link_libraries( api fc )
+
+include_directories( vendor/websocketpp )
+add_executable( websockettest tests/websocket.cpp )
+target_link_libraries( websockettest fc )
 
 add_executable( ntp_test ntp_test.cpp )
 target_link_libraries( ntp_test fc )
@@ -245,7 +252,6 @@ target_link_libraries( task_cancel_test fc )
 add_executable( real128_test tests/real128_test.cpp )
 target_link_libraries( real128_test fc )
 
-#include_directories( vendor/udt4/src )
 
 add_executable( udt_server tests/udts.cpp )
 target_link_libraries( udt_server fc udt )

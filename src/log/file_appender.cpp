@@ -107,8 +107,8 @@ namespace fc {
                }
                remove_all(link_filename);  // on windows, you can't delete the link while the underlying file is opened for writing
                out.open( log_filename );
+               create_hard_link(log_filename, link_filename);
              }
-             create_hard_link(log_filename, link_filename);
 
              /* Delete old log files */
              fc::time_point limit_time = now - cfg.rotation_limit;
@@ -160,9 +160,8 @@ namespace fc {
      format( "${timestamp} ${thread_name} ${context} ${file}:${line} ${method} ${level}]  ${message}" ),
      filename(p),
      flush(true),
-     truncate(true),
      rotate(false),
-     rotation_compression(true)
+     rotation_compression(false)
    {}
 
    file_appender::file_appender( const variant& args ) :

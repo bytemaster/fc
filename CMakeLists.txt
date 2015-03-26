@@ -91,6 +91,7 @@ set( CMAKE_FIND_LIBRARY_SUFFIXES ${ORIGINAL_LIB_SUFFIXES} )
 option( UNITY_BUILD OFF )
 
 set( fc_sources
+     src/rpc/state.cpp
      src/uint128.cpp
      src/real128.cpp
      src/variant.cpp

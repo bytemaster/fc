@@ -14,12 +14,11 @@ class file_appender : public appender {
 
             fc::string                         format;
             fc::path                           filename;
-            bool                               flush;
-            bool                               truncate;
-            bool                               rotate;
+            bool                               flush = true;
+            bool                               rotate = false;
             microseconds                       rotation_interval;
             microseconds                       rotation_limit;
-            bool                               rotation_compression;
+            bool                               rotation_compression = false;
          };
          file_appender( const variant& args );
          ~file_appender();
@@ -33,4 +32,4 @@ class file_appender : public appender {
 
 #include <fc/reflect/reflect.hpp>
 FC_REFLECT( fc::file_appender::config,
-            (format)(filename)(flush)(truncate)(rotate)(rotation_interval)(rotation_limit)(rotation_compression) )
+            (format)(filename)(flush)(rotate)(rotation_interval)(rotation_limit)(rotation_compression) )

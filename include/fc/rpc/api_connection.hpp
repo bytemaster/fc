@@ -7,7 +7,7 @@
 #include <vector>
 #include <functional>
 #include <utility>
-#include <fc/rpc/json_connection.hpp>
+//#include <fc/rpc/json_connection.hpp>
 
 namespace fc {
    class api_connection;
@@ -111,7 +111,7 @@ namespace fc {
          }
   
          /** makes calls to the remote server */
-         virtual variant send_call( api_id_type api_id, const string& method_name, const variants& args = variants() )const
+         virtual variant send_call( api_id_type api_id, const string& method_name, const variants& args = variants() )
          {
             FC_ASSERT( _remote_connection );
             return _remote_connection->receive_call( api_id, method_name, args );
@@ -217,6 +217,7 @@ namespace fc {
       };
    }
 
+   /*
    class json_api_connection : public api_connection
    {
       public:
@@ -248,5 +249,6 @@ namespace fc {
          std::shared_ptr<rpc::json_connection> _json_con;
 
    };
+   */
 
 } // fc

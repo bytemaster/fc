@@ -13,13 +13,16 @@ namespace fc { namespace rpc {
 
    struct error_object
    {
-      int64_t           code = 0;
+      int64_t           code;
       std::string       message;
       optional<variant> data;
    };
 
    struct response
    {
+      response(){}
+      response( int64_t i, fc::variant r ):id(i),result(r){}
+      response( int64_t i, error_object r ):id(i),error(r){}
       int64_t                id = 0;
       optional<fc::variant>  result;
       optional<error_object> error;

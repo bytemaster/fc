@@ -1,6 +1,7 @@
 #include <fc/network/http/websocket.hpp>
 #include <fc/log/logger.hpp>
 #include <fc/thread/thread.hpp>
+#include <fc/rpc/websocket_api.hpp>
 
 using namespace fc::http;
 

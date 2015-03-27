@@ -240,8 +240,6 @@ add_executable( api tests/api.cpp )
 target_link_libraries( api fc )
 
 include_directories( vendor/websocketpp )
-add_executable( websockettest tests/websocket.cpp )
-target_link_libraries( websockettest fc )
 
 add_executable( ntp_test ntp_test.cpp )
 target_link_libraries( ntp_test fc )

@@ -111,15 +111,11 @@ namespace fc {
          }
   
          /** makes calls to the remote server */
-         virtual variant send_call( api_id_type api_id, const string& method_name, const variants& args = variants() )
-         {
-            FC_ASSERT( _remote_connection );
-            return _remote_connection->receive_call( api_id, method_name, args );
-         }
+         virtual variant send_call( api_id_type api_id, const string& method_name, const variants& args = variants() ) = 0;
 
          variant receive_call( api_id_type api_id, const string& method_name, const variants& args = variants() )const
          {
-            wdump( (api_id)(method_name)(args) );
+            //wdump( (api_id)(method_name)(args) );
             FC_ASSERT( _local_apis.size() > api_id );
             return _local_apis[api_id]->call( method_name, args );
          }
@@ -131,19 +127,8 @@ namespace fc {
             return _local_apis.size() - 1;
          }
 
-         void                                  set_remote_connection( const std::shared_ptr<fc::api_connection>& rc )
-         {
-            FC_ASSERT( !_remote_connection );
-            FC_ASSERT( rc != this->shared_from_this() );
-            _remote_connection = rc;
-            if( _remote_connection && _remote_connection->remote_connection() != this->shared_from_this() )
-               _remote_connection->set_remote_connection( this->shared_from_this() );
-         }
-         const std::shared_ptr<fc::api_connection>& remote_connection()const  { return _remote_connection; }
-
       private:
          std::vector< std::unique_ptr<detail::generic_api> > _local_apis;
-         std::shared_ptr<fc::api_connection>                 _remote_connection;
 
 
          struct api_visitor
@@ -185,6 +170,27 @@ namespace fc {
                 };
             }
          };
+   };
+
+   class local_api_connection : public api_connection
+   {
+      public:
+         /** makes calls to the remote server */
+         virtual variant send_call( api_id_type api_id, const string& method_name, const variants& args = variants() ) override
+         {
+            FC_ASSERT( _remote_connection );
+            return _remote_connection->receive_call( api_id, method_name, args );
+         }
+
+         void  set_remote_connection( const std::shared_ptr<fc::api_connection>& rc )
+         {
+            FC_ASSERT( !_remote_connection );
+            FC_ASSERT( rc != this->shared_from_this() );
+            _remote_connection = rc;
+         }
+         const std::shared_ptr<fc::api_connection>& remote_connection()const  { return _remote_connection; }
+
+         std::shared_ptr<fc::api_connection>    _remote_connection;
    };
 
    template<typename Api>

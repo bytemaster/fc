@@ -7,31 +7,32 @@
 
 namespace fc { namespace rpc {
 
-   class websocket_api : public api_connection, public fc::rpc::state, public fc::http::websocket_session
+   class websocket_api_connection : public api_connection
    {
       public:
-         websocket_api( fc::http::websocket_connection_ptr c )
-         :fc::http::websocket_session(c)
+         websocket_api_connection( fc::http::websocket_connection_ptr c )
+         :_connection(c)
          {
-            add_method( "call", [this]( const variants& args ) -> variant {
+            _rpc_state.add_method( "call", [this]( const variants& args ) -> variant {
                       FC_ASSERT( args.size() == 3 && args[2].is_array() );
                       return this->receive_call( args[0].as_uint64(),
-                                          args[1].as_string(),
-                                          args[2].get_array() );
+                                                         args[1].as_string(),
+                                                         args[2].get_array() );
                                   });
+            _connection->on_message_handler( [&]( const std::string& msg ){ on_message(msg); } );
          }
 
          virtual variant send_call( api_id_type api_id, 
                                     const string& method_name, 
                                     const variants& args = variants() ) override
          {
-            auto request = this->start_remote_call(  "call", {api_id, method_name, args} );
-            send_message( fc::json::to_string(request) );
-            return wait_for_response( *request.id );
+            auto request = _rpc_state.start_remote_call(  "call", {api_id, method_name, args} );
+            _connection->send_message( fc::json::to_string(request) );
+            return _rpc_state.wait_for_response( *request.id );
          }
 
       protected:
-         virtual void on_message( const std::string& message )
+         void on_message( const std::string& message )
          {
             auto var = fc::json::from_string(message);
             const auto& var_obj = var.get_object();
@@ -39,26 +40,28 @@ namespace fc { namespace rpc {
             {
                auto call = var.as<fc::rpc::request>();
                try {
-                  auto result = local_call( call.method, call.params );
+                  auto result = _rpc_state.local_call( call.method, call.params );
                   if( call.id )
                   {
-                     send_message( fc::json::to_string( response( *call.id, result ) ) );
+                     _connection->send_message( fc::json::to_string( response( *call.id, result ) ) );
                   }
                }
                catch ( const fc::exception& e )
                {
                   if( call.id )
                   {
-                     send_message( fc::json::to_string( response( *call.id,  error_object{ 1, e.to_detail_string(), fc::variant(e)}  ) ) );
+                     _connection->send_message( fc::json::to_string( response( *call.id,  error_object{ 1, e.to_detail_string(), fc::variant(e)}  ) ) );
                   }
                }
             }
             else 
             {
                auto reply = var.as<fc::rpc::response>();
-               handle_reply( reply );
+               _rpc_state.handle_reply( reply );
             }
          }
+         fc::http::websocket_connection_ptr _connection;
+         fc::rpc::state                     _rpc_state;
    };
 
 } } // namespace fc::rpc

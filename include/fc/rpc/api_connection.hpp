@@ -75,6 +75,15 @@ namespace fc {
                   };
                }
 
+               template<typename ... Args>
+               std::function<variant(const fc::variants&)> to_generic( const std::function<void(Args...)>& f )const
+               {
+                  return [=]( const variants& args ) { 
+                     call_generic( f, args.begin(), args.end() ); 
+                     return variant();
+                  };
+               }
+
                template<typename Result, typename... Args>
                void operator()( const char* name, std::function<Result(Args...)>& memb )const {
                   api._methods.emplace_back( to_generic( memb ) ); 

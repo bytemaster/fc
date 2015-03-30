@@ -10,7 +10,7 @@ namespace fc { namespace rpc {
    class websocket_api_connection : public api_connection
    {
       public:
-         websocket_api_connection( fc::http::websocket_connection_ptr c )
+         websocket_api_connection( fc::http::websocket_connection& c )
          :_connection(c)
          {
             _rpc_state.add_method( "call", [this]( const variants& args ) -> variant {
@@ -19,7 +19,7 @@ namespace fc { namespace rpc {
                                                          args[1].as_string(),
                                                          args[2].get_array() );
                                   });
-            _connection->on_message_handler( [&]( const std::string& msg ){ on_message(msg); } );
+            _connection.on_message_handler( [&]( const std::string& msg ){ on_message(msg); } );
          }
 
          virtual variant send_call( api_id_type api_id, 
@@ -27,7 +27,7 @@ namespace fc { namespace rpc {
                                     const variants& args = variants() ) override
          {
             auto request = _rpc_state.start_remote_call(  "call", {api_id, method_name, args} );
-            _connection->send_message( fc::json::to_string(request) );
+            _connection.send_message( fc::json::to_string(request) );
             return _rpc_state.wait_for_response( *request.id );
          }
 
@@ -43,14 +43,14 @@ namespace fc { namespace rpc {
                   auto result = _rpc_state.local_call( call.method, call.params );
                   if( call.id )
                   {
-                     _connection->send_message( fc::json::to_string( response( *call.id, result ) ) );
+                     _connection.send_message( fc::json::to_string( response( *call.id, result ) ) );
                   }
                }
                catch ( const fc::exception& e )
                {
                   if( call.id )
                   {
-                     _connection->send_message( fc::json::to_string( response( *call.id,  error_object{ 1, e.to_detail_string(), fc::variant(e)}  ) ) );
+                     _connection.send_message( fc::json::to_string( response( *call.id,  error_object{ 1, e.to_detail_string(), fc::variant(e)}  ) ) );
                   }
                }
             }
@@ -60,8 +60,8 @@ namespace fc { namespace rpc {
                _rpc_state.handle_reply( reply );
             }
          }
-         fc::http::websocket_connection_ptr _connection;
-         fc::rpc::state                     _rpc_state;
+         fc::http::websocket_connection&  _connection;
+         fc::rpc::state                   _rpc_state;
    };
 
 } } // namespace fc::rpc

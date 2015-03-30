@@ -200,6 +200,10 @@ namespace fc { namespace http {
    {
       my->_server.listen(port);
    }
+   void websocket_server::listen( const fc::ip::endpoint& ep )
+   {
+      my->_server.listen( boost::asio::ip::tcp::endpoint( boost::asio::ip::address_v4(uint32_t(ep.get_address())),ep.port()) );
+   }
 
    void websocket_server::start_accept() { 
       my->_server.start_accept(); 

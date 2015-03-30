@@ -58,7 +58,7 @@ namespace fc {
                R call_generic( const std::function<R(Arg0,Args...)>& f, variants::const_iterator a0, variants::const_iterator e )const
                {
                   FC_ASSERT( a0 != e );
-                  return  call_generic<R,Args...>( bind_first_arg( f, a0->as<Arg0>() ), a0+1, e );
+                  return  call_generic<R,Args...>( bind_first_arg<R,Arg0,Args...>( f, a0->as< typename std::decay<Arg0>::type >() ), a0+1, e );
                }
 
                template<typename Interface, typename Adaptor, typename ... Args>
@@ -71,7 +71,7 @@ namespace fc {
                std::function<variant(const fc::variants&)> to_generic( const std::function<R(Args...)>& f )const
                {
                   return [=]( const variants& args ) { 
-                     return call_generic( f, args.begin(), args.end() ); 
+                     return variant( call_generic( f, args.begin(), args.end() ) ); 
                   };
                }
 

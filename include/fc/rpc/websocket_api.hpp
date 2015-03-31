@@ -19,16 +19,23 @@ namespace fc { namespace rpc {
                                                          args[1].as_string(),
                                                          args[2].get_array() );
                                   });
+
             _rpc_state.add_method( "notice", [this]( const variants& args ) -> variant {
                       FC_ASSERT( args.size() == 2 && args[1].is_array() );
                       this->receive_notice( args[0].as_uint64(), args[1].get_array() );
                       return variant();
                                   });
+
             _rpc_state.add_method( "callback", [this]( const variants& args ) -> variant {
                       FC_ASSERT( args.size() == 2 && args[1].is_array() );
                       this->receive_callback( args[0].as_uint64(), args[1].get_array() );
                       return variant();
                                   });
+
+            _rpc_state.on_unhandled( [&]( const std::string& method_name, const variants& args ){
+                       return this->receive_call( 0, method_name, args );
+                                   }); 
+
             _connection.on_message_handler( [&]( const std::string& msg ){ on_message(msg); } );
          }
 

@@ -21,6 +21,8 @@ void state::remove_method( const fc::string& name )
 variant state::local_call( const string& method_name, const variants& args )
 {
    auto method_itr = _methods.find(method_name);
+   if( method_itr == _methods.end() && _unhandled )
+      return _unhandled( method_name, args );
    FC_ASSERT( method_itr != _methods.end(), "Unknown Method: ${name}", ("name",method_name) );
    return method_itr->second(args);
 }
@@ -57,6 +59,10 @@ void state::close()
    for( auto item : _awaiting )
       item.second->set_exception( fc::exception_ptr(new FC_EXCEPTION( eof_exception, "connection closed" )) );
    _awaiting.clear();
+}
+void state::on_unhandled( const std::function<variant(const string&, const variants&)>& unhandled )
+{
+   _unhandled = unhandled;
 }
 
 } }  // namespace fc::rpc

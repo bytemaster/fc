@@ -45,10 +45,13 @@ namespace fc { namespace rpc {
 
          void close();
 
+         void on_unhandled( const std::function<variant(const string&,const variants&)>& unhandled );
+
       private:
          uint64_t                                                   _next_id = 1;
          std::unordered_map<uint64_t, fc::promise<variant>::ptr>    _awaiting;
          std::unordered_map<std::string, method>                    _methods;
+         std::function<variant(const string&,const variants&)>                    _unhandled;
    };
 } }  // namespace  fc::rpc
 

@@ -19,7 +19,8 @@ namespace fc
          {
             legacy_parser         = 0,
             strict_parser         = 1,
-            relaxed_parser        = 2
+            relaxed_parser        = 2,
+            legacy_parser_with_string_doubles = 3
          };
 
          static ostream& to_stream( ostream& out, const fc::string& );

@@ -15,16 +15,15 @@
 namespace fc
 {
     // forward declarations of provided functions
-    template<typename T> variant variant_from_stream( T& in );
+    template<typename T, json::parse_type parser_type> variant variant_from_stream( T& in );
     template<typename T> char parseEscape( T& in );
     template<typename T> fc::string stringFromStream( T& in );
     template<typename T> bool skip_white_space( T& in );
     template<typename T> fc::string stringFromToken( T& in );
-    template<typename T> variant_object objectFromStream( T& in );
-    template<typename T> variants arrayFromStream( T& in );
-    template<typename T> variant number_from_stream( T& in );
+    template<typename T, json::parse_type parser_type> variant_object objectFromStream( T& in );
+    template<typename T, json::parse_type parser_type> variants arrayFromStream( T& in );
+    template<typename T, json::parse_type parser_type> variant number_from_stream( T& in );
     template<typename T> variant token_from_stream( T& in );
-    template<typename T> variant variant_from_stream( T& in );
     void escape_string( const string& str, ostream& os );
     template<typename T> void to_stream( T& os, const variants& a );
     template<typename T> void to_stream( T& os, const variant_object& o );
@@ -168,7 +167,7 @@ namespace fc
                                           ("token", token.str() ) );
    }
 
-   template<typename T>
+   template<typename T, json::parse_type parser_type>
    variant_object objectFromStream( T& in )
    {
       mutable_variant_object obj;
@@ -197,7 +196,7 @@ namespace fc
                                         ("key", key) );
             }
             in.get();
-            auto val = variant_from_stream( in );
+            auto val = variant_from_stream<T, parser_type>( in );
 
             obj(std::move(key),std::move(val));
             skip_white_space(in);
@@ -219,7 +218,7 @@ namespace fc
       } FC_RETHROW_EXCEPTIONS( warn, "Error parsing object" );
    }
 
-   template<typename T>
+   template<typename T, json::parse_type parser_type>
    variants arrayFromStream( T& in )
    {
       variants ar;
@@ -238,7 +237,7 @@ namespace fc
               continue;
            }
            if( skip_white_space(in) ) continue;
-           ar.push_back( variant_from_stream(in) );
+           ar.push_back( variant_from_stream<T, parser_type>(in) );
            skip_white_space(in);
         }
         if( in.peek() != ']' )
@@ -251,7 +250,7 @@ namespace fc
       return ar;
    }
 
-   template<typename T>
+   template<typename T, json::parse_type parser_type>
    variant number_from_stream( T& in )
    {
       fc::stringstream ss;
@@ -309,7 +308,7 @@ namespace fc
       if (str == "-." || str == ".") // check the obviously wrong things we could have encountered
         FC_THROW_EXCEPTION(parse_error_exception, "Can't parse token \"${token}\" as a JSON numeric constant", ("token", str));
       if( dot )
-        return to_double(str);
+        return parser_type == json::legacy_parser_with_string_doubles ? variant(str) : variant(to_double(str));
       if( neg )
         return to_int64(str);
       return to_uint64(str);
@@ -386,7 +385,7 @@ namespace fc
    }
 
 
-   template<typename T>
+   template<typename T, json::parse_type parser_type>
    variant variant_from_stream( T& in )
    {
       skip_white_space(in);
@@ -404,9 +403,9 @@ namespace fc
             case '"':
               return stringFromStream( in );
             case '{':
-              return objectFromStream( in );
+              return objectFromStream<T, parser_type>( in );
             case '[':
-              return arrayFromStream( in );
+              return arrayFromStream<T, parser_type>( in );
             case '-':
             case '.':
             case '0':
@@ -419,7 +418,7 @@ namespace fc
             case '7':
             case '8':
             case '9':
-              return number_from_stream( in );
+              return number_from_stream<T, parser_type>( in );
             // null, true, false, or 'warning' / string
             case 'n':
             case 't':
@@ -466,7 +465,9 @@ namespace fc
       switch( ptype )
       {
           case legacy_parser:
-              return variant_from_stream( in );
+              return variant_from_stream<fc::stringstream, legacy_parser>( in );
+          case legacy_parser_with_string_doubles:
+              return variant_from_stream<fc::stringstream, legacy_parser_with_string_doubles>( in );
           case strict_parser:
               return json_relaxed::variant_from_stream<fc::stringstream, true>( in );
           case relaxed_parser:
@@ -760,7 +761,9 @@ namespace fc
       switch( ptype )
       {
           case legacy_parser:
-              return variant_from_stream( bi );
+              return variant_from_stream<boost::filesystem::ifstream, legacy_parser>( bi );
+          case legacy_parser_with_string_doubles:
+              return variant_from_stream<boost::filesystem::ifstream, legacy_parser_with_string_doubles>( bi );
           case strict_parser:
               return json_relaxed::variant_from_stream<boost::filesystem::ifstream, true>( bi );
           case relaxed_parser:
@@ -774,7 +777,9 @@ namespace fc
       switch( ptype )
       {
           case legacy_parser:
-              return variant_from_stream( in );
+              return variant_from_stream<fc::buffered_istream, legacy_parser>( in );
+          case legacy_parser_with_string_doubles:
+              return variant_from_stream<fc::buffered_istream, legacy_parser_with_string_doubles>( in );
           case strict_parser:
               return json_relaxed::variant_from_stream<buffered_istream, true>( in );
           case relaxed_parser:
@@ -807,7 +812,10 @@ namespace fc
       switch( ptype )
       {
           case legacy_parser:
-              variant_from_stream( in );
+              variant_from_stream<fc::stringstream, legacy_parser>( in );
+              break;
+          case legacy_parser_with_string_doubles:
+              variant_from_stream<fc::stringstream, legacy_parser_with_string_doubles>( in );
               break;
           case strict_parser:
               json_relaxed::variant_from_stream<fc::stringstream, true>( in );

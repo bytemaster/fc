@@ -30,6 +30,7 @@ namespace fc
          static variant  from_stream( buffered_istream& in, parse_type ptype = legacy_parser );
 
          static variant  from_string( const string& utf8_str, parse_type ptype = legacy_parser );
+         static variants variants_from_string( const string& utf8_str, parse_type ptype = legacy_parser );
          static string   to_string( const variant& v );
          static string   to_pretty_string( const variant& v );
 

@@ -427,6 +427,7 @@ namespace fc
               return token_from_stream( in );
             case 0x04: // ^D end of transmission
             case EOF:
+            case 0:
               FC_THROW_EXCEPTION( eof_exception, "unexpected end of file" );
             default:
               FC_THROW_EXCEPTION( parse_error_exception, "Unexpected char '${c}' in \"${s}\"",
@@ -453,6 +454,20 @@ namespace fc
       }
    } FC_RETHROW_EXCEPTIONS( warn, "", ("str",utf8_str) ) }
 
+   variants json::variants_from_string( const std::string& utf8_str, parse_type ptype )
+   { try {
+      variants result;
+      fc::stringstream in( utf8_str );
+      //in.exceptions( std::ifstream::eofbit );
+      try {
+         while( true )
+         {
+           // result.push_back( variant_from_stream( in ));
+           result.push_back(json_relaxed::variant_from_stream<fc::stringstream, false>( in ));
+         }
+      } catch ( const fc::eof_exception& ){}
+      return result;
+   } FC_RETHROW_EXCEPTIONS( warn, "", ("str",utf8_str) ) }
    /*
    void toUTF8( const char str, ostream& os )
    {

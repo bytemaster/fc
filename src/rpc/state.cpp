@@ -31,11 +31,12 @@ void  state::handle_reply( const response& response )
    FC_ASSERT( await != _awaiting.end(), "Unknown Response ID: ${id}", ("id",response.id)("response",response) );
    if( response.result ) 
       await->second->set_value( *response.result );
-   else
+   else if( response.error )
    {
-      FC_ASSERT( response.error );
       await->second->set_exception( exception_ptr(new FC_EXCEPTION( exception, "${error}", ("error",*response.error) ) ) );
    }
+   else
+      await->second->set_value( fc::variant() );
    _awaiting.erase(await);
 }
 

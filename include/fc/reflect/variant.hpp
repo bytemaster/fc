@@ -20,8 +20,19 @@ namespace fc
          template<typename Member, class Class, Member (Class::*member)>
          void operator()( const char* name )const
          {
-            vo(name,(val.*member));
+            this->add(vo,name,(val.*member));
          }
+
+      private:
+         template<typename M>
+         void add( mutable_variant_object& vo, const char* name, const optional<M>& v )const
+         { 
+            if( v.valid() )
+               vo(name,*v);
+         }
+         template<typename M>
+         void add( mutable_variant_object& vo, const char* name, const M& v )const
+         { vo(name,v); }
 
          mutable_variant_object& vo;
          const T& val;

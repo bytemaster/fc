@@ -37,6 +37,7 @@ namespace fc { namespace rpc {
                                    }); 
 
             _connection.on_message_handler( [&]( const std::string& msg ){ on_message(msg); } );
+            _connection.closed.connect( [this](){ closed(); } );
          }
 
          virtual variant send_call( api_id_type api_id, 
@@ -58,6 +59,7 @@ namespace fc { namespace rpc {
             fc::rpc::request req{ optional<uint64_t>(), "notice", {callback_id, std::move(args)}};  
             _connection.send_message( fc::json::to_string(req) );
          }
+
 
       protected:
          void on_message( const std::string& message )

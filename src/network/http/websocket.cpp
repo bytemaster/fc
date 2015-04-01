@@ -73,7 +73,8 @@ namespace fc { namespace http {
 
             virtual void send_message( const std::string& message )override
             {
-               _ws_connection->send( message );
+               auto ec = _ws_connection->send( message );
+               FC_ASSERT( !ec, "websocket send failed: ${msg}", ("msg",ec.message() ) );
             }
             virtual void close( int64_t code, const std::string& reason  )override
             {
@@ -158,13 +159,15 @@ namespace fc { namespace http {
                    }).wait();
                 });
                 _client.set_close_handler( [=]( connection_hdl hdl ){
-                   _client_thread.async( [&](){ _connection.reset(); } ).wait();
+                   if( _connection )
+                      _client_thread.async( [&](){ if( _connection ) _connection->closed(); _connection.reset(); } ).wait();
                    if( _closed ) _closed->set_value();
                 });
                 _client.set_fail_handler( [=]( connection_hdl hdl ){
                    auto con = _client.get_con_from_hdl(hdl);
                    auto message = con->get_ec().message();
-                      _client_thread.async( [&](){ _connection.reset(); } ).wait();
+                   if( _connection )
+                      _client_thread.async( [&](){ if( _connection ) _connection->closed(); _connection.reset(); } ).wait();
                    if( _connected && !_connected->ready() ) 
                        _connected->set_exception( exception_ptr( new FC_EXCEPTION( exception, "${message}", ("message",message)) ) );
                    if( _closed ) 

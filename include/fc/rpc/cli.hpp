@@ -75,7 +75,7 @@ namespace fc { namespace rpc {
                 }
                 catch ( const fc::exception& e )
                 {
-                     edump((e.to_detail_string()));
+                   std::cout << e.to_detail_string() << "\n";
                 }
             } 
          }

@@ -80,7 +80,7 @@ namespace fc {
          variant call( const string& name, const variants& args )
          {
             auto itr = _by_name.find(name);
-            FC_ASSERT( itr != _by_name.end() );
+            FC_ASSERT( itr != _by_name.end(), "no method with name '${name}'", ("name",name)("api",_by_name) );
             return call( itr->second, args );
          }
 
@@ -220,6 +220,7 @@ namespace fc {
             return _local_callbacks.size() - 1;
          }
 
+         fc::signal<void()> closed;
       private:
          std::vector< std::unique_ptr<generic_api> >     _local_apis;
          std::map< uint64_t, api_id_type >                       _handle_to_id;

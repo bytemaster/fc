@@ -35,7 +35,7 @@ void  state::handle_reply( const response& response )
       await->second->set_value( *response.result );
    else if( response.error )
    {
-      await->second->set_exception( exception_ptr(new FC_EXCEPTION( exception, "${error}", ("error",*response.error) ) ) );
+      await->second->set_exception( exception_ptr(new FC_EXCEPTION( exception, "${error}", ("error",response.error->message)("data",response) ) ) );
    }
    else
       await->second->set_value( fc::variant() );

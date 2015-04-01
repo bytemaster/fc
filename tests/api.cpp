@@ -23,7 +23,7 @@ class login_api
          return *calc;
       }
       fc::optional<fc::api<calculator>> calc;
-      std::set<std::string> test( const std::string&, const std::string& ){};
+      std::set<std::string> test( const std::string&, const std::string& ) { return std::set<std::string>(); }
 };
 FC_API( login_api, (get_calc)(test) );
 

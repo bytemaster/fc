@@ -41,6 +41,8 @@ namespace fc
    void from_variant( const variant& var,  blob& vo );
    template<typename T> void to_variant( const safe<T>& s, variant& v );
    template<typename T> void from_variant( const variant& v, safe<T>& s );
+   template<typename T> void to_variant( const std::unique_ptr<T>& s, variant& v );
+   template<typename T> void from_variant( const variant& v, std::unique_ptr<T>& s );
 
    template<typename... T> void to_variant( const static_variant<T...>& s, variant& v );
    template<typename... T> void from_variant( const variant& v, static_variant<T...>& s );
@@ -502,6 +504,23 @@ namespace fc
           from_variant( var, *vo );
       }
    }
+   template<typename T>
+   void to_variant( const std::unique_ptr<T>& var,  variant& vo )
+   {
+      if( var ) to_variant( *var, vo );
+      else vo = nullptr;
+   }
+
+   template<typename T>
+   void from_variant( const variant& var,  std::unique_ptr<T>& vo )
+   {
+      if( var.is_null() ) vo.reset();
+      else if( vo ) from_variant( var, *vo );
+      else {
+          vo.reset( new T() );
+          from_variant( var, *vo );
+      }
+   }
 
 
    template<typename T>
@@ -509,6 +528,7 @@ namespace fc
 
    template<typename T>
    void from_variant( const variant& v, safe<T>& s ) { s.value = v.as_uint64(); }
+
 
    variant operator + ( const variant& a, const variant& b );
    variant operator - ( const variant& a, const variant& b );

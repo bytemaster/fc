@@ -234,7 +234,7 @@ target_include_directories(fc
 #target_link_libraries( fc PUBLIC easylzma_static scrypt udt ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} ${ZLIB_LIBRARIES} ${PLATFORM_SPECIFIC_LIBS} ${RPCRT4} ${CMAKE_DL_LIBS} ${rt_library})
 target_link_libraries( fc PUBLIC easylzma_static udt ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} ${ZLIB_LIBRARIES} ${PLATFORM_SPECIFIC_LIBS} ${RPCRT4} ${CMAKE_DL_LIBS} ${rt_library})
 
-IF(NOT BOOST_unit_test_framework_LIBRARY MATCHES "\\.a$")
+IF(NOT Boost_UNIT_TEST_FRAMEWORK_LIBRARY MATCHES "\\.a$")
 IF(WIN32)
 add_definitions(/DBOOST_TEST_DYN_LINK)
 ELSE(WIN32)

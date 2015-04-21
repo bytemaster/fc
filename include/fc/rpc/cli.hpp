@@ -3,6 +3,7 @@
 #include <fc/io/json.hpp>
 #include <fc/io/buffered_iostream.hpp>
 #include <fc/io/sstream.hpp>
+#include <fc/rpc/api_connection.hpp>
 #include <fc/thread/thread.hpp>
 
 namespace fc { namespace rpc {

@@ -34,6 +34,7 @@ SET (ORIGINAL_LIB_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES})
 
 SET(BOOST_COMPONENTS)
 LIST(APPEND BOOST_COMPONENTS thread date_time system filesystem program_options signals serialization chrono unit_test_framework context locale iostreams)
+SET( Boost_USE_STATIC_LIBS ON CACHE STRING "ON or OFF" )
 
 IF( WIN32 )
   MESSAGE(STATUS "Configuring fc to build on Win32")
@@ -44,7 +45,6 @@ IF( WIN32 )
   SET(BOOST_ROOT $ENV{BOOST_ROOT})
 #  set(Boost_USE_DEBUG_PYTHON ON)
   set(Boost_USE_MULTITHREADED ON)
-  set(Boost_USE_STATIC_LIBS ON)
   set(BOOST_ALL_DYN_LINK OFF) # force dynamic linking for all libraries
 
   FIND_PACKAGE(Boost 1.53 REQUIRED COMPONENTS ${BOOST_COMPONENTS})
@@ -62,7 +62,6 @@ IF( WIN32 )
 ELSE(WIN32)
   MESSAGE(STATUS "Configuring fc to build on Unix/Apple")
 
-  SET(Boost_USE_STATIC_LIBS ON)
   LIST(APPEND BOOST_COMPONENTS coroutine)
 
   FIND_PACKAGE(Boost 1.53 REQUIRED COMPONENTS ${BOOST_COMPONENTS}) 
@@ -235,6 +234,14 @@ target_include_directories(fc
 
 #target_link_libraries( fc PUBLIC easylzma_static scrypt udt ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} ${ZLIB_LIBRARIES} ${PLATFORM_SPECIFIC_LIBS} ${RPCRT4} ${CMAKE_DL_LIBS} ${rt_library})
 target_link_libraries( fc PUBLIC easylzma_static udt ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} ${ZLIB_LIBRARIES} ${PLATFORM_SPECIFIC_LIBS} ${RPCRT4} ${CMAKE_DL_LIBS} ${rt_library})
+
+IF(NOT Boost_UNIT_TEST_FRAMEWORK_LIBRARY MATCHES "\\.(a|lib)$")
+IF(WIN32)
+add_definitions(/DBOOST_TEST_DYN_LINK)
+ELSE(WIN32)
+add_definitions(-DBOOST_TEST_DYN_LINK)
+ENDIF(WIN32)
+ENDIF()
 
 add_executable( api tests/api.cpp )
 target_link_libraries( api fc )

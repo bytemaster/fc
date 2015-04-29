@@ -1,6 +1,10 @@
 #pragma once
 #include <fc/string.hpp>
+#include <fc/optional.hpp>
 #include <vector>
+#include <map>
+#include <fc/container/flat_fwd.hpp>
+
 namespace fc {
   class value;
   class exception;
@@ -28,6 +32,27 @@ namespace fc {
   { 
      static const char* name()  { 
          static std::string n = std::string("std::vector<") + get_typename<T>::name() + ">"; 
+         return n.c_str();  
+     } 
+  };
+  template<typename T> struct get_typename<flat_set<T>>   
+  { 
+     static const char* name()  { 
+         static std::string n = std::string("flat_set<") + get_typename<T>::name() + ">"; 
+         return n.c_str();  
+     } 
+  };
+  template<typename T> struct get_typename<optional<T>>   
+  { 
+     static const char* name()  { 
+         static std::string n = std::string("optional<") + get_typename<T>::name() + ">"; 
+         return n.c_str();  
+     } 
+  };
+  template<typename K,typename V> struct get_typename<std::map<K,V>>   
+  { 
+     static const char* name()  { 
+         static std::string n = std::string("std::map<") + get_typename<K>::name() + ","+get_typename<V>::name()+">"; 
          return n.c_str();  
      } 
   };

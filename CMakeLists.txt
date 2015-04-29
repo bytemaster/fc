@@ -76,6 +76,8 @@ ELSE(WIN32)
   ENDIF(NOT APPLE)
 ENDIF(WIN32)
 
+
+
 IF(NOT "$ENV{OPENSSL_ROOT_DIR}" STREQUAL "")
   set(OPENSSL_ROOT_DIR $ENV{OPENSSL_ROOT_DIR} )
   set(OPENSSL_INCLUDE_DIR ${OPENSSL_ROOT_DIR}/include)
@@ -123,6 +125,7 @@ set( fc_sources
      src/interprocess/file_mapping.cpp
      src/interprocess/mmap_struct.cpp
      src/rpc/json_connection.cpp
+     src/rpc/cli.cpp
      src/log/log_message.cpp 
      src/log/logger.cpp
      src/log/appender.cpp
@@ -195,6 +198,25 @@ add_subdirectory( vendor/udt4 )
 
 setup_library( fc SOURCES ${sources} LIBRARY_TYPE STATIC DONT_INSTALL_LIBRARY )
 
+# begin readline stuff
+find_package(Curses)
+find_package(Readline)
+
+file(GLOB HEADERS "include/bts/cli/*.hpp")
+
+if (READLINE_FOUND)
+  target_compile_definitions (fc PRIVATE HAVE_READLINE)
+  set(readline_libraries ${Readline_LIBRARY})
+  if (CURSES_FOUND)
+    list(APPEND readline_libraries ${CURSES_LIBRARY})
+  endif()
+  set(readline_includes ${Readline_INCLUDE_DIR})
+endif()
+if(WIN32)
+  target_compile_definitions( fc PRIVATE _CRT_NONSTDC_NO_DEPRECATE )
+endif(WIN32)
+# end readline stuff
+
 IF(WIN32)
   target_compile_definitions(fc PUBLIC WIN32 NOMINMAX _WIN32_WINNT=0x0501 _CRT_SECURE_NO_WARNINGS
     _SCL_SERCURE_NO_WARNINGS 
@@ -221,6 +243,7 @@ target_include_directories(fc
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${Boost_INCLUDE_DIR}
     ${OPENSSL_INCLUDE_DIR}
+    "${readline_includes}"
 
   PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
   #${CMAKE_CURRENT_SOURCE_DIR}/vendor/scrypt-jane
@@ -233,7 +256,7 @@ target_include_directories(fc
   )
 
 #target_link_libraries( fc PUBLIC easylzma_static scrypt udt ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} ${ZLIB_LIBRARIES} ${PLATFORM_SPECIFIC_LIBS} ${RPCRT4} ${CMAKE_DL_LIBS} ${rt_library})
-target_link_libraries( fc PUBLIC easylzma_static udt ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} ${ZLIB_LIBRARIES} ${PLATFORM_SPECIFIC_LIBS} ${RPCRT4} ${CMAKE_DL_LIBS} ${rt_library})
+target_link_libraries( fc PUBLIC easylzma_static udt ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} ${ZLIB_LIBRARIES} ${PLATFORM_SPECIFIC_LIBS} ${RPCRT4} ${CMAKE_DL_LIBS} ${rt_library} ${readline_libraries})
 
 IF(NOT Boost_UNIT_TEST_FRAMEWORK_LIBRARY MATCHES "\\.(a|lib)$")
 IF(WIN32)

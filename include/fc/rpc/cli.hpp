@@ -6,6 +6,8 @@
 #include <fc/rpc/api_connection.hpp>
 #include <fc/thread/thread.hpp>
 
+#include <iostream>
+
 namespace fc { namespace rpc {
 
    /**
@@ -48,16 +50,24 @@ namespace fc { namespace rpc {
          {
             _result_formatters[method] = formatter;
          }
+
+         virtual void getline( const fc::string& prompt, fc::string& line );
+
       private:
          void run()
          {
-               while( !fc::cin.eof() && !_run_complete.canceled() )
+               while( !_run_complete.canceled() )
                {
                   try {
-                     std::cout << ">>> ";
-                     std::cout.flush();
                      std::string line;
-                     fc::getline( fc::cin, line );
+                     try
+                     {
+                        getline( ">>> ", line );
+                     }
+                     catch ( const fc::eof_exception& e )
+                     {
+                        break;
+                     }
                      std::cout << line << "\n";
                      line += char(EOF);
                      fc::variants args = fc::json::variants_from_string(line);;

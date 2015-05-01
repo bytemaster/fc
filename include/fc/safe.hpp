@@ -41,6 +41,11 @@ namespace fc {
          return safe(-value);
       }
 
+      safe operator++(int) { safe bak = *this; *this += 1; return bak; }
+      safe& operator++() { return *this += 1; }
+      safe operator--(int) { safe bak = *this; *this -= 1; return bak; }
+      safe& operator--() { return *this -= 1; }
+
       friend safe operator - ( const safe& a, const safe& b )
       {
          safe tmp(a); tmp -= b; return tmp;

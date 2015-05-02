@@ -2,6 +2,8 @@
 #include <fc/exception/exception.hpp>
 #include <fc/reflect/reflect.hpp>
 
+#include <limits>
+
 namespace fc {
 
    /**

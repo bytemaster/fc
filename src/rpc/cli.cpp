@@ -23,6 +23,9 @@
 #  endif
 #  undef HAVE_READLINE
 # endif
+# ifdef WIN32
+#  include <io.h>
+# endif
 #endif
 
 namespace fc { namespace rpc {

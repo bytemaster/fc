@@ -1,5 +1,6 @@
 
 #include <fc/rpc/cli.hpp>
+#include <fc/thread/thread.hpp>
 
 #include <iostream>
 
@@ -49,15 +50,18 @@ void cli::getline(
    if( _isatty( _fileno( stdin ) ) )
 #endif
    {
-      char* line_read = nullptr;
-      std::cout.flush(); //readline doesn't use cin, so we must manually flush _out
-      line_read = readline(prompt.c_str());
-      if( line_read == nullptr )
-         FC_THROW_EXCEPTION( fc::eof_exception, "" );
-      if( *line_read )
-         add_history(line_read);
-      line = line_read;
-      free(line_read);
+      static fc::thread getline_thread("getline");
+      getline_thread.async( [&](){
+         char* line_read = nullptr;
+         std::cout.flush(); //readline doesn't use cin, so we must manually flush _out
+         line_read = readline(prompt.c_str());
+         if( line_read == nullptr )
+            FC_THROW_EXCEPTION( fc::eof_exception, "" );
+         if( *line_read )
+            add_history(line_read);
+         line = line_read;
+         free(line_read);
+      }).wait();
    }
    else
 #endif

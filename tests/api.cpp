@@ -9,9 +9,10 @@ class calculator
       int32_t add( int32_t a, int32_t b ); // not implemented
       int32_t sub( int32_t a, int32_t b ); // not implemented
       void    on_result( const std::function<void(int32_t)>& cb );
+      void    on_result2( const std::function<void(int32_t)>& cb, int test );
 };
 
-FC_API( calculator, (add)(sub)(on_result) )
+FC_API( calculator, (add)(sub)(on_result)(on_result2) )
 
 
 class login_api
@@ -35,6 +36,7 @@ class some_calculator
       int32_t add( int32_t a, int32_t b ) { wlog("."); if( _cb ) _cb(a+b); return a+b; }
       int32_t sub( int32_t a, int32_t b ) {  wlog(".");if( _cb ) _cb(a-b); return a-b; }
       void    on_result( const std::function<void(int32_t)>& cb ) { wlog( "set callback" ); _cb = cb;  return ; }
+      void    on_result2(  const std::function<void(int32_t)>& cb, int test ){}
       std::function<void(int32_t)> _cb;
 };
 class variant_calculator
@@ -43,6 +45,7 @@ class variant_calculator
       double add( fc::variant a, fc::variant b ) { return a.as_double()+b.as_double(); }
       double sub( fc::variant a, fc::variant b ) { return a.as_double()-b.as_double(); }
       void    on_result( const std::function<void(int32_t)>& cb ) { wlog("set callback"); _cb = cb; return ; }
+      void    on_result2(  const std::function<void(int32_t)>& cb, int test ){}
       std::function<void(int32_t)> _cb;
 };
 

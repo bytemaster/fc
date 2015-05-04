@@ -73,6 +73,7 @@ namespace fc { namespace http {
 
             virtual void send_message( const std::string& message )override
             {
+               idump((message));
                auto ec = _ws_connection->send( message );
                FC_ASSERT( !ec, "websocket send failed: ${msg}", ("msg",ec.message() ) );
             }
@@ -103,7 +104,7 @@ namespace fc { namespace http {
                     _server_thread.async( [&](){
                        auto current_con = _connections.find(hdl);
                        assert( current_con != _connections.end() );
-                       //wdump(("server")(msg->get_payload()));
+                       wdump(("server")(msg->get_payload()));
                        current_con->second->on_message( msg->get_payload()  );
                     }).wait();
                });
@@ -154,7 +155,7 @@ namespace fc { namespace http {
                 _client.clear_access_channels( websocketpp::log::alevel::all );
                 _client.set_message_handler( [&]( connection_hdl hdl, message_ptr msg ){
                    _client_thread.async( [&](){
-                       // wdump((msg->get_payload()));
+                        wdump((msg->get_payload()));
                       _connection->on_message( msg->get_payload() );
                    }).wait();
                 });

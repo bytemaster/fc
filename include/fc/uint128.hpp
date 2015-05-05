@@ -102,10 +102,9 @@ namespace fc
 
       static void full_product( const uint128& a, const uint128& b, uint128& result_hi, uint128& result_lo );
 
-      private:
-          uint64_t hi;
-          uint64_t lo;
-
+      // fields must be public for serialization
+      uint64_t hi;
+      uint64_t lo;
   };
   static_assert( sizeof(uint128) == 2*sizeof(uint64_t), "validate packing assumptions" );
 
@@ -138,6 +137,8 @@ namespace std
        }
     };
 }
+
+FC_REFLECT( fc::uint128_t, (hi)(lo) )
 
 #ifdef _MSC_VER
   #pragma warning (pop)

@@ -10,6 +10,10 @@ namespace fc { namespace rpc {
    class websocket_api_connection : public api_connection
    {
       public:
+         ~websocket_api_connection()
+         {
+         }
+
          websocket_api_connection( fc::http::websocket_connection& c )
          :_connection(c)
          {

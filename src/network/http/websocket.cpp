@@ -69,7 +69,12 @@ namespace fc { namespace http {
       {
          public:
             websocket_connection_impl( T con )
-            :_ws_connection(con){}
+            :_ws_connection(con){
+            }
+
+            ~websocket_connection_impl()
+            {
+            }
 
             virtual void send_message( const std::string& message )override
             {
@@ -110,6 +115,7 @@ namespace fc { namespace http {
                });
                _server.set_close_handler( [&]( connection_hdl hdl ){
                     _server_thread.async( [&](){
+                       _connections[hdl]->closed();
                        _connections.erase( hdl );  
                     }).wait();
                });
@@ -118,6 +124,7 @@ namespace fc { namespace http {
                     if( _server.is_listening() )
                     {
                        _server_thread.async( [&](){
+                          _connections[hdl]->closed();
                           _connections.erase( hdl );  
                        }).wait();
                     }

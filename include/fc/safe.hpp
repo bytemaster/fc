@@ -10,6 +10,9 @@ namespace fc {
     *  This type is designed to provide automatic checks for
     *  integer overflow and default initialization. It will
     *  throw an exception on overflow conditions.
+    *
+    *  It can only be used on built-in types.  In particular,
+    *  safe<uint128_t> is buggy and should not be used.
     */
    template<typename T>
    struct safe

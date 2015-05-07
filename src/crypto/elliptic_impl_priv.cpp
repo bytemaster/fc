@@ -72,7 +72,7 @@ namespace fc { namespace ecc {
        FC_ASSERT( my->_key != empty_priv );
        public_key_data pub;
        unsigned int pk_len;
-       FC_ASSERT( secp256k1_ec_pubkey_create( (unsigned char*) pub.begin(), (int*) &pk_len, (unsigned char*) my->_key.data(), 1 ) );
+       FC_ASSERT( secp256k1_ec_pubkey_create( detail::_get_context(), (unsigned char*) pub.begin(), (int*) &pk_len, (unsigned char*) my->_key.data(), 1 ) );
        FC_ASSERT( pk_len == pub.size() );
        return public_key(pub);
     }
@@ -93,7 +93,7 @@ namespace fc { namespace ecc {
         unsigned int counter = 0;
         do
         {
-            FC_ASSERT( secp256k1_ecdsa_sign_compact( (unsigned char*) digest.data(), (unsigned char*) result.begin() + 1, (unsigned char*) my->_key.data(), extended_nonce_function, &counter, &recid ));
+            FC_ASSERT( secp256k1_ecdsa_sign_compact( detail::_get_context(), (unsigned char*) digest.data(), (unsigned char*) result.begin() + 1, (unsigned char*) my->_key.data(), extended_nonce_function, &counter, &recid ));
         } while( !public_key::is_canonical( result ) );
         result.begin()[0] = 27 + 4 + recid;
         return result;

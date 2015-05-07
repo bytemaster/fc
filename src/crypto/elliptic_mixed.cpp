@@ -16,13 +16,13 @@
 namespace fc { namespace ecc {
     namespace detail
     {
-        static int init_secp256k1() {
-            secp256k1_start(SECP256K1_START_VERIFY | SECP256K1_START_SIGN);
-            return 1;
+        const secp256k1_context_t* _get_context() {
+            static secp256k1_context_t* ctx = secp256k1_context_create(SECP256K1_CONTEXT_VERIFY | SECP256K1_CONTEXT_SIGN);
+            return ctx;
         }
 
         void _init_lib() {
-            static int init_s = init_secp256k1();
+            static const secp256k1_context_t* ctx = _get_context();
             static int init_o = init_openssl();
         }
     }
@@ -33,7 +33,7 @@ namespace fc { namespace ecc {
       FC_ASSERT( my->_key != empty_priv );
       FC_ASSERT( other.my->_key != nullptr );
       public_key_data pub(other.serialize());
-      FC_ASSERT( secp256k1_ec_pubkey_tweak_mul( (unsigned char*) pub.begin(), pub.size(), (unsigned char*) my->_key.data() ) );
+      FC_ASSERT( secp256k1_ec_pubkey_tweak_mul( detail::_get_context(), (unsigned char*) pub.begin(), pub.size(), (unsigned char*) my->_key.data() ) );
       return fc::sha512::hash( pub.begin() + 1, pub.size() - 1 );
     }
 

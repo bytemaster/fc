@@ -15,13 +15,13 @@
 namespace fc { namespace ecc {
     namespace detail
     {
-        static int init_secp256k1() {
-            secp256k1_start(SECP256K1_START_VERIFY | SECP256K1_START_SIGN);
-            return 1;
+        const secp256k1_context_t* _get_context() {
+            static secp256k1_context_t* ctx = secp256k1_context_create(SECP256K1_CONTEXT_VERIFY | SECP256K1_CONTEXT_SIGN);
+            return ctx;
         }
 
         void _init_lib() {
-            static int init_s = init_secp256k1();
+            static const secp256k1_context_t* ctx = _get_context();
             static int init_o = init_openssl();
         }
 
@@ -51,7 +51,7 @@ namespace fc { namespace ecc {
       FC_ASSERT( my->_key != empty_priv );
       FC_ASSERT( other.my->_key != empty_pub );
       public_key_data pub(other.my->_key);
-      FC_ASSERT( secp256k1_ec_pubkey_tweak_mul( (unsigned char*) pub.begin(), pub.size(), (unsigned char*) my->_key.data() ) );
+      FC_ASSERT( secp256k1_ec_pubkey_tweak_mul( detail::_get_context(), (unsigned char*) pub.begin(), pub.size(), (unsigned char*) my->_key.data() ) );
       return fc::sha512::hash( pub.begin() + 1, pub.size() - 1 );
     }
 
@@ -86,7 +86,7 @@ namespace fc { namespace ecc {
         FC_ASSERT( my->_key != empty_pub );
         public_key_data new_key;
         memcpy( new_key.begin(), my->_key.begin(), new_key.size() );
-        FC_ASSERT( secp256k1_ec_pubkey_tweak_add( (unsigned char*) new_key.begin(), new_key.size(), (unsigned char*) digest.data() ) );
+        FC_ASSERT( secp256k1_ec_pubkey_tweak_add( detail::_get_context(), (unsigned char*) new_key.begin(), new_key.size(), (unsigned char*) digest.data() ) );
         return public_key( new_key );
     }
 
@@ -108,7 +108,7 @@ namespace fc { namespace ecc {
         public_key_point_data dat;
         unsigned int pk_len = my->_key.size();
         memcpy( dat.begin(), my->_key.begin(), pk_len );
-        FC_ASSERT( secp256k1_ec_pubkey_decompress( (unsigned char *) dat.begin(), (int*) &pk_len ) );
+        FC_ASSERT( secp256k1_ec_pubkey_decompress( detail::_get_context(), (unsigned char *) dat.begin(), (int*) &pk_len ) );
         FC_ASSERT( pk_len == dat.size() );
         return dat;
     }
@@ -146,7 +146,7 @@ namespace fc { namespace ecc {
         }
 
         unsigned int pk_len;
-        FC_ASSERT( secp256k1_ecdsa_recover_compact( (unsigned char*) digest.data(), (unsigned char*) c.begin() + 1, (unsigned char*) my->_key.begin(), (int*) &pk_len, 1, (*c.begin() - 27) & 3 ) );
+        FC_ASSERT( secp256k1_ecdsa_recover_compact( detail::_get_context(), (unsigned char*) digest.data(), (unsigned char*) c.begin() + 1, (unsigned char*) my->_key.begin(), (int*) &pk_len, 1, (*c.begin() - 27) & 3 ) );
         FC_ASSERT( pk_len == my->_key.size() );
     }
 } }

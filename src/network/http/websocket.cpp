@@ -145,10 +145,12 @@ namespace fc { namespace http {
          public:
             websocket_connection_impl( T con )
             :_ws_connection(con){
+               wdump((uint64_t(this)));
             }
 
             ~websocket_connection_impl()
             {
+               wdump((uint64_t(this)));
             }
 
             virtual void send_message( const std::string& message )override
@@ -446,10 +448,23 @@ namespace fc { namespace http {
                 });
                 _client.set_close_handler( [=]( connection_hdl hdl ){
                    if( _connection )
-                      _client_thread.async( [&](){ if( _connection ) _connection->closed(); _connection.reset(); } ).wait();
-                   if( _closed ) _closed->set_value();
+                   {
+                      try {
+                         _client_thread.async( [&](){ 
+                                 wlog(". ${p}", ("p",uint64_t(_connection.get()))); 
+                                 if( !_shutting_down && !_closed && _connection ) 
+                                    _connection->closed(); 
+                                 _connection.reset(); 
+                         } ).wait();
+                      } catch ( const fc::exception& e )
+                      {
+                          if( _closed ) _closed->set_exception( e.dynamic_copy_exception() );
+                      }
+                      if( _closed ) _closed->set_value();
+                   }
                 });
                 _client.set_fail_handler( [=]( connection_hdl hdl ){
+                   elog( "." );
                    auto con = _client.get_con_from_hdl(hdl);
                    auto message = con->get_ec().message();
                    if( _connection )
@@ -480,10 +495,13 @@ namespace fc { namespace http {
             {
                if(_connection )
                {
+                  wlog(".");
+                  _shutting_down = true;
                   _connection->close(0, "client closed");
                   _closed->wait();
                }
             }
+            bool                               _shutting_down = false;
             fc::promise<void>::ptr             _connected;
             fc::promise<void>::ptr             _closed;
             fc::thread&                        _client_thread;

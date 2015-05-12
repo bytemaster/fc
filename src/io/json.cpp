@@ -451,6 +451,7 @@ namespace fc
             case '}': open_object--; break;
             case '[': open_array++; break;
             case ']': open_array--; break;
+            default: break;
          }
          FC_ASSERT( open_object < 100 && open_array < 100, "object graph too deep", ("object depth",open_object)("array depth", open_array) );
       }

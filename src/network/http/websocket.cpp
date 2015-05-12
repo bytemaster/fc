@@ -136,7 +136,7 @@ namespace fc { namespace http {
 
 
       using websocketpp::connection_hdl;
-      typedef websocketpp::server<asio_with_stub_log>                           websocket_server_type;
+      typedef websocketpp::server<asio_with_stub_log>  websocket_server_type;
       typedef websocketpp::server<asio_tls_stub_log>   websocket_tls_server_type;
 
       template<typename T>
@@ -211,8 +211,15 @@ namespace fc { namespace http {
 
                _server.set_close_handler( [&]( connection_hdl hdl ){
                     _server_thread.async( [&](){
-                       _connections[hdl]->closed();
-                       _connections.erase( hdl );  
+                       if( _connections.find(hdl) != _connections.end() )
+                       {
+                          _connections[hdl]->closed();
+                          _connections.erase( hdl );  
+                       }
+                       else
+                       {
+                            wlog( "unknown connection closed" );
+                       }
                     }).wait();
                });
 
@@ -220,8 +227,15 @@ namespace fc { namespace http {
                     if( _server.is_listening() )
                     {
                        _server_thread.async( [&](){
-                          _connections[hdl]->closed();
-                          _connections.erase( hdl );  
+                          if( _connections.find(hdl) != _connections.end() )
+                          {
+                             _connections[hdl]->closed();
+                             _connections.erase( hdl );  
+                          }
+                          else
+                          {
+                            wlog( "unknown connection failed" );
+                          }
                        }).wait();
                     }
                });
@@ -360,7 +374,10 @@ namespace fc { namespace http {
 
 
       typedef websocketpp::client<asio_with_stub_log> websocket_client_type; 
+      typedef websocketpp::client<asio_tls_stub_log> websocket_tls_client_type; 
+
       typedef websocket_client_type::connection_ptr  websocket_client_connection_type; 
+      typedef websocket_tls_client_type::connection_ptr  websocket_tls_client_connection_type; 
 
       class websocket_client_impl 
       {
@@ -392,6 +409,7 @@ namespace fc { namespace http {
                    if( _closed ) 
                        _closed->set_value();
                 });
+
                 _client.init_asio( &fc::asio::default_io_service() );
             }
             ~websocket_client_impl()
@@ -408,6 +426,72 @@ namespace fc { namespace http {
             websocket_client_type              _client;
             websocket_connection_ptr           _connection;
       };
+
+
+
+      class websocket_tls_client_impl 
+      {
+         public:
+            typedef websocket_tls_client_type::message_ptr message_ptr;
+
+            websocket_tls_client_impl()
+            :_client_thread( fc::thread::current() )
+            {
+                _client.clear_access_channels( websocketpp::log::alevel::all );
+                _client.set_message_handler( [&]( connection_hdl hdl, message_ptr msg ){
+                   _client_thread.async( [&](){
+                        wdump((msg->get_payload()));
+                      _connection->on_message( msg->get_payload() );
+                   }).wait();
+                });
+                _client.set_close_handler( [=]( connection_hdl hdl ){
+                   if( _connection )
+                      _client_thread.async( [&](){ if( _connection ) _connection->closed(); _connection.reset(); } ).wait();
+                   if( _closed ) _closed->set_value();
+                });
+                _client.set_fail_handler( [=]( connection_hdl hdl ){
+                   auto con = _client.get_con_from_hdl(hdl);
+                   auto message = con->get_ec().message();
+                   if( _connection )
+                      _client_thread.async( [&](){ if( _connection ) _connection->closed(); _connection.reset(); } ).wait();
+                   if( _connected && !_connected->ready() ) 
+                       _connected->set_exception( exception_ptr( new FC_EXCEPTION( exception, "${message}", ("message",message)) ) );
+                   if( _closed ) 
+                       _closed->set_value();
+                });
+
+                _client.set_tls_init_handler( [=](websocketpp::connection_hdl) {
+                   context_ptr ctx = websocketpp::lib::make_shared<boost::asio::ssl::context>(boost::asio::ssl::context::tlsv1);
+                   try {
+                      ctx->set_options(boost::asio::ssl::context::default_workarounds |
+                      boost::asio::ssl::context::no_sslv2 |
+                      boost::asio::ssl::context::no_sslv3 |
+                      boost::asio::ssl::context::single_dh_use);
+                   } catch (std::exception& e) {
+                      edump((e.what()));
+                      std::cout << e.what() << std::endl;
+                   }
+                   return ctx;
+                });
+
+                _client.init_asio( &fc::asio::default_io_service() );
+            }
+            ~websocket_tls_client_impl()
+            {
+               if(_connection )
+               {
+                  _connection->close(0, "client closed");
+                  _closed->wait();
+               }
+            }
+            fc::promise<void>::ptr             _connected;
+            fc::promise<void>::ptr             _closed;
+            fc::thread&                        _client_thread;
+            websocket_tls_client_type              _client;
+            websocket_connection_ptr           _connection;
+      };
+
+
    } // namespace detail
 
    websocket_server::websocket_server():my( new detail::websocket_server_impl() ) {}
@@ -456,18 +540,20 @@ namespace fc { namespace http {
    }
 
 
+   websocket_tls_client::websocket_tls_client():my( new detail::websocket_tls_client_impl() ) {}
+   websocket_tls_client::~websocket_tls_client(){ }
 
 
 
-
-
-
-
-
-   websocket_client::websocket_client():my( new detail::websocket_client_impl() ) {}
+   websocket_client::websocket_client():my( new detail::websocket_client_impl() ),smy(new detail::websocket_tls_client_impl()) {}
    websocket_client::~websocket_client(){ }
+
    websocket_connection_ptr websocket_client::connect( const std::string& uri )
    { try {
+       if( uri.substr(0,4) == "wss:" ) 
+          return secure_connect(uri);
+       FC_ASSERT( uri.substr(0,3) == "ws:" );
+
        // wlog( "connecting to ${uri}", ("uri",uri));
        websocketpp::lib::error_code ec;
 
@@ -476,6 +562,54 @@ namespace fc { namespace http {
        my->_client.set_open_handler( [=]( websocketpp::connection_hdl hdl ){
           auto con =  my->_client.get_con_from_hdl(hdl);
           my->_connection = std::make_shared<detail::websocket_connection_impl<detail::websocket_client_connection_type>>( con );
+          my->_closed = fc::promise<void>::ptr( new fc::promise<void>("websocket::closed") );
+          my->_connected->set_value();
+       });
+
+       auto con = my->_client.get_connection( uri, ec );
+
+       if( ec ) FC_ASSERT( !ec, "error: ${e}", ("e",ec.message()) );
+
+       my->_client.connect(con);
+       my->_connected->wait();
+       return my->_connection;
+   } FC_CAPTURE_AND_RETHROW( (uri) ) }
+
+   websocket_connection_ptr websocket_client::secure_connect( const std::string& uri )
+   { try {
+       if( uri.substr(0,3) == "ws:" ) 
+          return connect(uri);
+       FC_ASSERT( uri.substr(0,4) == "wss:" );
+       // wlog( "connecting to ${uri}", ("uri",uri));
+       websocketpp::lib::error_code ec;
+
+       smy->_connected = fc::promise<void>::ptr( new fc::promise<void>("websocket::connect") );
+
+       smy->_client.set_open_handler( [=]( websocketpp::connection_hdl hdl ){
+          auto con =  smy->_client.get_con_from_hdl(hdl);
+          smy->_connection = std::make_shared<detail::websocket_connection_impl<detail::websocket_tls_client_connection_type>>( con );
+          smy->_closed = fc::promise<void>::ptr( new fc::promise<void>("websocket::closed") );
+          smy->_connected->set_value();
+       });
+
+       auto con = smy->_client.get_connection( uri, ec );
+       if( ec )
+          FC_ASSERT( !ec, "error: ${e}", ("e",ec.message()) );
+       smy->_client.connect(con);
+       smy->_connected->wait();
+       return smy->_connection;
+   } FC_CAPTURE_AND_RETHROW( (uri) ) }
+
+   websocket_connection_ptr websocket_tls_client::connect( const std::string& uri )
+   { try {
+       // wlog( "connecting to ${uri}", ("uri",uri));
+       websocketpp::lib::error_code ec;
+
+       my->_connected = fc::promise<void>::ptr( new fc::promise<void>("websocket::connect") );
+
+       my->_client.set_open_handler( [=]( websocketpp::connection_hdl hdl ){
+          auto con =  my->_client.get_con_from_hdl(hdl);
+          my->_connection = std::make_shared<detail::websocket_connection_impl<detail::websocket_tls_client_connection_type>>( con );
           my->_closed = fc::promise<void>::ptr( new fc::promise<void>("websocket::closed") );
           my->_connected->set_value();
        });

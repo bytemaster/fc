@@ -11,6 +11,7 @@ namespace fc { namespace http {
       class websocket_server_impl;
       class websocket_tls_server_impl;
       class websocket_client_impl;
+      class websocket_tls_client_impl;
    } // namespace detail;
 
    class websocket_connection
@@ -79,8 +80,20 @@ namespace fc { namespace http {
          ~websocket_client();
 
          websocket_connection_ptr connect( const std::string& uri );
+         websocket_connection_ptr secure_connect( const std::string& uri );
       private:
          std::unique_ptr<detail::websocket_client_impl> my;
+         std::unique_ptr<detail::websocket_tls_client_impl> smy;
+   };
+   class websocket_tls_client
+   {
+      public:
+         websocket_tls_client();
+         ~websocket_tls_client();
+
+         websocket_connection_ptr connect( const std::string& uri );
+      private:
+         std::unique_ptr<detail::websocket_tls_client_impl> my;
    };
 
 } }

@@ -40,7 +40,8 @@ namespace fc { namespace rpc {
                        return this->receive_call( 0, method_name, args );
                                    }); 
 
-            _connection.on_message_handler( [&]( const std::string& msg ){ on_message(msg); } );
+            _connection.on_message_handler( [&]( const std::string& msg ){ on_message(msg,true); } );
+            _connection.on_http_handler( [&]( const std::string& msg ){ return on_message(msg,false); } );
             _connection.closed.connect( [this](){ closed(); } );
          }
 
@@ -66,7 +67,7 @@ namespace fc { namespace rpc {
 
 
       protected:
-         void on_message( const std::string& message )
+         std::string on_message( const std::string& message, bool send_message = true )
          { 
             try {
                auto var = fc::json::from_string(message);
@@ -78,14 +79,21 @@ namespace fc { namespace rpc {
                      auto result = _rpc_state.local_call( call.method, call.params );
                      if( call.id )
                      {
-                        _connection.send_message( fc::json::to_string( response( *call.id, result ) ) );
+                        auto reply = fc::json::to_string( response( *call.id, result ) );
+                        if( send_message )
+                           _connection.send_message( reply );
+                        return reply;
                      }
                   }
                   catch ( const fc::exception& e )
                   {
                      if( call.id )
                      {
-                        _connection.send_message( fc::json::to_string( response( *call.id,  error_object{ 1, e.to_detail_string(), fc::variant(e)}  ) ) );
+                        auto reply = fc::json::to_string( response( *call.id,  error_object{ 1, e.to_detail_string(), fc::variant(e)}  ) );
+                        if( send_message )
+                           _connection.send_message( reply );
+
+                        return reply;
                      }
                   }
                }
@@ -96,7 +104,9 @@ namespace fc { namespace rpc {
                }
             } catch ( const fc::exception& e ) {
                wdump((e.to_detail_string()));
+               return e.to_detail_string();
             }
+            return string();
          }
          fc::http::websocket_connection&  _connection;
          fc::rpc::state                   _rpc_state;

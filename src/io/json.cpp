@@ -436,9 +436,30 @@ namespace fc
       }
 	  return variant();
    }
+
+
+   /** the purpose of this check is to verify that we will not get a stack overflow in the recursive descent parser */
+   void check_string_depth( const string& utf8_str  )
+   {
+      int32_t open_object = 0;
+      int32_t open_array  = 0;
+      for( auto c : utf8_str )
+      {
+         switch( c )
+         {
+            case '{': open_object++; break;
+            case '}': open_object--; break;
+            case '[': open_array++; break;
+            case ']': open_array--; break;
+         }
+         FC_ASSERT( open_object < 100 && open_array < 100, "object graph too deep", ("object depth",open_object)("array depth", open_array) );
+      }
+   }
    
    variant json::from_string( const std::string& utf8_str, parse_type ptype )
    { try {
+      check_string_depth( utf8_str );
+
       fc::stringstream in( utf8_str );
       //in.exceptions( std::ifstream::eofbit );
       switch( ptype )
@@ -456,6 +477,7 @@ namespace fc
 
    variants json::variants_from_string( const std::string& utf8_str, parse_type ptype )
    { try {
+      check_string_depth( utf8_str );
       variants result;
       fc::stringstream in( utf8_str );
       //in.exceptions( std::ifstream::eofbit );

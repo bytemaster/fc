@@ -278,6 +278,9 @@ add_executable( task_cancel_test tests/task_cancel.cpp )
 target_link_libraries( task_cancel_test fc )
 
 
+add_executable( bloom_test tests/bloom_test.cpp )
+target_link_libraries( bloom_test fc )
+
 add_executable( real128_test tests/real128_test.cpp )
 target_link_libraries( real128_test fc )
 

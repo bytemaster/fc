@@ -589,11 +589,23 @@ namespace fc
               os << "null";
               return;
          case variant::int64_type:
-              os << v.as_int64();
+         {
+              int64_t i = v.as_int64();
+              if( i >> 32 )
+                 os << v.as_string();
+              else
+                 os << i;
               return;
+         }
          case variant::uint64_type:
-              os << v.as_uint64();
+         {
+              uint64_t i = v.as_uint64();
+              if( i >> 32 )
+                 os << v.as_string();
+              else
+                 os << i;
               return;
+         }
          case variant::double_type:
               os << v.as_double();
               return;

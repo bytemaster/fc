@@ -1,4 +1,3 @@
-
 #include <fc/rpc/cli.hpp>
 #include <fc/thread/thread.hpp>
 
@@ -31,10 +30,7 @@
 
 namespace fc { namespace rpc {
 
-void cli::getline(
-   const fc::string& prompt,
-   fc::string& line
-   )
+void cli::getline( const fc::string& prompt, fc::string& line)
 {
    // getting file descriptor for C++ streams is near impossible
    // so we just assume it's the same as the C stream...

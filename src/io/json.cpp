@@ -591,8 +591,8 @@ namespace fc
          case variant::int64_type:
          {
               int64_t i = v.as_int64();
-              if( i >> 32 )
-                 os << v.as_string();
+              if( i > 0xffffffff )
+                 os << '"'<<v.as_string()<<'"';
               else
                  os << i;
               return;
@@ -600,14 +600,15 @@ namespace fc
          case variant::uint64_type:
          {
               uint64_t i = v.as_uint64();
-              if( i >> 32 )
-                 os << v.as_string();
+              if( i > 0xffffffff )
+                 os << '"'<<v.as_string()<<'"';
               else
                  os << i;
               return;
          }
          case variant::double_type:
-              os << v.as_double();
+              //os << v.as_string();
+                 os << '"'<<v.as_string()<<'"';
               return;
          case variant::bool_type:
               os << v.as_string();

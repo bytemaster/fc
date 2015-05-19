@@ -155,6 +155,7 @@ struct type_info<T&, Ts...> {
     static const bool no_reference_types = false;
     static const bool no_duplicates = position<T, Ts...>::pos == -1 && type_info<Ts...>::no_duplicates;
     static const size_t size = type_info<Ts...>::size > sizeof(T&) ? type_info<Ts...>::size : sizeof(T&);
+    static const size_t count = 1 + type_info<Ts...>::count;
 };
 
 template<typename T, typename... Ts>
@@ -162,12 +163,14 @@ struct type_info<T, Ts...> {
     static const bool no_reference_types = type_info<Ts...>::no_reference_types;
     static const bool no_duplicates = position<T, Ts...>::pos == -1 && type_info<Ts...>::no_duplicates;
     static const size_t size = type_info<Ts...>::size > sizeof(T) ? type_info<Ts...>::size : sizeof(T&);
+    static const size_t count = 1 + type_info<Ts...>::count;
 };
 
 template<>
 struct type_info<> {
     static const bool no_reference_types = true;
     static const bool no_duplicates = true;
+    static const size_t count = 0;
     static const size_t size = 0;
 };
 
@@ -314,13 +317,15 @@ public:
         return impl::storage_ops<0, Types...>::apply(_tag, storage, v);
     }
 
-     void set_which( int w ) {
-       this->~static_variant();
-       _tag = w;
-       impl::storage_ops<0, Types...>::con(_tag, storage);
-     }
+    static int count() { return impl::type_info<Types...>::count; }
+    void set_which( int w ) {
+      FC_ASSERT( w < count() );
+      this->~static_variant();
+      _tag = w;
+      impl::storage_ops<0, Types...>::con(_tag, storage);
+    }
 
-     int which() const {return _tag;}
+    int which() const {return _tag;}
 };
 
 template<typename Result>
@@ -369,4 +374,5 @@ struct visitor {
       s.visit( to_static_variant(ar[1]) );
    }
 
+  template<typename... T> struct get_typename<T...>  { static const char* name()   { return typeid(static_variant<T...>).name();   } };
 } // namespace fc

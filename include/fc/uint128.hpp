@@ -39,6 +39,7 @@ namespace fc
       bool     operator == ( const uint128& o )const{ return hi == o.hi && lo == o.lo;             }
       bool     operator != ( const uint128& o )const{ return hi != o.hi || lo != o.lo;             }
       bool     operator < ( const uint128& o )const { return (hi == o.hi) ? lo < o.lo : hi < o.hi; }
+      bool     operator < ( const int64_t& o )const { return *this < uint128(o); }
       bool     operator !()const                    { return !(hi !=0 || lo != 0);                 }
       uint128  operator -()const                    { return ++uint128( ~hi, ~lo );                }
       uint128  operator ~()const                    { return uint128( ~hi, ~lo );                  }
@@ -72,10 +73,15 @@ namespace fc
       friend uint128 operator << ( const uint128& l, const uint128& r )  { return uint128(l)<<=r;  }
       friend uint128 operator >> ( const uint128& l, const uint128& r )  { return uint128(l)>>=r;  }
       friend bool    operator >  ( const uint128& l, const uint128& r )  { return r < l;           }
-
+      friend bool    operator >  ( const uint128& l, const int64_t& r )  { return uint128(r) < l;           }
+      friend bool    operator >  ( const int64_t& l, const uint128& r )  { return r < uint128(l);           }
 
       friend bool    operator >=  ( const uint128& l, const uint128& r ) { return l == r || l > r; }
+      friend bool    operator >=  ( const uint128& l, const int64_t& r ) { return l >= uint128(r); }
+      friend bool    operator >=  ( const int64_t& l, const uint128& r ) { return uint128(l) >= r; }
       friend bool    operator <=  ( const uint128& l, const uint128& r ) { return l == r || l < r; }
+      friend bool    operator <=  ( const uint128& l, const int64_t& r ) { return l <= uint128(r); }
+      friend bool    operator <=  ( const int64_t& l, const uint128& r ) { return uint128(l) <= r; }
 
       friend std::size_t hash_value( const uint128& v ) { return city_hash_size_t((const char*)&v, sizeof(v)); }
 

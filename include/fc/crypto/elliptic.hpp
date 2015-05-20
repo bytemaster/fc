@@ -1,5 +1,6 @@
 #pragma once
 #include <fc/crypto/bigint.hpp>
+#include <fc/crypto/openssl.hpp>
 #include <fc/crypto/sha256.hpp>
 #include <fc/crypto/sha512.hpp>
 #include <fc/fwd.hpp>
@@ -31,7 +32,7 @@ namespace fc {
            public_key();
            public_key(const public_key& k);
            ~public_key();
-           bool verify( const fc::sha256& digest, const signature& sig );
+//           bool verify( const fc::sha256& digest, const signature& sig );
            public_key_data serialize()const;
            public_key_point_data serialize_ecc_point()const;
 
@@ -43,7 +44,10 @@ namespace fc {
            public_key( const compact_signature& c, const fc::sha256& digest, bool check_canonical = true );
 
            bool valid()const;
-           public_key mult( const fc::sha256& offset );
+           /** Computes new pubkey = generator * offset + old pubkey ?! */
+//           public_key mult( const fc::sha256& offset )const;
+           /** Computes new pubkey = regenerate(offset).pubkey + old pubkey
+            *                      = offset * G + 1 * old pubkey ?! */
            public_key add( const fc::sha256& offset )const;
 
            public_key( public_key&& pk );
@@ -61,11 +65,14 @@ namespace fc {
 
            /// Allows to convert current public key object into base58 number.
            std::string to_base58() const;
+           static std::string to_base58( const public_key_data &key );
            static public_key from_base58( const std::string& b58 );
 
         private:
           friend class private_key;
-          fc::fwd<detail::public_key_impl,8> my;
+          static public_key from_key_data( const public_key_data& v );
+          static bool is_canonical( const compact_signature& c );
+          fc::fwd<detail::public_key_impl,33> my;
     };
 
     /**
@@ -103,9 +110,9 @@ namespace fc {
             */
            fc::sha512 get_shared_secret( const public_key& pub )const;
 
-           signature         sign( const fc::sha256& digest )const;
+//           signature         sign( const fc::sha256& digest )const;
            compact_signature sign_compact( const fc::sha256& digest )const;
-           bool              verify( const fc::sha256& digest, const signature& sig );
+//           bool              verify( const fc::sha256& digest, const signature& sig );
 
            public_key get_public_key()const;
 
@@ -123,7 +130,9 @@ namespace fc {
            }
 
         private:
-           fc::fwd<detail::private_key_impl,8> my;
+           private_key( EC_KEY* k );
+           static fc::sha256 get_secret( const EC_KEY * const k );
+           fc::fwd<detail::private_key_impl,32> my;
     };
   } // namespace ecc
   void to_variant( const ecc::private_key& var,  variant& vo );

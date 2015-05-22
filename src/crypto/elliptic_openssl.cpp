@@ -21,29 +21,29 @@ namespace fc { namespace ecc {
         class private_key_impl
         {
             public:
-                private_key_impl() noexcept
+                private_key_impl() BOOST_NOEXCEPT
                 {
                     _init_lib();
                 }
 
-                private_key_impl( const private_key_impl& cpy ) noexcept
-                {
-                    _init_lib();
-                    *this = cpy;
-                }
-
-                private_key_impl( private_key_impl&& cpy ) noexcept
+                private_key_impl( const private_key_impl& cpy ) BOOST_NOEXCEPT
                 {
                     _init_lib();
                     *this = cpy;
                 }
 
-                ~private_key_impl() noexcept
+                private_key_impl( private_key_impl&& cpy ) BOOST_NOEXCEPT
+                {
+                    _init_lib();
+                    *this = cpy;
+                }
+
+                ~private_key_impl() BOOST_NOEXCEPT
                 {
                     free_key();
                 }
 
-                private_key_impl& operator=( const private_key_impl& pk ) noexcept
+                private_key_impl& operator=( const private_key_impl& pk ) BOOST_NOEXCEPT
                 {
                     if (pk._key == nullptr)
                     {
@@ -56,7 +56,7 @@ namespace fc { namespace ecc {
                     return *this;
                 }
 
-                private_key_impl& operator=( private_key_impl&& pk ) noexcept
+                private_key_impl& operator=( private_key_impl&& pk ) BOOST_NOEXCEPT
                 {
                     if ( this != &pk ) {
                         free_key();
@@ -69,7 +69,7 @@ namespace fc { namespace ecc {
                 EC_KEY* _key = nullptr;
 
             private:
-                void free_key() noexcept
+                void free_key() BOOST_NOEXCEPT
                 {
                     if( _key != nullptr )
                     {

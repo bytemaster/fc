@@ -1,4 +1,5 @@
 #include <fc/fwd_impl.hpp>
+#include <boost/config.hpp>
 
 #include "_elliptic_impl_pub.hpp"
 
@@ -7,29 +8,29 @@
 namespace fc { namespace ecc {
     namespace detail {
 
-        public_key_impl::public_key_impl() noexcept
+        public_key_impl::public_key_impl() BOOST_NOEXCEPT
         {
             _init_lib();
         }
 
-        public_key_impl::public_key_impl( const public_key_impl& cpy ) noexcept
-        {
-            _init_lib();
-            *this = cpy;
-        }
-
-        public_key_impl::public_key_impl( public_key_impl&& cpy ) noexcept
+        public_key_impl::public_key_impl( const public_key_impl& cpy ) BOOST_NOEXCEPT
         {
             _init_lib();
             *this = cpy;
         }
 
-        public_key_impl::~public_key_impl() noexcept
+        public_key_impl::public_key_impl( public_key_impl&& cpy ) BOOST_NOEXCEPT
+        {
+            _init_lib();
+            *this = cpy;
+        }
+
+        public_key_impl::~public_key_impl() BOOST_NOEXCEPT
         {
             free_key();
         }
 
-        public_key_impl& public_key_impl::operator=( const public_key_impl& pk ) noexcept
+        public_key_impl& public_key_impl::operator=( const public_key_impl& pk ) BOOST_NOEXCEPT
         {
             if (pk._key == nullptr)
             {
@@ -42,7 +43,7 @@ namespace fc { namespace ecc {
             return *this;
         }
 
-        public_key_impl& public_key_impl::operator=( public_key_impl&& pk ) noexcept
+        public_key_impl& public_key_impl::operator=( public_key_impl&& pk ) BOOST_NOEXCEPT
         {
             if ( this != &pk ) {
                 free_key();
@@ -52,7 +53,7 @@ namespace fc { namespace ecc {
             return *this;
         }
 
-        void public_key_impl::free_key() noexcept
+        void public_key_impl::free_key() BOOST_NOEXCEPT
         {
             if( _key != nullptr )
             {

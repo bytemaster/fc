@@ -294,6 +294,14 @@ namespace fc
 
 } // namespace fc
 
+#if __APPLE__
+    #define LIKELY(x)    __builtin_expect((long)!!(x), 1L)
+    #define UNLIKELY(x)  __builtin_expect((long)!!(x), 0L)
+#else
+    #define LIKELY(x)   (x)
+    #define UNLIKELY(x) (x)
+#endif
+
 /**
  *@brief: Workaround for varying preprocessing behavior between MSVC and gcc
  */
@@ -304,7 +312,7 @@ namespace fc
 #define FC_ASSERT( TEST, ... ) \
   FC_EXPAND_MACRO( \
     FC_MULTILINE_MACRO_BEGIN \
-      if( !(TEST) ) \
+      if( UNLIKELY(!(TEST)) ) \
         FC_THROW_EXCEPTION( fc::assert_exception, #TEST ": "  __VA_ARGS__ ); \
     FC_MULTILINE_MACRO_END \
   )

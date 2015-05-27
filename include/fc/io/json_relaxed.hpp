@@ -343,8 +343,8 @@ namespace fc { namespace json_relaxed
 
    template<bool strict>
    fc::variant parseNumberOrStr( const fc::string& token )
-   {
-       
+   { try {
+       //ilog( (token) ); 
        size_t i = 0, n = token.length();
        if( n == 0 )
            FC_THROW_EXCEPTION( parse_error_exception, "expected: non-empty token, got: empty token" );
@@ -426,12 +426,14 @@ namespace fc { namespace json_relaxed
            if( i >= n )
                return parseInt<10>( token, start );
            char c = token[i++];
+           //idump((c)(std::string()+c));
            switch( c )
            {
                case '0': case '1': case '2': case '3': case '4':
                case '5': case '6': case '7': case '8': case '9':
                    break;
                case '.':
+                   return fc::variant(token);
                    if( dot_ok )
                    {
                        dot_ok = false;
@@ -442,7 +444,9 @@ namespace fc { namespace json_relaxed
                            return fc::variant( fc::to_double(token.c_str()) );
                        }
 
+                       //idump((i));
                        c = token[i+1];
+                       //idump((c));
                        switch( c )
                        {
                            case '0': case '1': case '2': case '3': case '4':
@@ -466,7 +470,7 @@ namespace fc { namespace json_relaxed
                                    FC_THROW_EXCEPTION( parse_error_exception, "expected digit after '.'" );
                                return fc::variant( token );
                            default:
-                               FC_THROW_EXCEPTION( parse_error_exception, "illegal character '{c}' in token", ( "c", c ) );
+                               FC_THROW_EXCEPTION( parse_error_exception, "illegal character '{c}' in token", ( "c", c )("i",int(c)) );
                        }
                    }
                    else
@@ -554,7 +558,7 @@ namespace fc { namespace json_relaxed
                    FC_THROW_EXCEPTION( parse_error_exception, "illegal character '{c}' in number", ( "c", c ) );
            }
        }
-   }
+   } FC_CAPTURE_AND_RETHROW( (token) ) }
 
    template<typename T, bool strict>
    variant_object objectFromStream( T& in )
@@ -641,13 +645,13 @@ namespace fc { namespace json_relaxed
 
    template<typename T, bool strict>
    variant numberFromStream( T& in )
-   {
+   { try {
        fc::string token = tokenFromStream(in);
        variant result = parseNumberOrStr<strict>( token );
        if( strict && !(result.is_int64() || result.is_uint64() || result.is_double()) )
            FC_THROW_EXCEPTION( parse_error_exception, "expected: number" );
        return result;
-   }
+   } FC_CAPTURE_AND_RETHROW() }
    
    template<typename T, bool strict>
    variant wordFromStream( T& in )

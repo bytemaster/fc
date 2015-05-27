@@ -11,6 +11,11 @@
 #include <fc/thread/thread.hpp>
 #include <fc/asio.hpp>
 
+#ifdef DEFAULT_LOGGER
+# undef DEFAULT_LOGGER
+#endif
+#define DEFAULT_LOGGER "rpc"
+
 namespace fc { namespace http {
 
    namespace detail {

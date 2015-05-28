@@ -1,8 +1,10 @@
 #pragma once
 #include <fc/container/flat_fwd.hpp>
+#include <fc/container/deque_fwd.hpp>
 #include <fc/io/varint.hpp>
 #include <fc/array.hpp>
 #include <fc/safe.hpp>
+#include <deque>
 #include <vector>
 #include <string>
 #include <unordered_set>
@@ -39,6 +41,9 @@ namespace fc {
 
     template<typename Stream, typename T> inline void pack( Stream& s, const flat_set<T>& value );
     template<typename Stream, typename T> inline void unpack( Stream& s, flat_set<T>& value );
+
+    template<typename Stream, typename T> inline void pack( Stream& s, const std::deque<T>& value );
+    template<typename Stream, typename T> inline void unpack( Stream& s, std::deque<T>& value );
 
     template<typename Stream, typename K, typename V> inline void pack( Stream& s, const std::unordered_map<K,V>& value );
     template<typename Stream, typename K, typename V> inline void unpack( Stream& s, std::unordered_map<K,V>& value );

@@ -9,6 +9,7 @@
 #include <map>
 #include <set>
 #include <fc/container/flat_fwd.hpp>
+#include <fc/container/deque_fwd.hpp>
 
 namespace fc
 {

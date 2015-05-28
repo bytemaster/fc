@@ -17,6 +17,7 @@ class sha224
     operator string()const;
 
     char*    data()const;
+    size_t data_size()const { return 224 / 8; }
 
     static sha224 hash( const char* d, uint32_t dlen );
     static sha224 hash( const string& );

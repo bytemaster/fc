@@ -113,7 +113,7 @@ namespace fc {
          R call_generic( const std::function<R(std::function<Signature>,Args...)>& f, variants::const_iterator a0, variants::const_iterator e )
          {
             FC_ASSERT( a0 != e, "too few arguments passed to method" );
-            detail::callback_functor<Signature> arg0( *this, a0->as<uint64_t>() );
+            detail::callback_functor<Signature> arg0( get_connection(), a0->as<uint64_t>() );
             return  call_generic<R,Args...>( this->bind_first_arg<R,std::function<Signature>,Args...>( f, std::function<Signature>(arg0) ), a0+1, e );
          }
          template<typename R, typename Signature, typename ... Args>

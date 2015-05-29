@@ -15,6 +15,7 @@ class sha512
     operator string()const;
 
     char*    data()const;
+    size_t data_size()const { return 512 / 8; }
 
     static sha512 hash( const char* d, uint32_t dlen );
     static sha512 hash( const string& );

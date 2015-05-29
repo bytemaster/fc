@@ -18,6 +18,7 @@ class sha256
     operator string()const;
 
     char*    data()const;
+    size_t data_size()const { return 256 / 8; }
 
     static sha256 hash( const char* d, uint32_t dlen );
     static sha256 hash( const string& );

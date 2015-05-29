@@ -150,17 +150,16 @@ namespace fc { namespace http {
          public:
             websocket_connection_impl( T con )
             :_ws_connection(con){
-               wdump((uint64_t(this)));
             }
 
             ~websocket_connection_impl()
             {
-               wdump((uint64_t(this)));
             }
 
             virtual void send_message( const std::string& message )override
             {
                idump((message));
+               //std::cerr<<"send: "<<message<<"\n";
                auto ec = _ws_connection->send( message );
                FC_ASSERT( !ec, "websocket send failed: ${msg}", ("msg",ec.message() ) );
             }
@@ -195,7 +194,9 @@ namespace fc { namespace http {
                        auto current_con = _connections.find(hdl);
                        assert( current_con != _connections.end() );
                        wdump(("server")(msg->get_payload()));
-                       current_con->second->on_message( msg->get_payload()  );
+                       //std::cerr<<"recv: "<<msg->get_payload()<<"\n";
+                       auto payload = msg->get_payload();
+                       fc::async([=](){ current_con->second->on_message( payload ); });
                     }).wait();
                });
 
@@ -303,8 +304,9 @@ namespace fc { namespace http {
                     _server_thread.async( [&](){
                        auto current_con = _connections.find(hdl);
                        assert( current_con != _connections.end() );
-                       wdump(("server")(msg->get_payload()));
-                       current_con->second->on_message( msg->get_payload()  );
+                       auto received = msg->get_payload();
+                       wdump((received));
+                       fc::async([=](){ current_con->second->on_message( received ); });
                     }).wait();
                });
 
@@ -398,8 +400,12 @@ namespace fc { namespace http {
                 _client.set_message_handler( [&]( connection_hdl hdl, message_ptr msg ){
                    _client_thread.async( [&](){
                         wdump((msg->get_payload()));
-                        if( _connection )
-                           _connection->on_message( msg->get_payload() );
+                        //std::cerr<<"recv: "<<msg->get_payload()<<"\n";
+                        auto received = msg->get_payload();
+                        fc::async( [=](){
+                           if( _connection )
+                               _connection->on_message(received);
+                        });
                    }).wait();
                 });
                 _client.set_close_handler( [=]( connection_hdl hdl ){

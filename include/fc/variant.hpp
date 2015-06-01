@@ -1,15 +1,19 @@
 #pragma once 
+
+#include <deque>
+#include <map>
+#include <memory>
+#include <set>
+#include <unordered_map>
+#include <unordered_set>
 #include <vector>
+
+#include <string.h> // memset
+
 #include <fc/optional.hpp>
 #include <fc/string.hpp>
-#include <memory>
-#include <string.h> // memset
-#include <unordered_set>
-#include <unordered_map>
-#include <map>
-#include <set>
-#include <fc/container/flat_fwd.hpp>
 #include <fc/container/deque_fwd.hpp>
+#include <fc/container/flat_fwd.hpp>
 
 namespace fc
 {

@@ -34,10 +34,9 @@ namespace fc {
    template<typename T>
    void to_variant( const std::deque<T>& var,  variant& vo )
    {
-       std::vector<variant> vars(var.size());
-       size_t i = 0;
-       for( auto itr = var.begin(); itr != var.end(); ++itr, ++i )
-          vars[i] = variant(*itr);
+       std::vector<variant> vars;
+       vars.reserve(var.size());
+       std::transform(var.begin(), var.end(), std::back_inserter(vars), [](const T& t) { return variant(t); });
        vo = vars;
    }
    template<typename T>
@@ -45,8 +44,6 @@ namespace fc {
    {
       const variants& vars = var.get_array();
       vo.clear();
-      vo.reserve( vars.size() );
-      for( auto itr = vars.begin(); itr != vars.end(); ++itr )
-         vo.insert( itr->as<T>() );
+      std::transform(vars.begin(), vars.end(), std::back_inserter(vo), [](const variant& t) { return t.template as<T>(); });
    }
 } // namespace fc

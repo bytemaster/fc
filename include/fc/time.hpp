@@ -101,7 +101,9 @@ namespace fc {
         friend bool      operator == ( const time_point_sec& a, const time_point_sec& b ) { return a.utc_seconds == b.utc_seconds; }
         friend bool      operator != ( const time_point_sec& a, const time_point_sec& b ) { return a.utc_seconds != b.utc_seconds; }
         time_point_sec&  operator += ( uint32_t m ) { utc_seconds+=m; return *this; }
+        time_point_sec&  operator += ( microseconds m ) { utc_seconds+=m.to_seconds(); return *this; }
         time_point_sec&  operator -= ( uint32_t m ) { utc_seconds-=m; return *this; }
+        time_point_sec&  operator -= ( microseconds m ) { utc_seconds-=m.to_seconds(); return *this; }
         time_point_sec   operator +( uint32_t offset )const { return time_point_sec(utc_seconds + offset); }
         time_point_sec   operator -( uint32_t offset )const { return time_point_sec(utc_seconds - offset); }
 

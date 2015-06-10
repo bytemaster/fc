@@ -16,6 +16,8 @@ namespace fc {
       class private_key_impl;
     }
 
+    typedef fc::sha256                  blind_factor_type;
+    typedef fc::array<char,33>          commitment_type;
     typedef fc::array<char,33>          public_key_data;
     typedef fc::sha256                  private_key_secret;
     typedef fc::array<char,65>          public_key_point_data; ///< the full non-compressed version of the ECC point
@@ -134,6 +136,45 @@ namespace fc {
            static fc::sha256 get_secret( const EC_KEY * const k );
            fc::fwd<detail::private_key_impl,32> my;
     };
+
+
+
+     struct range_proof_info
+     {
+         uint8_t      exp;
+         uint8_t      mantissa;
+         uint64_t     min_value;
+         uint64_t     max_value;
+         std::vector<char> proof;
+     };
+
+     commitment_type blind( const blind_factor_type& blind, uint64_t value );
+     commitment_type blind_sum( const std::vector<blind_factor_type>& blinds, uint32_t non_neg );
+     /**  verifies taht commnits + neg_commits + excess == 0 */
+     bool            verify_sum( const std::vector<commitment_type>& commits, const std::vector<commitment_type>& neg_commits, int64_t excess );
+     bool            verify_range( uint64_t min_val, uint64_t max_val, const commitment_type& commit, const std::vector<char>& proof );
+
+     std::vector<char>    range_proof_sign( uint64_t min_value, 
+                                       const commitment_type& commit, 
+                                       const blind_factor_type& commit_blind, 
+                                       const blind_factor_type& nonce,
+                                       uint8_t base10_exp,
+                                       uint8_t min_bits,
+                                       uint64_t actual_value
+                                     );
+
+     bool            verify_range_rewind( blind_factor_type& blind_out,
+                                          uint64_t& value_out,
+                                          string& message_out, 
+                                          const blind_factor_type& nonce,
+                                          uint64_t min_val, 
+                                          uint64_t max_val, 
+                                          commitment_type commit, 
+                                          const std::vector<char>& proof );
+     range_proof_info range_get_info( const std::vector<char>& proof );
+     
+     
+
   } // namespace ecc
   void to_variant( const ecc::private_key& var,  variant& vo );
   void from_variant( const variant& var,  ecc::private_key& vo );
@@ -177,3 +218,4 @@ namespace fc {
 
 FC_REFLECT_TYPENAME( fc::ecc::private_key )
 FC_REFLECT_TYPENAME( fc::ecc::public_key )
+FC_REFLECT( fc::ecc::range_proof_info, (exp)(mantissa)(min_value)(max_value)(proof) )

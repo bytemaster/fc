@@ -141,34 +141,33 @@ namespace fc {
 
      struct range_proof_info
      {
-         uint8_t      exp;
-         uint8_t      mantissa;
+         int          exp;
+         int          mantissa;
          uint64_t     min_value;
          uint64_t     max_value;
-         std::vector<char> proof;
      };
 
-     commitment_type blind( const blind_factor_type& blind, uint64_t value );
-     commitment_type blind_sum( const std::vector<blind_factor_type>& blinds, uint32_t non_neg );
+     commitment_type   blind( const blind_factor_type& blind, uint64_t value );
+     blind_factor_type blind_sum( const std::vector<blind_factor_type>& blinds, uint32_t non_neg );
      /**  verifies taht commnits + neg_commits + excess == 0 */
      bool            verify_sum( const std::vector<commitment_type>& commits, const std::vector<commitment_type>& neg_commits, int64_t excess );
-     bool            verify_range( uint64_t min_val, uint64_t max_val, const commitment_type& commit, const std::vector<char>& proof );
+     bool            verify_range( uint64_t& min_val, uint64_t& max_val, const commitment_type& commit, const std::vector<char>& proof );
 
      std::vector<char>    range_proof_sign( uint64_t min_value, 
                                        const commitment_type& commit, 
                                        const blind_factor_type& commit_blind, 
                                        const blind_factor_type& nonce,
-                                       uint8_t base10_exp,
+                                       int8_t base10_exp,
                                        uint8_t min_bits,
                                        uint64_t actual_value
                                      );
 
-     bool            verify_range_rewind( blind_factor_type& blind_out,
+     bool            verify_range_proof_rewind( blind_factor_type& blind_out,
                                           uint64_t& value_out,
                                           string& message_out, 
                                           const blind_factor_type& nonce,
-                                          uint64_t min_val, 
-                                          uint64_t max_val, 
+                                          uint64_t& min_val, 
+                                          uint64_t& max_val, 
                                           commitment_type commit, 
                                           const std::vector<char>& proof );
      range_proof_info range_get_info( const std::vector<char>& proof );
@@ -218,4 +217,4 @@ namespace fc {
 
 FC_REFLECT_TYPENAME( fc::ecc::private_key )
 FC_REFLECT_TYPENAME( fc::ecc::public_key )
-FC_REFLECT( fc::ecc::range_proof_info, (exp)(mantissa)(min_value)(max_value)(proof) )
+FC_REFLECT( fc::ecc::range_proof_info, (exp)(mantissa)(min_value)(max_value) )

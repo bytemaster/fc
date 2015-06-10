@@ -289,6 +289,9 @@ ENDIF()
 add_executable( api tests/api.cpp )
 target_link_libraries( api fc )
 
+#add_executable( blind tests/blind.cpp )
+#target_link_libraries( blind fc ${ECC_LIB} )
+
 include_directories( vendor/websocketpp )
 
 add_executable( ntp_test ntp_test.cpp )

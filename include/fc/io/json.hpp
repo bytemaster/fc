@@ -22,28 +22,33 @@ namespace fc
             relaxed_parser        = 2,
             legacy_parser_with_string_doubles = 3
          };
+         enum output_formatting
+         {
+            stringify_large_ints_and_doubles = 0,
+            legacy_generator = 1
+         };
 
-         static ostream& to_stream( ostream& out, const fc::string& );
-         static ostream& to_stream( ostream& out, const variant& v );
-         static ostream& to_stream( ostream& out, const variants& v );
-         static ostream& to_stream( ostream& out, const variant_object& v );
+         static ostream& to_stream( ostream& out, const fc::string&);
+         static ostream& to_stream( ostream& out, const variant& v, output_formatting format = stringify_large_ints_and_doubles );
+         static ostream& to_stream( ostream& out, const variants& v, output_formatting format = stringify_large_ints_and_doubles );
+         static ostream& to_stream( ostream& out, const variant_object& v, output_formatting format = stringify_large_ints_and_doubles );
 
          static variant  from_stream( buffered_istream& in, parse_type ptype = legacy_parser );
 
          static variant  from_string( const string& utf8_str, parse_type ptype = legacy_parser );
          static variants variants_from_string( const string& utf8_str, parse_type ptype = legacy_parser );
-         static string   to_string( const variant& v );
-         static string   to_pretty_string( const variant& v );
+         static string   to_string( const variant& v, output_formatting format = stringify_large_ints_and_doubles );
+         static string   to_pretty_string( const variant& v, output_formatting format = stringify_large_ints_and_doubles );
 
          static bool     is_valid( const std::string& json_str, parse_type ptype = legacy_parser );
 
          template<typename T>
-         static void     save_to_file( const T& v, const fc::path& fi, bool pretty = true )
+         static void     save_to_file( const T& v, const fc::path& fi, bool pretty = true, output_formatting format = stringify_large_ints_and_doubles )
          {
-            save_to_file( variant(v), fi, pretty );
+            save_to_file( variant(v), fi, pretty, format );
          }
 
-         static void     save_to_file( const variant& v, const fc::path& fi, bool pretty = true );
+         static void     save_to_file( const variant& v, const fc::path& fi, bool pretty = true, output_formatting format = stringify_large_ints_and_doubles );
          static variant  from_file( const fc::path& p, parse_type ptype = legacy_parser );
 
          template<typename T>
@@ -53,19 +58,19 @@ namespace fc
          }
 
          template<typename T>
-         static string   to_string( const T& v ) 
+         static string   to_string( const T& v, output_formatting format = stringify_large_ints_and_doubles ) 
          {
-            return to_string( variant(v) );
+            return to_string( variant(v), format );
          }
 
          template<typename T>
-         static string   to_pretty_string( const T& v ) 
+         static string   to_pretty_string( const T& v, output_formatting format = stringify_large_ints_and_doubles ) 
          {
-            return to_pretty_string( variant(v) );
+            return to_pretty_string( variant(v), format );
          }
 
          template<typename T>
-         static void save_to_file( const T& v, const std::string& p, bool pretty = true ) 
+         static void save_to_file( const T& v, const std::string& p, bool pretty = true, output_formatting format = stringify_large_ints_and_doubles ) 
          {
             save_to_file( variant(v), fc::path(p), pretty );
          } 

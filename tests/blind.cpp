@@ -43,9 +43,11 @@ int main( int argc, char** argv )
       auto B1 = fc::sha256::hash("B1");
       auto B2 = fc::sha256::hash("B2");
       auto b3 = fc::sha256::hash("b3");
-      auto C1 = fc::ecc::blind( B1, 1 );
-      auto C2 = fc::ecc::blind( B2, 2 );
-      auto c3 = fc::ecc::blind( b3, 3 );
+      auto B4 = fc::sha256::hash("B4");
+      auto C1 = fc::ecc::blind( B1, 1  );
+      auto C2 = fc::ecc::blind( B2, 2  );
+      auto c3 = fc::ecc::blind( b3, 3  );
+      auto C4 = fc::ecc::blind( B4, -1 );
 
       auto B3 = fc::ecc::blind_sum( {B1,B2}, 2 );
       auto C3 = fc::ecc::blind( B3, 3 );
@@ -55,6 +57,7 @@ int main( int argc, char** argv )
       auto C2m1 = fc::ecc::blind( B2m1, 1 );
 
       FC_ASSERT( fc::ecc::verify_sum( {C1,C2}, {C3}, 0 ) );
+      FC_ASSERT( fc::ecc::verify_sum( {C3}, {C1,C2}, 0 ) );
       FC_ASSERT( fc::ecc::verify_sum( {C3}, {C1,C2}, 0 ) );
 
 

@@ -23,6 +23,7 @@ namespace fc {
     typedef fc::array<char,65>          public_key_point_data; ///< the full non-compressed version of the ECC point
     typedef fc::array<char,72>          signature;
     typedef fc::array<unsigned char,65> compact_signature;
+    typedef std::vector<char>           range_proof_type;
 
     /**
      *  @class public_key
@@ -151,9 +152,9 @@ namespace fc {
      blind_factor_type blind_sum( const std::vector<blind_factor_type>& blinds, uint32_t non_neg );
      /**  verifies taht commnits + neg_commits + excess == 0 */
      bool            verify_sum( const std::vector<commitment_type>& commits, const std::vector<commitment_type>& neg_commits, int64_t excess );
-     bool            verify_range( uint64_t& min_val, uint64_t& max_val, const commitment_type& commit, const std::vector<char>& proof );
+     bool            verify_range( uint64_t& min_val, uint64_t& max_val, const commitment_type& commit, const range_proof_type& proof );
 
-     std::vector<char>    range_proof_sign( uint64_t min_value, 
+     range_proof_type range_proof_sign( uint64_t min_value, 
                                        const commitment_type& commit, 
                                        const blind_factor_type& commit_blind, 
                                        const blind_factor_type& nonce,
@@ -169,8 +170,8 @@ namespace fc {
                                           uint64_t& min_val, 
                                           uint64_t& max_val, 
                                           commitment_type commit, 
-                                          const std::vector<char>& proof );
-     range_proof_info range_get_info( const std::vector<char>& proof );
+                                          const range_proof_type& proof );
+     range_proof_info range_get_info( const range_proof_type& proof );
      
      
 

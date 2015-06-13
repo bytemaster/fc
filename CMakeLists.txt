@@ -49,6 +49,42 @@ SET( ECC_REST src/crypto/elliptic_impl_priv.cpp )
 ENDIF( ECC_IMPL STREQUAL mixed )
 ENDIF( ECC_IMPL STREQUAL openssl )
 
+# Configure secp256k1-zkp
+
+set( SECP256K1_DIR "${CMAKE_CURRENT_SOURCE_DIR}/vendor/secp256k1-zkp" )
+
+file( GLOB SECP256K1_SOURCES "${SECP256K1_DIR}/src/secp256k1.c" )
+add_library( secp256k1 ${SECP256K1_SOURCES} )
+
+target_include_directories( secp256k1 PRIVATE "${SECP256K1_DIR}" PUBLIC "${SECP256K1_DIR}/include" )
+
+# ***Will only work for Clang on 64-bit Mac/Linux***
+set( SECP256K1_BUILD_DEFINES
+    HAVE_BUILTIN_CLZLL
+    HAVE_BUILTIN_EXPECT
+    HAVE_DLFCN_H
+    HAVE_INTTYPES_H
+    HAVE_LIBCRYPTO
+    HAVE_MEMORY_H
+    HAVE_STDINT_H
+    HAVE_STDLIB_H
+    HAVE_STRINGS_H
+    HAVE_STRING_H
+    HAVE_SYS_STAT_H
+    HAVE_SYS_TYPES_H
+    HAVE_UNISTD_H
+    HAVE___INT128
+    STDC_HEADERS
+    USE_FIELD_5X52
+    USE_FIELD_INV_BUILTIN
+    USE_NUM_NONE
+    USE_SCALAR_4X64
+    USE_SCALAR_INV_BUILTIN
+)
+set_target_properties( secp256k1 PROPERTIES COMPILE_DEFINITIONS "${SECP256K1_BUILD_DEFINES}" LINKER_LANGUAGE C )
+
+# End configure secp256k1-zkp
+
 IF( WIN32 )
   MESSAGE(STATUS "Configuring fc to build on Win32")
 
@@ -77,7 +113,7 @@ ELSE(WIN32)
 
   LIST(APPEND BOOST_COMPONENTS coroutine)
 
-  FIND_PACKAGE(Boost 1.53 REQUIRED COMPONENTS ${BOOST_COMPONENTS}) 
+  FIND_PACKAGE(Boost 1.53 REQUIRED COMPONENTS ${BOOST_COMPONENTS})
 
   SET(CMAKE_FIND_LIBRARY_SUFFIXES ".a;.so")
 
@@ -115,8 +151,8 @@ set( fc_sources
      src/thread/thread_specific.cpp
      src/thread/future.cpp
      src/thread/task.cpp
-     src/thread/spin_lock.cpp 
-     src/thread/spin_yield_lock.cpp 
+     src/thread/spin_lock.cpp
+     src/thread/spin_yield_lock.cpp
      src/thread/mutex.cpp
      src/thread/non_preemptable_scope_check.cpp
      src/asio.cpp
@@ -139,7 +175,7 @@ set( fc_sources
      src/interprocess/mmap_struct.cpp
      src/rpc/json_connection.cpp
      src/rpc/cli.cpp
-     src/log/log_message.cpp 
+     src/log/log_message.cpp
      src/log/logger.cpp
      src/log/appender.cpp
      src/log/console_appender.cpp
@@ -190,12 +226,11 @@ set( fc_sources
      ${SALSA_SRC}
      )
 
-     SET_PROPERTY( SOURCE 
+     SET_PROPERTY( SOURCE
                    vendor/salsa20/salsa20.s
                    PROPERTY LANGUAGE C)
 
-file(GLOB_RECURSE fc_headers ${CMAKE_CURRENT_SOURCE_DIR} 
-  *.hpp *.h)
+file( GLOB_RECURSE fc_headers ${CMAKE_CURRENT_SOURCE_DIR} *.hpp *.h )
 
 set( sources
   ${fc_sources}
@@ -233,12 +268,12 @@ endif(WIN32)
 
 IF(WIN32)
   target_compile_definitions(fc PUBLIC WIN32 NOMINMAX _WIN32_WINNT=0x0501 _CRT_SECURE_NO_WARNINGS
-    _SCL_SERCURE_NO_WARNINGS 
+    _SCL_SERCURE_NO_WARNINGS
     # Needed to disable MSVC autolinking feature (#pragma comment)
     BOOST_ALL_NO_LIB
   )
   # Activate C++ exception handling, assume extern C calls don't throw
-  # Add /U options to be sure settings specific to dynamic boost link are ineffective 
+  # Add /U options to be sure settings specific to dynamic boost link are ineffective
   target_compile_options(fc PUBLIC /EHsc /UBOOST_ALL_DYN_LINK /UBOOST_LINKING_PYTHON /UBOOST_DEBUG_PYTHON)
 ELSE()
   SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99 -Wall")
@@ -252,7 +287,7 @@ ELSE()
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -fnon-call-exceptions")
   ENDIF()
 ENDIF()
- 
+
 target_include_directories(fc
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${Boost_INCLUDE_DIR}
@@ -260,13 +295,14 @@ target_include_directories(fc
     "${readline_includes}"
 
   PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
-  #${CMAKE_CURRENT_SOURCE_DIR}/vendor/scrypt-jane
-    ${CMAKE_CURRENT_SOURCE_DIR}/vendor/cyoencode-1.0.2/src
     ${CMAKE_CURRENT_SOURCE_DIR}/vendor/boost_1.51/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/vendor/salsa20
+    ${CMAKE_CURRENT_SOURCE_DIR}/vendor/cyoencode-1.0.2/src
     ${CMAKE_CURRENT_SOURCE_DIR}/vendor/easylzma/src
+    ${CMAKE_CURRENT_SOURCE_DIR}/vendor/salsa20
+    #${CMAKE_CURRENT_SOURCE_DIR}/vendor/scrypt-jane
     ${CMAKE_CURRENT_SOURCE_DIR}/vendor/udt4/src
     ${CMAKE_CURRENT_SOURCE_DIR}/vendor/websocketpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/vendor/secp256k1-zkp
   )
 
 #target_link_libraries( fc PUBLIC easylzma_static scrypt udt ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} ${ZLIB_LIBRARIES} ${PLATFORM_SPECIFIC_LIBS} ${RPCRT4} ${CMAKE_DL_LIBS} ${rt_library} ${ECC_LIB} )
@@ -288,8 +324,8 @@ ENDIF()
 add_executable( api tests/api.cpp )
 target_link_libraries( api fc )
 
-#add_executable( blind tests/blind.cpp )
-#target_link_libraries( blind fc )
+add_executable( blind tests/blind.cpp )
+target_link_libraries( blind fc )
 
 include_directories( vendor/websocketpp )
 
@@ -363,7 +399,7 @@ if(WIN32)
       endif()
 
    endforeach()
-   
+
    set(INTERFACE_LINK_PDB_DEBUG)
    set(SHARED_LIBRARIES_DEBUG)
    foreach(boost_import_lib ${Boost_LIBRARIES_DEBUG})
@@ -430,9 +466,8 @@ SET(POST_BUILD_STEP_COMMANDS ${POST_BUILD_STEP_COMMANDS}
      COMMAND ${CMAKE_COMMAND} -E copy_if_different "${OPENSSL_ROOT_DIR}/ssl/openssl.cnf" "${OPENSSL_CONF_TARGET}/openssl.cnf")
     ENDIF(WIN32)
 
-ADD_CUSTOM_COMMAND(TARGET fc POST_BUILD ${POST_BUILD_STEP_COMMANDS} 
+ADD_CUSTOM_COMMAND(TARGET fc POST_BUILD ${POST_BUILD_STEP_COMMANDS}
   COMMENT "Copying OpenSSL/ssl/openssl.cnf into target directory."
 )
 
 MESSAGE(STATUS "Finished fc module configuration...")
-

@@ -5,8 +5,6 @@
 #include <fc/reflect/variant.hpp>
 
 extern "C" {
-#include </Users/dlarimer/Downloads/secp256k1-zkp/src/libsecp256k1-config.h>
-#include </Users/dlarimer/Downloads/secp256k1-zkp/src/scalar.h>
 #include <secp256k1.h>
 }
 //struct secp256k1_scalar_t { uint64_t v[4]; };
@@ -65,7 +63,7 @@ int main( int argc, char** argv )
          auto B1 = fc::sha256::hash("B1");
          auto B2 = fc::sha256::hash("B2");
          auto B3 = fc::sha256::hash("B3");
-       
+
          //secp256k1_scalar_get_b32((unsigned char*)&B1, (const secp256k1_scalar_t*)&B2);
          //B1 = fc::variant("b2e5da56ef9f2a34d3e22fd12634bc99261e95c87b9960bf94ed3d27b30").as<fc::sha256>();
 
@@ -84,7 +82,7 @@ int main( int argc, char** argv )
       }
 
 
-   } 
+   }
    catch ( const fc::exception& e )
    {
       edump((e.to_detail_string()));

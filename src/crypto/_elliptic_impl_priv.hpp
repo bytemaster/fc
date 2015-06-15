@@ -14,10 +14,10 @@ void _init_lib();
 class private_key_impl
 {
     public:
-        private_key_impl() noexcept;
-        private_key_impl( const private_key_impl& cpy ) noexcept;
+        private_key_impl() BOOST_NOEXCEPT;
+        private_key_impl( const private_key_impl& cpy ) BOOST_NOEXCEPT;
 
-        private_key_impl& operator=( const private_key_impl& pk ) noexcept;
+        private_key_impl& operator=( const private_key_impl& pk ) BOOST_NOEXCEPT;
 
         private_key_secret _key;
 };

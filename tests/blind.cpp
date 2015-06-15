@@ -4,9 +4,9 @@
 #include <fc/variant.hpp>
 #include <fc/reflect/variant.hpp>
 
-extern "C" {
-#include <secp256k1.h>
-}
+//extern "C" {
+//#include <secp256k1.h>
+//}
 //struct secp256k1_scalar_t { uint64_t v[4]; };
 //extern "C" { void secp256k1_scalar_get_b32(unsigned char *bin, const struct secp256k1_scalar_t* a); }
 

@@ -39,50 +39,59 @@ SET( Boost_USE_STATIC_LIBS ON CACHE STRING "ON or OFF" )
 
 
 IF( ECC_IMPL STREQUAL openssl )
-SET( ECC_REST src/crypto/elliptic_impl_pub.cpp )
+  SET( ECC_REST src/crypto/elliptic_impl_pub.cpp )
 ELSE( ECC_IMPL STREQUAL openssl )
-SET( ECC_LIB secp256k1 )
-IF( ECC_IMPL STREQUAL mixed )
-SET( ECC_REST src/crypto/elliptic_impl_priv.cpp src/crypto/elliptic_impl_pub.cpp )
-ELSE( ECC_IMPL STREQUAL mixed )
-SET( ECC_REST src/crypto/elliptic_impl_priv.cpp )
-ENDIF( ECC_IMPL STREQUAL mixed )
+  SET( ECC_LIB secp256k1 )
+  IF( ECC_IMPL STREQUAL mixed )
+    SET( ECC_REST src/crypto/elliptic_impl_priv.cpp src/crypto/elliptic_impl_pub.cpp )
+  ELSE( ECC_IMPL STREQUAL mixed )
+    SET( ECC_REST src/crypto/elliptic_impl_priv.cpp )
+  ENDIF( ECC_IMPL STREQUAL mixed )
 ENDIF( ECC_IMPL STREQUAL openssl )
 
 # Configure secp256k1-zkp
-
+  
 set( SECP256K1_DIR "${CMAKE_CURRENT_SOURCE_DIR}/vendor/secp256k1-zkp" )
-
+  
 file( GLOB SECP256K1_SOURCES "${SECP256K1_DIR}/src/secp256k1.c" )
 add_library( secp256k1 ${SECP256K1_SOURCES} )
-
+  
 target_include_directories( secp256k1 PRIVATE "${SECP256K1_DIR}" PUBLIC "${SECP256K1_DIR}/include" )
+  
 
-# ***Will only work for Clang on 64-bit Mac/Linux***
-set( SECP256K1_BUILD_DEFINES
-    HAVE_BUILTIN_CLZLL
-    HAVE_BUILTIN_EXPECT
-    HAVE_DLFCN_H
-    HAVE_INTTYPES_H
-    HAVE_LIBCRYPTO
-    HAVE_MEMORY_H
-    HAVE_STDINT_H
-    HAVE_STDLIB_H
-    HAVE_STRINGS_H
-    HAVE_STRING_H
-    HAVE_SYS_STAT_H
-    HAVE_SYS_TYPES_H
-    HAVE_UNISTD_H
-    HAVE___INT128
-    STDC_HEADERS
-    USE_FIELD_5X52
-    USE_FIELD_INV_BUILTIN
-    USE_NUM_NONE
-    USE_SCALAR_4X64
-    USE_SCALAR_INV_BUILTIN
-)
+if( WIN32 )
+  set( SECP256K1_BUILD_DEFINES 
+      USE_FIELD_10X26
+      USE_FIELD_INV_BUILTIN
+      USE_NUM_NONE
+      USE_SCALAR_8X32
+      USE_SCALAR_INV_BUILTIN )
+else()
+  # ***Will only work for Clang on 64-bit Mac/Linux***
+  set( SECP256K1_BUILD_DEFINES
+      HAVE_BUILTIN_CLZLL
+      HAVE_BUILTIN_EXPECT
+      HAVE_DLFCN_H
+      HAVE_INTTYPES_H
+      HAVE_LIBCRYPTO
+      HAVE_MEMORY_H
+      HAVE_STDINT_H
+      HAVE_STDLIB_H
+      HAVE_STRINGS_H
+      HAVE_STRING_H
+      HAVE_SYS_STAT_H
+      HAVE_SYS_TYPES_H
+      HAVE_UNISTD_H
+      HAVE___INT128
+      STDC_HEADERS
+      USE_FIELD_5X52
+      USE_FIELD_INV_BUILTIN
+      USE_NUM_NONE
+      USE_SCALAR_4X64
+      USE_SCALAR_INV_BUILTIN
+  )
+endif()
 set_target_properties( secp256k1 PROPERTIES COMPILE_DEFINITIONS "${SECP256K1_BUILD_DEFINES}" LINKER_LANGUAGE C )
-
 # End configure secp256k1-zkp
 
 IF( WIN32 )
@@ -324,8 +333,10 @@ ENDIF()
 add_executable( api tests/api.cpp )
 target_link_libraries( api fc )
 
-add_executable( blind tests/blind.cpp )
-target_link_libraries( blind fc )
+if( ECC_IMPL STREQUAL secp256k1 )
+    add_executable( blind tests/blind.cpp )
+    target_link_libraries( blind fc )
+endif()
 
 include_directories( vendor/websocketpp )
 

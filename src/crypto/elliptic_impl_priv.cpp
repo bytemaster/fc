@@ -9,18 +9,18 @@
 namespace fc { namespace ecc {
     namespace detail {
 
-        private_key_impl::private_key_impl() noexcept
+        private_key_impl::private_key_impl() BOOST_NOEXCEPT
         {
             _init_lib();
         }
 
-        private_key_impl::private_key_impl( const private_key_impl& cpy ) noexcept
+        private_key_impl::private_key_impl( const private_key_impl& cpy ) BOOST_NOEXCEPT
         {
             _init_lib();
             this->_key = cpy._key;
         }
 
-        private_key_impl& private_key_impl::operator=( const private_key_impl& pk ) noexcept
+        private_key_impl& private_key_impl::operator=( const private_key_impl& pk ) BOOST_NOEXCEPT
         {
             _key = pk._key;
             return *this;

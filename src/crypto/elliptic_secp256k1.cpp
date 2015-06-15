@@ -29,12 +29,12 @@ namespace fc { namespace ecc {
         class public_key_impl
         {
             public:
-                public_key_impl() noexcept
+                public_key_impl() BOOST_NOEXCEPT
                 {
                     _init_lib();
                 }
 
-                public_key_impl( const public_key_impl& cpy ) noexcept
+                public_key_impl( const public_key_impl& cpy ) BOOST_NOEXCEPT
                     : _key( cpy._key )
                 {
                     _init_lib();

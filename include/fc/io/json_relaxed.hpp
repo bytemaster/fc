@@ -581,7 +581,7 @@ namespace fc { namespace json_relaxed
                continue;
             }
             if( skip_white_space(in) ) continue;
-            string key = stringFromStream<T, strict>( in );
+            string key = json_relaxed::stringFromStream<T, strict>( in );
             skip_white_space(in);
             if( in.peek() != ':' )
             {
@@ -589,7 +589,7 @@ namespace fc { namespace json_relaxed
                                         ("key", key) );
             }
             in.get();
-            auto val = variant_from_stream<T, strict>( in );
+            auto val = json_relaxed::variant_from_stream<T, strict>( in );
 
             obj(std::move(key),std::move(val));
             skip_white_space(in);
@@ -630,7 +630,7 @@ namespace fc { namespace json_relaxed
               continue;
            }
            if( skip_white_space(in) ) continue;
-           ar.push_back( variant_from_stream<T, strict>(in) );
+           ar.push_back( json_relaxed::variant_from_stream<T, strict>(in) );
            skip_white_space(in);
         }
         if( in.peek() != ']' )
@@ -647,7 +647,7 @@ namespace fc { namespace json_relaxed
    variant numberFromStream( T& in )
    { try {
        fc::string token = tokenFromStream(in);
-       variant result = parseNumberOrStr<strict>( token );
+       variant result = json_relaxed::parseNumberOrStr<strict>( token );
        if( strict && !(result.is_int64() || result.is_uint64() || result.is_double()) )
            FC_THROW_EXCEPTION( parse_error_exception, "expected: number" );
        return result;
@@ -700,11 +700,11 @@ namespace fc { namespace json_relaxed
               in.get();
               continue;
             case '"':
-              return stringFromStream<T, strict>( in );
+              return json_relaxed::stringFromStream<T, strict>( in );
             case '{':
-              return objectFromStream<T, strict>( in );
+              return json_relaxed::objectFromStream<T, strict>( in );
             case '[':
-              return arrayFromStream<T, strict>( in );
+              return json_relaxed::arrayFromStream<T, strict>( in );
             case '-':
             case '+':
             case '.':
@@ -718,7 +718,7 @@ namespace fc { namespace json_relaxed
             case '7':
             case '8':
             case '9':
-              return numberFromStream<T, strict>( in );
+              return json_relaxed::numberFromStream<T, strict>( in );
             // null, true, false, or 'warning' / string
             case 'a': case 'b': case 'c': case 'd': case 'e': case 'f': case 'g': case 'h':
             case 'i': case 'j': case 'k': case 'l': case 'm': case 'n': case 'o': case 'p':
@@ -729,7 +729,7 @@ namespace fc { namespace json_relaxed
             case 'Q': case 'R': case 'S': case 'T': case 'U': case 'V': case 'W': case 'X':
             case 'Y': case 'Z':
             case '_':                               case '/':
-              return wordFromStream<T, strict>( in );
+              return json_relaxed::wordFromStream<T, strict>( in );
             case 0x04: // ^D end of transmission
             case EOF:
               FC_THROW_EXCEPTION( eof_exception, "unexpected end of file" );

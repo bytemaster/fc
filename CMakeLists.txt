@@ -280,6 +280,10 @@ IF(WIN32)
     _SCL_SERCURE_NO_WARNINGS
     # Needed to disable MSVC autolinking feature (#pragma comment)
     BOOST_ALL_NO_LIB
+    # The current version of websockets doesn't correctly guess what 'chrono' implementation boost::asio uses 
+    # on the recommended build platform of VC++12/boost_1.58.  Force it here until websocket gets their
+    # autodetecting code to do the right thing.
+    _WEBSOCKETPP_CPP11_CHRONO_
   )
   # Activate C++ exception handling, assume extern C calls don't throw
   # Add /U options to be sure settings specific to dynamic boost link are ineffective

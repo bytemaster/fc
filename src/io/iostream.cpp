@@ -78,17 +78,12 @@ namespace fc {
 
   fc::istream& getline( fc::istream& i, fc::string& s, char delim  ) {
     fc::stringstream ss; 
-    try
-    {
-       char c;
-       i.read( &c, 1 );
-       while( true ) {
-         if( c == delim ) { s = ss.str();  return i; }
-         if( c != '\r' ) ss.write(&c,1);
-         i.read( &c, 1 );
-       }
-    } catch ( fc::eof_exception& )
-    {
+    char c;
+    i.read( &c, 1 );
+    while( true ) {
+      if( c == delim ) { s = ss.str();  return i; }
+      if( c != '\r' ) ss.write(&c,1);
+      i.read( &c, 1 );
     }
     s = ss.str();
     return i;

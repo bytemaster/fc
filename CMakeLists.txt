@@ -128,7 +128,6 @@ ELSE(WIN32)
 
   IF(NOT APPLE)
     # Linux or other unix
-    SET(SALSA_SRC vendor/salsa20/salsa20.s)
     SET(rt_library rt )
     SET(pthread_library pthread)
   ENDIF(NOT APPLE)
@@ -212,7 +211,6 @@ set( fc_sources
      ${ECC_REST}
      src/crypto/elliptic_${ECC_IMPL}.cpp
      src/crypto/rand.cpp
-     src/crypto/salsa20.cpp
      src/network/tcp_socket.cpp
      src/network/udp_socket.cpp
      src/network/udt_socket.cpp
@@ -230,13 +228,7 @@ set( fc_sources
      src/compress/lzma.cpp
      vendor/cyoencode-1.0.2/src/CyoDecode.c
      vendor/cyoencode-1.0.2/src/CyoEncode.c
-     #vendor/salsa20/ecrypt.c
-     ${SALSA_SRC}
      )
-
-     SET_PROPERTY( SOURCE
-                   vendor/salsa20/salsa20.s
-                   PROPERTY LANGUAGE C)
 
 file( GLOB_RECURSE fc_headers ${CMAKE_CURRENT_SOURCE_DIR} *.hpp *.h )
 
@@ -309,7 +301,6 @@ target_include_directories(fc
     ${CMAKE_CURRENT_SOURCE_DIR}/vendor/boost_1.51/include
     ${CMAKE_CURRENT_SOURCE_DIR}/vendor/cyoencode-1.0.2/src
     ${CMAKE_CURRENT_SOURCE_DIR}/vendor/easylzma/src
-    ${CMAKE_CURRENT_SOURCE_DIR}/vendor/salsa20
     ${CMAKE_CURRENT_SOURCE_DIR}/vendor/udt4/src
     ${CMAKE_CURRENT_SOURCE_DIR}/vendor/websocketpp
     ${CMAKE_CURRENT_SOURCE_DIR}/vendor/secp256k1-zkp

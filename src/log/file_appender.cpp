@@ -1,4 +1,3 @@
-#include <fc/compress/lzma.hpp>
 #include <fc/exception/exception.hpp>
 #include <fc/io/fstream.hpp>
 #include <fc/log/file_appender.hpp>
@@ -13,8 +12,6 @@
 
 namespace fc {
 
-   static const string compression_extension( ".lzma" );
-
    class file_appender::impl : public fc::retainable
    {
       public:
@@ -25,33 +22,12 @@ namespace fc {
       private:
          future<void>               _rotation_task;
          time_point_sec             _current_file_start_time;
-         std::unique_ptr<thread>    _compression_thread;
 
          time_point_sec get_file_start_time( const time_point_sec& timestamp, const microseconds& interval )
          {
              int64_t interval_seconds = interval.to_seconds();
              int64_t file_number = timestamp.sec_since_epoch() / interval_seconds;
              return time_point_sec( (uint32_t)(file_number * interval_seconds) );
-         }
-
-         void compress_file( const fc::path& filename )
-         {
-             FC_ASSERT( cfg.rotate && cfg.rotation_compression );
-             FC_ASSERT( _compression_thread );
-             if( !_compression_thread->is_current() )
-             {
-                 _compression_thread->async( [this, filename]() { compress_file( filename ); }, "compress_file" ).wait();
-                 return;
-             }
-
-             try
-             {
-                 lzma_compress_file( filename, filename.parent_path() / (filename.filename().string() + compression_extension) );
-                 remove_all( filename );
-             }
-             catch( ... )
-             {
-             }
          }
 
       public:
@@ -61,9 +37,6 @@ namespace fc {
              {
                  FC_ASSERT( cfg.rotation_interval >= seconds( 1 ) );
                  FC_ASSERT( cfg.rotation_limit >= cfg.rotation_interval );
-
-                 if( cfg.rotation_compression )
-                     _compression_thread.reset( new thread( "compression") );
 
                  _rotation_task = async( [this]() { rotate_files( true ); }, "rotate_files(1)" );
              }
@@ -132,17 +105,11 @@ namespace fc {
                              remove_all( *itr );
                              continue;
                          }
-
-                         if( !cfg.rotation_compression )
-                           continue;
-                         if( current_filename.find( compression_extension ) != string::npos )
-                           continue;
-                         compress_file( *itr );
                      }
                  }
                  catch (const fc::canceled_exception&)
                  {
-                   throw;
+                     throw;
                  }
                  catch( ... )
                  {
@@ -160,8 +127,7 @@ namespace fc {
      format( "${timestamp} ${thread_name} ${context} ${file}:${line} ${method} ${level}]  ${message}" ),
      filename(p),
      flush(true),
-     rotate(false),
-     rotation_compression(false)
+     rotate(false)
    {}
 
    file_appender::file_appender( const variant& args ) :

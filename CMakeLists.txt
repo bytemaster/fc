@@ -225,7 +225,6 @@ set( fc_sources
      src/network/gntp.cpp
      src/compress/smaz.cpp
      src/compress/zlib.cpp
-     src/compress/lzma.cpp
      vendor/cyoencode-1.0.2/src/CyoDecode.c
      vendor/cyoencode-1.0.2/src/CyoEncode.c
      )
@@ -240,7 +239,6 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/git_revision.cpp.in" "${CMAKE_CU
 list(APPEND sources "${CMAKE_CURRENT_BINARY_DIR}/git_revision.cpp")
 list(APPEND sources ${fc_headers})
 
-add_subdirectory( vendor/easylzma )
 add_subdirectory( vendor/websocketpp )
 add_subdirectory( vendor/udt4 )
 
@@ -300,14 +298,13 @@ target_include_directories(fc
   PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/vendor/boost_1.51/include
     ${CMAKE_CURRENT_SOURCE_DIR}/vendor/cyoencode-1.0.2/src
-    ${CMAKE_CURRENT_SOURCE_DIR}/vendor/easylzma/src
     ${CMAKE_CURRENT_SOURCE_DIR}/vendor/udt4/src
     ${CMAKE_CURRENT_SOURCE_DIR}/vendor/websocketpp
     ${CMAKE_CURRENT_SOURCE_DIR}/vendor/secp256k1-zkp
   )
 
-#target_link_libraries( fc PUBLIC easylzma_static udt ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} ${ZLIB_LIBRARIES} ${PLATFORM_SPECIFIC_LIBS} ${RPCRT4} ${CMAKE_DL_LIBS} ${rt_library} ${ECC_LIB} )
-target_link_libraries( fc PUBLIC -L/usr/local/lib easylzma_static udt ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} ${ZLIB_LIBRARIES} ${PLATFORM_SPECIFIC_LIBS} ${RPCRT4} ${CMAKE_DL_LIBS} ${rt_library} ${readline_libraries} ${ECC_LIB} )
+#target_link_libraries( fc PUBLIC udt ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} ${ZLIB_LIBRARIES} ${PLATFORM_SPECIFIC_LIBS} ${RPCRT4} ${CMAKE_DL_LIBS} ${rt_library} ${ECC_LIB} )
+target_link_libraries( fc PUBLIC -L/usr/local/lib udt ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} ${ZLIB_LIBRARIES} ${PLATFORM_SPECIFIC_LIBS} ${RPCRT4} ${CMAKE_DL_LIBS} ${rt_library} ${readline_libraries} ${ECC_LIB} )
 
 if(MSVC)
   set_source_files_properties( src/network/http/websocket.cpp PROPERTIES COMPILE_FLAGS "/bigobj" )
@@ -351,9 +348,6 @@ target_link_libraries( udt_server fc udt )
 
 add_executable( udt_client tests/udtc.cpp )
 target_link_libraries( udt_client fc udt )
-
-add_executable( lzma_test tests/lzma_test.cpp )
-target_link_libraries( lzma_test fc )
 
 add_executable( ecc_test tests/ecc_test.cpp )
 target_link_libraries( ecc_test fc )

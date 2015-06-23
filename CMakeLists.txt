@@ -50,17 +50,17 @@ ELSE( ECC_IMPL STREQUAL openssl )
 ENDIF( ECC_IMPL STREQUAL openssl )
 
 # Configure secp256k1-zkp
-  
+
 set( SECP256K1_DIR "${CMAKE_CURRENT_SOURCE_DIR}/vendor/secp256k1-zkp" )
-  
+
 file( GLOB SECP256K1_SOURCES "${SECP256K1_DIR}/src/secp256k1.c" )
 add_library( secp256k1 ${SECP256K1_SOURCES} )
-  
+
 target_include_directories( secp256k1 PRIVATE "${SECP256K1_DIR}" PUBLIC "${SECP256K1_DIR}/include" )
-  
+
 
 if( WIN32 )
-  set( SECP256K1_BUILD_DEFINES 
+  set( SECP256K1_BUILD_DEFINES
       USE_FIELD_10X26
       USE_FIELD_INV_BUILTIN
       USE_NUM_NONE
@@ -213,7 +213,6 @@ set( fc_sources
      src/crypto/elliptic_${ECC_IMPL}.cpp
      src/crypto/rand.cpp
      src/crypto/salsa20.cpp
-     #src/crypto/scrypt.cpp
      src/network/tcp_socket.cpp
      src/network/udp_socket.cpp
      src/network/udt_socket.cpp
@@ -251,7 +250,6 @@ list(APPEND sources ${fc_headers})
 
 add_subdirectory( vendor/easylzma )
 add_subdirectory( vendor/websocketpp )
-#add_subdirectory( vendor/scrypt-jane )
 add_subdirectory( vendor/udt4 )
 
 setup_library( fc SOURCES ${sources} LIBRARY_TYPE STATIC DONT_INSTALL_LIBRARY )
@@ -280,7 +278,7 @@ IF(WIN32)
     _SCL_SERCURE_NO_WARNINGS
     # Needed to disable MSVC autolinking feature (#pragma comment)
     BOOST_ALL_NO_LIB
-    # The current version of websockets doesn't correctly guess what 'chrono' implementation boost::asio uses 
+    # The current version of websockets doesn't correctly guess what 'chrono' implementation boost::asio uses
     # on the recommended build platform of VC++12/boost_1.58.  Force it here until websocket gets their
     # autodetecting code to do the right thing.
     _WEBSOCKETPP_CPP11_CHRONO_
@@ -312,13 +310,12 @@ target_include_directories(fc
     ${CMAKE_CURRENT_SOURCE_DIR}/vendor/cyoencode-1.0.2/src
     ${CMAKE_CURRENT_SOURCE_DIR}/vendor/easylzma/src
     ${CMAKE_CURRENT_SOURCE_DIR}/vendor/salsa20
-    #${CMAKE_CURRENT_SOURCE_DIR}/vendor/scrypt-jane
     ${CMAKE_CURRENT_SOURCE_DIR}/vendor/udt4/src
     ${CMAKE_CURRENT_SOURCE_DIR}/vendor/websocketpp
     ${CMAKE_CURRENT_SOURCE_DIR}/vendor/secp256k1-zkp
   )
 
-#target_link_libraries( fc PUBLIC easylzma_static scrypt udt ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} ${ZLIB_LIBRARIES} ${PLATFORM_SPECIFIC_LIBS} ${RPCRT4} ${CMAKE_DL_LIBS} ${rt_library} ${ECC_LIB} )
+#target_link_libraries( fc PUBLIC easylzma_static udt ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} ${ZLIB_LIBRARIES} ${PLATFORM_SPECIFIC_LIBS} ${RPCRT4} ${CMAKE_DL_LIBS} ${rt_library} ${ECC_LIB} )
 target_link_libraries( fc PUBLIC -L/usr/local/lib easylzma_static udt ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} ${ZLIB_LIBRARIES} ${PLATFORM_SPECIFIC_LIBS} ${RPCRT4} ${CMAKE_DL_LIBS} ${rt_library} ${readline_libraries} ${ECC_LIB} )
 
 if(MSVC)

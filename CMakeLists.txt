@@ -59,7 +59,7 @@ ExternalProject_Add( project_secp256k1
  BUILD_COMMAND make
  INSTALL_COMMAND make install
 )
-ExternalProject_Add_Step(project_secp256k1 secp256k1_autogen
+ExternalProject_Add_Step(project_secp256k1 autogen
  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/vendor/secp256k1-zkp
  COMMAND ./autogen.sh
  DEPENDERS configure
@@ -69,6 +69,7 @@ ExternalProject_Get_Property(project_secp256k1 install_dir)
 
 add_library(secp256k1 STATIC IMPORTED)
 set_property(TARGET secp256k1 PROPERTY IMPORTED_LOCATION ${install_dir}/lib/libsecp256k1.a)
+set_property(TARGET secp256k1 PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR}/vendor/secp256k1-zkp/include)
 add_dependencies(secp256k1 project_secp256k1)
 
 # End configure secp256k1-zkp

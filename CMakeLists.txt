@@ -50,48 +50,44 @@ ELSE( ECC_IMPL STREQUAL openssl )
 ENDIF( ECC_IMPL STREQUAL openssl )
 
 # Configure secp256k1-zkp
+if ( WIN32 )
+    # autoconf won't work here, hard code the defines
+    set( SECP256K1_DIR "${CMAKE_CURRENT_SOURCE_DIR}/vendor/secp256k1-zkp" )
+    
+    file( GLOB SECP256K1_SOURCES "${SECP256K1_DIR}/src/secp256k1.c" )
+    add_library( secp256k1 ${SECP256K1_SOURCES} )
+    
+    target_include_directories( secp256k1 PRIVATE "${SECP256K1_DIR}" PUBLIC "${SECP256K1_DIR}/include" )
+    
+    set( SECP256K1_BUILD_DEFINES
+        USE_FIELD_10X26
+        USE_FIELD_INV_BUILTIN
+        USE_NUM_NONE
+        USE_SCALAR_8X32
+        USE_SCALAR_INV_BUILTIN )
+    set_target_properties( secp256k1 PROPERTIES COMPILE_DEFINITIONS "${SECP256K1_BUILD_DEFINES}" LINKER_LANGUAGE C )
+else ( WIN32 )
+    include(ExternalProject)
+    ExternalProject_Add( project_secp256k1
+     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/vendor/secp256k1-zkp
+     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/vendor/secp256k1-zkp
+     CONFIGURE_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/vendor/secp256k1-zkp/configure --prefix=${CMAKE_CURRENT_BINARY_DIR}/vendor/secp256k1-zkp
+     BUILD_COMMAND make
+     INSTALL_COMMAND make install
+    )
+    ExternalProject_Add_Step(project_secp256k1 autogen
+     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/vendor/secp256k1-zkp
+     COMMAND ./autogen.sh
+     DEPENDERS configure
+    )
 
-set( SECP256K1_DIR "${CMAKE_CURRENT_SOURCE_DIR}/vendor/secp256k1-zkp" )
+    ExternalProject_Get_Property(project_secp256k1 install_dir)
 
-file( GLOB SECP256K1_SOURCES "${SECP256K1_DIR}/src/secp256k1.c" )
-add_library( secp256k1 ${SECP256K1_SOURCES} )
-
-target_include_directories( secp256k1 PRIVATE "${SECP256K1_DIR}" PUBLIC "${SECP256K1_DIR}/include" )
-
-
-if( WIN32 )
-  set( SECP256K1_BUILD_DEFINES
-      USE_FIELD_10X26
-      USE_FIELD_INV_BUILTIN
-      USE_NUM_NONE
-      USE_SCALAR_8X32
-      USE_SCALAR_INV_BUILTIN )
-else()
-  # ***Will only work for Clang on 64-bit Mac/Linux***
-  set( SECP256K1_BUILD_DEFINES
-      HAVE_BUILTIN_CLZLL
-      HAVE_BUILTIN_EXPECT
-      HAVE_DLFCN_H
-      HAVE_INTTYPES_H
-      HAVE_LIBCRYPTO
-      HAVE_MEMORY_H
-      HAVE_STDINT_H
-      HAVE_STDLIB_H
-      HAVE_STRINGS_H
-      HAVE_STRING_H
-      HAVE_SYS_STAT_H
-      HAVE_SYS_TYPES_H
-      HAVE_UNISTD_H
-      HAVE___INT128
-      STDC_HEADERS
-      USE_FIELD_5X52
-      USE_FIELD_INV_BUILTIN
-      USE_NUM_NONE
-      USE_SCALAR_4X64
-      USE_SCALAR_INV_BUILTIN
-  )
-endif()
-set_target_properties( secp256k1 PROPERTIES COMPILE_DEFINITIONS "${SECP256K1_BUILD_DEFINES}" LINKER_LANGUAGE C )
+    add_library(secp256k1 STATIC IMPORTED)
+    set_property(TARGET secp256k1 PROPERTY IMPORTED_LOCATION ${install_dir}/lib/libsecp256k1.a)
+    set_property(TARGET secp256k1 PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR}/vendor/secp256k1-zkp/include)
+    add_dependencies(secp256k1 project_secp256k1)
+endif ( WIN32 )
 # End configure secp256k1-zkp
 
 IF( WIN32 )

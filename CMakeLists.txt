@@ -53,12 +53,12 @@ ENDIF( ECC_IMPL STREQUAL openssl )
 if ( WIN32 )
     # autoconf won't work here, hard code the defines
     set( SECP256K1_DIR "${CMAKE_CURRENT_SOURCE_DIR}/vendor/secp256k1-zkp" )
-    
+
     file( GLOB SECP256K1_SOURCES "${SECP256K1_DIR}/src/secp256k1.c" )
     add_library( secp256k1 ${SECP256K1_SOURCES} )
-    
+
     target_include_directories( secp256k1 PRIVATE "${SECP256K1_DIR}" PUBLIC "${SECP256K1_DIR}/include" )
-    
+
     set( SECP256K1_BUILD_DEFINES
         USE_FIELD_10X26
         USE_FIELD_INV_BUILTIN
@@ -74,6 +74,7 @@ else ( WIN32 )
      CONFIGURE_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/vendor/secp256k1-zkp/configure --prefix=${CMAKE_CURRENT_BINARY_DIR}/vendor/secp256k1-zkp --with-bignum=no
      BUILD_COMMAND make
      INSTALL_COMMAND true
+     BUILD_BYPRODUCTS ${CMAKE_CURRENT_BINARY_DIR}/vendor/secp256k1-zkp/src/project_secp256k1-build/.libs/libsecp256k1.a
     )
     ExternalProject_Add_Step(project_secp256k1 autogen
      WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/vendor/secp256k1-zkp

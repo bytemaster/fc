@@ -30,6 +30,94 @@
 
 namespace fc { namespace rpc {
 
+cli::~cli()
+{
+   if( _run_complete.valid() )
+   {
+      stop();
+   }
+}
+
+variant cli::send_call( api_id_type api_id, string method_name, variants args /* = variants() */ )
+{
+   FC_ASSERT(false);
+}
+
+variant cli::send_callback( uint64_t callback_id, variants args /* = variants() */ )
+{
+   FC_ASSERT(false);
+}
+
+void cli::send_notice( uint64_t callback_id, variants args /* = variants() */ )
+{
+   FC_ASSERT(false);
+}
+
+void cli::start()
+{
+   _run_complete = fc::async( [&](){ run(); } );
+}
+
+void cli::stop()
+{
+   _run_complete.cancel();
+   _run_complete.wait();
+}
+
+void cli::wait()
+{
+   _run_complete.wait();
+}
+
+void cli::format_result( const string& method, std::function<string(variant,const variants&)> formatter)
+{
+   _result_formatters[method] = formatter;
+}
+
+void cli::set_prompt( const string& prompt )
+{
+   _prompt = prompt;
+}
+
+void cli::run()
+{
+   while( !_run_complete.canceled() )
+   {
+      try
+      {
+         std::string line;
+         try
+         {
+            getline( _prompt.c_str(), line );
+         }
+         catch ( const fc::eof_exception& e )
+         {
+            break;
+         }
+         std::cout << line << "\n";
+         line += char(EOF);
+         fc::variants args = fc::json::variants_from_string(line);;
+         if( args.size() == 0 )
+            continue;
+
+         const string& method = args[0].get_string();
+
+         auto result = receive_call( 0, method, variants( args.begin()+1,args.end() ) );
+         auto itr = _result_formatters.find( method );
+         if( itr == _result_formatters.end() )
+         {
+            std::cout << fc::json::to_pretty_string( result ) << "\n";
+         }
+         else
+            std::cout << itr->second( result, args ) << "\n";
+      }
+      catch ( const fc::exception& e )
+      {
+         std::cout << e.to_detail_string() << "\n";
+      }
+   }
+}
+
 void cli::getline( const fc::string& prompt, fc::string& line)
 {
    // getting file descriptor for C++ streams is near impossible
@@ -69,4 +157,4 @@ void cli::getline( const fc::string& prompt, fc::string& line)
    }
 }
 
-} }
+} } // namespace fc::rpc

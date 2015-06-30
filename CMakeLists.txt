@@ -146,7 +146,6 @@ set( CMAKE_FIND_LIBRARY_SUFFIXES ${ORIGINAL_LIB_SUFFIXES} )
 option( UNITY_BUILD OFF )
 
 set( fc_sources
-     src/rpc/state.cpp
      src/uint128.cpp
      src/real128.cpp
      src/variant.cpp
@@ -178,8 +177,11 @@ set( fc_sources
      src/interprocess/signals.cpp
      src/interprocess/file_mapping.cpp
      src/interprocess/mmap_struct.cpp
-     src/rpc/json_connection.cpp
      src/rpc/cli.cpp
+     src/rpc/http_api.cpp
+     src/rpc/json_connection.cpp
+     src/rpc/state.cpp
+     src/rpc/websocket_api.cpp
      src/log/log_message.cpp
      src/log/logger.cpp
      src/log/appender.cpp

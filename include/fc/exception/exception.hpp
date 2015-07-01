@@ -6,8 +6,9 @@
 #include <fc/log/logger.hpp>
 #include <fc/optional.hpp>
 #include <exception>
+#include <functional>
+#include <iostream>
 #include <unordered_map>
-
 
 namespace fc
 {
@@ -291,7 +292,6 @@ namespace fc
   FC_DECLARE_EXCEPTION( underflow_exception, underflow_code, "Integer Underflow" );
 
   std::string except_str();
-
 } // namespace fc
 
 #if __APPLE__
@@ -313,7 +313,10 @@ namespace fc
   FC_EXPAND_MACRO( \
     FC_MULTILINE_MACRO_BEGIN \
       if( UNLIKELY(!(TEST)) ) \
+      {                                                                      \
+        std::cout << "assert_trip:  " << __FILE__ << ':' << __LINE__ << ": " << #TEST << "\n"; \
         FC_THROW_EXCEPTION( fc::assert_exception, #TEST ": "  __VA_ARGS__ ); \
+      }                                                                      \
     FC_MULTILINE_MACRO_END \
   )
 

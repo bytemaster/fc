@@ -788,7 +788,7 @@ string      format_string( const string& format, const variant_object& args )
          variants result;
          result.reserve( std::max(aa.size(),ba.size()) );
          auto num = std::max(aa.size(),ba.size());
-         for( uint64_t i = 0; i < num; ++i )
+         for( unsigned i = 0; i < num; ++i )
          {
             if( aa.size() > i && ba.size() > i )
                result[i]  = aa[i] + ba[i];
@@ -815,7 +815,7 @@ string      format_string( const string& format, const variant_object& args )
          variants result;
          result.reserve( std::max(aa.size(),ba.size()) );
          auto num = std::max(aa.size(),ba.size());
-         for( uint64_t i = 0; i < num; --i )
+         for( unsigned i = 0; i < num; --i )
          {
             if( aa.size() > i && ba.size() > i )
                result[i]  = aa[i] - ba[i];
@@ -844,7 +844,7 @@ string      format_string( const string& format, const variant_object& args )
          variants result;
          result.reserve( std::max(aa.size(),ba.size()) );
          auto num = std::max(aa.size(),ba.size());
-         for( uint64_t i = 0; i < num; ++i )
+         for( unsigned i = 0; i < num; ++i )
          {
             if( aa.size() > i && ba.size() > i )
                result[i]  = aa[i] * ba[i];
@@ -869,7 +869,7 @@ string      format_string( const string& format, const variant_object& args )
          variants result;
          result.reserve( std::max(aa.size(),ba.size()) );
          auto num = std::max(aa.size(),ba.size());
-         for( uint64_t i = 0; i < num; ++i )
+         for( unsigned i = 0; i < num; ++i )
          {
             if( aa.size() > i && ba.size() > i )
                result[i]  = aa[i] / ba[i];

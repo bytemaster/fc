@@ -24,6 +24,7 @@ namespace fc {
     typedef fc::array<char,72>          signature;
     typedef fc::array<unsigned char,65> compact_signature;
     typedef std::vector<char>           range_proof_type;
+    typedef fc::array<char,78>          extended_key_data;
 
     /**
      *  @class public_key
@@ -72,6 +73,8 @@ namespace fc {
            std::string to_base58() const;
            static std::string to_base58( const public_key_data &key );
            static public_key from_base58( const std::string& b58 );
+
+           unsigned int fingerprint() const;
 
         private:
           friend class private_key;
@@ -136,13 +139,63 @@ namespace fc {
             return a.get_secret() < b.get_secret();
            }
 
+           unsigned int fingerprint() const { return get_public_key().fingerprint(); }
+
         private:
            private_key( EC_KEY* k );
            static fc::sha256 get_secret( const EC_KEY * const k );
            fc::fwd<detail::private_key_impl,32> my;
     };
 
+    class extended_public_key : public public_key
+    {
+        public:
+            extended_public_key( const public_key& k, const sha256& c,
+                                 int child = 0, int parent_fp = 0, uint8_t depth = 0 );
 
+            extended_public_key derive_child( int i ) const;
+            extended_public_key derive_normal_child( int i ) const;
+
+            extended_key_data serialize_extended() const;
+            static extended_public_key deserialize( const extended_key_data& data );
+            fc::string str() const;
+            fc::string to_base58() const { return str(); }
+            static extended_public_key from_base58( const fc::string& base58 );
+
+        private:
+            sha256 c;
+            int child_num, parent_fp;
+            uint8_t depth;
+    };
+
+    class extended_private_key : public private_key
+    {
+        public:
+            extended_private_key( const private_key& k, const sha256& c,
+                                  int child = 0, int parent_fp = 0, uint8_t depth = 0 );
+
+            extended_public_key get_extended_public_key()const;
+
+            extended_private_key derive_child( int i ) const;
+            extended_private_key derive_normal_child( int i ) const;
+            extended_private_key derive_hardened_child( int i ) const;
+
+            extended_key_data serialize_extended() const;
+            static extended_private_key deserialize( const extended_key_data& data );
+            fc::string str() const;
+            fc::string to_base58() const { return str(); }
+            static extended_private_key from_base58( const fc::string& base58 );
+            static extended_private_key generate_master( const fc::string& seed );
+            static extended_private_key generate_master( const char* seed, uint32_t seed_len );
+
+        private:
+            extended_private_key private_derive_rest( const fc::sha512& hash,
+                                                      int num ) const;
+
+            sha256 c;
+            int child_num, parent_fp;
+            uint8_t depth;
+    };
 
      struct range_proof_info
      {

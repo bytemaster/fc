@@ -1,7 +1,9 @@
 #include <fc/crypto/elliptic.hpp>
 
 #include <fc/crypto/base58.hpp>
+#include <fc/crypto/hmac.hpp>
 #include <fc/crypto/openssl.hpp>
+#include <fc/crypto/sha512.hpp>
 
 #include <fc/fwd_impl.hpp>
 #include <fc/exception/exception.hpp>
@@ -11,6 +13,9 @@
 #include <secp256k1.h>
 
 #include "_elliptic_impl_priv.hpp"
+
+#define BTC_EXT_PUB_MAGIC   (0x0488B21E)
+#define BTC_EXT_PRIV_MAGIC  (0x0488ADE4)
 
 namespace fc { namespace ecc {
     namespace detail
@@ -151,7 +156,229 @@ namespace fc { namespace ecc {
         FC_ASSERT( pk_len == my->_key.size() );
     }
 
+    static fc::sha256 _left( const fc::sha512& v )
+    {
+        fc::sha256 result;
+        memcpy( result.data(), v.data(), 32 );
+        return result;
+    }
 
+    static fc::sha256 _right( const fc::sha512& v )
+    {
+        fc::sha256 result;
+        memcpy( result.data(), v.data() + 32, 32 );
+        return result;
+    }
+
+    typedef fc::array<char,37> chr37;
+
+    static void _put( unsigned char** dest, unsigned int i)
+    {
+        *(*dest)++ = (i >> 24) & 0xff;
+        *(*dest)++ = (i >> 16) & 0xff;
+        *(*dest)++ = (i >>  8) & 0xff;
+        *(*dest)++ =  i        & 0xff;
+    }
+
+    static unsigned int _get( unsigned char** src )
+    {
+        unsigned int result = *(*src)++ << 24;
+        result |= *(*src)++ << 16;
+        result |= *(*src)++ <<  8;
+        result |= *(*src)++;
+        return result;
+    }
+
+    static chr37 _derive_message( char first, const char* key32, int i )
+    {
+        chr37 result;
+        unsigned char* dest = (unsigned char*) result.begin();
+        *dest++ = first;
+        memcpy( dest, key32, 32 ); dest += 32;
+        _put( &dest, i );
+        return result;
+    }
+
+    static chr37 _derive_message( const public_key_data& key, int i )
+    {
+        return _derive_message( *key.begin(), key.begin() + 1, i );
+    }
+
+    static chr37 _derive_message( const private_key_secret& key, int i )
+    {
+        return _derive_message( 0, key.data(), i );
+    }
+
+    static fc::string _to_base58( const extended_key_data& key )
+    {
+        char buffer[key.size() + 4];
+        memcpy( buffer, key.begin(), key.size() );
+        fc::sha256 double_hash = fc::sha256::hash( fc::sha256::hash( key.begin(), key.size() ));
+        memcpy( buffer + key.size(), double_hash.data(), 4 );
+        return fc::to_base58( buffer, sizeof(buffer) );
+    }
+
+    static void _parse_extended_data( unsigned char* buffer, fc::string base58 )
+    {
+        memset( buffer, 0, 78 );
+        std::vector<char> decoded = fc::from_base58( base58 );
+        unsigned int i = 0;
+        for ( char c : decoded )
+        {
+            if ( i >= 78 || i > decoded.size() - 4 ) { break; }
+            buffer[i++] = c;
+        }
+    }
+
+    typedef hmac<fc::sha512> hmac_sha512;
+
+    extended_public_key::extended_public_key( const public_key& k, const fc::sha256& c,
+                                              int child, int parent, uint8_t depth )
+        : public_key(k), c(c), child_num(child), parent_fp(parent), depth(depth) { }
+
+    extended_public_key extended_public_key::derive_child(int i) const
+    {
+        FC_ASSERT( !(i&0x80000000), "Can't derive hardened public key!" );
+        return derive_normal_child(i);
+    }
+
+    extended_public_key extended_public_key::derive_normal_child(int i) const
+    {
+        hmac_sha512 mac;
+        public_key_data key = serialize();
+        const chr37 data = _derive_message( key, i );
+        fc::sha512 l = mac.digest( c.data(), c.data_size(), data.begin(), data.size() );
+        fc::sha256 left = _left(l);
+        FC_ASSERT( secp256k1_ec_pubkey_tweak_add( detail::_get_context(), (unsigned char*) key.begin(), key.size(), (unsigned char*) left.data() ) > 0 );
+        extended_public_key result( key, _right(l), i, fingerprint(), depth + 1 );
+        return result;
+    }
+
+    extended_key_data extended_public_key::serialize_extended() const
+    {
+        extended_key_data result;
+        unsigned char* dest = (unsigned char*) result.begin();
+        _put( &dest, BTC_EXT_PUB_MAGIC );
+        *dest++ = depth;
+        _put( &dest, parent_fp );
+        _put( &dest, child_num );
+        memcpy( dest, c.data(), c.data_size() ); dest += 32;
+        public_key_data key = serialize();
+        memcpy( dest, key.begin(), key.size() );
+        return result;
+    }
+
+    fc::string extended_public_key::str() const
+    {
+        return _to_base58( serialize_extended() );
+    }
+
+    extended_public_key extended_public_key::from_base58( const fc::string& base58 )
+    {
+        unsigned char buffer[78];
+        unsigned char* ptr = buffer;
+        _parse_extended_data( buffer, base58 );
+        FC_ASSERT( _get( &ptr ) == BTC_EXT_PUB_MAGIC, "Invalid extended private key" );
+        uint8_t d = *ptr++;
+        int fp = _get( &ptr );
+        int cn = _get( &ptr );
+        fc::sha256 chain;
+        memcpy( chain.data(), ptr, chain.data_size() ); ptr += chain.data_size();
+        public_key_data key;
+        memcpy( key.begin(), ptr, key.size() );
+        return extended_public_key( key, chain, cn, fp, d );
+    }
+
+    extended_private_key::extended_private_key( const private_key& k, const sha256& c,
+                                                int child, int parent, uint8_t depth )
+        : private_key(k), c(c), child_num(child), parent_fp(parent), depth(depth) { }
+
+    extended_public_key extended_private_key::get_extended_public_key() const
+    {
+        return extended_public_key( get_public_key(), c, child_num, parent_fp, depth );
+    }
+
+    extended_private_key extended_private_key::derive_child(int i) const
+    {
+        return i < 0 ? derive_hardened_child(i) : derive_normal_child(i);
+    }
+
+    extended_private_key extended_private_key::derive_normal_child(int i) const
+    {
+        const chr37 data = _derive_message( get_public_key().serialize(), i );
+        hmac_sha512 mac;
+        fc::sha512 l = mac.digest( c.data(), c.data_size(), data.begin(), data.size() );
+        return private_derive_rest( l, i );
+    }
+
+    extended_private_key extended_private_key::derive_hardened_child(int i) const
+    {
+        hmac_sha512 mac;
+        private_key_secret key = get_secret();
+        const chr37 data = _derive_message( key, i );
+        fc::sha512 l = mac.digest( c.data(), c.data_size(), data.begin(), data.size() );
+        return private_derive_rest( l, i );
+    }
+
+    extended_private_key extended_private_key::private_derive_rest( const fc::sha512& hash,
+                                                                    int i) const
+    {
+        fc::sha256 left = _left(hash);
+        FC_ASSERT( secp256k1_ec_privkey_tweak_add( detail::_get_context(), (unsigned char*) left.data(), (unsigned char*) get_secret().data() ) > 0 );
+        extended_private_key result( private_key::regenerate( left ), _right(hash),
+                                     i, fingerprint(), depth + 1 );
+        return result;
+    }
+
+    extended_key_data extended_private_key::serialize_extended() const
+    {
+        extended_key_data result;
+        unsigned char* dest = (unsigned char*) result.begin();
+        _put( &dest, BTC_EXT_PRIV_MAGIC );
+        *dest++ = depth;
+        _put( &dest, parent_fp );
+        _put( &dest, child_num );
+        memcpy( dest, c.data(), c.data_size() ); dest += 32;
+        *dest++ = 0;
+        private_key_secret key = get_secret();
+        memcpy( dest, key.data(), key.data_size() );
+        return result;
+    }
+
+    fc::string extended_private_key::str() const
+    {
+        return _to_base58( serialize_extended() );
+    }
+
+    extended_private_key extended_private_key::from_base58( const fc::string& base58 )
+    {
+        unsigned char buffer[78];
+        unsigned char* ptr = buffer;
+        _parse_extended_data( buffer, base58 );
+        FC_ASSERT( _get( &ptr ) == BTC_EXT_PRIV_MAGIC, "Invalid extended private key" );
+        uint8_t d = *ptr++;
+        int fp = _get( &ptr );
+        int cn = _get( &ptr );
+        fc::sha256 chain;
+        memcpy( chain.data(), ptr, chain.data_size() ); ptr += chain.data_size();
+        ptr++;
+        private_key_secret key;
+        memcpy( key.data(), ptr, key.data_size() );
+        return extended_private_key( private_key::regenerate(key), chain, cn, fp, d );
+    }
+
+    extended_private_key extended_private_key::generate_master( const fc::string& seed )
+    {
+        return generate_master( seed.c_str(), seed.size() );
+    }
+
+    extended_private_key extended_private_key::generate_master( const char* seed, uint32_t seed_len )
+    {
+        hmac_sha512 mac;
+        fc::sha512 hash = mac.digest( "Bitcoin seed", 12, seed, seed_len );
+        extended_private_key result( private_key::regenerate( _left(hash) ), _right(hash) );
+        return result;
+    }
 
 
      commitment_type blind( const blind_factor_type& blind, uint64_t value )

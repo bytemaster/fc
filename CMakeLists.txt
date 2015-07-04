@@ -341,6 +341,12 @@ target_link_libraries( bloom_test fc )
 add_executable( real128_test tests/all_tests.cpp tests/real128_test.cpp )
 target_link_libraries( real128_test fc )
 
+add_executable( hmac_test tests/hmac_test.cpp )
+target_link_libraries( hmac_test fc )
+
+add_executable( blinding_test tests/blinding_test.cpp )
+target_link_libraries( blinding_test fc )
+
 
 add_executable( udt_server tests/udts.cpp )
 target_link_libraries( udt_server fc udt )

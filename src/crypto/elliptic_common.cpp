@@ -1,6 +1,7 @@
 #include <fc/crypto/base58.hpp>
 #include <fc/crypto/elliptic.hpp>
 #include <fc/io/raw.hpp>
+#include <fc/crypto/ripemd160.hpp>
 
 /* stuff common to all ecc implementations */
 
@@ -48,6 +49,14 @@ namespace fc { namespace ecc {
         FC_ASSERT( memcmp( (char*)&check, data.data + sizeof(key), sizeof(check) ) == 0 );
         memcpy( (char*)key.data, data.data, sizeof(key) );
         return from_key_data(key);
+    }
+
+    unsigned int public_key::fingerprint() const
+    {
+        public_key_data key = serialize();
+        ripemd160 hash = ripemd160::hash( sha256::hash( key.begin(), key.size() ) );
+        unsigned char* fp = (unsigned char*) hash._hash;
+        return (fp[0] << 24) | (fp[1] << 16) | (fp[2] << 8) | fp[3];
     }
 
     bool public_key::is_canonical( const compact_signature& c ) {

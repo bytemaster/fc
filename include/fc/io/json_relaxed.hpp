@@ -689,7 +689,7 @@ namespace fc { namespace json_relaxed
    {
       skip_white_space(in);
       variant var;
-      while( char c = in.peek() )
+      while( signed char c = in.peek() )
       {
          switch( c )
          {

@@ -390,7 +390,7 @@ namespace fc
    {
       skip_white_space(in);
       variant var;
-      while( char c = in.peek() )
+      while( signed char c = in.peek() )
       {
          switch( c )
          {

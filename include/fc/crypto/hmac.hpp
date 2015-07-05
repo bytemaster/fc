@@ -54,14 +54,9 @@ namespace fc {
             typename H::encoder encoder;
     };
 
-    template<>
-    unsigned int hmac<sha224>::internal_block_size() const { return 64; }
-
-    template<>
-    unsigned int hmac<sha256>::internal_block_size() const { return 64; }
-
-    template<>
-    unsigned int hmac<sha512>::internal_block_size() const { return 128; }
+    typedef hmac<fc::sha224> hmac_sha224;
+    typedef hmac<fc::sha256> hmac_sha256;
+    typedef hmac<fc::sha512> hmac_sha512;
 }
 
 #endif	/* HMAC_HPP */

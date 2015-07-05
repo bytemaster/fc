@@ -1,4 +1,5 @@
 #include <fc/crypto/hex.hpp>
+#include <fc/crypto/hmac.hpp>
 #include <fc/fwd_impl.hpp>
 #include <openssl/sha.h>
 #include <string.h>
@@ -101,4 +102,7 @@ namespace fc {
     else
         memset( &bi, char(0), sizeof(bi) );
   }
+
+    template<>
+    unsigned int hmac<sha512>::internal_block_size() const { return 128; }
 }

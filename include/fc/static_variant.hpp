@@ -268,6 +268,14 @@ public:
        v.visit( impl::move_construct<static_variant>(*this) );
        return *this;
     }
+    friend bool operator == ( const static_variant& a, const static_variant& b )
+    {
+       return a.wich() == b.which();
+    }
+    friend bool operator < ( const static_variant& a, const static_variant& b )
+    {
+       return a.wich() < b.which();
+    }
 
     template<typename X>
     X& get() {

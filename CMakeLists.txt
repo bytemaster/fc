@@ -50,48 +50,45 @@ ELSE( ECC_IMPL STREQUAL openssl )
 ENDIF( ECC_IMPL STREQUAL openssl )
 
 # Configure secp256k1-zkp
-  
-set( SECP256K1_DIR "${CMAKE_CURRENT_SOURCE_DIR}/vendor/secp256k1-zkp" )
-  
-file( GLOB SECP256K1_SOURCES "${SECP256K1_DIR}/src/secp256k1.c" )
-add_library( secp256k1 ${SECP256K1_SOURCES} )
-  
-target_include_directories( secp256k1 PRIVATE "${SECP256K1_DIR}" PUBLIC "${SECP256K1_DIR}/include" )
-  
+if ( WIN32 )
+    # autoconf won't work here, hard code the defines
+    set( SECP256K1_DIR "${CMAKE_CURRENT_SOURCE_DIR}/vendor/secp256k1-zkp" )
 
-if( WIN32 )
-  set( SECP256K1_BUILD_DEFINES 
-      USE_FIELD_10X26
-      USE_FIELD_INV_BUILTIN
-      USE_NUM_NONE
-      USE_SCALAR_8X32
-      USE_SCALAR_INV_BUILTIN )
-else()
-  # ***Will only work for Clang on 64-bit Mac/Linux***
-  set( SECP256K1_BUILD_DEFINES
-      HAVE_BUILTIN_CLZLL
-      HAVE_BUILTIN_EXPECT
-      HAVE_DLFCN_H
-      HAVE_INTTYPES_H
-      HAVE_LIBCRYPTO
-      HAVE_MEMORY_H
-      HAVE_STDINT_H
-      HAVE_STDLIB_H
-      HAVE_STRINGS_H
-      HAVE_STRING_H
-      HAVE_SYS_STAT_H
-      HAVE_SYS_TYPES_H
-      HAVE_UNISTD_H
-      HAVE___INT128
-      STDC_HEADERS
-      USE_FIELD_5X52
-      USE_FIELD_INV_BUILTIN
-      USE_NUM_NONE
-      USE_SCALAR_4X64
-      USE_SCALAR_INV_BUILTIN
-  )
-endif()
-set_target_properties( secp256k1 PROPERTIES COMPILE_DEFINITIONS "${SECP256K1_BUILD_DEFINES}" LINKER_LANGUAGE C )
+    file( GLOB SECP256K1_SOURCES "${SECP256K1_DIR}/src/secp256k1.c" )
+    add_library( secp256k1 ${SECP256K1_SOURCES} )
+
+    target_include_directories( secp256k1 PRIVATE "${SECP256K1_DIR}" PUBLIC "${SECP256K1_DIR}/include" )
+
+    set( SECP256K1_BUILD_DEFINES
+        USE_FIELD_10X26
+        USE_FIELD_INV_BUILTIN
+        USE_NUM_NONE
+        USE_SCALAR_8X32
+        USE_SCALAR_INV_BUILTIN )
+    set_target_properties( secp256k1 PROPERTIES COMPILE_DEFINITIONS "${SECP256K1_BUILD_DEFINES}" LINKER_LANGUAGE C )
+else ( WIN32 )
+    include(ExternalProject)
+    ExternalProject_Add( project_secp256k1
+     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/vendor/secp256k1-zkp
+     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/vendor/secp256k1-zkp
+     CONFIGURE_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/vendor/secp256k1-zkp/configure --prefix=${CMAKE_CURRENT_BINARY_DIR}/vendor/secp256k1-zkp --with-bignum=no
+     BUILD_COMMAND make
+     INSTALL_COMMAND true
+     BUILD_BYPRODUCTS ${CMAKE_CURRENT_BINARY_DIR}/vendor/secp256k1-zkp/src/project_secp256k1-build/.libs/libsecp256k1.a
+    )
+    ExternalProject_Add_Step(project_secp256k1 autogen
+     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/vendor/secp256k1-zkp
+     COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/vendor/secp256k1-zkp/autogen.sh
+     DEPENDERS configure
+    )
+
+    ExternalProject_Get_Property(project_secp256k1 binary_dir)
+
+    add_library(secp256k1 STATIC IMPORTED)
+    set_property(TARGET secp256k1 PROPERTY IMPORTED_LOCATION ${binary_dir}/.libs/libsecp256k1${CMAKE_STATIC_LIBRARY_SUFFIX})
+    set_property(TARGET secp256k1 PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR}/vendor/secp256k1-zkp/include)
+    add_dependencies(secp256k1 project_secp256k1)
+endif ( WIN32 )
 # End configure secp256k1-zkp
 
 IF( WIN32 )
@@ -128,7 +125,6 @@ ELSE(WIN32)
 
   IF(NOT APPLE)
     # Linux or other unix
-    SET(SALSA_SRC vendor/salsa20/salsa20.s)
     SET(rt_library rt )
     SET(pthread_library pthread)
   ENDIF(NOT APPLE)
@@ -150,7 +146,6 @@ set( CMAKE_FIND_LIBRARY_SUFFIXES ${ORIGINAL_LIB_SUFFIXES} )
 option( UNITY_BUILD OFF )
 
 set( fc_sources
-     src/rpc/state.cpp
      src/uint128.cpp
      src/real128.cpp
      src/variant.cpp
@@ -182,8 +177,11 @@ set( fc_sources
      src/interprocess/signals.cpp
      src/interprocess/file_mapping.cpp
      src/interprocess/mmap_struct.cpp
-     src/rpc/json_connection.cpp
      src/rpc/cli.cpp
+     src/rpc/http_api.cpp
+     src/rpc/json_connection.cpp
+     src/rpc/state.cpp
+     src/rpc/websocket_api.cpp
      src/log/log_message.cpp
      src/log/logger.cpp
      src/log/appender.cpp
@@ -212,8 +210,6 @@ set( fc_sources
      ${ECC_REST}
      src/crypto/elliptic_${ECC_IMPL}.cpp
      src/crypto/rand.cpp
-     src/crypto/salsa20.cpp
-     #src/crypto/scrypt.cpp
      src/network/tcp_socket.cpp
      src/network/udp_socket.cpp
      src/network/udt_socket.cpp
@@ -228,16 +224,9 @@ set( fc_sources
      src/network/gntp.cpp
      src/compress/smaz.cpp
      src/compress/zlib.cpp
-     src/compress/lzma.cpp
      vendor/cyoencode-1.0.2/src/CyoDecode.c
      vendor/cyoencode-1.0.2/src/CyoEncode.c
-     #vendor/salsa20/ecrypt.c
-     ${SALSA_SRC}
      )
-
-     SET_PROPERTY( SOURCE
-                   vendor/salsa20/salsa20.s
-                   PROPERTY LANGUAGE C)
 
 file( GLOB_RECURSE fc_headers ${CMAKE_CURRENT_SOURCE_DIR} *.hpp *.h )
 
@@ -249,9 +238,7 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/git_revision.cpp.in" "${CMAKE_CU
 list(APPEND sources "${CMAKE_CURRENT_BINARY_DIR}/git_revision.cpp")
 list(APPEND sources ${fc_headers})
 
-add_subdirectory( vendor/easylzma )
 add_subdirectory( vendor/websocketpp )
-#add_subdirectory( vendor/scrypt-jane )
 add_subdirectory( vendor/udt4 )
 
 setup_library( fc SOURCES ${sources} LIBRARY_TYPE STATIC DONT_INSTALL_LIBRARY )
@@ -280,7 +267,7 @@ IF(WIN32)
     _SCL_SERCURE_NO_WARNINGS
     # Needed to disable MSVC autolinking feature (#pragma comment)
     BOOST_ALL_NO_LIB
-    # The current version of websockets doesn't correctly guess what 'chrono' implementation boost::asio uses 
+    # The current version of websockets doesn't correctly guess what 'chrono' implementation boost::asio uses
     # on the recommended build platform of VC++12/boost_1.58.  Force it here until websocket gets their
     # autodetecting code to do the right thing.
     _WEBSOCKETPP_CPP11_CHRONO_
@@ -310,16 +297,13 @@ target_include_directories(fc
   PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/vendor/boost_1.51/include
     ${CMAKE_CURRENT_SOURCE_DIR}/vendor/cyoencode-1.0.2/src
-    ${CMAKE_CURRENT_SOURCE_DIR}/vendor/easylzma/src
-    ${CMAKE_CURRENT_SOURCE_DIR}/vendor/salsa20
-    #${CMAKE_CURRENT_SOURCE_DIR}/vendor/scrypt-jane
     ${CMAKE_CURRENT_SOURCE_DIR}/vendor/udt4/src
     ${CMAKE_CURRENT_SOURCE_DIR}/vendor/websocketpp
     ${CMAKE_CURRENT_SOURCE_DIR}/vendor/secp256k1-zkp
   )
 
-#target_link_libraries( fc PUBLIC easylzma_static scrypt udt ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} ${ZLIB_LIBRARIES} ${PLATFORM_SPECIFIC_LIBS} ${RPCRT4} ${CMAKE_DL_LIBS} ${rt_library} ${ECC_LIB} )
-target_link_libraries( fc PUBLIC -L/usr/local/lib easylzma_static udt ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} ${ZLIB_LIBRARIES} ${PLATFORM_SPECIFIC_LIBS} ${RPCRT4} ${CMAKE_DL_LIBS} ${rt_library} ${readline_libraries} ${ECC_LIB} )
+#target_link_libraries( fc PUBLIC udt ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} ${ZLIB_LIBRARIES} ${PLATFORM_SPECIFIC_LIBS} ${RPCRT4} ${CMAKE_DL_LIBS} ${rt_library} ${ECC_LIB} )
+target_link_libraries( fc PUBLIC -L/usr/local/lib udt ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} ${ZLIB_LIBRARIES} ${PLATFORM_SPECIFIC_LIBS} ${RPCRT4} ${CMAKE_DL_LIBS} ${rt_library} ${readline_libraries} ${ECC_LIB} )
 
 if(MSVC)
   set_source_files_properties( src/network/http/websocket.cpp PROPERTIES COMPILE_FLAGS "/bigobj" )
@@ -363,9 +347,6 @@ target_link_libraries( udt_server fc udt )
 
 add_executable( udt_client tests/udtc.cpp )
 target_link_libraries( udt_client fc udt )
-
-add_executable( lzma_test tests/lzma_test.cpp )
-target_link_libraries( lzma_test fc )
 
 add_executable( ecc_test tests/ecc_test.cpp )
 target_link_libraries( ecc_test fc )

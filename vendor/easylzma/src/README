@@ -1,3 +1,0 @@
-pavlov/ - contains original lzma compress/decompress source from Igor Pavlov
-easylzma/ - contains the public api of this library
-./ - contains the implementation of this wrapper library

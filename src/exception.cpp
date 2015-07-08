@@ -4,6 +4,8 @@
 #include <fc/log/logger.hpp>
 #include <fc/io/json.hpp>
 
+#include <iostream>
+
 namespace fc
 {
    FC_REGISTER_EXCEPTIONS( (timeout_exception)
@@ -227,5 +229,25 @@ namespace fc
       my = std::move(copy.my);
       return *this;
    }
+
+   void record_assert_trip(
+      const char* filename,
+      uint32_t lineno,
+      const char* expr
+      )
+   {
+      fc::mutable_variant_object assert_trip_info =
+         fc::mutable_variant_object()
+         ("source_file", filename)
+         ("source_lineno", lineno)
+         ("expr", expr)
+         ;
+      std::cout
+         << "FC_ASSERT triggered:  "
+         << fc::json::to_string( assert_trip_info ) << "\n";
+      return;
+   }
+
+   bool enable_record_assert_trip = false;
 
 } // fc

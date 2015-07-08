@@ -6,8 +6,8 @@
 #include <fc/log/logger.hpp>
 #include <fc/optional.hpp>
 #include <exception>
+#include <functional>
 #include <unordered_map>
-
 
 namespace fc
 {
@@ -292,6 +292,13 @@ namespace fc
 
   std::string except_str();
 
+  void record_assert_trip(
+     const char* filename,
+     uint32_t lineno,
+     const char* expr
+     );
+
+  extern bool enable_record_assert_trip;
 } // namespace fc
 
 #if __APPLE__
@@ -313,7 +320,11 @@ namespace fc
   FC_EXPAND_MACRO( \
     FC_MULTILINE_MACRO_BEGIN \
       if( UNLIKELY(!(TEST)) ) \
+      {                                                                      \
+        if( fc::enable_record_assert_trip )                                  \
+           fc::record_assert_trip( __FILE__, __LINE__, #TEST );              \
         FC_THROW_EXCEPTION( fc::assert_exception, #TEST ": "  __VA_ARGS__ ); \
+      }                                                                      \
     FC_MULTILINE_MACRO_END \
   )
 

@@ -270,11 +270,11 @@ public:
     }
     friend bool operator == ( const static_variant& a, const static_variant& b )
     {
-       return a.wich() == b.which();
+       return a.which() == b.which();
     }
     friend bool operator < ( const static_variant& a, const static_variant& b )
     {
-       return a.wich() < b.which();
+       return a.which() < b.which();
     }
 
     template<typename X>

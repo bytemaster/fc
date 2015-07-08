@@ -14,6 +14,7 @@
 #include <fc/string.hpp>
 #include <fc/container/deque_fwd.hpp>
 #include <fc/container/flat_fwd.hpp>
+#include <fc/smart_ref_fwd.hpp>
 
 namespace fc
 {
@@ -44,6 +45,8 @@ namespace fc
 
    void to_variant( const blob& var,  variant& vo );
    void from_variant( const variant& var,  blob& vo );
+   template<typename T> void to_variant( const smart_ref<T>& s, variant& v );
+   template<typename T> void from_variant( const variant& v, smart_ref<T>& s );
    template<typename T> void to_variant( const safe<T>& s, variant& v );
    template<typename T> void from_variant( const variant& v, safe<T>& s );
    template<typename T> void to_variant( const std::unique_ptr<T>& s, variant& v );
@@ -534,6 +537,11 @@ namespace fc
    template<typename T>
    void from_variant( const variant& v, safe<T>& s ) { s.value = v.as_uint64(); }
 
+   template<typename T>
+   void to_variant( const smart_ref<T>& s, variant& v ) { v = *s; }
+
+   template<typename T>
+   void from_variant( const variant& v, smart_ref<T>& s ) { from_variant( v, *s ); }
 
    variant operator + ( const variant& a, const variant& b );
    variant operator - ( const variant& a, const variant& b );

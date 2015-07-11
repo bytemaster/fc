@@ -2,6 +2,7 @@
 #include <fc/crypto/elliptic.hpp>
 #include <fc/io/raw.hpp>
 #include <fc/crypto/hmac.hpp>
+#include <fc/crypto/openssl.hpp>
 #include <fc/crypto/ripemd160.hpp>
 
 /* stuff common to all ecc implementations */
@@ -63,6 +64,30 @@ namespace fc { namespace ecc {
         static chr37 _derive_message( const private_key_secret& key, int i )
         {
             return _derive_message( 0, key.data(), i );
+        }
+
+        const ec_group& get_curve()
+        {
+            static const ec_group secp256k1( EC_GROUP_new_by_curve_name( NID_secp256k1 ) );
+            return secp256k1;
+        }
+
+        static private_key_secret _get_curve_order()
+        {
+            const ec_group& group = get_curve();
+            bn_ctx ctx(BN_CTX_new());
+            ssl_bignum order;
+            FC_ASSERT( EC_GROUP_get_order( group, order, ctx ) );
+            private_key_secret bin;
+            FC_ASSERT( BN_num_bytes( order ) == bin.data_size() );
+            FC_ASSERT( BN_bn2bin( order, (unsigned char*) bin.data() ) == bin.data_size() );
+            return bin;
+        }
+
+        const private_key_secret& get_curve_order()
+        {
+            static private_key_secret order = _get_curve_order();
+            return order;
         }
     }
 
@@ -246,6 +271,9 @@ namespace fc { namespace ecc {
         return extended_public_key( get_public_key(), c, child_num, parent_fp, depth );
     }
 
+    public_key extended_public_key::generate_p(int i) const { return derive_normal_child(2*i + 0); }
+    public_key extended_public_key::generate_q(int i) const { return derive_normal_child(2*i + 1); }
+
     extended_private_key extended_private_key::derive_child(int i) const
     {
         return i < 0 ? derive_hardened_child(i) : derive_normal_child(i);
@@ -282,6 +310,11 @@ namespace fc { namespace ecc {
         memcpy( dest, key.data(), key.data_size() );
         return result;
     }
+
+    private_key extended_private_key::generate_a(int i) const { return derive_hardened_child(4*i + 0); }
+    private_key extended_private_key::generate_b(int i) const { return derive_hardened_child(4*i + 1); }
+    private_key extended_private_key::generate_c(int i) const { return derive_hardened_child(4*i + 2); }
+    private_key extended_private_key::generate_d(int i) const { return derive_hardened_child(4*i + 3); }
 
     fc::string extended_private_key::str() const
     {

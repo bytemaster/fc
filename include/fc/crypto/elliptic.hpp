@@ -25,6 +25,8 @@ namespace fc {
     typedef fc::array<unsigned char,65> compact_signature;
     typedef std::vector<char>           range_proof_type;
     typedef fc::array<char,78>          extended_key_data;
+    typedef fc::sha256                  blinded_hash;
+    typedef fc::sha256                  blind_signature;
 
     /**
      *  @class public_key
@@ -162,6 +164,8 @@ namespace fc {
             fc::string to_base58() const { return str(); }
             static extended_public_key from_base58( const fc::string& base58 );
 
+            public_key generate_p( int i ) const;
+            public_key generate_q( int i ) const;
         private:
             sha256 c;
             int child_num, parent_fp;
@@ -188,10 +192,22 @@ namespace fc {
             static extended_private_key generate_master( const fc::string& seed );
             static extended_private_key generate_master( const char* seed, uint32_t seed_len );
 
+            // Oleg Andreev's blind signature scheme,
+            // see http://blog.oleganza.com/post/77474860538/blind-signatures
+            public_key blind_public_key( const extended_public_key& bob, int i ) const;
+            blinded_hash blind_hash( const fc::sha256& hash, int i ) const;
+            blind_signature blind_sign( const blinded_hash& hash, int i ) const;
+            compact_signature unblind_signature( const extended_public_key& bob, const blind_signature& sig, int i ) const;
+
         private:
             extended_private_key private_derive_rest( const fc::sha512& hash,
                                                       int num ) const;
-
+            private_key generate_a( int i ) const;
+            private_key generate_b( int i ) const;
+            private_key generate_c( int i ) const;
+            private_key generate_d( int i ) const;
+            private_key_secret compute_p( int i ) const;
+            private_key_secret compute_q( int i, const private_key_secret& p ) const;
             sha256 c;
             int child_num, parent_fp;
             uint8_t depth;
@@ -211,9 +227,9 @@ namespace fc {
      bool            verify_sum( const std::vector<commitment_type>& commits, const std::vector<commitment_type>& neg_commits, int64_t excess );
      bool            verify_range( uint64_t& min_val, uint64_t& max_val, const commitment_type& commit, const range_proof_type& proof );
 
-     range_proof_type range_proof_sign( uint64_t min_value, 
-                                       const commitment_type& commit, 
-                                       const blind_factor_type& commit_blind, 
+     range_proof_type range_proof_sign( uint64_t min_value,
+                                       const commitment_type& commit,
+                                       const blind_factor_type& commit_blind,
                                        const blind_factor_type& nonce,
                                        int8_t base10_exp,
                                        uint8_t min_bits,
@@ -222,15 +238,15 @@ namespace fc {
 
      bool            verify_range_proof_rewind( blind_factor_type& blind_out,
                                           uint64_t& value_out,
-                                          string& message_out, 
+                                          string& message_out,
                                           const blind_factor_type& nonce,
-                                          uint64_t& min_val, 
-                                          uint64_t& max_val, 
-                                          commitment_type commit, 
+                                          uint64_t& min_val,
+                                          uint64_t& max_val,
+                                          commitment_type commit,
                                           const range_proof_type& proof );
      range_proof_info range_get_info( const range_proof_type& proof );
-     
-     
+
+
 
   } // namespace ecc
   void to_variant( const ecc::private_key& var,  variant& vo );

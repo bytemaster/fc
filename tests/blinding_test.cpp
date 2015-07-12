@@ -4,6 +4,7 @@
 #include <fc/crypto/base58.hpp>
 #include <fc/crypto/hex.hpp>
 #include <fc/crypto/elliptic.hpp>
+#include <fc/exception/exception.hpp>
 
 // See https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki#Test_Vectors
 
@@ -102,4 +103,30 @@ BOOST_AUTO_TEST_CASE(test_extended_keys_2)
     BOOST_CHECK_EQUAL( m_0_m1_1_m2_2.str(), TEST2_M_0_m1_1_m2_2_PRIV );
     BOOST_CHECK_EQUAL( m_0_m1_1_m2_2.get_extended_public_key().str(), TEST2_M_0_m1_1_m2_2_PUB );
     BOOST_CHECK_EQUAL( m_0_m1_1_m2.get_extended_public_key().derive_child(2).str(), TEST2_M_0_m1_1_m2_2_PUB );
+}
+
+BOOST_AUTO_TEST_CASE(test_blinding)
+{
+    char buffer[7] = "test_";
+    fc::ecc::extended_private_key alice = fc::ecc::extended_private_key::generate_master( "master" );
+    fc::ecc::extended_private_key bob = fc::ecc::extended_private_key::generate_master( "puppet" );
+
+    for ( int i = 0; i < 10; i++ )
+    {
+        alice = alice.derive_child( i );
+        bob = bob.derive_child( i | 0x80000000 );
+        buffer[6] = '0' + i;
+        fc::ecc::extended_public_key bob_pub = bob.get_extended_public_key();
+        fc::sha256 hash = fc::sha256::hash( buffer, sizeof(buffer) );
+        fc::ecc::public_key t = alice.blind_public_key( bob_pub, i );
+        fc::ecc::blinded_hash blinded = alice.blind_hash( hash, i );
+        fc::ecc::blind_signature blind_sig = bob.blind_sign( blinded, i );
+        fc::ecc::compact_signature sig = alice.unblind_signature( bob_pub, blind_sig, i );
+        try {
+        fc::ecc::public_key validate( sig, hash );
+//        BOOST_CHECK_EQUAL( validate.serialize(), t.serialize() );
+        } catch (const fc::exception& e) {
+            printf( "Test %d: %s\n", i, e.to_string().c_str() );
+        }
+    }
 }

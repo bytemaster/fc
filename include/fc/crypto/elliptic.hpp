@@ -197,6 +197,7 @@ namespace fc {
             public_key blind_public_key( const extended_public_key& bob, int i ) const;
             blinded_hash blind_hash( const fc::sha256& hash, int i ) const;
             blind_signature blind_sign( const blinded_hash& hash, int i ) const;
+            // WARNING! This may produce non-canonical signatures!
             compact_signature unblind_signature( const extended_public_key& bob, const blind_signature& sig, int i ) const;
 
         private:

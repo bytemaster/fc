@@ -178,35 +178,45 @@ namespace fc { namespace ecc {
         return result;
     }
 
-    static void to_bignum( const private_key_secret& in, ssl_bignum& out )
+    static void to_bignum( const unsigned char* in, ssl_bignum& out, unsigned int len )
     {
-        if ( in.data()[0] & 0x80 )
+        if ( *in & 0x80 )
         {
-            unsigned char buffer[33];
+            unsigned char buffer[len + 1];
             *buffer = 0;
-            memcpy( buffer + 1, in.data(), 32 );
+            memcpy( buffer + 1, in, len );
             BN_bin2bn( buffer, sizeof(buffer), out );
         }
         else
         {
-            BN_bin2bn( (unsigned char*) in.data(), in.data_size(), out );
+            BN_bin2bn( in, len, out );
+        }
+    }
+
+    static void to_bignum( const private_key_secret& in, ssl_bignum& out )
+    {
+        to_bignum( (unsigned char*) in.data(), out, in.data_size() );
+    }
+
+    static void from_bignum( const ssl_bignum& in, unsigned char* out, unsigned int len )
+    {
+        unsigned int l = BN_num_bytes( in );
+        if ( l > len )
+        {
+            unsigned char buffer[l];
+            BN_bn2bin( in, buffer );
+            memcpy( out, buffer + l - len, len );
+        }
+        else
+        {
+            memset( out, 0, len - l );
+            BN_bn2bin( in, out + len - l );
         }
     }
 
     static void from_bignum( const ssl_bignum& in, private_key_secret& out )
     {
-        unsigned int len = BN_num_bytes( in );
-        if ( len > out.data_size() )
-        {
-            unsigned char buffer[len];
-            BN_bn2bin( in, buffer );
-            memcpy( (unsigned char*) out.data(), buffer + len - out.data_size(), out.data_size() );
-        }
-        else
-        {
-            memset( out.data(), 0, out.data_size() - len );
-            BN_bn2bin( in, (unsigned char*) out.data() + out.data_size() - len );
-        }
+        from_bignum( in, (unsigned char*) out.data(), out.data_size() );
     }
 
     static void invert( const private_key_secret& in, private_key_secret& out )
@@ -254,6 +264,20 @@ namespace fc { namespace ecc {
         public_key_data P = p.serialize();
         FC_ASSERT( secp256k1_ec_pubkey_tweak_mul( detail::_get_context(), (unsigned char*) P.begin(), P.size(), (unsigned char*) prod.data() ) );
         return public_key( P );
+    }
+
+    static void canonicalize( unsigned char *int256 )
+    {
+        if (!(*int256 & 0x80))
+        {
+            return; // nothing to do
+        }
+        ssl_bignum bn_k;
+        to_bignum( int256, bn_k, 32 );
+        ssl_bignum bn_n;
+        to_bignum( detail::get_curve_order(), bn_n );
+        FC_ASSERT( BN_sub( bn_k, bn_n, bn_k ) );
+        from_bignum( bn_k, int256, 32 );
     }
 
     static public_key compute_t( const private_key_secret& a, const private_key_secret& b,
@@ -369,8 +393,11 @@ namespace fc { namespace ecc {
         public_key_data k = compute_k( a, c, p );
 
         compact_signature result;
-        memcpy( result.begin(), k.begin() + 1, 32 );
-        memcpy( result.begin() + 32, c.data(), 32 );
+        *result.begin() = 27 + 4 + (*k.begin() & 1);
+        memcpy( result.begin() + 1, k.begin() + 1, 32 );
+        canonicalize( result.begin() + 1 );
+        memcpy( result.begin() + 33, c.data(), 32 );
+        canonicalize( result.begin() + 33 );
         return result;
     }
 

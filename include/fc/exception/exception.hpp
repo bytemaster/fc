@@ -1,7 +1,7 @@
 #pragma once
 /**
  *  @file exception.hpp
- *  @brief Defines exception's used by fc 
+ *  @brief Defines exception's used by fc
  */
 #include <fc/log/logger.hpp>
 #include <fc/optional.hpp>
@@ -13,10 +13,10 @@ namespace fc
 {
    namespace detail { class exception_impl; }
 
-   enum exception_code 
+   enum exception_code
    {
        /** for exceptions we threw that don't have an assigned code */
-       unspecified_exception_code        = 0, 
+       unspecified_exception_code        = 0,
        unhandled_exception_code          = 1, ///< for unhandled 3rd party exceptions
        timeout_exception_code            = 2, ///< timeout exceptions
        file_not_found_exception_code     = 3,
@@ -35,7 +35,8 @@ namespace fc
        udt_error_code                    = 17,
        aes_error_code                    = 18,
        overflow_code                     = 19,
-       underflow_code                    = 20
+       underflow_code                    = 20,
+       divide_by_zero_code               = 21
    };
 
    /**
@@ -46,21 +47,21 @@ namespace fc
     *  new log_message is added to the exception.
     *
     *  exception's are designed to be serialized to a variant and
-    *  deserialized from an variant.  
+    *  deserialized from an variant.
     *
     *  @see FC_THROW_EXCEPTION
     *  @see FC_RETHROW_EXCEPTION
     *  @see FC_RETHROW_EXCEPTIONS
     */
-   class exception 
+   class exception
    {
       public:
-         enum code_enum 
+         enum code_enum
          {
             code_value = unspecified_exception_code
          };
 
-         exception( int64_t code = unspecified_exception_code, 
+         exception( int64_t code = unspecified_exception_code,
                     const std::string& name_value = "exception",
                     const std::string& what_value = "unspecified");
          exception( log_message&&, int64_t code = unspecified_exception_code,
@@ -83,7 +84,7 @@ namespace fc
           */
          const log_messages&  get_log()const;
          void                 append_log( log_message m );
-         
+
          /**
           *   Generates a detailed string including file, line, method,
           *   and other information that is generally only useful for
@@ -97,7 +98,7 @@ namespace fc
          std::string to_string( log_level ll = log_level::info  )const;
 
          /**
-          *  Throw this exception as its most derived type. 
+          *  Throw this exception as its most derived type.
           *
           *  @note does not return.
           */
@@ -106,7 +107,7 @@ namespace fc
          /**
           *  This is equivalent to:
           *  @code
-          *   try { throwAsDynamic_exception(); } 
+          *   try { throwAsDynamic_exception(); }
           *   catch( ... ) { return std::current_exception(); }
           *  @endcode
           */
@@ -132,21 +133,21 @@ namespace fc
     *  @brief re-thrown whenever an unhandled exception is caught.
     *  @ingroup serializable
     *  Any exceptions thrown by 3rd party libraries that are not
-    *  caught get wrapped in an unhandled_exception exception.  
+    *  caught get wrapped in an unhandled_exception exception.
     *
-    *  The original exception is captured as a std::exception_ptr 
+    *  The original exception is captured as a std::exception_ptr
     *  which may be rethrown.  The std::exception_ptr does not
-    *  propgate across process boundaries. 
+    *  propgate across process boundaries.
     */
-   class unhandled_exception : public exception 
-   { 
-      public: 
-       enum code_enum { 
-          code_value = unhandled_exception_code, 
-       }; 
-       unhandled_exception( log_message&& m, std::exception_ptr e = std::current_exception() ); 
-       unhandled_exception( log_messages ); 
-       unhandled_exception( const exception&  ); 
+   class unhandled_exception : public exception
+   {
+      public:
+       enum code_enum {
+          code_value = unhandled_exception_code,
+       };
+       unhandled_exception( log_message&& m, std::exception_ptr e = std::current_exception() );
+       unhandled_exception( log_messages );
+       unhandled_exception( const exception&  );
 
        std::exception_ptr get_inner_exception()const;
 
@@ -160,10 +161,10 @@ namespace fc
    fc::exception_ptr copy_exception( T&& e )
    {
 #if defined(_MSC_VER) && (_MSC_VER < 1700)
-     return std::make_shared<unhandled_exception>( log_message(), 
+     return std::make_shared<unhandled_exception>( log_message(),
                                                    std::copy_exception(fc::forward<T>(e)) );
 #else
-     return std::make_shared<unhandled_exception>( log_message(), 
+     return std::make_shared<unhandled_exception>( log_message(),
                                                    std::make_exception_ptr(fc::forward<T>(e)) );
 #endif
    }
@@ -177,7 +178,7 @@ namespace fc
            virtual NO_RETURN void rethrow( const exception& e )const = 0;
         };
 
-        template<typename T> 
+        template<typename T>
         struct exception_builder : public base_exception_builder
         {
            virtual NO_RETURN void rethrow( const exception& e )const override
@@ -195,7 +196,7 @@ namespace fc
            (void)itr; // in release builds this hides warnings
            _registered_exceptions[T::code_value] = &builder;
         }
-        
+
         void NO_RETURN rethrow( const exception& e )const;
 
         static exception_factory& instance()
@@ -248,7 +249,7 @@ namespace fc
          else fc::exception::dynamic_rethrow_exception(); \
        } \
    };
-   
+
   #define FC_DECLARE_EXCEPTION( TYPE, CODE, WHAT ) \
       FC_DECLARE_DERIVED_EXCEPTION( TYPE, fc::exception, CODE, WHAT )
 
@@ -267,8 +268,8 @@ namespace fc
   FC_DECLARE_EXCEPTION( out_of_range_exception, out_of_range_exception_code, "Out of Range" );
 
   /** @brief if an operation is unsupported or not valid this may be thrown */
-  FC_DECLARE_EXCEPTION( invalid_operation_exception, 
-                        invalid_operation_exception_code, 
+  FC_DECLARE_EXCEPTION( invalid_operation_exception,
+                        invalid_operation_exception_code,
                         "Invalid Operation" );
   /** @brief if an host name can not be resolved this may be thrown */
   FC_DECLARE_EXCEPTION( unknown_host_exception,
@@ -289,6 +290,7 @@ namespace fc
   FC_DECLARE_EXCEPTION( aes_exception, aes_error_code, "AES error" );
   FC_DECLARE_EXCEPTION( overflow_exception, overflow_code, "Integer Overflow" );
   FC_DECLARE_EXCEPTION( underflow_exception, underflow_code, "Integer Underflow" );
+  FC_DECLARE_EXCEPTION( divide_by_zero_exception, divide_by_zero_code, "Integer Divide By Zero" );
 
   std::string except_str();
 
@@ -333,7 +335,7 @@ namespace fc
     throw EXCEPTION_TYPE( FC_LOG_MESSAGE( error, "", FC_FORMAT_ARG_PARAMS(__VA_ARGS__) ) ); \
   FC_MULTILINE_MACRO_END
 
-//#define FC_THROW( FORMAT, ... ) 
+//#define FC_THROW( FORMAT, ... )
 // FC_INDIRECT_EXPAND workas around a bug in Visual C++ variadic macro processing that prevents it
 // from separating __VA_ARGS__ into separate tokens
 #define FC_INDIRECT_EXPAND(MACRO, ARGS) MACRO ARGS
@@ -343,7 +345,7 @@ namespace fc
   FC_MULTILINE_MACRO_END
 
 #define FC_EXCEPTION( EXCEPTION_TYPE, FORMAT, ... ) \
-    EXCEPTION_TYPE( FC_LOG_MESSAGE( error, FORMAT, __VA_ARGS__ ) )  
+    EXCEPTION_TYPE( FC_LOG_MESSAGE( error, FORMAT, __VA_ARGS__ ) )
 /**
  *  @def FC_THROW_EXCEPTION( EXCEPTION, FORMAT, ... )
  *  @param EXCEPTION a class in the Phoenix::Athena::API namespace that inherits

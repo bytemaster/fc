@@ -108,6 +108,8 @@ namespace fc
 
       static void full_product( const uint128& a, const uint128& b, uint128& result_hi, uint128& result_lo );
 
+      uint8_t popcount() const;
+
       // fields must be public for serialization
       uint64_t hi;
       uint64_t lo;

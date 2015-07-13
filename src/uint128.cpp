@@ -325,7 +325,33 @@ namespace fc
        
        return;
    }
-   
+
+   static uint8_t _popcount_64( uint64_t x )
+   {
+      static const uint64_t m[] = {
+         0x5555555555555555ULL,
+         0x3333333333333333ULL,
+         0x0F0F0F0F0F0F0F0FULL,
+         0x00FF00FF00FF00FFULL,
+         0x0000FFFF0000FFFFULL,
+         0x00000000FFFFFFFFULL
+      };
+      // TODO future optimization:  replace slow, portable version
+      // with fast, non-portable __builtin_popcountll intrinsic
+      // (when available)
+
+      for( int i=0, w=1; i<6; i++, w+=w )
+      {
+         x = (x & m[i]) + ((x >> w) & m[i]);
+      }
+      return uint8_t(x);
+   }
+
+   uint8_t uint128::popcount()const
+   {
+      return _popcount_64( lo ) + _popcount_64( hi );
+   }
+
    void to_variant( const uint128& var,  variant& vo )  { vo = std::string(var);         }
    void from_variant( const variant& var,  uint128& vo ){ vo = uint128(var.as_string()); }
 

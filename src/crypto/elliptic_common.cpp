@@ -89,6 +89,25 @@ namespace fc { namespace ecc {
             static private_key_secret order = _get_curve_order();
             return order;
         }
+
+        static private_key_secret _get_half_curve_order()
+        {
+            const ec_group& group = get_curve();
+            bn_ctx ctx(BN_CTX_new());
+            ssl_bignum order;
+            FC_ASSERT( EC_GROUP_get_order( group, order, ctx ) );
+            BN_rshift1( order, order );
+            private_key_secret bin;
+            FC_ASSERT( BN_num_bytes( order ) == bin.data_size() );
+            FC_ASSERT( BN_bn2bin( order, (unsigned char*) bin.data() ) == bin.data_size() );
+            return bin;
+        }
+
+        const private_key_secret& get_half_curve_order()
+        {
+            static private_key_secret half_order = _get_half_curve_order();
+            return half_order;
+        }
     }
 
     public_key public_key::from_key_data( const public_key_data &data ) {

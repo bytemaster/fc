@@ -351,14 +351,15 @@ target_link_libraries( udt_client fc udt )
 add_executable( ecc_test tests/ecc_test.cpp )
 target_link_libraries( ecc_test fc )
 
-#add_executable( test_compress tests/compress.cpp )
-#target_link_libraries( test_compress fc )
 #add_executable( test_aes tests/aes_test.cpp )
 #target_link_libraries( test_aes fc ${rt_library} ${pthread_library} )
 #add_executable( test_sleep tests/sleep.cpp )
 #target_link_libraries( test_sleep fc )
 #add_executable( test_rate_limiting tests/rate_limiting.cpp )
 #target_link_libraries( test_rate_limiting fc )
+
+add_executable( all_tests tests/all_tests.cpp tests/compress.cpp )
+target_link_libraries( all_tests fc )
 
 if(WIN32)
    # add addtional import library on windows platform

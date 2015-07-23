@@ -338,7 +338,7 @@ target_link_libraries( task_cancel_test fc )
 add_executable( bloom_test tests/bloom_test.cpp )
 target_link_libraries( bloom_test fc )
 
-add_executable( real128_test tests/real128_test.cpp )
+add_executable( real128_test tests/all_tests.cpp tests/real128_test.cpp )
 target_link_libraries( real128_test fc )
 
 
@@ -358,7 +358,7 @@ target_link_libraries( ecc_test fc )
 #add_executable( test_rate_limiting tests/rate_limiting.cpp )
 #target_link_libraries( test_rate_limiting fc )
 
-add_executable( all_tests tests/all_tests.cpp tests/compress.cpp )
+add_executable( all_tests tests/all_tests.cpp tests/compress.cpp tests/real128_test.cpp )
 target_link_libraries( all_tests fc )
 
 if(WIN32)

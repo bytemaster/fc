@@ -322,20 +322,20 @@ add_executable( api tests/api.cpp )
 target_link_libraries( api fc )
 
 if( ECC_IMPL STREQUAL secp256k1 )
-    add_executable( blind tests/blind.cpp )
+    add_executable( blind tests/all_tests.cpp tests/blind.cpp )
     target_link_libraries( blind fc )
 endif()
 
 include_directories( vendor/websocketpp )
 
-add_executable( ntp_test ntp_test.cpp )
+add_executable( ntp_test tests/all_tests.cpp tests/ntp_test.cpp )
 target_link_libraries( ntp_test fc )
 
 add_executable( task_cancel_test tests/all_tests.cpp tests/task_cancel.cpp )
 target_link_libraries( task_cancel_test fc )
 
 
-add_executable( bloom_test tests/bloom_test.cpp )
+add_executable( bloom_test tests/all_tests.cpp tests/bloom_test.cpp )
 target_link_libraries( bloom_test fc )
 
 add_executable( real128_test tests/all_tests.cpp tests/real128_test.cpp )
@@ -360,7 +360,8 @@ target_link_libraries( ecc_test fc )
 
 add_executable( all_tests tests/all_tests.cpp tests/blind.cpp
                           tests/bloom_test.cpp
-                          tests/compress.cpp tests/real128_test.cpp
+                          tests/compress.cpp tests/ntp_test.cpp
+                          tests/real128_test.cpp
                           tests/task_cancel.cpp )
 target_link_libraries( all_tests fc )
 

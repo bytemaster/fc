@@ -15,6 +15,7 @@
 #include <fc/container/deque_fwd.hpp>
 #include <fc/container/flat_fwd.hpp>
 #include <fc/smart_ref_fwd.hpp>
+#include <boost/multi_index_container_fwd.hpp>
 
 namespace fc
 {
@@ -45,6 +46,11 @@ namespace fc
 
    void to_variant( const blob& var,  variant& vo );
    void from_variant( const variant& var,  blob& vo );
+
+
+   template<typename T, typename... Args> void to_variant( const boost::multi_index_container<T,Args...>& s, variant& v );
+   template<typename T, typename... Args> void from_variant( const variant& v, boost::multi_index_container<T,Args...>& s );
+
    template<typename T> void to_variant( const smart_ref<T>& s, variant& v );
    template<typename T> void from_variant( const variant& v, smart_ref<T>& s );
    template<typename T> void to_variant( const safe<T>& s, variant& v );
@@ -464,7 +470,7 @@ namespace fc
       std::vector<variant> vars(t.size());
        for( size_t i = 0; i < t.size(); ++i )
           vars[i] = variant(t[i]);
-       v = vars;
+       v = std::move(vars);
    }
    /** @ingroup Serializable */
    template<typename A, typename B>
@@ -542,6 +548,23 @@ namespace fc
 
    template<typename T>
    void from_variant( const variant& v, smart_ref<T>& s ) { from_variant( v, *s ); }
+
+   template<typename T, typename... Args> void to_variant( const boost::multi_index_container<T,Args...>& c, variant& v )
+   {
+       std::vector<variant> vars;
+       vars.reserve( c.size() );
+       for( const auto& item : c )
+          vars.emplace_back( variant(item) );
+       v = std::move(vars);
+   }
+
+   template<typename T, typename... Args> void from_variant( const variant& v, boost::multi_index_container<T,Args...>& c )
+   {
+      const variants& vars = v.get_array();
+      c.clear();
+      for( const auto& item : vars )
+         c.insert( item.as<T>() );
+   }
 
    variant operator + ( const variant& a, const variant& b );
    variant operator - ( const variant& a, const variant& b );

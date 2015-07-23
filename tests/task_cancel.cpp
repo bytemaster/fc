@@ -1,4 +1,3 @@
-#define BOOST_TEST_MODULE fc_task_cancel_tests
 #include <boost/test/unit_test.hpp>
 
 #include <fc/thread/thread.hpp>
@@ -7,6 +6,8 @@
 #include <fc/thread/mutex.hpp>
 #include <fc/exception/exception.hpp>
 #include <fc/thread/non_preemptable_scope_check.hpp>
+
+BOOST_AUTO_TEST_SUITE(fc_thread)
 
 BOOST_AUTO_TEST_CASE( leave_mutex_locked )
 {
@@ -239,3 +240,5 @@ BOOST_AUTO_TEST_CASE( cancel_scheduled_task )
   }
   BOOST_CHECK_EQUAL(task_execute_count, 2);
 }
+
+BOOST_AUTO_TEST_SUITE_END()

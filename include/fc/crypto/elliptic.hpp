@@ -46,6 +46,8 @@ namespace fc {
            public_key( const public_key_point_data& v );
            public_key( const compact_signature& c, const fc::sha256& digest, bool check_canonical = true );
 
+           public_key child( const fc::sha256& offset )const;
+
            bool valid()const;
            /** Computes new pubkey = generator * offset + old pubkey ?! */
 //           public_key mult( const fc::sha256& offset )const;
@@ -95,6 +97,8 @@ namespace fc {
 
            static private_key generate();
            static private_key regenerate( const fc::sha256& secret );
+
+           private_key child( const fc::sha256& offset )const;
 
            /**
             *  This method of generation enables creating a new private key in a deterministic manner relative to

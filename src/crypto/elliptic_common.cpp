@@ -1,5 +1,6 @@
 #include <fc/crypto/base58.hpp>
 #include <fc/crypto/elliptic.hpp>
+#include <fc/io/raw.hpp>
 
 /* stuff common to all ecc implementations */
 
@@ -7,6 +8,23 @@ namespace fc { namespace ecc {
 
     public_key public_key::from_key_data( const public_key_data &data ) {
         return public_key(data);
+    }
+
+    public_key public_key::child( const fc::sha256& offset )const
+    {
+       fc::sha256::encoder enc;
+       fc::raw::pack( enc, *this );
+       fc::raw::pack( enc, offset );
+
+       return add( enc.result() );
+    }
+
+    private_key private_key::child( const fc::sha256& offset )const
+    {
+       fc::sha256::encoder enc;
+       fc::raw::pack( enc, get_public_key() );
+       fc::raw::pack( enc, offset );
+       return generate_from_seed( get_secret(), enc.result() );
     }
 
     std::string public_key::to_base58( const public_key_data &key )

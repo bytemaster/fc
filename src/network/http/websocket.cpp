@@ -249,13 +249,12 @@ namespace fc { namespace http {
                });
             }
             ~websocket_server_impl()
-            {
+            { 
                if( _server.is_listening() )
                   _server.stop_listening();
                auto cpy_con = _connections;
                for( auto item : cpy_con )
                   _server.close( item.first, 0, "server exit" );
-               fc::asio::default_io_service(true);
             }
 
             typedef std::map<connection_hdl, websocket_connection_ptr,std::owner_less<connection_hdl> > con_map;
@@ -360,7 +359,6 @@ namespace fc { namespace http {
                auto cpy_con = _connections;
                for( auto item : cpy_con )
                   _server.close( item.first, 0, "server exit" );
-               fc::asio::default_io_service(true);
             }
 
             typedef std::map<connection_hdl, websocket_connection_ptr,std::owner_less<connection_hdl> > con_map;

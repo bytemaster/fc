@@ -362,6 +362,7 @@ add_executable( all_tests tests/all_tests.cpp
                           tests/compress/compress.cpp
                           tests/crypto/aes_test.cpp
                           tests/crypto/base_n_tests.cpp
+                          tests/crypto/bigint_test.cpp
                           tests/crypto/blind.cpp
                           tests/network/ntp_test.cpp
                           tests/thread/task_cancel.cpp

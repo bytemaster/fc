@@ -5,6 +5,7 @@
 #include <fc/crypto/base36.hpp>
 #include <fc/crypto/base58.hpp>
 #include <fc/crypto/base64.hpp>
+#include <fc/exception/exception.hpp>
 
 #include <iostream>
 
@@ -94,9 +95,15 @@ static void test_58( const std::string& test, const std::string& expected )
     BOOST_CHECK( !memcmp( vec.data(), dec.data(), vec.size() ) );
 
     char buffer[64];
-    size_t len = fc::from_base58( enc1, buffer, 16 );
-    BOOST_CHECK( len <= 16 );
+    size_t len = fc::from_base58( enc1, buffer, 64 );
+    BOOST_CHECK( len <= 64 );
     BOOST_CHECK( !memcmp( vec.data(), buffer, len ) );
+    if ( len > 10 ) {
+        try {
+            len = fc::from_base58( enc1, buffer, 10 );
+            BOOST_CHECK( len <= 10 );
+        } catch ( fc::exception expected ) {}
+    }
 
 }
 

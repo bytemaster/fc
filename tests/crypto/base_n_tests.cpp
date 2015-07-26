@@ -66,6 +66,12 @@ static void test_58( const std::string& test, const std::string& expected )
     std::vector<char> dec = fc::from_base58( enc1 );
     BOOST_CHECK_EQUAL( vec.size(), dec.size() );
     BOOST_CHECK( !memcmp( vec.data(), dec.data(), vec.size() ) );
+
+    char buffer[64];
+    size_t len = fc::from_base58( enc1, buffer, 16 );
+    BOOST_CHECK( len <= 16 );
+    BOOST_CHECK( !memcmp( vec.data(), buffer, len ) );
+
 }
 
 BOOST_AUTO_TEST_CASE(base58_test)

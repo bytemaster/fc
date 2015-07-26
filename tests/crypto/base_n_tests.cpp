@@ -1,5 +1,6 @@
 #include <boost/test/unit_test.hpp>
 
+#include <fc/crypto/hex.hpp>
 #include <fc/crypto/base32.hpp>
 #include <fc/crypto/base36.hpp>
 #include <fc/crypto/base58.hpp>
@@ -10,6 +11,33 @@
 static const std::string TEST1("");
 static const std::string TEST2("\0\00101", 4);
 static const std::string TEST3("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+
+static void test_16( const std::string& test, const std::string& expected )
+{
+    std::vector<char> vec( test.begin(), test.end() );
+    fc::string enc1 = fc::to_hex( vec );
+    fc::string enc2 = fc::to_hex( test.c_str(), test.size() );
+    BOOST_CHECK_EQUAL( enc1, enc2 );
+    BOOST_CHECK_EQUAL( expected, enc2 );
+
+    char out[32];
+    int len = fc::from_hex( enc1, out, 32 );
+    BOOST_CHECK_EQUAL( test.size(), len );
+    BOOST_CHECK( !memcmp( test.c_str(), out, len ) );
+    if (len > 10) {
+        BOOST_CHECK( fc::from_hex( enc1, out, 10 ) <= 10 );
+    }
+}
+
+BOOST_AUTO_TEST_SUITE(fc_crypto)
+
+BOOST_AUTO_TEST_CASE(hex_test)
+{
+    test_16( TEST1, "" );
+    test_16( TEST2, "00013031" );
+    test_16( TEST3, "4142434445464748494a4b4c4d4e4f505152535455565758595a" );
+}
+
 
 static void test_32( const std::string& test, const std::string& expected )
 {
@@ -23,8 +51,6 @@ static void test_32( const std::string& test, const std::string& expected )
     BOOST_CHECK_EQUAL( vec.size(), dec.size() );
     BOOST_CHECK( !memcmp( vec.data(), dec.data(), vec.size() ) );
 }
-
-BOOST_AUTO_TEST_SUITE(fc_crypto)
 
 BOOST_AUTO_TEST_CASE(base32_test)
 {

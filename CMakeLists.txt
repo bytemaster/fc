@@ -364,6 +364,7 @@ add_executable( all_tests tests/all_tests.cpp
                           tests/crypto/base_n_tests.cpp
                           tests/crypto/bigint_test.cpp
                           tests/crypto/blind.cpp
+                          tests/crypto/blowfish_test.cpp
                           tests/network/ntp_test.cpp
                           tests/thread/task_cancel.cpp
                           tests/bloom_test.cpp

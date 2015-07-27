@@ -165,10 +165,12 @@ static char** cli_completion( const char * text , int start, int end)
    char **matches;
    matches = (char **)NULL;
 
+#ifdef HAVE_READLINE
    if (start == 0)
       matches = rl_completion_matches ((char*)text, &my_generator);
    else
       rl_bind_key('\t',rl_abort);
+#endif
 
    return (matches);
 }

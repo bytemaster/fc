@@ -93,6 +93,13 @@ namespace fc {
 
          fc::api_connection&  get_connection(){ auto tmp = _api_connection.lock(); FC_ASSERT( tmp, "connection closed"); return *tmp; }
 
+         std::vector<std::string> get_method_names()const
+         {
+            std::vector<std::string> result;
+            result.reserve( _by_name.size() );
+            for( auto& m : _by_name ) result.push_back(m.first);
+            return result;
+         }
 
       private:
          friend struct api_visitor;
@@ -221,9 +228,11 @@ namespace fc {
             return _local_callbacks.size() - 1;
          }
 
+         std::vector<std::string> get_method_names( api_id_type local_api_id = 0 )const { return _local_apis[local_api_id]->get_method_names(); }
+
          fc::signal<void()> closed;
       private:
-         std::vector< std::unique_ptr<generic_api> >     _local_apis;
+         std::vector< std::unique_ptr<generic_api> >             _local_apis;
          std::map< uint64_t, api_id_type >                       _handle_to_id;
          std::vector< std::function<variant(const variants&)>  > _local_callbacks;
 

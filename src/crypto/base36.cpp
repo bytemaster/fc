@@ -7,9 +7,20 @@ namespace fc
     fc::string to_base36( const char* data, size_t len )
     {
        if( len == 0 ) return fc::string();
-       fc::bigint value( data, len );
+
+       const char* src = data;
+       int src_len = len;
+       char buffer[len+1];
+       if (*data & 0x80) {
+           buffer[0] = 0;
+           memcpy( buffer + 1, data, len );
+           src = buffer;
+           src_len++;
+       }
+       fc::bigint value( src, src_len );
+
        auto base36 = "0123456789abcdefghijklmnopqrstuvwxyz";
-       std::vector<char> out( static_cast<size_t>(len * 1.6) + 1 );
+       std::vector<char> out( static_cast<size_t>(len * 1.6) + 2 );
        int pos = out.size() - 1;
        out[pos] = '\0';
        fc::bigint _36(36);
@@ -19,7 +30,7 @@ namespace fc
            out[pos] = base36[(value % _36).to_int64()];
          }
        } while (value /= _36);
-       while (*data++ == 0) {
+       while (len-- > 0 && *data++ == 0) {
            out[--pos] = '0';
        }
        return &out[pos]; //fc::string( &out[pos], out.size() - pos);
@@ -61,7 +72,7 @@ namespace fc
        const char *in = b36.c_str();
        while (*in++ == '0') { leading_zeros++; }
        char* first = bytes.data();
-       while (*first == 0) { first++; len--; }
+       while (len > 0 && *first == 0) { first++; len--; }
        std::vector<char> result;
        result.resize(leading_zeros + len, 0);
        memcpy( result.data() + leading_zeros, first, len );

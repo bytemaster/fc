@@ -322,23 +322,23 @@ add_executable( api tests/api.cpp )
 target_link_libraries( api fc )
 
 if( ECC_IMPL STREQUAL secp256k1 )
-    add_executable( blind tests/blind.cpp )
+    add_executable( blind tests/all_tests.cpp tests/crypto/blind.cpp )
     target_link_libraries( blind fc )
 endif()
 
 include_directories( vendor/websocketpp )
 
-add_executable( ntp_test ntp_test.cpp )
+add_executable( ntp_test tests/all_tests.cpp tests/network/ntp_test.cpp )
 target_link_libraries( ntp_test fc )
 
-add_executable( task_cancel_test tests/task_cancel.cpp )
+add_executable( task_cancel_test tests/all_tests.cpp tests/thread/task_cancel.cpp )
 target_link_libraries( task_cancel_test fc )
 
 
-add_executable( bloom_test tests/bloom_test.cpp )
+add_executable( bloom_test tests/all_tests.cpp tests/bloom_test.cpp )
 target_link_libraries( bloom_test fc )
 
-add_executable( real128_test tests/real128_test.cpp )
+add_executable( real128_test tests/all_tests.cpp tests/real128_test.cpp )
 target_link_libraries( real128_test fc )
 
 
@@ -348,17 +348,30 @@ target_link_libraries( udt_server fc udt )
 add_executable( udt_client tests/udtc.cpp )
 target_link_libraries( udt_client fc udt )
 
-add_executable( ecc_test tests/ecc_test.cpp )
+add_executable( ecc_test tests/crypto/ecc_test.cpp )
 target_link_libraries( ecc_test fc )
 
-#add_executable( test_compress tests/compress.cpp )
-#target_link_libraries( test_compress fc )
 #add_executable( test_aes tests/aes_test.cpp )
 #target_link_libraries( test_aes fc ${rt_library} ${pthread_library} )
 #add_executable( test_sleep tests/sleep.cpp )
 #target_link_libraries( test_sleep fc )
 #add_executable( test_rate_limiting tests/rate_limiting.cpp )
 #target_link_libraries( test_rate_limiting fc )
+
+add_executable( all_tests tests/all_tests.cpp
+                          tests/compress/compress.cpp
+                          tests/crypto/aes_test.cpp
+                          tests/crypto/base_n_tests.cpp
+                          tests/crypto/bigint_test.cpp
+                          tests/crypto/blind.cpp
+                          tests/crypto/blowfish_test.cpp
+                          tests/crypto/sha_tests.cpp
+                          tests/network/ntp_test.cpp
+                          tests/thread/task_cancel.cpp
+                          tests/bloom_test.cpp
+                          tests/real128_test.cpp
+                          )
+target_link_libraries( all_tests fc )
 
 if(WIN32)
    # add addtional import library on windows platform

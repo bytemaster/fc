@@ -22,8 +22,8 @@ your system.
 Testing
 -------
 
-Type "make ecc_test" to build the ecc_test executable from tests/ecc_test.cpp
-with the currently configured ECC implementation.
+Type "make ecc_test" to build the ecc_test executable from
+tests/crypto/ecc_test.cpp with the currently configured ECC implementation.
 
 ecc_test expects two arguments:
 
@@ -38,6 +38,6 @@ If the file does exist, intermediate results from the current ECC backend
 are compared with the file contents.
 
 For a full round of interoperability testing, you can use the script
-tests/ecc-interop.sh .
+tests/crypto/ecc-interop.sh .
 None of the test runs should produce any output.
 

@@ -5,7 +5,8 @@
 #include <fc/crypto/sha256.hpp>
 #include <fc/variant.hpp>
 #include <fc/exception/exception.hpp>
-  
+#include "_digest_common.hpp"
+
 namespace fc {
 
     sha256::sha256() { memset( _hash, 0, sizeof(_hash) ); }
@@ -64,11 +65,7 @@ namespace fc {
 
     sha256 operator << ( const sha256& h1, uint32_t i ) {
       sha256 result;
-      uint8_t* r = (uint8_t*)result._hash;
-      uint8_t* s = (uint8_t*)h1._hash;
-      for( uint32_t p = 0; p < sizeof(h1._hash)-1; ++p )
-          r[p] = s[p] << i | (s[p+1]>>(8-i));
-      r[31] = s[31] << i;
+      fc::detail::shift_l( h1.data(), result.data(), result.data_size(), i );
       return result;
     }
     sha256 operator ^ ( const sha256& h1, const sha256& h2 ) {

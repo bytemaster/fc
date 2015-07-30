@@ -73,11 +73,26 @@ void test_big( const std::string& expected ) {
     BOOST_CHECK( hash3 == hash2 << 60 );
 }
 
+template<typename H>
+void test_stream( ) {
+    H hash( TEST1 );
+    std::stringstream stream;
+    stream << hash;
+
+    H other;
+    stream >> other;
+    BOOST_CHECK( hash == other );
+}
+
 template void test_big<fc::ripemd160>( const std::string& expected );
 template void test_big<fc::sha1>( const std::string& expected );
 template void test_big<fc::sha224>( const std::string& expected );
 template void test_big<fc::sha256>( const std::string& expected );
 template void test_big<fc::sha512>( const std::string& expected );
+
+template void test_stream<fc::ripemd160>();
+template void test_stream<fc::sha256>();
+template void test_stream<fc::sha512>();
 
 BOOST_AUTO_TEST_SUITE(fc_crypto)
 
@@ -90,6 +105,7 @@ BOOST_AUTO_TEST_CASE(ripemd160_test)
 //    test<fc::ripemd160>( TEST4, "" );
     test<fc::ripemd160>( TEST5, "52783243c1697bdbe16d37f97f68f08325dc1528" );
     test_big<fc::ripemd160>( "29b6df855772aa9a95442bf83b282b495f9f6541" );
+    test_stream<fc::ripemd160>();
 }
 
 BOOST_AUTO_TEST_CASE(sha1_test)
@@ -123,6 +139,7 @@ BOOST_AUTO_TEST_CASE(sha256_test)
     test<fc::sha256>( TEST4, "cf5b16a778af8380036ce59e7b0492370b249b11e8f07a51afac45037afee9d1" );
     test<fc::sha256>( TEST5, "cdc76e5c9914fb9281a1c7e284d73e67f1809a48a497200e046d39ccc7112cd0" );
     test_big<fc::sha256>( "50e72a0e26442fe2552dc3938ac58658228c0cbfb1d2ca872ae435266fcd055e" );
+    test_stream<fc::sha256>();
 
     std::vector<int> test_object;
     test_object.push_back( 42 );
@@ -155,6 +172,7 @@ BOOST_AUTO_TEST_CASE(sha512_test)
                              "de0ff244877ea60a4cb0432ce577c31beb009c5c2c49aa2e4eadb217ad8cc09b" );
     test_big<fc::sha512>( "b47c933421ea2db149ad6e10fce6c7f93d0752380180ffd7f4629a712134831d"
                           "77be6091b819ed352c2967a2e2d4fa5050723c9630691f1a05a7281dbe6c1086" );
+    test_stream<fc::sha512>();
 }
 
 BOOST_AUTO_TEST_SUITE_END()

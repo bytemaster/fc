@@ -2,6 +2,8 @@
 
 #include <fc/crypto/rand.hpp>
 
+#include <cmath>
+
 static void check_randomness( const char* buffer, size_t len ) {
     if (len == 0) { return; }
     // count bit runs and 0's / 1's

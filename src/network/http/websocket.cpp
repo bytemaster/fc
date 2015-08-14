@@ -228,6 +228,8 @@ namespace fc { namespace http {
                        {
                             wlog( "unknown connection closed" );
                        }
+                       if( _connections.empty() && _closed )
+                          _closed->set_value();
                     }).wait();
                });
 
@@ -244,17 +246,25 @@ namespace fc { namespace http {
                           {
                             wlog( "unknown connection failed" );
                           }
+                          if( _connections.empty() && _closed )
+                             _closed->set_value();
                        }).wait();
                     }
                });
             }
             ~websocket_server_impl()
-            { 
+            {
                if( _server.is_listening() )
                   _server.stop_listening();
+
+               if( _connections.size() )
+                  _closed = new fc::promise<void>();
+
                auto cpy_con = _connections;
                for( auto item : cpy_con )
                   _server.close( item.first, 0, "server exit" );
+
+               if( _closed ) _closed->wait();
             }
 
             typedef std::map<connection_hdl, websocket_connection_ptr,std::owner_less<connection_hdl> > con_map;

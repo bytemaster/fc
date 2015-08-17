@@ -1,3 +1,4 @@
+#include <memory>
 #include <fc/crypto/bigint.hpp>
 #include <fc/io/sstream.hpp>
 #include <fc/log/logger.hpp>
@@ -10,11 +11,11 @@ namespace fc
 
        const char* src = data;
        int src_len = len;
-       char buffer[len+1];
+       std::unique_ptr<char[]> buffer(new char[len+1]);
        if (*data & 0x80) {
            buffer[0] = 0;
-           memcpy( buffer + 1, data, len );
-           src = buffer;
+           memcpy( buffer.get() + 1, data, len );
+           src = buffer.get();
            src_len++;
        }
        fc::bigint value( src, src_len );

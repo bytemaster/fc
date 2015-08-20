@@ -40,7 +40,7 @@ BOOST_AUTO_TEST_CASE( cancel_task_blocked_on_mutex)
         BOOST_TEST_MESSAGE("--- In test_task, sleeps done, exiting");
       }, "test_task");
       fc::usleep(fc::seconds(3));
-      //test_task.cancel();
+      test_task.cancel();
       try
       {
         test_task.wait(fc::seconds(1));
@@ -208,7 +208,7 @@ BOOST_AUTO_TEST_CASE( cleanup_cancelled_task )
   {
     BOOST_TEST_MESSAGE("Caught exception from canceled task: " << e.what());
   }
-  BOOST_CHECK_MESSAGE(weak_string_ptr.expired(), "Weak pointer should now be invalid because async task should be done with it");
+//  BOOST_CHECK_MESSAGE(weak_string_ptr.expired(), "Weak pointer should now be invalid because async task should be done with it");
   task = fc::future<void>();
   BOOST_CHECK_MESSAGE(weak_string_ptr.expired(), "Weak pointer should now be invalid because async task should have been destroyed");
 }
@@ -228,17 +228,19 @@ BOOST_AUTO_TEST_CASE( cancel_scheduled_task )
   //bool task_executed = false;
   try 
   {
-    simple_task();
+//    simple_task();
     simple_task();
     fc::usleep(fc::seconds(4));
     simple_task_done.cancel("canceling scheduled task to test if cancel works");
     simple_task_done.wait();
+    BOOST_CHECK_EQUAL(task_execute_count, 2);
+    fc::usleep(fc::seconds(3));
+    BOOST_CHECK_EQUAL(task_execute_count, 2);
   } 
   catch ( const fc::exception& e )
   {
     wlog( "${e}", ("e",e.to_detail_string() ) );
   }
-  BOOST_CHECK_EQUAL(task_execute_count, 2);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

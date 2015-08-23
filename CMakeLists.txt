@@ -373,6 +373,7 @@ add_executable( all_tests tests/all_tests.cpp
                           tests/thread/task_cancel.cpp
                           tests/bloom_test.cpp
                           tests/real128_test.cpp
+                          tests/utf8_test.cpp
                           )
 target_link_libraries( all_tests fc )
 

@@ -350,6 +350,22 @@ namespace fc
       return *this;
    }
 
+   mutable_variant_object& mutable_variant_object::operator()( const variant_object& vo )
+   {
+      for( const variant_object::entry& e : vo )
+         set( e.key(), e.value() );
+      return *this;
+   }
+
+   mutable_variant_object& mutable_variant_object::operator()( const mutable_variant_object& mvo )
+   {
+      if( &mvo == this )     // mvo(mvo) is no-op
+         return *this;
+      for( const mutable_variant_object::entry& e : mvo )
+         set( e.key(), e.value() );
+      return *this;
+   }
+
    void to_variant( const mutable_variant_object& var,  variant& vo )
    {
       vo = variant(var);

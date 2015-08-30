@@ -370,6 +370,7 @@ add_executable( all_tests tests/all_tests.cpp
                           tests/crypto/rand_test.cpp
                           tests/crypto/sha_tests.cpp
                           tests/network/ntp_test.cpp
+                          tests/network/http/websocket_test.cpp
                           tests/thread/task_cancel.cpp
                           tests/bloom_test.cpp
                           tests/real128_test.cpp

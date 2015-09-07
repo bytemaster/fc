@@ -38,6 +38,9 @@ namespace fc {
                  FC_ASSERT( cfg.rotation_interval >= seconds( 1 ) );
                  FC_ASSERT( cfg.rotation_limit >= cfg.rotation_interval );
 
+
+
+
                  _rotation_task = async( [this]() { rotate_files( true ); }, "rotate_files(1)" );
              }
          }
@@ -79,7 +82,11 @@ namespace fc {
                    out.close();
                }
                remove_all(link_filename);  // on windows, you can't delete the link while the underlying file is opened for writing
-               out.open( log_filename );
+               if( fc::exists( log_filename ) )
+                  out.open( log_filename, std::ios_base::out | std::ios_base::app );
+               else
+                  out.open( log_filename, std::ios_base::out | std::ios_base::app);
+
                create_hard_link(log_filename, link_filename);
              }
 
@@ -138,7 +145,8 @@ namespace fc {
          fc::create_directories(my->cfg.filename.parent_path());
 
          if(!my->cfg.rotate)
-           my->out.open(my->cfg.filename);
+            my->out.open( my->cfg.filename, std::ios_base::out | std::ios_base::app);
+
       }
       catch( ... )
       {

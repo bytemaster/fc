@@ -22,11 +22,10 @@ namespace fc
     {
         ssl_wrapper(ssl_type* obj):obj(obj) {}
 
-        operator ssl_type*()
-        {
-            return obj;
-        }
+        operator ssl_type*() { return obj; }
+        operator const ssl_type*() const { return obj; }
         ssl_type* operator->() { return obj; }
+        const ssl_type* operator->() const { return obj; }
 
         ssl_type* obj;
     };

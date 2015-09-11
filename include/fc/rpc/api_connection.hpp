@@ -22,15 +22,15 @@ namespace fc {
          public:
             typedef typename std::function<Signature>::result_type result_type;
 
-            callback_functor( fc::api_connection& con, uint64_t id )
+            callback_functor( std::weak_ptr< fc::api_connection > con, uint64_t id )
             :_callback_id(id),_api_connection(con){}
 
             template<typename... Args> 
             result_type operator()( Args... args )const;
 
          private:
-            uint64_t                           _callback_id;
-            fc::api_connection&                _api_connection;
+            uint64_t _callback_id;
+            std::weak_ptr< fc::api_connection > _api_connection;
       };
 
       template<typename R, typename Arg0, typename ... Args>
@@ -91,8 +91,18 @@ namespace fc {
             return _methods[method_id](args);
          }
 
-         fc::api_connection&  get_connection(){ auto tmp = _api_connection.lock(); FC_ASSERT( tmp, "connection closed"); return *tmp; }
+         std::weak_ptr< fc::api_connection > get_connection()
+         {
+            return _api_connection;
+         }
 
+         std::vector<std::string> get_method_names()const
+         {
+            std::vector<std::string> result;
+            result.reserve( _by_name.size() );
+            for( auto& m : _by_name ) result.push_back(m.first);
+            return result;
+         }
 
       private:
          friend struct api_visitor;
@@ -221,9 +231,11 @@ namespace fc {
             return _local_callbacks.size() - 1;
          }
 
+         std::vector<std::string> get_method_names( api_id_type local_api_id = 0 )const { return _local_apis[local_api_id]->get_method_names(); }
+
          fc::signal<void()> closed;
       private:
-         std::vector< std::unique_ptr<generic_api> >     _local_apis;
+         std::vector< std::unique_ptr<generic_api> >             _local_apis;
          std::map< uint64_t, api_id_type >                       _handle_to_id;
          std::vector< std::function<variant(const variants&)>  > _local_callbacks;
 
@@ -382,7 +394,11 @@ namespace fc {
       template<typename... Args> 
       typename callback_functor<Signature>::result_type callback_functor<Signature>::operator()( Args... args )const
       {
-         _api_connection.send_callback( _callback_id, fc::variants{ args... } ).template as< result_type >();
+         std::shared_ptr< fc::api_connection > locked = _api_connection.lock();
+         // TODO:  make new exception type for this instead of recycling eof_exception
+         if( !locked )
+            throw fc::eof_exception();
+         locked->send_callback( _callback_id, fc::variants{ args... } ).template as< result_type >();
       }
 
 
@@ -392,17 +408,21 @@ namespace fc {
          public:
           typedef void result_type;
 
-          callback_functor( fc::api_connection& con, uint64_t id )
+          callback_functor( std::weak_ptr< fc::api_connection > con, uint64_t id )
           :_callback_id(id),_api_connection(con){}
 
           void operator()( Args... args )const
           {
-             _api_connection.send_notice( _callback_id, fc::variants{ args... } );
+             std::shared_ptr< fc::api_connection > locked = _api_connection.lock();
+             // TODO:  make new exception type for this instead of recycling eof_exception
+             if( !locked )
+                throw fc::eof_exception();
+             locked->send_notice( _callback_id, fc::variants{ args... } );
           }
 
          private:
-          uint64_t            _callback_id;
-          fc::api_connection& _api_connection;
+          uint64_t _callback_id;
+          std::weak_ptr< fc::api_connection > _api_connection;
       };
    } // namespace detail
 

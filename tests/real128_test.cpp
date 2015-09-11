@@ -1,7 +1,8 @@
 #include <fc/real128.hpp>
-#define BOOST_TEST_MODULE Real128Test
 #include <boost/test/unit_test.hpp>
 #include <fc/log/logger.hpp>
+
+BOOST_AUTO_TEST_SUITE(fc)
 
 using fc::real128;
 using std::string;
@@ -50,3 +51,5 @@ BOOST_AUTO_TEST_CASE(real128_test)
    wdump((real128("12345.6789")) );
    wdump( (ten/3*3) );
 }
+
+BOOST_AUTO_TEST_SUITE_END()

@@ -70,6 +70,10 @@ namespace fc
          exception( log_messages&&, int64_t code = unspecified_exception_code,
                                     const std::string& name_value = "exception",
                                     const std::string& what_value = "unspecified");
+         exception( const log_messages&,
+                    int64_t code = unspecified_exception_code,
+                    const std::string& name_value = "exception",
+                    const std::string& what_value = "unspecified");
          exception( const exception& e );
          exception( exception&& e );
          ~exception();
@@ -232,6 +236,10 @@ namespace fc
        :BASE( std::move(m), code, name_value, what_value ){} \
        explicit TYPE( fc::log_messages&& m, int64_t code, const std::string& name_value, const std::string& what_value )\
        :BASE( std::move(m), code, name_value, what_value ){}\
+       explicit TYPE( const fc::log_messages& m, int64_t code, const std::string& name_value, const std::string& what_value )\
+       :BASE( m, code, name_value, what_value ){}\
+       TYPE( const std::string& what_value, const fc::log_messages& m ) \
+       :BASE( m, CODE, BOOST_PP_STRINGIZE(TYPE), what_value ){} \
        TYPE( fc::log_message&& m ) \
        :BASE( fc::move(m), CODE, BOOST_PP_STRINGIZE(TYPE), WHAT ){}\
        TYPE( fc::log_messages msgs ) \

@@ -176,6 +176,14 @@ namespace fc
          set(std::move(key), variant( fc::forward<T>(var) ) );
          return *this;
       }
+      /**
+       * Copy a variant_object into this mutable_variant_object.
+       */
+      mutable_variant_object& operator()( const variant_object& vo );
+      /**
+       * Copy another mutable_variant_object into this mutable_variant_object.
+       */
+      mutable_variant_object& operator()( const mutable_variant_object& mvo );
       ///@}
 
 

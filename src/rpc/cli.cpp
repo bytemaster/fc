@@ -30,6 +30,12 @@
 
 namespace fc { namespace rpc {
 
+static std::vector<std::string>& cli_commands()
+{
+   static std::vector<std::string>* cmds = new std::vector<std::string>();
+   return *cmds;
+}
+
 cli::~cli()
 {
    if( _run_complete.valid() )
@@ -55,6 +61,7 @@ void cli::send_notice( uint64_t callback_id, variants args /* = variants() */ )
 
 void cli::start()
 {
+   cli_commands() = get_method_names(0);
    _run_complete = fc::async( [&](){ run(); } );
 }
 
@@ -118,6 +125,57 @@ void cli::run()
    }
 }
 
+
+char * dupstr (const char* s) {
+   char *r;
+
+   r = (char*) malloc ((strlen (s) + 1));
+   strcpy (r, s);
+   return (r);
+}
+
+char* my_generator(const char* text, int state)
+{
+   static int list_index, len;
+   const char *name;
+
+   if (!state) {
+      list_index = 0;
+      len = strlen (text);
+   }
+
+   auto& cmd = cli_commands();
+
+   while( list_index < cmd.size() ) 
+   {
+      name = cmd[list_index].c_str();
+      list_index++;
+
+      if (strncmp (name, text, len) == 0)
+         return (dupstr(name));
+   }
+
+   /* If no names matched, then return NULL. */
+   return ((char *)NULL);
+}
+
+
+static char** cli_completion( const char * text , int start, int end)
+{
+   char **matches;
+   matches = (char **)NULL;
+
+#ifdef HAVE_READLINE
+   if (start == 0)
+      matches = rl_completion_matches ((char*)text, &my_generator);
+   else
+      rl_bind_key('\t',rl_abort);
+#endif
+
+   return (matches);
+}
+
+
 void cli::getline( const fc::string& prompt, fc::string& line)
 {
    // getting file descriptor for C++ streams is near impossible
@@ -134,6 +192,8 @@ void cli::getline( const fc::string& prompt, fc::string& line)
    if( _isatty( _fileno( stdin ) ) )
 #endif
    {
+      rl_attempted_completion_function = cli_completion;
+
       static fc::thread getline_thread("getline");
       getline_thread.async( [&](){
          char* line_read = nullptr;
@@ -141,6 +201,7 @@ void cli::getline( const fc::string& prompt, fc::string& line)
          line_read = readline(prompt.c_str());
          if( line_read == nullptr )
             FC_THROW_EXCEPTION( fc::eof_exception, "" );
+         rl_bind_key( '\t', rl_complete );
          if( *line_read )
             add_history(line_read);
          line = line_read;

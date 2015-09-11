@@ -1,16 +1,14 @@
+#include <boost/test/unit_test.hpp>
+
 #include <fc/crypto/elliptic.hpp>
 #include <fc/log/logger.hpp>
 #include <fc/io/raw.hpp>
 #include <fc/variant.hpp>
 #include <fc/reflect/variant.hpp>
 
-//extern "C" {
-//#include <secp256k1.h>
-//}
-//struct secp256k1_scalar_t { uint64_t v[4]; };
-//extern "C" { void secp256k1_scalar_get_b32(unsigned char *bin, const struct secp256k1_scalar_t* a); }
+BOOST_AUTO_TEST_SUITE(fc_crypto)
 
-int main( int argc, char** argv )
+BOOST_AUTO_TEST_CASE(blind_test)
 {
    try {
       auto InB1 = fc::sha256::hash("InB1");
@@ -34,16 +32,16 @@ int main( int argc, char** argv )
       //FC_ASSERT( fc::ecc::verify_sum( {InC1,InC2}, {OutC1}, -60 ) );
 
 
-      FC_ASSERT( fc::ecc::verify_sum( {InC1,InC2}, {OutC1,OutC2}, 0 ) );
+      BOOST_CHECK( fc::ecc::verify_sum( {InC1,InC2}, {OutC1,OutC2}, 0 ) );
       auto nonce = fc::sha256::hash("nonce");
 
       auto proof = fc::ecc::range_proof_sign( 0, OutC1, OutB1, nonce, 0, 0, 40 );
-      wdump( (proof.size()));
+//      wdump( (proof.size()));
 
       auto result = fc::ecc::range_get_info( proof );
-      wdump((result));
-      FC_ASSERT( result.max_value >= 60 );
-      FC_ASSERT( result.min_value >= 0 );
+//      wdump((result));
+      BOOST_CHECK( result.max_value >= 60 );
+      BOOST_CHECK( result.min_value >= 0 );
 
 
       auto B1 = fc::sha256::hash("B1");
@@ -62,10 +60,10 @@ int main( int argc, char** argv )
       auto B2m1 = fc::ecc::blind_sum( {B2,B1}, 1 );
       auto C2m1 = fc::ecc::blind( B2m1, 1 );
 
-      FC_ASSERT( fc::ecc::verify_sum( {C1,C2}, {C3}, 0 ) );
-      FC_ASSERT( fc::ecc::verify_sum( {C1,C2}, {C3}, 0 ) );
-      FC_ASSERT( fc::ecc::verify_sum( {C3}, {C1,C2}, 0 ) );
-      FC_ASSERT( fc::ecc::verify_sum( {C3}, {C1,C2}, 0 ) );
+      BOOST_CHECK( fc::ecc::verify_sum( {C1,C2}, {C3}, 0 ) );
+      BOOST_CHECK( fc::ecc::verify_sum( {C1,C2}, {C3}, 0 ) );
+      BOOST_CHECK( fc::ecc::verify_sum( {C3}, {C1,C2}, 0 ) );
+      BOOST_CHECK( fc::ecc::verify_sum( {C3}, {C1,C2}, 0 ) );
 
 
       {
@@ -82,13 +80,13 @@ int main( int argc, char** argv )
          auto C3 = fc::ecc::blind( B1, 1 );
          auto C4 = fc::ecc::blind( B1, 2 );
 
-         FC_ASSERT( fc::ecc::verify_sum( {C2}, {C3}, -1 ) );
-         FC_ASSERT( fc::ecc::verify_sum( {C1}, {C1}, 0 ) );
-         FC_ASSERT( fc::ecc::verify_sum( {C2}, {C2}, 0 ) );
-         FC_ASSERT( fc::ecc::verify_sum( {C3}, {C2}, 1 ) );
-         FC_ASSERT( fc::ecc::verify_sum( {C1}, {C2}, INT64_MAX ) );
-         FC_ASSERT( fc::ecc::verify_sum( {C1}, {C2}, INT64_MAX ) );
-         FC_ASSERT( fc::ecc::verify_sum( {C2}, {C1}, -INT64_MAX ) );
+         BOOST_CHECK( fc::ecc::verify_sum( {C2}, {C3}, -1 ) );
+         BOOST_CHECK( fc::ecc::verify_sum( {C1}, {C1}, 0 ) );
+         BOOST_CHECK( fc::ecc::verify_sum( {C2}, {C2}, 0 ) );
+         BOOST_CHECK( fc::ecc::verify_sum( {C3}, {C2}, 1 ) );
+         BOOST_CHECK( fc::ecc::verify_sum( {C1}, {C2}, INT64_MAX ) );
+         BOOST_CHECK( fc::ecc::verify_sum( {C1}, {C2}, INT64_MAX ) );
+         BOOST_CHECK( fc::ecc::verify_sum( {C2}, {C1}, -INT64_MAX ) );
       }
 
 
@@ -101,16 +99,15 @@ int main( int argc, char** argv )
          auto InC  = fc::ecc::blind( InBlind, 1000 );
          auto In0  = fc::ecc::blind( InBlind, 0 );
 
-         FC_ASSERT( fc::ecc::verify_sum( {InC}, {OutC1,OutC2}, 0 ) );
-         FC_ASSERT( fc::ecc::verify_sum( {InC}, {In0}, 1000 ) );
+         BOOST_CHECK( fc::ecc::verify_sum( {InC}, {OutC1,OutC2}, 0 ) );
+         BOOST_CHECK( fc::ecc::verify_sum( {InC}, {In0}, 1000 ) );
 
       }
-
-
    }
    catch ( const fc::exception& e )
    {
       edump((e.to_detail_string()));
    }
-   return 0;
 }
+
+BOOST_AUTO_TEST_SUITE_END()

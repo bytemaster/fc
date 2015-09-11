@@ -196,7 +196,11 @@ namespace fc { namespace http {
                        wdump(("server")(msg->get_payload()));
                        //std::cerr<<"recv: "<<msg->get_payload()<<"\n";
                        auto payload = msg->get_payload();
-                       fc::async([=](){ current_con->second->on_message( payload ); });
+                       std::shared_ptr<websocket_connection> con = current_con->second;
+                       ++_pending_messages;
+                       auto f = fc::async([this,con,payload](){ if( _pending_messages ) --_pending_messages; con->on_message( payload ); });
+                       if( _pending_messages > 100 ) f.wait();
+                       
                     }).wait();
                });
 
@@ -228,6 +232,8 @@ namespace fc { namespace http {
                        {
                             wlog( "unknown connection closed" );
                        }
+                       if( _connections.empty() && _closed )
+                          _closed->set_value();
                     }).wait();
                });
 
@@ -244,17 +250,25 @@ namespace fc { namespace http {
                           {
                             wlog( "unknown connection failed" );
                           }
+                          if( _connections.empty() && _closed )
+                             _closed->set_value();
                        }).wait();
                     }
                });
             }
             ~websocket_server_impl()
-            { 
+            {
                if( _server.is_listening() )
                   _server.stop_listening();
+
+               if( _connections.size() )
+                  _closed = new fc::promise<void>();
+
                auto cpy_con = _connections;
                for( auto item : cpy_con )
                   _server.close( item.first, 0, "server exit" );
+
+               if( _closed ) _closed->wait();
             }
 
             typedef std::map<connection_hdl, websocket_connection_ptr,std::owner_less<connection_hdl> > con_map;
@@ -264,6 +278,7 @@ namespace fc { namespace http {
             websocket_server_type    _server;
             on_connection_handler    _on_connection;
             fc::promise<void>::ptr   _closed;
+            uint32_t                 _pending_messages = 0;
       };
 
       class websocket_tls_server_impl
@@ -305,8 +320,8 @@ namespace fc { namespace http {
                        auto current_con = _connections.find(hdl);
                        assert( current_con != _connections.end() );
                        auto received = msg->get_payload();
-                       wdump((received));
-                       fc::async([=](){ current_con->second->on_message( received ); });
+                       std::shared_ptr<websocket_connection> con = current_con->second;
+                       fc::async([con,received](){ con->on_message( received ); });
                     }).wait();
                });
 

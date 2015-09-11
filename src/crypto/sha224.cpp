@@ -4,7 +4,8 @@
 #include <string.h>
 #include <fc/crypto/sha224.hpp>
 #include <fc/variant.hpp>
-  
+#include "_digest_common.hpp"
+
 namespace fc {
 
     sha224::sha224() { memset( _hash, 0, sizeof(_hash) ); }
@@ -52,11 +53,7 @@ namespace fc {
 
     sha224 operator << ( const sha224& h1, uint32_t i ) {
       sha224 result;
-      uint8_t* r = (uint8_t*)&result;//result._hash;
-      uint8_t* s = (uint8_t*)&h1;//h1._hash;
-      for( uint32_t p = 0; p < sizeof(sha224)-1; ++p )
-          r[p] = s[p] << i | (s[p+1]>>(8-i));
-      r[sizeof(sha224)-1] = s[sizeof(sha224)-1] << i;
+      fc::detail::shift_l( h1.data(), result.data(), result.data_size(), i );
       return result;
     }
     sha224 operator ^ ( const sha224& h1, const sha224& h2 ) {

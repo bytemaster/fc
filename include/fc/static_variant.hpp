@@ -284,7 +284,8 @@ public:
             "Type not in static_variant."
         );
         if(_tag == impl::position<X, Types...>::pos) {
-            return *reinterpret_cast<X*>(storage);
+            void* tmp(storage);
+            return *reinterpret_cast<X*>(tmp);
         } else {
             FC_THROW_EXCEPTION( fc::assert_exception, "static_variant does not contain a value of type ${t}", ("t",fc::get_typename<X>::name()) );
            //     std::string("static_variant does not contain value of type ") + typeid(X).name()
@@ -298,7 +299,8 @@ public:
             "Type not in static_variant."
         );
         if(_tag == impl::position<X, Types...>::pos) {
-            return *reinterpret_cast<const X*>(storage);
+            const void* tmp(storage);
+            return *reinterpret_cast<const X*>(tmp);
         } else {
             FC_THROW_EXCEPTION( fc::assert_exception, "static_variant does not contain a value of type ${t}", ("t",fc::get_typename<X>::name()) );
         }

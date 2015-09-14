@@ -81,6 +81,7 @@ std::string websocket_api_connection::on_message(
       if( var_obj.contains( "method" ) )
       {
          auto call = var.as<fc::rpc::request>();
+         exception_ptr optexcept;
          try
          {
             auto result = _rpc_state.local_call( call.method, call.params );
@@ -96,12 +97,16 @@ std::string websocket_api_connection::on_message(
          {
             if( call.id )
             {
-               auto reply = fc::json::to_string( response( *call.id,  error_object{ 1, e.to_detail_string(), fc::variant(e)}  ) );
+               optexcept = e.dynamic_copy_exception();
+            }
+         }
+         if( optexcept ) {
+
+               auto reply = fc::json::to_string( response( *call.id,  error_object{ 1, optexcept->to_detail_string(), fc::variant(*optexcept)}  ) );
                if( send_message )
                   _connection.send_message( reply );
 
                return reply;
-            }
          }
       }
       else

@@ -74,11 +74,11 @@ namespace fc
         {
           try 
           {
-            wlog( "resolving... ${r}", ("r", item) );
+            //wlog( "resolving... ${r}", ("r", item) );
             auto eps = resolve( item.first, item.second );
             for( auto ep : eps )
             {
-              wlog( "sending request to ${ep}", ("ep",ep) );
+             // wlog( "sending request to ${ep}", ("ep",ep) );
               std::shared_ptr<char> send_buffer(new char[48], [](char* p){ delete[] p; });
               std::array<unsigned char, 48> packet_to_send { {010,0,0,0,0,0,0,0,0} };
               memcpy(send_buffer.get(), packet_to_send.data(), packet_to_send.size());
@@ -144,7 +144,7 @@ namespace fc
               try
               {
                 _sock.receive_from( receive_buffer, receive_buffer_size, from );
-                wlog("received ntp reply from ${from}",("from",from) );
+              //  wlog("received ntp reply from ${from}",("from",from) );
               } FC_RETHROW_EXCEPTIONS(error, "Error reading from NTP socket");
 
               fc::time_point receive_time = fc::time_point::now();
@@ -158,10 +158,10 @@ namespace fc
                                                 (server_transmit_time - server_receive_time));
               //wlog("origin_time = ${origin_time}, server_receive_time = ${server_receive_time}, server_transmit_time = ${server_transmit_time}, receive_time = ${receive_time}",
               //     ("origin_time", origin_time)("server_receive_time", server_receive_time)("server_transmit_time", server_transmit_time)("receive_time", receive_time));
-              wlog("ntp offset: ${offset}, round_trip_delay ${delay}", ("offset", offset)("delay", round_trip_delay));
+              // wlog("ntp offset: ${offset}, round_trip_delay ${delay}", ("offset", offset)("delay", round_trip_delay));
 
               //if the reply we just received has occurred more than a second after our last time request (it was more than a second ago since our last request)
-              if( round_trip_delay > fc::seconds(1) )
+              if( round_trip_delay > fc::microseconds(300000) )
               {
                 wlog("received stale ntp reply requested at ${request_time}, send a new time request", ("request_time", origin_time));
                 request_now(); //request another reply and ignore this one
@@ -174,7 +174,7 @@ namespace fc
                   _last_ntp_delta_initialized = true;
                   fc::microseconds ntp_delta_time = fc::microseconds(_last_ntp_delta_microseconds);
                   _last_valid_ntp_reply_received_time = receive_time;
-                  wlog("ntp_delta_time updated to ${delta_time}", ("delta_time",ntp_delta_time) );
+                  wlog("ntp_delta_time updated to ${delta_time} us", ("delta_time",ntp_delta_time) );
                 }
                 else
                   elog( "NTP time and local time vary by more than a day! ntp:${ntp_time} local:${local}", 

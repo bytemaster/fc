@@ -5,6 +5,12 @@
 #include <fc/crypto/openssl.hpp>
 #include <fc/crypto/ripemd160.hpp>
 
+#ifdef _MSC_VER
+# include <malloc.h>
+#else
+# include <alloca.h>
+#endif
+
 /* stuff common to all ecc implementations */
 
 #define BTC_EXT_PUB_MAGIC   (0x0488B21E)
@@ -225,7 +231,7 @@ namespace fc { namespace ecc {
 
     static fc::string _to_base58( const extended_key_data& key )
     {
-        char buffer[key.size() + 4];
+        char *buffer = (char*)alloca(key.size() + 4);
         memcpy( buffer, key.begin(), key.size() );
         fc::sha256 double_hash = fc::sha256::hash( fc::sha256::hash( key.begin(), key.size() ));
         memcpy( buffer + key.size(), double_hash.data(), 4 );

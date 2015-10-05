@@ -12,6 +12,12 @@
 #include <assert.h>
 #include <secp256k1.h>
 
+#ifdef _MSC_VER
+# include <malloc.h>
+#else
+# include <alloca.h>
+#endif
+
 #include "_elliptic_impl_priv.hpp"
 
 namespace fc { namespace ecc {
@@ -183,7 +189,7 @@ namespace fc { namespace ecc {
     {
         if ( *in & 0x80 )
         {
-            unsigned char buffer[len + 1];
+            unsigned char *buffer = (unsigned char*)alloca(len + 1);
             *buffer = 0;
             memcpy( buffer + 1, in, len );
             BN_bin2bn( buffer, sizeof(buffer), out );
@@ -204,7 +210,7 @@ namespace fc { namespace ecc {
         unsigned int l = BN_num_bytes( in );
         if ( l > len )
         {
-            unsigned char buffer[l];
+            unsigned char *buffer = (unsigned char*)alloca(l);
             BN_bn2bin( in, buffer );
             memcpy( out, buffer + l - len, len );
         }

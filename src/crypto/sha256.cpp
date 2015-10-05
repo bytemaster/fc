@@ -1,4 +1,5 @@
 #include <fc/crypto/hex.hpp>
+#include <fc/crypto/hmac.hpp>
 #include <fc/fwd_impl.hpp>
 #include <openssl/sha.h>
 #include <string.h>
@@ -113,4 +114,6 @@ namespace fc {
     return sha_value._hash[0];
   }
 
+    template<>
+    unsigned int hmac<sha256>::internal_block_size() const { return 64; }
 } //end namespace fc

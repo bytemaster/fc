@@ -2,6 +2,7 @@
 #include <fc/thread/thread.hpp>
 #include <boost/thread.hpp>
 #include <fc/log/logger.hpp>
+#include <fc/exception/exception.hpp>
 
 namespace fc {
   namespace asio {
@@ -102,7 +103,25 @@ namespace fc {
             asio_thread  = new boost::thread( [=]()
             {
               fc::thread::current().set_name("asio");
-              io->run();
+              while (!io->stopped())
+              {
+                try
+                {
+                  io->run();
+                }
+                catch (const fc::exception& e)
+                {
+                  elog("Caught unhandled exception in asio service loop: ${e}", ("e", e));
+                }
+                catch (const std::exception& e)
+                {
+                  elog("Caught unhandled exception in asio service loop: ${e}", ("e", e.what()));
+                }
+                catch (...)
+                {
+                  elog("Caught unhandled exception in asio service loop");
+                }
+              }
             });
        }
 

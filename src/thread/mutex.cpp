@@ -118,13 +118,18 @@ namespace fc {
       cc->next_blocked_mutex = m_blist;
       m_blist = cc;
     } // end lock scope
+
+    
+    std::exception_ptr e;
     try {
         fc::thread::current().my->yield_until( abs_time, false );
         return( 0 == cc->next_blocked_mutex );
     } catch (...) {
-      cleanup( *this, m_blist_lock, m_blist, cc);
-      throw;
+      e = std::current_exception();
     }
+    assert(e);
+    cleanup( *this, m_blist_lock, m_blist, cc);
+    std::rethrow_exception(e);
   }
 
   void mutex::lock() {
@@ -166,6 +171,7 @@ namespace fc {
 #endif
     }
 
+    std::exception_ptr e; // cleanup calls yield so we need to move the exception outside of the catch block
     try 
     {
       fc::thread::current().yield(false);
@@ -174,17 +180,13 @@ namespace fc {
       assert(recursive_lock_count == 0);
       recursive_lock_count = 1;
     }
-    catch ( exception& e )
-    {
-      wlog( "lock threw: ${e}", ("e", e));
-      cleanup( *this, m_blist_lock, m_blist, current_context);
-      FC_RETHROW_EXCEPTION(e, warn, "lock threw: ${e}", ("e", e));
-    }
     catch ( ... ) 
     {
-      wlog( "lock threw unexpected exception" );
+      e = std::current_exception();
+    }
+    if( e ) {
       cleanup( *this, m_blist_lock, m_blist, current_context);
-      throw;
+      std::rethrow_exception(e);
     }
   }
 

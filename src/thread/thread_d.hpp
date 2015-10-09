@@ -474,10 +474,7 @@ namespace fc {
               {
                 self->process_tasks();
               } 
-              catch ( canceled_exception& ) 
-              {
-                // allowed exception...
-              }
+              catch ( canceled_exception& ) { /* allowed exception */  }
               catch ( ... ) 
               {
                 elog( "fiber ${name} exited with uncaught exception: ${e}", ("e",fc::except_str())("name", self->name) );

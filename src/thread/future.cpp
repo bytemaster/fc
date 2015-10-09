@@ -62,16 +62,14 @@ namespace fc {
       }
       _enqueue_thread();
     }
-    try
-    {
-      thread::current().wait_until( ptr(this,true), timeout_us );
-    }
-    catch (...)
-    {
-      _dequeue_thread();
-      throw;
-    }
+    std::exception_ptr e;
+    try { thread::current().wait_until( ptr(this,true), timeout_us ); }
+    catch (...) { e = std::current_exception(); }
+
     _dequeue_thread();
+
+    if( e ) std::rethrow_exception(e);
+
     if( _ready ) 
     {
        if( _exceptp ) 

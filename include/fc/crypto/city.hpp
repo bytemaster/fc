@@ -47,9 +47,9 @@
 
 namespace fc {
 
-class uint128;
 template<typename T, size_t N>
 class array;
+class uint128;
 
 // Hash function for a byte array.
 uint64_t city_hash64(const char *buf, size_t len);
@@ -71,5 +71,6 @@ uint64_t city_hash_crc_64(const char *buf, size_t len);
 // Hash function for a byte array.
 uint128           city_hash_crc_128(const char *s, size_t len);
 array<uint64_t,4> city_hash_crc_256(const char *s, size_t len);
+
 
 } // namespace fc

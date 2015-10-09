@@ -68,6 +68,7 @@ namespace fc { namespace rpc {
             void handle_message( const variant_object& obj )
             {
               wlog(  "recv: ${msg}", ("msg", obj) );
+               fc::exception_ptr eptr;
                try 
                {
                   auto m = obj.find("method");
@@ -158,6 +159,7 @@ namespace fc { namespace rpc {
                         }
                         else if( e != obj.end() ) //if error response
                         {
+                          fc::exception_ptr eptr;
                           try
                           {
                              auto err = e->value().get_object();
@@ -173,8 +175,9 @@ namespace fc { namespace rpc {
                           catch ( fc::exception& e )
                           {
                             elog( "Error parsing exception: ${e}", ("e", e.to_detail_string() ) );
-                            await->second->set_exception( e.dynamic_copy_exception() );
+                            eptr = e.dynamic_copy_exception();
                           }
+                          if( eptr ) await->second->set_exception( eptr );
                         }
                         else // id found without error, result, nor method field
                         {
@@ -191,12 +194,14 @@ namespace fc { namespace rpc {
                {
                   fc_elog( _logger, "json rpc exception: ${exception}", ("exception",e ));
                   elog( "json rpc exception: ${exception}", ("exception",e ));
-                  close(e.dynamic_copy_exception());   
+                  eptr = e.dynamic_copy_exception();
                }
+               if( eptr ) { close(eptr); }
             }
 
             void read_loop()
             {
+               fc::exception_ptr eptr;
                try 
                {
                   fc::string line;
@@ -211,16 +216,17 @@ namespace fc { namespace rpc {
                catch ( eof_exception& eof ) 
                { 
                   _eof = true; 
-                  close( eof.dynamic_copy_exception() );
+                  eptr = eof.dynamic_copy_exception();
                }
                catch ( exception& e )
                {
-                  close( e.dynamic_copy_exception() );
+                  eptr = e.dynamic_copy_exception();
                }
                catch ( ... )
                {
-                  close( fc::exception_ptr(new FC_EXCEPTION( unhandled_exception, "json connection read error" )) );
+                  eptr = fc::exception_ptr(new FC_EXCEPTION( unhandled_exception, "json connection read error" ));
                }
+               if( eptr ) close( eptr );
             }
 
             void close( fc::exception_ptr e )

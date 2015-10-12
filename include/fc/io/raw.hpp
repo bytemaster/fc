@@ -236,7 +236,13 @@ namespace fc {
 
     // bool
     template<typename Stream> inline void pack( Stream& s, const bool& v ) { pack( s, uint8_t(v) );             }
-    template<typename Stream> inline void unpack( Stream& s, bool& v )     { uint8_t b; unpack( s, b ); v=(b!=0);    }
+    template<typename Stream> inline void unpack( Stream& s, bool& v )
+    {
+       uint8_t b;
+       unpack( s, b );
+       FC_ASSERT( (b & ~1) == 0 );
+       v=(b!=0);
+    }
 
     namespace detail {
     

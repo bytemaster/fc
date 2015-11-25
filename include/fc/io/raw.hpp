@@ -122,6 +122,13 @@ namespace fc {
       s.read((char*)&v.data[0],N*sizeof(T));
     } FC_RETHROW_EXCEPTIONS( warn, "fc::array<type,length>", ("type",fc::get_typename<T>::name())("length",N) ) }
 
+    template<typename Stream, typename T> 
+    inline void unpack( Stream& s, std::shared_ptr<T>& v) 
+    { try {
+      v = std::make_shared<T>();
+      unpack( s, *v );
+    } FC_RETHROW_EXCEPTIONS( warn, "std::shared_ptr<T>", ("type",fc::get_typename<T>::name()) ) }
+
     template<typename Stream> inline void pack( Stream& s, const signed_int& v ) {
       uint32_t val = (v.value<<1) ^ (v.value>>31);
       do {

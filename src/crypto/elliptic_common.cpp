@@ -269,6 +269,11 @@ namespace fc { namespace ecc {
         memcpy( dest, key.begin(), key.size() );
         return result;
     }
+    
+    extended_public_key extended_public_key::deserialize( const extended_key_data& data )
+    {
+       return from_base58( _to_base58( data ) );
+    }
 
     fc::string extended_public_key::str() const
     {
@@ -334,6 +339,11 @@ namespace fc { namespace ecc {
         private_key_secret key = get_secret();
         memcpy( dest, key.data(), key.data_size() );
         return result;
+    }
+    
+    extended_private_key extended_private_key::deserialize( const extended_key_data& data )
+    {
+       return from_base58( _to_base58( data ) );
     }
 
     private_key extended_private_key::generate_a(int i) const { return derive_hardened_child(4*i + 0); }

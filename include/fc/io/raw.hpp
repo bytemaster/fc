@@ -110,10 +110,16 @@ namespace fc {
        s.read( (char*)&usec_as_int64, sizeof(usec_as_int64) );
        usec = fc::microseconds(usec_as_int64);
     } FC_RETHROW_EXCEPTIONS( warn, "" ) }
-    
+
     template<typename Stream, typename T, size_t N> 
     inline void pack( Stream& s, const fc::array<T,N>& v) {
       s.write((const char*)&v.data[0],N*sizeof(T));
+    }
+
+    template<typename Stream, typename T>
+    inline void pack( Stream& s, const std::shared_ptr<T>& v)
+    {
+      pack( s, *v );
     }
 
     template<typename Stream, typename T, size_t N> 

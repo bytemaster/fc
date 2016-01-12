@@ -37,7 +37,6 @@ SET(BOOST_COMPONENTS)
 LIST(APPEND BOOST_COMPONENTS thread date_time system filesystem program_options signals serialization chrono unit_test_framework context locale iostreams)
 SET( Boost_USE_STATIC_LIBS ON CACHE STRING "ON or OFF" )
 
-
 IF( ECC_IMPL STREQUAL openssl )
   SET( ECC_REST src/crypto/elliptic_impl_pub.cpp )
 ELSE( ECC_IMPL STREQUAL openssl )
@@ -291,6 +290,8 @@ ENDIF()
 
 # This will become unnecessary once we update to websocketpp which fixes upstream issue #395
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DWEBSOCKETPP_STRICT_MASKING")
+
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DBOOST_ASIO_HAS_STD_CHRONO")
 
 target_include_directories(fc
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include

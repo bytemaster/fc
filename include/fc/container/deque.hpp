@@ -1,6 +1,7 @@
 #pragma once
 
 #include <deque>
+#include <fc/io/raw.hpp>
 
 namespace fc {
    namespace raw {
@@ -31,19 +32,4 @@ namespace fc {
 
     } // namespace raw
 
-   template<typename T>
-   void to_variant( const std::deque<T>& var,  variant& vo )
-   {
-       std::vector<variant> vars;
-       vars.reserve(var.size());
-       std::transform(var.begin(), var.end(), std::back_inserter(vars), [](const T& t) { return variant(t); });
-       vo = vars;
-   }
-   template<typename T>
-   void from_variant( const variant& var,  std::deque<T>& vo )
-   {
-      const variants& vars = var.get_array();
-      vo.clear();
-      std::transform(vars.begin(), vars.end(), std::back_inserter(vo), [](const variant& t) { return t.template as<T>(); });
-   }
 } // namespace fc

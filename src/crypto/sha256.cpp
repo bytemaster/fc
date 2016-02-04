@@ -69,6 +69,11 @@ namespace fc {
       fc::detail::shift_l( h1.data(), result.data(), result.data_size(), i );
       return result;
     }
+    sha256 operator >> ( const sha256& h1, uint32_t i ) {
+      sha256 result;
+      fc::detail::shift_r( h1.data(), result.data(), result.data_size(), i );
+      return result;
+    }
     sha256 operator ^ ( const sha256& h1, const sha256& h2 ) {
       sha256 result;
       result._hash[0] = h1._hash[0] ^ h2._hash[0];

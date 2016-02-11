@@ -463,7 +463,6 @@ namespace fc
    {
       const variants& vars = var.get_array();
       tmp.clear();
-      tmp.reserve( vars.size() );
       for( auto itr = vars.begin(); itr != vars.end(); ++itr )
          tmp.push_back( itr->as<T>() );
    }
@@ -472,10 +471,10 @@ namespace fc
    template<typename T>
    void to_variant( const std::deque<T>& t, variant& v )
    {
-      std::deque<variant> vars(t.size());
-       for( size_t i = 0; i < t.size(); ++i )
-          vars[i] = variant(t[i]);
-       v = std::move(vars);
+      std::vector<variant> vars(t.size());
+      for( size_t i = 0; i < t.size(); ++i )
+         vars[i] = variant(t[i]);
+      v = std::move(vars);
    }
 
 

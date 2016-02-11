@@ -199,25 +199,28 @@ namespace fc { namespace http {
                        std::shared_ptr<websocket_connection> con = current_con->second;
                        ++_pending_messages;
                        auto f = fc::async([this,con,payload](){ if( _pending_messages ) --_pending_messages; con->on_message( payload ); });
-                       if( _pending_messages > 100 ) f.wait();
-                       
+                       if( _pending_messages > 100 ) 
+                         f.wait();
                     }).wait();
                });
 
                _server.set_http_handler( [&]( connection_hdl hdl ){
                     _server_thread.async( [&](){
-
                        auto current_con = std::make_shared<websocket_connection_impl<websocket_server_type::connection_ptr>>( _server.get_con_from_hdl(hdl) );
                        _on_connection( current_con );
 
                        auto con = _server.get_con_from_hdl(hdl);
-                       wdump(("server")(con->get_request_body()));
-                       auto response = current_con->on_http( con->get_request_body() );
+                       con->defer_http_response();
+                       std::string request_body = con->get_request_body();
+                       wdump(("server")(request_body));
 
-                       con->set_body( response );
-                       con->set_status( websocketpp::http::status_code::ok );
-                       current_con->closed();
-
+                       fc::async([current_con, request_body, con] {
+                          std::string response = current_con->on_http(request_body);
+                          con->set_body( response );
+                          con->set_status( websocketpp::http::status_code::ok );
+                          con->send_http_response();
+                          current_con->closed();
+                       }, "call on_http");
                     }).wait();
                });
 

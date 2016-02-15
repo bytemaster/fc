@@ -112,7 +112,7 @@ namespace fc {
       //wlog( "my ${n}", ("n",name()) );
       if( my )
       {
-        wlog( "calling quit() on ${n}",("n",my->name) );
+        // wlog( "calling quit() on ${n}",("n",my->name) );
         quit(); // deletes `my`
       }
    }
@@ -157,7 +157,7 @@ namespace fc {
       async( [=](){quit();}, "thread::quit" );//.wait();
       if( my->boost_thread ) 
       {
-        wlog("destroying boost thread ${tid}",("tid",(uintptr_t)my->boost_thread->native_handle()));
+        //wlog("destroying boost thread ${tid}",("tid",(uintptr_t)my->boost_thread->native_handle()));
         my->boost_thread->join();
         delete my;
         my = nullptr;
@@ -243,7 +243,7 @@ namespace fc {
       } 
       catch( canceled_exception& e )
       {
-        wlog( "thread canceled: ${e}", ("e", e.to_detail_string()) );
+        dlog( "thread canceled: ${e}", ("e", e.to_detail_string()) );
       }
       delete my->current;
       my->current = 0;

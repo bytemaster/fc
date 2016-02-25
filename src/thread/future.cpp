@@ -63,18 +63,42 @@ namespace fc {
       _enqueue_thread();
     }
     std::exception_ptr e;
-    try { thread::current().wait_until( ptr(this,true), timeout_us ); }
+
+    //
+    // Create shared_ptr to take ownership of this; i.e. this will
+    // be deleted when p_this goes out of scope.  Consequently,
+    // it would be Very Bad to let p_this go out of scope
+    // before we're done reading/writing instance variables!
+    // See https://github.com/cryptonomex/graphene/issues/597
+    //
+
+    ptr p_this = ptr( this, true );
+
+    try
+    {
+       //
+       // We clone p_this here because the wait_until() API requires us
+       // to use std::move().  I.e. wait_until() takes ownership of any
+       // pointer passed to it.  Since we want to keep ownership ourselves,
+       // we need to have two shared_ptr's to this:
+       //
+       // - p_this to keep this alive until the end of the current function
+       // - p_this2 to be owned by wait_until() as the wait_until() API requires
+       //
+       ptr p_this2 = p_this;
+       thread::current().wait_until( std::move( p_this2 ), timeout_us );
+    }
     catch (...) { e = std::current_exception(); }
 
     _dequeue_thread();
 
     if( e ) std::rethrow_exception(e);
 
-    if( _ready ) 
+    if( _ready )
     {
-       if( _exceptp ) 
+       if( _exceptp )
          _exceptp->dynamic_rethrow_exception();
-       return; 
+       return;
     }
     FC_THROW_EXCEPTION( timeout_exception, "" );
   }

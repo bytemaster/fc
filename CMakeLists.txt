@@ -142,6 +142,17 @@ find_package(OpenSSL REQUIRED)
 
 set( CMAKE_FIND_LIBRARY_SUFFIXES ${ORIGINAL_LIB_SUFFIXES} )
 
+# We are now building in support for deflate compression into our websockets layer by default,
+# which requires zlib.  Aside from that, all of fc compiles without zlib, so this could be
+# made optional without much effort
+# (important exception, apple: as of 10.10 yosemite, the OpenSSL static libraries shipped with 
+# os x have a dependency on zlib)
+# On a side note, fc's fc::zlib_compress() function uses a separate implementation of zlib
+# from the miniz library.  If we're comfortable requiring an external zlib, we can 
+# reimplement fc::zlib_compress() to call the real zlib, and remove miniz.c from our
+# repository.
+find_package( ZLIB REQUIRED )
+
 option( UNITY_BUILD OFF )
 
 set( fc_sources
@@ -472,14 +483,6 @@ if(WIN32)
    set_property(TARGET fc PROPERTY SHARED_LIBRARIES_RELEASE ${SHARED_LIBRARIES_RELEASE})
 
 endif(WIN32)
-
-IF(APPLE)
-  # As of 10.10 yosemite, the OpenSSL static libraries shipped with os x have a dependency
-  # on zlib, so any time you link in openssl you also need to link zlib.  .  We really want to detect whether openssl was configured with the --no-zlib
-  # option or not when it was built, but that's difficult to do in practice, so we
-  # just always try to link it in on mac.
-  find_package( ZLIB REQUIRED )
-ENDIF(APPLE)
 
 SET(OPENSSL_CONF_TARGET )
 IF(DEFINED CMAKE_RUNTIME_OUTPUT_DIRECTORY)

@@ -3,6 +3,7 @@
 #include <websocketpp/config/asio.hpp>
 #include <websocketpp/server.hpp>
 #include <websocketpp/config/asio_client.hpp>
+#include <websocketpp/extensions/permessage_deflate/enabled.hpp>
 #include <websocketpp/client.hpp>
 #include <websocketpp/logger/stub.hpp>
 
@@ -61,47 +62,12 @@ namespace fc { namespace http {
               transport_type;
 
           static const long timeout_open_handshake = 0;
-      };
-      struct asio_tls_with_stub_log : public websocketpp::config::asio_tls {
 
-          typedef asio_with_stub_log type;
-          typedef asio_tls base;
+          /// permessage_compress extension
+          struct permessage_deflate_config {};
 
-          typedef base::concurrency_type concurrency_type;
-
-          typedef base::request_type request_type;
-          typedef base::response_type response_type;
-
-          typedef base::message_type message_type;
-          typedef base::con_msg_manager_type con_msg_manager_type;
-          typedef base::endpoint_msg_manager_type endpoint_msg_manager_type;
-
-          /// Custom Logging policies
-          /*typedef websocketpp::log::syslog<concurrency_type,
-              websocketpp::log::elevel> elog_type;
-          typedef websocketpp::log::syslog<concurrency_type,
-              websocketpp::log::alevel> alog_type;
-          */
-          //typedef base::alog_type alog_type;
-          //typedef base::elog_type elog_type;
-          typedef websocketpp::log::stub elog_type;
-          typedef websocketpp::log::stub alog_type;
-
-          typedef base::rng_type rng_type;
-
-          struct transport_config : public base::transport_config {
-              typedef type::concurrency_type concurrency_type;
-              typedef type::alog_type alog_type;
-              typedef type::elog_type elog_type;
-              typedef type::request_type request_type;
-              typedef type::response_type response_type;
-              typedef websocketpp::transport::asio::tls_socket::endpoint socket_type;
-          };
-
-          typedef websocketpp::transport::asio::endpoint<transport_config>
-              transport_type;
-
-          static const long timeout_open_handshake = 0;
+          typedef websocketpp::extensions::permessage_deflate::enabled
+              <permessage_deflate_config> permessage_deflate_type;
       };
       struct asio_tls_stub_log : public websocketpp::config::asio_tls {
          typedef asio_tls_stub_log type;
@@ -124,16 +90,22 @@ namespace fc { namespace http {
          typedef base::rng_type rng_type;
 
          struct transport_config : public base::transport_config {
-         typedef type::concurrency_type concurrency_type;
-         typedef type::alog_type alog_type;
-         typedef type::elog_type elog_type;
-         typedef type::request_type request_type;
-         typedef type::response_type response_type;
-         typedef websocketpp::transport::asio::tls_socket::endpoint socket_type;
+            typedef type::concurrency_type concurrency_type;
+            typedef type::alog_type alog_type;
+            typedef type::elog_type elog_type;
+            typedef type::request_type request_type;
+            typedef type::response_type response_type;
+            typedef websocketpp::transport::asio::tls_socket::endpoint socket_type;
          };
 
          typedef websocketpp::transport::asio::endpoint<transport_config>
          transport_type;
+
+         /// permessage_compress extension
+         struct permessage_deflate_config {};
+
+         typedef websocketpp::extensions::permessage_deflate::enabled
+             <permessage_deflate_config> permessage_deflate_type;
       };
 
 

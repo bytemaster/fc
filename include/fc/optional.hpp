@@ -18,9 +18,11 @@ namespace fc {
    *  fc::optional adds less than 400.
    */
   template<typename T>
-  class optional 
+  class optional
   {
     public:
+      typedef T value_type;
+
       optional():_valid(false){}
       ~optional(){ reset(); }
 

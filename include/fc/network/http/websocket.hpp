@@ -8,8 +8,7 @@
 
 namespace fc { namespace http {
    namespace detail {
-      class websocket_server_impl;
-      class websocket_tls_server_impl;
+      class abstract_websocket_server;
       class websocket_client_impl;
       class websocket_tls_client_impl;
    } // namespace detail;
@@ -42,7 +41,7 @@ namespace fc { namespace http {
    class websocket_server
    {
       public:
-         websocket_server();
+         websocket_server(bool enable_permessage_deflate = true);
          ~websocket_server();
 
          void on_connection( const on_connection_handler& handler);
@@ -51,16 +50,16 @@ namespace fc { namespace http {
          void start_accept();
 
       private:
-         friend class detail::websocket_server_impl;
-         std::unique_ptr<detail::websocket_server_impl> my;
+         std::unique_ptr<detail::abstract_websocket_server> my;
    };
 
 
    class websocket_tls_server
    {
       public:
-         websocket_tls_server( const std::string& server_pem = std::string(),
-                           const std::string& ssl_password = std::string());
+         websocket_tls_server(const std::string& server_pem = std::string(),
+                              const std::string& ssl_password = std::string(),
+                              bool enable_permessage_deflate = true);
          ~websocket_tls_server();
 
          void on_connection( const on_connection_handler& handler);
@@ -69,8 +68,7 @@ namespace fc { namespace http {
          void start_accept();
 
       private:
-         friend class detail::websocket_tls_server_impl;
-         std::unique_ptr<detail::websocket_tls_server_impl> my;
+         std::unique_ptr<detail::abstract_websocket_server> my;
    };
 
    class websocket_client

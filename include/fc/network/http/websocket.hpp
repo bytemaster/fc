@@ -59,7 +59,7 @@ namespace fc { namespace http {
       public:
          websocket_tls_server(const std::string& server_pem = std::string(),
                               const std::string& ssl_password = std::string(),
-                              bool enable_permessage_deflate = true);
+                              bool enable_permessage_deflate = false);
          ~websocket_tls_server();
 
          void on_connection( const on_connection_handler& handler);

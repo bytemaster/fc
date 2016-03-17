@@ -249,7 +249,7 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/git_revision.cpp.in" "${CMAKE_CU
 list(APPEND sources "${CMAKE_CURRENT_BINARY_DIR}/git_revision.cpp")
 list(APPEND sources ${fc_headers})
 
-add_subdirectory( vendor/websocketpp )
+add_subdirectory( vendor/websocketpp EXCLUDE_FROM_ALL )
 add_subdirectory( vendor/udt4 )
 
 setup_library( fc SOURCES ${sources} LIBRARY_TYPE STATIC DONT_INSTALL_LIBRARY )

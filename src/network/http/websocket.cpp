@@ -1,9 +1,19 @@
 #include <fc/network/http/websocket.hpp>
+
+#ifndef WIN32 
+// websocket++ currently does not build correctly with permessage deflate enabled
+// since chrome does not work with websocketpp's implementation of permessage-deflate
+// yet, I'm just disabling it on windows instead of trying to fix the build error.
+# define ENABLE_WEBSOCKET_PERMESSAGE_DEFLATE
+#endif
+
 #include <websocketpp/config/asio_client.hpp>
 #include <websocketpp/config/asio.hpp>
 #include <websocketpp/server.hpp>
 #include <websocketpp/config/asio_client.hpp>
-#include <websocketpp/extensions/permessage_deflate/enabled.hpp>
+#ifdef ENABLE_WEBSOCKET_PERMESSAGE_DEFLATE
+# include <websocketpp/extensions/permessage_deflate/enabled.hpp>
+#endif
 #include <websocketpp/client.hpp>
 #include <websocketpp/logger/stub.hpp>
 
@@ -56,7 +66,8 @@ namespace fc { namespace http {
           // override default value of 5 sec timeout
           static const long timeout_open_handshake = 0;
       };
-      
+
+#ifdef ENABLE_WEBSOCKET_PERMESSAGE_DEFLATE
       struct asio_with_stub_log_and_deflate : public websocketpp::config::asio {
           typedef asio_with_stub_log_and_deflate type;
           typedef asio base;
@@ -98,6 +109,7 @@ namespace fc { namespace http {
           // override default value of 5 sec timeout
           static const long timeout_open_handshake = 0;
       };
+#endif ENABLE_WEBSOCKET_PERMESSAGE_DEFLATE
 
       struct asio_tls_stub_log : public websocketpp::config::asio_tls {
           typedef asio_tls_stub_log type;
@@ -132,6 +144,7 @@ namespace fc { namespace http {
               transport_type;
       };
 
+#ifdef ENABLE_WEBSOCKET_PERMESSAGE_DEFLATE
       struct asio_tls_stub_log_and_deflate : public websocketpp::config::asio_tls {
           typedef asio_tls_stub_log_and_deflate type;
           typedef asio_tls base;
@@ -169,6 +182,7 @@ namespace fc { namespace http {
           typedef websocketpp::extensions::permessage_deflate::enabled
               <permessage_deflate_config> permessage_deflate_type;
       };
+#endif
 
       using websocketpp::connection_hdl;
 
@@ -513,10 +527,18 @@ namespace fc { namespace http {
    } // namespace detail
 
    websocket_server::websocket_server(bool enable_permessage_deflate /* = true */) :
-      my( enable_permessage_deflate ? 
+      my( 
+#ifdef ENABLE_WEBSOCKET_PERMESSAGE_DEFLATE
+          enable_permessage_deflate ? 
             (detail::abstract_websocket_server*)new detail::websocket_server_impl<detail::asio_with_stub_log_and_deflate> : 
+#endif
             (detail::abstract_websocket_server*)new detail::websocket_server_impl<detail::asio_with_stub_log> ) 
-   {}
+   {
+#ifndef ENABLE_WEBSOCKET_PERMESSAGE_DEFLATE
+     if (enable_permessage_deflate)
+       elog("Websocket permessage-deflate requested but not enabled during compile");
+#endif
+   }
    websocket_server::~websocket_server(){}
 
    void websocket_server::on_connection( const on_connection_handler& handler )
@@ -543,10 +565,18 @@ namespace fc { namespace http {
    websocket_tls_server::websocket_tls_server(const string& server_pem, 
                                               const string& ssl_password, 
                                               bool enable_permessage_deflate /* = true */) :
-      my( enable_permessage_deflate ? 
+      my(
+#ifdef ENABLE_WEBSOCKET_PERMESSAGE_DEFLATE
+          enable_permessage_deflate ? 
             (detail::abstract_websocket_server*)new detail::websocket_tls_server_impl<detail::asio_tls_stub_log_and_deflate>(server_pem, ssl_password) : 
+#endif
             (detail::abstract_websocket_server*)new detail::websocket_tls_server_impl<detail::asio_tls_stub_log>(server_pem, ssl_password) ) 
-   {}
+   {
+#ifndef ENABLE_WEBSOCKET_PERMESSAGE_DEFLATE
+     if (enable_permessage_deflate)
+       elog("Websocket permessage-deflate requested but not enabled during compile");
+#endif
+   }
    websocket_tls_server::~websocket_tls_server(){}
 
    void websocket_tls_server::on_connection( const on_connection_handler& handler )

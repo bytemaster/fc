@@ -316,6 +316,7 @@ target_include_directories(fc
     ${CMAKE_CURRENT_SOURCE_DIR}/vendor/udt4/src
     ${CMAKE_CURRENT_SOURCE_DIR}/vendor/websocketpp
     ${CMAKE_CURRENT_SOURCE_DIR}/vendor/secp256k1-zkp
+    ${ZLIB_INCLUDE_DIR}
   )
 
 #target_link_libraries( fc PUBLIC udt ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} ${ZLIB_LIBRARIES} ${PLATFORM_SPECIFIC_LIBS} ${RPCRT4} ${CMAKE_DL_LIBS} ${rt_library} ${ECC_LIB} )

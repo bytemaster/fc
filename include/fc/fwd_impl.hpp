@@ -1,5 +1,4 @@
-#ifndef _FC_FWD_IMPL_HPP_
-#define _FC_FWD_IMPL_HPP_
+#pragma once
 
 #include <fc/utility.hpp>
 #include <fc/fwd.hpp>
@@ -134,4 +133,3 @@ namespace fc {
 
 } // namespace fc
 
-#endif  //_FC_FWD_IMPL_HPP_

@@ -1,5 +1,5 @@
 #pragma once
-#include <fc/ssh/process.hpp>
+#include <memory>
 #include <functional>
 #include <fc/filesystem.hpp>
 
@@ -59,7 +59,8 @@ namespace fc {
    *  via client::create();
    *
    */
-  class client {
+  class client 
+  {
     public:
       enum trace_level {
         TRACE_NONE      = 0,
@@ -88,14 +89,26 @@ namespace fc {
       void           set_logger( const logger& lgr );
       const logger&  get_logger()const;
 
+      /** 
+       *  Connect, with no password specified.  Authentication will try public key, 
+       *  (via agent or explicitly-set key), empty password, then keyboard-interactive
+       */
       void connect( const fc::string& user, const fc::string& host, uint16_t port = 22);
 
       /**
-       *  Connect via password or keyboard-interactive 
+       *  Connect, specifying a password to be used for password authentication
        */
       void connect( const fc::string& user, const fc::string& pass, const fc::string& host, uint16_t port = 22);
 
       /**
+       *  @note THIS METHOD IS DEPRECATED and should be replace with:
+       *
+       *  ssh::client_ptr sshc = std::make_shared<ssh::client>();
+       *  sshc->connect( ... )
+       *  ssh::process_ptr  proc = std::make_shared<ssh::process>( sshc );
+       *  proc->exec( ... )
+       *
+       *
        *  @brief execute command on remote machine
        *  @param pty_type - whether or not to request a PTY when executing this process, this is necessary 
        *          for interactive (non-buffered) IO with the remote process, if left empty no pty will be 
@@ -104,8 +117,8 @@ namespace fc {
        *  @note Processes launched in this manner will fully buffer stdin and stdout regardless of whether
        *     the process calls flush().  If you need unbuffered (streaming, realtime) access to standard
        *     out then you must launch the process via a shell.
-       */
       ssh::process exec( const fc::string& cmd, const fc::string& pty_type = "" );
+       */
 
 
       /**
@@ -115,7 +128,7 @@ namespace fc {
        *         transfer, the callback should return true.  To cancel the callback should return false.
        */
       void scp_send( const fc::path& local_path, const fc::path& remote_path, 
-                              std::function<bool(size_t,size_t)> progress = [](size_t,size_t){return true;} );
+                              std::function<bool(uint64_t,uint64_t)> progress = [](uint64_t,uint64_t){return true;} );
 
       /**
        *  @brief recursively sends the contents of local_dir to the remote_path
@@ -126,13 +139,22 @@ namespace fc {
        *  Progress will be reported as total bytes transferred for all files.
        */
       void scp_send_dir( const fc::path& local_dir, const fc::path& remote_path, 
-                              std::function<bool(size_t,size_t)> progress = [](size_t,size_t){return true;} );
+                              std::function<bool(uint64_t,uint64_t)> progress = [](uint64_t,uint64_t){return true;} );
 
       /**
        *  @pre remote_path is not a directory
        *  @post remote file is removed from the remote filesystem
        */
       void rm( const fc::path& remote_path );
+
+      /**
+       *  @pre remote_path is a directory
+       *  @post remote directory is removed from the remote filesystem
+       */
+      void rmdir( const fc::path& remote_path );
+
+      void rmdir_recursive( const fc::path& remote_path );  
+
       file_attrib stat( const fc::path& remote_path );
 
       /**
@@ -149,6 +171,13 @@ namespace fc {
        */
       void create_directories( const fc::path& remote_dir, int mode = owner_read|owner_write|owner_exec );
 
+      /**
+       * Sets whether the remote system is believed to be a Windows box (by default, it's
+       * assumed to be running UNIX.  This alters how command-line arguments are quoted
+       * and possibly how filenames are altered when copying files
+       */
+      void set_remote_system_is_windows(bool is_windows = true);
+
       void close();
 
       client();
@@ -157,7 +186,8 @@ namespace fc {
     private:
       friend class process;
       friend class detail::process_impl;
-      fc::shared_ptr<detail::client_impl>  my;
+      std::unique_ptr<detail::client_impl> my;
   };
+  typedef std::shared_ptr<client> client_ptr;
 
 } } // namespace fc::ssh

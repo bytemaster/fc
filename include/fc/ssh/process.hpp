@@ -1,13 +1,8 @@
 #pragma once
-#include <fc/shared_ptr.hpp>
-#include <fc/string.hpp>
+#include <fc/interprocess/iprocess.hpp>
 
-namespace fc { 
-
-  class istream;
-  class ostream;
-
-  namespace ssh {
+namespace fc { namespace ssh 
+{
 
   class client;
 
@@ -21,39 +16,43 @@ namespace fc {
    *
    *  Process can only be created by mace::ssh::client.
    */
-  class process { //: public fc::retainable {
+  class process  : public iprocess
+  {
     public:
-      //typedef fc::shared_ptr<process> ptr;
-
-      process( const process& p );
-      process( process&& p );
-      process();
-      ~process();
-
-      bool valid()const;
+      virtual iprocess& exec( const fc::path& exe, std::vector<std::string> args, 
+                              const fc::path& work_dir = fc::path(), exec_opts opts = open_all );
 
       /**
        *  Blocks until the result code of the process has been returned.
        */
-      int result();
+      virtual int result();
+
+
       /**
-       *  @brief returns a stream that writes to the procss' stdin
+       * Not supported.  libssh2 does not support sending signals to remote processes.
+       * closing in_stream() is the best you can do
        */
-      fc::ostream& in_stream()const;
+      virtual void kill();
+
+
+      /**
+       *  @brief returns a stream that writes to the process' stdin
+       */
+      virtual fc::buffered_ostream_ptr in_stream();
+      
       /**
        *  @brief returns a stream that reads from the process' stdout
        */
-      fc::istream& out_stream()const;
+      virtual fc::buffered_istream_ptr out_stream();
       /**
        *  @brief returns a stream that reads from the process' stderr
        */
-      fc::istream& err_stream()const;
+      virtual fc::buffered_istream_ptr err_stream();
 
-      process& operator=( const process& p );
+      process( fc::ssh::client_ptr c );
+      ~process();
     private:
-      friend class client;
-      process( client& c, const fc::string& cmd, const fc::string& pty_type = fc::string() );
-
-      fc::shared_ptr<detail::process_impl> my;
+      std::unique_ptr<detail::process_impl> my;
   };
+
 } } // fc::ssh

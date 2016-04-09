@@ -3,6 +3,35 @@
 #include <fc/fwd.hpp>
 #include <fc/optional.hpp>
 
+#ifndef USE_FC_STRING
+#include <string>
+namespace fc
+{
+    typedef std::string string;
+
+  int64_t  to_int64( const fc::string& );
+  uint64_t to_uint64( const fc::string& );
+  double   to_double( const fc::string& );
+  fc::string to_string( double );
+  fc::string to_string( uint64_t );
+  fc::string to_string( int64_t );
+  fc::string to_string( uint16_t );
+  std::string to_pretty_string( int64_t );
+  inline fc::string to_string( int32_t v ) { return to_string( int64_t(v) ); }
+  inline fc::string to_string( uint32_t v ){ return to_string( uint64_t(v) ); }
+#ifdef __APPLE__
+  inline fc::string to_string( size_t s) { return to_string(uint64_t(s)); }
+#endif
+
+  typedef fc::optional<fc::string> ostring;
+  class variant_object;
+  fc::string format_string( const fc::string&, const variant_object& );
+  fc::string trim( const fc::string& );
+  fc::string to_lower( const fc::string& );
+  string trim_and_normalize_spaces( const string& s );
+}
+
+#else
 
 /**
  *  There is debate about whether doing this is 'standard conforming', but 
@@ -22,10 +51,8 @@ namespace std {
   typedef basic_string<char, char_traits<char>, allocator<char> > string;
 }
 
-#include <string>
 
 namespace fc {
- // typedef std::string string;
   /**
    * @brief wrapper on std::string
    *
@@ -44,7 +71,8 @@ namespace fc {
     public:
       typedef char*       iterator;
       typedef const char* const_iterator;
-      static const size_t npos = -1;
+      enum { npos = size_t(-1) };
+      //  static const size_t npos;// = -1;
 
       string();
       string( const std::string& s );
@@ -74,14 +102,21 @@ namespace fc {
       void    reserve( size_t );
       size_t  size()const;
       size_t  find( char c, size_t pos = 0 )const;
+      size_t  find(const fc::string& str, size_t pos = 0) const;
+      size_t  find(const char* s, size_t pos = 0) const;
       size_t  rfind( char c, size_t pos = npos )const;
       size_t  rfind( const char* c, size_t pos = npos )const;
       size_t  rfind( const fc::string& c, size_t pos = npos )const;
+      size_t  find_first_of (const fc::string& str, size_t pos = 0) const;
+      size_t  find_first_of (const char* s, size_t pos = 0) const;
+      string& replace(size_t pos,  size_t len,  const fc::string& str);
+      string& replace(size_t pos,  size_t len,  const char* s);
 
       void    resize( size_t s );
       void    clear();
 
       const char* c_str()const;
+      char*       data();
 
       bool    operator == ( const char* s )const;
       bool    operator == ( const string& s )const;
@@ -101,7 +136,17 @@ namespace fc {
        fc::fwd<std::string,32> my;
   };
 
+  int64_t  to_int64( const fc::string& );
+  uint64_t to_uint64( const fc::string& );
+  double   to_double( const fc::string& );
+  fc::string to_string( double );
+  fc::string to_string( uint64_t );
+  fc::string to_string( int64_t );
+
   typedef fc::optional<fc::string> ostring;
+  class variant_object;
+  fc::string format_string( const fc::string&, const variant_object& );
 
 } // namespace fc
 
+#endif

@@ -10,5 +10,5 @@ for the development of asynchronous libraries.  Some of the highlights include:
  - Automatic generation of client / server stubs for reflected interfaces with support for JSON-RPC
  - Cryptographic Primitives for a variaty of hashes and encryption algorithms
  - Logging Infrastructure 
- - Wraps many Boost APIs, such as boost::filesystem, boost::thread, and boost::exception to acceleate compiles
+ - Wraps many Boost APIs, such as boost::filesystem, boost::thread, and boost::exception to accelerate compiles
  - Support for unofficial Boost.Process library.
